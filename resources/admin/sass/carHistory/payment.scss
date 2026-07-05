@@ -1,0 +1,955 @@
+.paymentDialogLayout {
+    width  : 100%;
+    display: flex;
+
+    // flex-direction: column;
+    .paymentLeft {
+        flex         : 1;
+        margin-right : 25px;
+        padding-right: 25px;
+        background   : #fbfbfb;
+        padding      : 15px;
+        border-radius: 10px;
+        box-shadow   : 0 0 3px rgb(0 0 0 / 10%);
+    }
+
+    .paymentRight {
+        width: 300px;
+
+        .garageListingGp {
+            margin-bottom: 12px;
+            border-radius: 10px;
+            text-align   : left;
+            padding      : 0 0 10px 0px;
+
+
+            h3 {
+                margin           : 0;
+                // border-bottom : 1px solid #eee;
+                padding-bottom   : 5px;
+                margin-bottom    : 5px;
+                display          : flex;
+                align-items      : center;
+
+                span {
+                    margin-right: 12px;
+                }
+            }
+
+            .garageListing {
+                // background    : #eee;
+                display          : flex;
+                align-items      : center;
+                padding          : 7px 0px;
+                // padding       : 15px 20px;
+                // border-radius : 15px;
+                flex-direction   : column;
+                border-top       : 1px solid #eeeeee;
+                border-bottom    : 1px solid #eee;
+
+                .itemListingTxt {
+                    display      : flex;
+                    align-items  : flex-start;
+                    width        : 100%;
+                    margin-bottom: 5px;
+
+                    label {
+                        display        : flex;
+                        border-radius  : 50%;
+                        display        : flex;
+                        padding        : 4px;
+                        justify-content: center;
+                        background     : #fbfbfb;
+
+                        span {
+                            font-size: 15px;
+                        }
+                    }
+
+                    .span {
+                        margin: 0 10px;
+                    }
+
+                    p {
+                        margin   : 0;
+                        font-size: 14px;
+
+                        &.fontWeight {
+                            font-weight        : 600;
+                            font-weight        : unset;
+                            -webkit-text-stroke: .5px;
+                        }
+                    }
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+        }
+
+        .headerListingServiceTxt {
+            display    : flex;
+            align-items: center;
+
+            span {
+                margin-right: 12px;
+            }
+
+            h3 {
+                margin    : 0;
+                text-align: left
+            }
+        }
+
+        .bodyListingServiceLayoutGp {
+            overflow     : hidden;
+            border-radius: 15px;
+            padding      : 0px 0;
+            background   : #eeeeee;
+            margin-top   : 10px;
+        }
+
+        .bodyListingServiceGp {
+            background      : #eeeeee;
+            max-height      : 500px;
+            /* border-radius: 15px; */
+            /* margin-top   : 15px; */
+            padding         : 0 10px;
+            overflow-y      : auto;
+            margin          : 10px 0;
+
+            .listingItemSer {
+                display            : flex;
+                // border       : 1px solid #eee;
+                // border-radius: 10px;
+                overflow           : hidden;
+                // padding         : 10px;
+
+                img {
+                    width        : 70px;
+                    height       : 70px;
+                    border-radius: 10px;
+                    object-fit   : contain;
+                    border       : 1px solid #7575752b;
+                    padding      : 14px;
+                }
+
+
+
+                .serTextGp {
+                    flex       : 1;
+                    text-align : left;
+                    margin-left: 10px;
+                    font-size  : 14px;
+
+                    p {
+                        margin     : 0;
+                        line-height: 22px;
+                    }
+
+                    .price {
+                        color: red;
+                    }
+
+                    .headerText {
+                        font-weight        : unset;
+                        -webkit-text-stroke: .3px;
+                    }
+                }
+
+                &:last-child {
+                    border-bottom: 0;
+                }
+            }
+
+            .paddingBorderBT {
+                border-bottom : 1px solid #d8dce5;
+                margin-bottom : 10px;
+                padding-bottom: 10px;
+
+                &:last-child {
+                    border-bottom: 0;
+                }
+            }
+        }
+
+        .TotalPaymentRGp {
+            background   : #eee;
+            margin-top   : 15px;
+            padding      : 11px;
+            border-radius: 10px;
+
+            .listing {
+                display      : flex;
+                border-bottom: 1px solid #e0e0e0;
+                height       : 35px;
+                align-items  : center;
+                font-size    : 15px;
+
+                label {
+                    flex      : 1;
+                    text-align: start;
+                }
+
+                span {
+                    margin: 0 15px;
+                }
+
+                p {
+                    margin             : 0;
+                    width              : 100px;
+                    text-align         : right;
+                    font-weight        : 600;
+                    font-size          : 15px;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .3px;
+                }
+
+                &:last-child {
+                    border-bottom: none;
+                }
+            }
+        }
+
+        .footerPaymentBtnGp {
+            margin-top: 15px;
+
+            .btnPayment {
+                width              : 100%;
+                text-align         : center;
+                justify-content    : center;
+                display            : flex;
+                height             : 40px;
+                background         : blue;
+                color              : white;
+                border-radius      : 40px;
+                font-weight        : unset;
+                -webkit-text-stroke: .3px;
+
+                .imgLoad {
+                    margin-right: 8px;
+                    height      : 20px;
+                    width       : 20px;
+                }
+            }
+        }
+    }
+
+    .memberListing {
+        display       : flex;
+        width         : 100%;
+        flex-direction: column;
+        align-items   : flex-start;
+
+        .itemList {
+            display       : flex;
+            padding-left  : 25px;
+            padding-top   : 10px;
+            padding-bottom: 10px;
+
+            img {
+                width             : 130px;
+                border-radius     : 20px;
+                max-height        : 130px;
+                -o-object-fit     : cover;
+                object-fit        : contain;
+                -o-object-position: top;
+                object-position   : top;
+            }
+
+            .gpText {
+                margin-left    : 20px;
+                align-items    : flex-start;
+                display        : flex;
+                flex-direction : column;
+                justify-content: flex-end;
+                font-size      : 14px;
+
+                .txt {
+                    display    : flex;
+                    align-items: center;
+
+                    label {
+                        display: flex;
+
+                        i {
+                            font-size: 20px;
+                        }
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+
+                    span {
+                        margin: 0 5px;
+                    }
+                }
+            }
+        }
+
+        .pLeft {
+            flex          : 1;
+            display       : flex;
+            flex-direction: column;
+            text-align    : left;
+
+            p {
+                margin: 0;
+            }
+
+            h3 {
+                font-size: 30px;
+                margin   : 10px 0;
+            }
+
+            .itemText {
+                display    : flex;
+                align-items: center;
+
+                span {
+                    margin: 0 5px;
+                }
+
+                p {
+                    margin: 0;
+                }
+            }
+        }
+
+        .pRight {
+            width          : 40%;
+            display        : flex;
+            justify-content: flex-end;
+
+            img {
+                width        : 150px;
+                border-radius: 15px;
+            }
+        }
+    }
+
+    .memberCarListing {
+        width     : 100%;
+        text-align: left;
+
+        .mCItemListing {
+            // background   : #fbfbfb;
+            // padding      : 20px;
+            border-radius: 5px;
+            display      : flex;
+            flex-wrap    : wrap;
+            margin       : 20px 0px 0 30px;
+
+            .mCItem {
+                display      : flex;
+                width        : 100%;
+                margin-bottom: 5px;
+                align-items  : center;
+                font-size    : 14px;
+
+                label {
+                    display: flex;
+
+                    i {
+                        font-size: 20px;
+                    }
+                }
+
+                p {
+                    margin: 0;
+                }
+
+                span {
+                    margin: 0 5px;
+                }
+
+                .price {
+                    color    : red;
+                    font-size: 20px;
+                }
+
+                &.textRight {
+                    justify-content: flex-end;
+                }
+            }
+        }
+
+        .memberItem {
+            display      : flex;
+            margin-bottom: 5px;
+
+            div {
+                flex   : 1;
+                display: flex;
+            }
+
+            .mLeft {
+                justify-content: flex-start;
+            }
+
+            .mRight {
+                justify-content    : flex-end;
+                font-weight        : unset;
+                -webkit-text-stroke: .3px;
+            }
+        }
+
+    }
+
+    .paymentByListing {
+        display       : flex;
+        flex-direction: column;
+        text-align    : left;
+        padding       : 5px 0 0;
+
+        .labelGp {
+            label {
+                span {
+                    color : red;
+                    margin: 0 5px;
+                }
+            }
+
+            .error {
+                color    : rgba(255, 56, 56, 0.7411764706);
+                font-size: 11px;
+            }
+        }
+
+        .listingPackage {
+            margin-top: 7px;
+
+            .itemPackage {
+                margin-bottom: 20px;
+                height       : 65px;
+                width        : 100%;
+                align-items  : center;
+                display      : flex;
+                background   : #eee;
+                padding      : 20px;
+                border-radius: 5px;
+                cursor       : pointer;
+                position     : relative;
+
+                &.selectActive {
+                    border    : 2px solid #024de3;
+                    background: #1266f130 !important;
+                }
+
+                .icon {
+                    position: absolute;
+                    right   : -5px;
+                    top     : -11px;
+                    color   : #00b74a;
+                }
+
+                &.error {
+                    border    : 1px solid red;
+                    background: #ff000012 !important;
+                }
+            }
+        }
+
+        .paymentListing {
+            display        : flex;
+            flex-wrap      : wrap;
+            margin-left    : 20px;
+            width          : calc(100% - 20px);
+            justify-content: center;
+
+            .pItem {
+                // width        : 100%;
+                // width           : calc(100% / 2 - 15px);
+                flex               : 1;
+                margin-right       : 20px;
+                width              : calc(100% / 2);
+                // display         : flex;
+                // margin-right    : 30px;
+                margin-top         : 7px;
+                margin-bottom      : 7px;
+                display            : flex;
+                flex-wrap          : wrap;
+                background         : #eee;
+                border-radius      : 5px;
+                align-items        : center;
+                // margin       : 7px 0 10px 0;
+                cursor             : pointer;
+                position           : relative;
+                height             : 80px;
+                box-shadow         : 0 0 3px rgb(0 0 0 / 20%);
+
+                .textGp {
+                    display    : flex;
+                    height     : 100%;
+                    width      : 100%;
+                    align-items: center;
+                    padding    : 0 10px;
+
+                    img {
+                        width           : 60px;
+                        height          : 60px;
+                        -o-object-fit   : contain;
+                        object-fit      : contain;
+                        margin-right    : 10px;
+                        // border       : 1px solid #ccc;
+                        // border-radius: 15px;
+                    }
+
+                    p {
+                        white-space: nowrap;
+                    }
+                }
+
+                &.selectActive {
+                    border    : 2px solid #024de3;
+                    background: #1266f130 !important;
+                }
+
+                .icon {
+                    position     : absolute;
+                    right        : -5px;
+                    top          : -11px;
+                    color        : #fbfbfb;
+                    background   : #024de3;
+                    border-radius: 50%;
+                }
+
+                &.error {
+                    border    : 1px solid red;
+                    background: #ff000012 !important;
+                }
+
+                &:last-child {
+                    margin-bottom: 0;
+                    margin-right : 0;
+                }
+
+            }
+        }
+
+        .paymentFormInputGp {
+            margin-left: 20px;
+
+            /* margin: 10px 0; */
+            /* background: #eeeeee91; */
+            padding      : 0px;
+            margin-top   : 10px;
+            border-radius: 10px;
+
+            .inputRow2 {
+                display      : flex;
+                flex-wrap    : wrap;
+                max-width    : 100%;
+                margin-bottom: 10px;
+
+                .inputGp {
+                    flex         : 1;
+                    margin-right : 20px;
+                    width        : calc(50% - 40px);
+                    display      : flex;
+                    margin-bottom: 0;
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+                }
+            }
+
+            .inputGp {
+                display       : flex;
+                flex-direction: column;
+                margin-bottom : 10px;
+
+                .price {
+                    background: #e0e0e0;
+                    opacity   : 0.6;
+                    font-size : 18px !important;
+                }
+
+                label {
+                    font-size: 14px;
+                    color    : #5a5e66;
+
+                    span {
+                        color      : red;
+                        margin-left: 4px;
+                    }
+                }
+
+                input[type="number"] {
+                    height       : 40px;
+                    border       : 1px solid #d8dce5;
+                    border-radius: 5px;
+                    padding      : 0 10px;
+                    font-size    : 14px;
+
+                }
+
+                textarea {
+                    border       : 1px solid #eeeeee;
+                    border-radius: 7px;
+                    font-size    : 14px;
+                    padding      : 10px;
+                }
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+
+    .repairServiceListing {
+        width        : 100%;
+        // padding: 0 20px;
+        background   : #eee;
+        padding      : 20px;
+        border-radius: 20px;
+
+        .rsItemTxt {
+            display    : flex;
+            align-items: center;
+
+            span {
+                margin: 0 5px;
+            }
+
+            p {
+                margin: 0;
+            }
+        }
+
+        .itemListingRSGP {
+            margin-top: 20px;
+        }
+
+        .itemListingRS {
+            display      : flex;
+            border-bottom: 1px solid #e0e0e0;
+            padding      : 10px 5px;
+            font-size    : 14px;
+
+            .RSLeft {
+                flex      : 1;
+                text-align: start;
+
+            }
+
+            .RSRight {
+                flex      : 1;
+                text-align: right;
+            }
+
+            label {
+                font-size: 13px;
+                color    : #757575;
+            }
+
+            h3 {
+                margin: 0;
+            }
+        }
+    }
+
+    .btnPaymentFooterListing {
+        display        : flex;
+        justify-content: flex-end;
+        margin-top     : 15px;
+
+        .btnPaymentCancel {
+            background  : none;
+            color       : #ff3838;
+            margin-right: 15px;
+        }
+
+        .btnPaymentSubmit {
+            background: #024de3;
+            color     : #fff;
+
+            .img {
+                margin-right: 5px;
+                width       : 20px;
+                height      : 20px;
+            }
+        }
+    }
+}
+
+.inputPaymentPrice {
+    display       : flex;
+    flex-direction: column;
+
+    .label {
+        font-size: 14px;
+        color    : #757575;
+
+        span {
+            color       : red;
+            margin-right: 5px;
+        }
+    }
+
+    input {
+        height       : 40px;
+        padding      : 0 10px;
+        border       : 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .error {
+        color    : #ff3838bd;
+        font-size: 11px;
+    }
+}
+
+.popUPPaymentAlertBG {
+    background: #cccccc91;
+    position  : fixed;
+    width     : 100%;
+    height    : 100%;
+}
+
+.popUPPaymentAlert {
+    width          : 100%;
+    height         : 100%;
+    position       : fixed;
+    justify-content: center;
+    display        : flex;
+    align-items    : center;
+    overflow       : hidden !important;
+
+
+    .iconPG {
+        background     : #0cb00c;
+        color          : white;
+        width          : 70px;
+        height         : 70px;
+        display        : flex;
+        justify-content: center;
+        align-items    : center;
+        border-radius  : 50%;
+
+        svg {
+            width : 55px;
+            height: 55px;
+        }
+
+        i {
+            font-size: 50px;
+        }
+    }
+
+    .layoutP {
+        width          : 280px;
+        /* height      : 300px; */
+        background     : #b7bac1;
+        border-radius  : 20px;
+        display        : flex;
+        flex-direction : column;
+        align-items    : center;
+        justify-content: center;
+        padding        : 35px;
+
+        .btnPFooter {
+            .confirm {
+                background     : blue;
+                text-align     : center;
+                display        : flex;
+                justify-content: center;
+
+            }
+        }
+    }
+
+    .PTextG {
+        text-align: center;
+    }
+}
+
+.txtEmptyPayment {
+    margin-top         : 35px;
+    font-size          : 20px;
+    font-weight        : 600;
+    font-weight        : unset;
+    -webkit-text-stroke: .3px;
+    height             : 240px;
+    justify-content    : center;
+    display            : flex;
+    flex-direction     : column;
+    align-items        : center;
+
+    img {
+        width : 60px;
+        height: 60px;
+    }
+
+    p {
+        font-size: 18px;
+        padding  : 0px;
+    }
+
+    button {
+        border       : none;
+        height       : 30px;
+        padding      : 7px;
+        border-radius: 5px;
+        font-size    : 12px;
+        background   : blue;
+        color        : white;
+    }
+}
+
+.pMarginTop12 {
+    margin-top: 12px !important;
+}
+
+.numberLabel {
+    display    : flex;
+    align-items: center;
+    margin     : 0 0 10px 0;
+
+    .number {
+        font-size      : 14px;
+        color          : #757575;
+        width          : 25px;
+        height         : 25px;
+        background     : #00b74a;
+        display        : flex;
+        align-items    : center;
+        justify-content: center;
+        border-radius  : 50%;
+        color          : #ffff;
+        font-weight    : 600;
+        margin-right   : 10px;
+    }
+
+    h3 {
+        margin: 0;
+
+        span {
+            margin-left: 4px;
+            color      : red;
+            font-size  : 16px;
+        }
+
+        .errorLabel {
+            color      : rgba(255, 56, 56, 0.7411764706);
+            font-size  : 11px;
+            margin-left: 15px;
+        }
+    }
+
+}
+
+.paymentPending {
+    background         : #ffa900;
+    font-weight        : 600;
+    font-weight        : unset;
+    -webkit-text-stroke: 0.3px;
+    font-size          : 14px;
+    padding            : 4px 12px;
+    border-radius      : 24px;
+    font-size          : 13px;
+    color              : white;
+}
+
+.paymentComplete {
+    background         : #21b75e;
+    font-weight        : 600;
+    font-weight        : unset;
+    -webkit-text-stroke: 0.3px;
+    padding            : 4px 12px;
+    border-radius      : 24px;
+    font-size          : 13px;
+    color              : white;
+}
+
+.submitSpinner {
+    width       : 20px;
+    height      : 20px;
+    margin-right: 10px;
+
+    .loaderSpinnerVer1 {
+        height    : 100% !important;
+        width     : 100% !important;
+        border    : 4px solid #fbfbfb;
+        border-top: 4px solid #3498db;
+    }
+}
+
+.loaderSpinnerVer1 {
+    border           : 5px solid #fbfbfb;
+    border-radius    : 50%;
+    border-top       : 5px solid #3498db;
+    width            : 65px;
+    height           : 65px;
+    -webkit-animation: spinLoadingcus 1.5s linear infinite;
+    /* Safari */
+    animation        : spinLoadingcus 1.5s linear infinite;
+}
+
+.gg-spinner {
+    transform: scale(var(--ggs, 1))
+}
+
+.gg-spinner,
+.gg-spinner::after,
+.gg-spinner::before {
+    box-sizing: border-box;
+    position  : relative;
+    display   : block;
+    width     : 20px;
+    height    : 20px
+}
+
+.gg-spinner::after,
+.gg-spinner::before {
+    content      : "";
+    position     : absolute;
+    border-radius: 100px
+}
+
+.gg-spinner::before {
+    // animation       : spinner 1s cubic-bezier(.6, 0, .4, 1) infinite;
+    animation: spinLoadingcus 2s linear infinite;;
+    border          : 3px solid transparent;
+    border-top-color: currentColor
+}
+
+.gg-spinner::after {
+    border : 3px solid;
+    opacity: .2
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    to {
+        transform: rotate(359deg)
+    }
+}
+
+/* Safari */
+@-webkit-keyframes spinLoadingcus {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spinLoadingcus {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

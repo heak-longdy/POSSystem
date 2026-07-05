@@ -1,0 +1,54 @@
+#tinymce.mce-content-body {
+    width: calc(100% - 65px) !important;
+
+    p {
+        max-width: 100% !important;
+        margin   : 0 !important;
+
+        span {
+            iframe {
+                max-width: 100% !important;
+                width    : 100% !important;
+            }
+
+            .mce-shim {
+                max-width: 100% !important;
+            }
+
+            .mce-preview-object .mce-shim {
+                max-width: 100% !important;
+            }
+        }
+
+        iframe {
+            max-width: 100% !important;
+            width    : 100% !important;
+        }
+    }
+
+    iframe {
+        max-width: 100% !important;
+        width    : 100% !important;
+    }
+}
+
+.mce-content-body {
+    p {
+        padding: 0 !important;
+        margin : 0 !important;
+    }
+}
+
+.tox-edit-area p {
+    margin: 5px 0; /* Adjust the margin as needed */
+}
+
+.tox-tinymce{
+    .tox-editor-container{
+        z-index: 1;
+    }
+}
+.tox-promotion,
+.tox-statusbar__branding {
+    display: none !important;
+}

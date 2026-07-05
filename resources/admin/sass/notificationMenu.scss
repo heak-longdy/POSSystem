@@ -1,0 +1,94 @@
+.notification-body {
+    display: none !important;
+
+    &.show {
+        display: flex !important;
+    }
+}
+
+.notification-card {
+
+    // background-color: #fff;
+    // width: 350px;
+    // padding: 20px;
+    ul {
+        padding: 0 !important;
+    }
+}
+
+.notification-header {
+    display        : flex;
+    justify-content: space-between;
+    align-items    : center;
+    margin-bottom  : 15px;
+}
+
+.notification-header h2 {
+    font-size: 18px;
+    color    : #333;
+    margin   : 0;
+}
+
+.badge {
+    background-color: #4A90E2;
+    color           : #fff;
+    font-size       : 12px;
+    padding         : 5px 10px;
+    border-radius   : 12px;
+}
+
+.notification-list {
+    list-style   : none;
+    margin-bottom: 20px;
+}
+
+.notification-list li {
+    display      : flex;
+    align-items  : center;
+    margin-bottom: 15px;
+}
+
+.notification-list img {
+    width        : 40px;
+    height       : 40px;
+    border-radius: 50%;
+    margin-right : 10px;
+}
+
+.notification-content p {
+    margin    : 0;
+    font-size : 14px;
+    color     : #333;
+    text-align: left;
+}
+
+.notification-content p strong {
+    font-weight: bold;
+    color      : #000;
+}
+
+.notification-content p:nth-child(2) {
+    color    : #888;
+    font-size: 12px;
+}
+
+.see-all-btn {
+    text-align: center;
+}
+
+.see-all-btn button {
+    background-color: #4A90E2;
+    color           : #fff !important;
+    padding         : 6px 20px !important;
+    border-radius   : 10px !important;
+    cursor          : pointer !important;
+    font-size       : 14px;
+    width           : 100%;
+    margin-left     : 0 !important;
+    margin-top      : 25px;
+}
+
+.see-all-btn button:hover {
+    background-color: #4A90E2;
+    color           : #fff;
+}

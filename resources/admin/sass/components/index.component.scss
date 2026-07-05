@@ -1,0 +1,7 @@
+$border-radius : 20px;
+$primary-color :linear-gradient(335deg, #90f7ec 0%, #32ccbc 100%);
+$success-color :linear-gradient(335deg, #81fbb8 0%, #28c76f 100%);
+$danger-color  :linear-gradient(335deg, #feb692 0%, #ea5455 100%);
+$warning-color :linear-gradient(335deg, #fdeb71 0%, #f8d600 100%);
+$info-color    :linear-gradient(335deg, #abdcff 0%, #0396ff 100%);
+@import "toast.component";

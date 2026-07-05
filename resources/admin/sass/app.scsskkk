@@ -1,0 +1,281 @@
+html,
+body {
+    margin    : 0;
+    padding   : 0;
+    background: var(--grey);
+    overflow-x: hidden;
+}
+
+body.dark {
+    --light  : #0C0C1E;
+    /* --grey: #060714; */
+    --grey   : #060714eb;
+    --dark   : #FBFBFB;
+}
+
+$fontFamily : 'Poppins',
+sans-serif;
+
+:root {
+    --poppins     : 'Poppins', sans-serif;
+    --lato        : 'Lato', sans-serif;
+    --light       : #F9F9F9;
+    --blue        : #3C91E6;
+    --light-blue  : #CFE8FF;
+    --grey        : #eee;
+    --dark-grey   : #AAAAAA;
+    --dark        : #342E37;
+    --red         : #DB504A;
+    --yellow      : #FFCE26;
+    --light-yellow: #FFF2C6;
+    --orange      : #FD7238;
+    --light-orange: #FFE0D3;
+    --fontSize15  : 15px;
+    --white       : #fff;
+}
+
+@import "./variable.scss";
+@import "./function.scss";
+@import "./font.scss";
+@import "./component.scss";
+@import "./content.scss";
+@import "./sidebar.scss";
+@import "./header.scss";
+@import "./table.scss";
+@import "./dashboard.scss";
+
+@import 'boxicons/css/animations.css';
+@import 'boxicons/css/boxicons.css';
+@import 'boxicons/css/boxicons.min.css';
+@import 'boxicons/css/transformations.css';
+
+@import "./dialog.scss";
+@import "./form.scss";
+@import "./list.scss";
+@import "./message.scss";
+@import "./file-manager.scss";
+@import "./loading.scss";
+@import "./empty.scss";
+@import "./no-permission.scss";
+@import "./auth/login.scss";
+@import "./pick-me.scss";
+@import "./error.scss";
+@import "./map.scss";
+
+//Customize
+@import "./cutomize/shop-form.scss";
+@import "./cutomize/qrcode.scss";
+@import "./cutomize/order.scss";
+@import "./cutomize/invoice.scss";
+@import "./components/index.component.scss";
+@import './components/select-option.component.scss';
+
+@import "./dialog/dialog.scss";
+@import "./dialog/popUp.scss";
+
+@import "./booking/invoice.scss";
+
+//blog
+@import "./blog/create.scss";
+
+@import 'choice/choices.scss';
+
+//memberCar
+@import "./memberCar/view.scss";
+@import "./memberCar/formlayoutpop.scss";
+@import "./memberCar/reportCar.scss";
+
+@import "./checkbox/list.scss";
+
+@import "./tab/list.scss";
+
+// //permission
+@import "./permission/listing.scss";
+
+//carHistory
+// @import "./carHistory/invoice.scss";
+// @import "./carHistory/payment.scss";
+
+//tiny
+@import "./tinymce/listing.scss";
+
+//product
+@import "./product/form.scss";
+@import "./memberRequestMoney/detail.scss";
+
+//booking
+@import "./order.scss";
+
+//inventory
+@import "./inventoryFrom.scss";
+
+@import "./custom.scss";
+@import "./progress.scss";
+@import "./chart.scss";
+@import "./chosen.scss";
+
+
+@import "./multipleSelect.scss";
+
+
+//animation
+@import "./animationPopUp/index.scss";
+
+@import "./menuDropDownOption.scss";
+@import "./dialogAnimation.scss";
+
+@import "./button.scss";
+@import "./tab.scss";
+
+@import "./formPopUp/index.scss";
+@import "./scroller.scss";
+
+@import "./pagination.scss";
+
+@import './swal.scss';
+
+::-webkit-scrollbar {
+    width : 5px;
+    height: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background   : #333;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background   : $scroll;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: $scroll;
+}
+
+button:disabled {
+    background: rgba(0, 0, 0, 0.12) !important;
+    color     : rgba(0, 0, 0, 0.26) !important;
+    cursor    : no-drop !important;
+}
+
+input:disabled,
+select:disabled,
+.select2-container--disabled {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color     : rgba(0, 0, 0, 0.5) !important;
+    cursor    : no-drop !important;
+}
+
+[_route] {
+    cursor: pointer;
+}
+
+*:focus {
+    outline: none;
+}
+
+#ks-breadcrumb {
+    .breadcrumb-item {
+        cursor: pointer;
+
+        &:hover {
+            opacity: 0.7;
+        }
+
+        &.active {
+            cursor: default;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+}
+
+//Switch lang
+.lang-input {
+    display   : none !important;
+    transition: display 0.2s ease-in-out;
+
+    &.active {
+        display: inline-block !important;
+    }
+}
+
+.form-label {
+    display        : flex;
+    justify-content: space-between;
+    align-items    : center;
+    width          : 100%;
+    margin         : 0;
+    padding        : 0;
+}
+
+.switch-lang {
+    display: flex;
+
+    .tap {
+        color      : #333 !important;
+        font-size  : 0.8rem;
+        font-weight: 600;
+        cursor     : pointer;
+        padding    : 2px 4px;
+        position   : relative;
+        margin-left: 4px;
+
+        &::before {
+            content         : "";
+            position        : absolute;
+            bottom          : 0;
+            left            : 0;
+            width           : 0;
+            height          : 2px;
+            background-color: blue;
+            border-radius   : 5px;
+            transition      : width 0.1s ease-in;
+        }
+
+        &.active::before {
+            width: 100%;
+        }
+    }
+}
+
+.labelError {
+    color: red !important;
+}
+
+.selectOptionLayout {
+    height       : 100%;
+    margin-left  : 5px;
+    border       : 1px solid #d8dce5;
+    border-radius: 5px;
+    overflow     : hidden;
+    position     : relative;
+    max-width    : 240px;
+
+    select {
+        height   : 100%;
+        border   : unset;
+        padding  : 0 10px;
+        cursor   : pointer;
+        font-size: 14px;
+        color    : #5a5e66;
+    }
+
+    svg {
+        position: absolute;
+        right   : 2px;
+        height  : 100%;
+        color   : #7d7d7d;
+    }
+}
+
+.justContentStart {
+    justify-content: flex-start !important;
+
+    button:first-child {
+        margin-left: 0 !important;
+    }
+}

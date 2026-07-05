@@ -1,0 +1,103 @@
+$padding15        :15px;
+$widthCh          :70%;
+// Color
+$primary          : #024de3;
+$border-radius    :8px;
+$menu-active      : #3A3A3C;
+$container        : #fff;
+$container        : #fff;
+$label            : #024de3;
+$border           : #d4d4d4;
+$text             : #989898;
+$border-radius    : 10px;
+$tableBorderRadius:15px;
+$btn              : ('create':#024de3,
+    'edit':#024de3,
+    'delete':#ff3838,
+    'save':#00c753);
+
+$dark    : #231f20;
+$danger  : #ff3838;
+$success :#00c753;
+$silver  : #e5e5e5;
+$warning : #ffb800;
+
+*,
+::after,
+::before {
+    margin    : 0;
+    padding   : 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-size: 14px;
+}
+
+h3 {
+    font-size: 25px;
+}
+
+.paddingTop_Bot60 {
+    padding: 60px 0;
+}
+
+.marginTop_Bot30 {
+    margin: 30px 0;
+}
+
+.colorYellow {
+    color: #f28517 !important;
+}
+
+.bgYellow {
+    background: #f28517;
+}
+
+.margin_bot20 {
+    margin-bottom: 20px;
+}
+
+.text_align_right {
+    text-align: right;
+}
+
+.border-radius {
+    border-radius: 15px;
+}
+
+.wsNowrap {
+    white-space: nowrap;
+}
+
+.colLine {
+    width     : 1px;
+    height    : 100%;
+    background: #484646;
+    margin    : 0 20px;
+}
+
+.btnApply {
+    background   : #ff9900;
+    color        : #fff;
+    padding      : 10px 23px;
+    border-radius: 7px;
+    border       : none;
+}
+
+.fontWeight {
+    font-weight        : unset;
+    -webkit-text-stroke: 0.7px;
+}
+
+
+.fontWeightUnset {
+    font-weight        : unset;
+    -webkit-text-stroke: 0.4px;
+}
+
+.underLine {
+    height    : 1px;
+    background: #00000017;
+    width     : 100%;
+}

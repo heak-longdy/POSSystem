@@ -1,0 +1,35 @@
+.applyContainer {
+    margin         : 150px 0;
+    width          : 100%;
+    display        : flex;
+    flex-direction : column;
+    justify-content: center;
+    align-items    : center;
+
+    h2 {
+        margin-bottom: 60px;
+        font-size: 25px;
+        color: #ff9900;
+    }
+
+    .applyGp {
+        display : flex;
+        grid-gap: 70px;
+        width   : 77%;
+
+
+
+        .appLeft {
+            flex: 1;
+
+            .remarkText {
+                margin-bottom: 25px;
+
+            }
+        }
+
+        .appRight {
+            width: 350px;
+        }
+    }
+}

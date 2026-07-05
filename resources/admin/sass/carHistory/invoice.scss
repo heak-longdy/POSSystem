@@ -1,0 +1,377 @@
+@import "../font.scss";
+
+@media print {
+    @page {
+        size  : A10;
+        size  : portrait;
+        margin: 1.5cm;
+    }
+}
+
+.swal2-container.swal2-center.swal2-backdrop-show {
+    z-index: 9999 !important;
+}
+
+$bgInvoice: #ffa9008a;
+
+.carInvoiceHeader {
+    display      : flex;
+    border       : 1px solid #b7bac1;
+    padding      : 15px;
+    border-radius: 5px;
+    position     : relative;
+    height       : 100%;
+    color        : black !important;
+
+
+    .imageLogoGp {
+        width: 120px;
+
+        img {
+            width: 100%;
+        }
+
+        p {
+            margin            : 0;
+            font-size         : 15px;
+            overflow          : hidden;
+            text-overflow     : ellipsis;
+            white-space       : initial;
+            display           : -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size         : 14px;
+        }
+    }
+
+    .textHeaderGp {
+        flex          : 1;
+        position      : absolute;
+        width         : 100%;
+        text-align    : center;
+        display       : flex;
+        flex-direction: column;
+        text-align    : center;
+        align-items   : center;
+        top           : 30px;
+
+        h3 {
+            font-family        : 'Khmer_OS_Wat_Phnom' !important;
+            color              : #024de3ad;
+            font-size          : 24px;
+            font-weight        : unset;
+            -webkit-text-stroke: .3px;
+            margin-top         : 0;
+            margin-bottom      : 15px;
+        }
+
+        p {
+            margin            : 0;
+            width             : 65%;
+            font-size         : 14px;
+            overflow          : hidden;
+            text-overflow     : ellipsis;
+            white-space       : initial;
+            display           : -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size         : 14px;
+            line-height       : 23px;
+        }
+    }
+}
+
+.headerTextInvoice {
+    text-align: center;
+    color     : black;
+
+    .txt {
+        font-family        : 'Khmer_OS_Wat_Phnom' !important;
+        color              : #024de3ad;
+        font-size          : 18px;
+        font-weight        : unset;
+        -webkit-text-stroke: .3px;
+    }
+}
+
+.boxItemListingGp {
+    display: flex;
+
+    .boxItem {
+        border       : 1px solid #ccc;
+        margin-right : 25px;
+        border-radius: 5px;
+        padding      : 10px;
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        .itemTxt {
+            display    : flex;
+            align-items: flex-start;
+            font-size  : 14px;
+
+            label {
+                width     : 150px;
+                text-align: end;
+            }
+
+            span {
+                margin: 0 10px
+            }
+
+            p {
+                margin    : 0;
+                text-align: start;
+                word-break: break-all;
+                flex      : 1;
+            }
+        }
+    }
+
+    .numberInvoice {
+        display            : flex;
+        justify-content    : flex-start !important;
+        padding-left       : 25px;
+        font-weight        : unset;
+        -webkit-text-stroke: .5px;
+
+        span {
+            margin: 0 5px;
+        }
+    }
+
+    .boxLeft {
+        flex: 1;
+    }
+
+    .boxRight {
+        flex: 1;
+
+        .itemTxt {
+            label {
+                width: 95px;
+            }
+        }
+    }
+}
+
+.reportInvoiceListingTableLayout {
+    margin-top: 20px;
+    border    : 1px solid #e0e0e0;
+    font-size : 15px;
+    overflow  : hidden;
+
+    div>div {
+        border-right   : 1px solid #e0e0e0;
+        height         : 100%;
+        display        : flex;
+        align-items    : center;
+        width          : 100%;
+        justify-content: center;
+
+        &:last-child {
+            border-right: none;
+        }
+    }
+
+    .headerReport {
+        display            : flex;
+        width              : 100%;
+        height             : 40px;
+        background         : $bgInvoice;
+        align-items        : center;
+        font-weight        : 600;
+        font-weight        : unset;
+        -webkit-text-stroke: .5px;
+
+        &.bgBooking {
+            background: #eee !important;
+        }
+    }
+
+    .bodyReport {
+        display    : flex;
+        width      : 100%;
+        height     : 37px;
+        align-items: center;
+        border-top : 1px solid #e0e0e0;
+        font-size  : 13px;
+
+    }
+
+    .tableTextLeft {
+        display        : flex;
+        justify-content: flex-start;
+        padding        : 0 10px;
+    }
+
+    .col10 {
+        width: 10%;
+    }
+
+    .col20 {
+        width: 20%;
+    }
+
+    .col30 {
+        width: 30%;
+    }
+
+    .col40 {
+        width: 40%;
+    }
+
+    .col50 {
+        width: 50%;
+    }
+
+    .col60 {
+        width: 60%;
+    }
+}
+
+.invoiceFooter {
+    display: flex;
+
+    .footerItem {
+        display       : flex !important;
+        flex-direction: column !important;
+        height        : auto !important;
+
+        &:first-child {
+            border-top: 1px solid #d8dce5;
+            padding   : 7px 13px;
+            background: $bgInvoice;
+        }
+
+        p {
+            margin         : 0;
+            display        : flex;
+            justify-content: flex-start;
+            width          : 100%;
+            text-align     : start;
+            font-family    : 'Khmer_OS_Wat_Phnom' !important;
+            font-size      : 13px;
+        }
+
+        .bodyReport {
+            height      : 100% !important;
+            border-right: 0;
+            width       : 100% !important;
+
+            .textRight {
+                display        : flex;
+                justify-content: flex-end;
+                padding-right  : 7px;
+                background     : $bgInvoice;
+
+                &.bgBooking {
+                    background: #024de36b !important;
+                }
+            }
+
+            div {
+                // border-right: 0 !important;
+            }
+        }
+    }
+
+
+}
+
+.invoiceFooterText {
+    display  : flex;
+    width    : 100%;
+    padding  : 15px 0;
+    font-size: 15px;
+
+    .footerItemText {
+        display       : flex !important;
+        flex-direction: column !important;
+        flex          : 1;
+
+        .textGp {
+            display        : flex;
+            width          : 100%;
+            flex-direction : column;
+            justify-content: center;
+            text-align     : center;
+            align-items    : center;
+            line-height    : 25px;
+        }
+
+        p {
+            margin         : 0;
+            display        : flex;
+            justify-content: flex-center;
+        }
+    }
+
+    // .col60 {
+    //     width: 60%;
+    // }
+
+    // .col40 {
+    //     width: 40%;
+    // }
+}
+
+.gg-check {
+    box-sizing   : border-box;
+    position     : relative;
+    display      : block;
+    transform    : scale(var(--ggs, 1));
+    width        : 22px;
+    height       : 22px;
+    border       : 2px solid transparent;
+    border-radius: 100px
+}
+
+.gg-check::after {
+    content         : "";
+    display         : block;
+    box-sizing      : border-box;
+    position        : absolute;
+    left            : 5px;
+    top             : -5px;
+    width           : 8px;
+    height          : 15px;
+    border-width    : 0 2px 2px 0;
+    border-style    : solid;
+    transform-origin: bottom left;
+    transform       : rotate(45deg);
+    color           : blue;
+}
+
+.gg-close {
+    box-sizing   : border-box;
+    position     : relative;
+    display      : block;
+    transform    : scale(var(--ggs, 1));
+    width        : 22px;
+    height       : 22px;
+    border       : 2px solid transparent;
+    border-radius: 40px
+}
+
+.gg-close::after,
+.gg-close::before {
+    content      : "";
+    display      : block;
+    box-sizing   : border-box;
+    position     : absolute;
+    width        : 16px;
+    height       : 2px;
+    background   : currentColor;
+    transform    : rotate(45deg);
+    border-radius: 5px;
+    top          : 8px;
+    left         : 5px;
+    color        : red;
+}
+
+.gg-close::after {
+    transform: rotate(-45deg)
+}

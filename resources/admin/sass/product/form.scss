@@ -1,0 +1,362 @@
+$borderColorTable:#d8dce5;
+
+.productFormLayout {
+    .pHeader {
+        display       : flex;
+        align-items   : flex-end;
+        border-bottom : 1px solid #d8dce5;
+        padding-bottom: 12px;
+        margin-bottom : 12px;
+
+        img {
+            width        : 60px;
+            height       : 60px;
+            border-radius: 50%;
+            object-fit   : cover;
+        }
+
+        .pText {
+            display    : flex;
+            align-items: center;
+            margin-left: 15px;
+
+            p {
+                margin: 0;
+            }
+
+            button {
+                background: none;
+                color     : blue;
+                font-size : 12px;
+            }
+        }
+    }
+
+    .inputFormLayout {
+        .row2Input {
+            display      : flex;
+            margin-bottom: 10px;
+
+            .inputGp {
+                flex        : 1;
+                margin-right: 25px;
+            }
+
+            .imgGp {
+                width     : 170px;
+                height    : 135px;
+                margin-top: 20px;
+
+                .form-select-photo {
+                    height: 100% !important;
+                }
+            }
+        }
+
+        .inputItem {
+            display       : flex;
+            flex-direction: column;
+            margin-bottom : 10px;
+
+            label {
+                font-size: 14px;
+                color    : #5a5e66;
+                padding  : 0 12px 0 0;
+
+                span {
+                    margin-left: 5px;
+                    color      : red;
+                }
+            }
+
+            textarea {
+                background-color: #fff;
+                border          : 1px solid #d8dce5;
+                box-sizing      : border-box;
+                color           : #5a5e66;
+                display         : inline-block;
+                font-size       : 14px;
+                height          : 60px;
+                line-height     : 1;
+                outline         : 0;
+                padding         : 10px;
+                transition      : border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+                width           : 100%;
+
+                &.des {
+                    height: 150px;
+                }
+            }
+
+            input {
+                background-color: #fff;
+                border          : 1px solid #d8dce5;
+                box-sizing      : border-box;
+                color           : #5a5e66;
+                display         : inline-block;
+                font-size       : 14px;
+                height          : 40px;
+                line-height     : 1;
+                outline         : 0;
+                padding         : 0 15px;
+                transition      : border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+                width           : 100%;
+            }
+
+            .error {
+                color      : #ff9d9d;
+                font-size  : 12px !important;
+                line-height: 1;
+                padding-top: 4px;
+            }
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+
+        .tableProductListingLayout {
+            .itemTableProductGp {
+                margin-bottom: 15px;
+
+                &:last-child {
+                    margin-bottom: 0 !important;
+                }
+
+                .label {
+                    font-size          : 14px;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .3px;
+                }
+
+                .checkBoxGp {
+                    display    : flex;
+                    align-items: center;
+                    font-size  : 14px;
+                    color      : #b7bac1;
+
+                    input[type="checkbox"] {
+                        width : 25px;
+                        height: 17px;
+                    }
+                }
+
+                .PTableGp {
+                    border-bottom: 1px solid $borderColorTable;
+                    margin       : 15px 0 0 0;
+
+                    .rowTable {
+                        display      : flex;
+                        align-items  : center;
+                        padding      : 0;
+                        border-bottom: 1px solid $borderColorTable;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        div {
+                            border-right: 1px solid $borderColorTable;
+                            padding     : 0 10px;
+                            height      : 100%;
+
+                            &:last-child {
+                                border-right: none;
+                            }
+                        }
+
+                        .textCenter {
+                            display        : flex;
+                            justify-content: center;
+                        }
+
+                        .opacity3 {
+                            opacity: 0.3;
+                        }
+
+                        .colT10 {
+                            width: 10%;
+                        }
+
+                        .colT70 {
+                            width: 70%;
+                        }
+
+                        .btnTrash {
+                            cursor         : pointer;
+                            width          : 100%;
+                            justify-content: center;
+
+                            svg {
+                                width : 20px;
+                                height: 20px;
+                            }
+                        }
+                    }
+
+                    .header {
+                        height: 50px;
+
+                        div {
+                            height             : 100%;
+                            display            : flex;
+                            justify-content    : flex-start;
+                            align-items        : center;
+                            font-weight        : unset;
+                            -webkit-text-stroke: .5px;
+                        }
+                    }
+
+                    .body {
+                        height: 70px;
+
+                        div {
+                            height         : 100%;
+                            display        : flex;
+                            justify-content: flex-start;
+                            align-items    : center;
+                            font-size      : 12px;
+                        }
+                    }
+                }
+            }
+
+            .btnAddLineGp {
+                button {
+                    background         : none;
+                    color              : #024de3;
+                    padding            : 0;
+                    font-size          : 14px;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .3px;
+
+                    svg {
+                        width       : 17px;
+                        height      : 17px;
+                        margin-right: 5px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.tableItemListingGp {
+    display: flex;
+    width  : 100%;
+    padding: 0 !important;
+
+    img {
+        width : 65px;
+        height: 85%;
+        border: 1px solid #eee;
+    }
+
+    .tableItemTextGp {
+        flex-direction : column;
+        height         : 100% !important;
+        text-align     : left !important;
+        justify-content: center !important;
+        align-items    : flex-start !important;
+        display        : flex;
+        justify-content: center !important;
+
+        h3 {
+            margin   : 0;
+            font-size: 14px;
+        }
+
+        p {
+            margin   : 0;
+            font-size: 12px;
+            color    : #b7bac1;
+        }
+    }
+}
+
+.addInputDynamicLayout {
+    border        : 1px solid $borderColorTable;
+    border-top    : 0;
+    border-bottom : 0;
+    flex-direction: column;
+    height        : auto !important;
+    padding       : 20px 0 !important;
+
+    .inputAddGp {
+        width        : 100%;
+        padding      : 0 !important;
+        margin-bottom: 15px;
+
+        .btnAdd {
+            cursor: pointer;
+
+            svg {
+                background   : #00b74a;
+                color        : white;
+                padding      : 2px;
+                border-radius: 50%;
+                width        : 25px;
+                height       : 25px;
+            }
+        }
+
+        div {
+            padding: 0 !important;
+
+            input[type="text"] {
+                margin-right: 20px;
+                padding     : 0 10px;
+            }
+
+            input[type="number"] {
+                text-align: center;
+            }
+
+            input {
+                width    : 100%;
+                height   : 35px;
+                border   : 1px solid $borderColorTable;
+                font-size: 15px;
+            }
+        }
+
+        .btnTrash {
+            width          : 100%;
+            justify-content: center !important;
+        }
+    }
+
+    div {
+        border-right: 0 !important;
+    }
+}
+
+.imageGpbtnActionlayout {
+    display   : flex;
+    margin-top: 15px;
+    height    : 20px;
+
+    button {
+        background     : none;
+        color          : black !important;
+        flex           : 1;
+        border-right   : 2px solid black !important;
+        border-radius  : 0 !important;
+        max-height     : 100%;
+        min-height     : 100%;
+        margin         : 0 !important;
+        padding        : 0 !important;
+        text-align     : center !important;
+        justify-content: center;
+
+        svg {
+            width : 17px;
+            height: 17px;
+        }
+
+        &:last-child {
+            border-right: none !important;
+        }
+    }
+}

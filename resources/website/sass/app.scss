@@ -1,0 +1,41 @@
+@import "boxicons/css/animations.css";
+@import "boxicons/css/boxicons.css";
+@import "boxicons/css/boxicons.min.css";
+@import "boxicons/css/transformations.css";
+
+@import "./fancybox.css";
+
+@import "./function.scss";
+@import "./font.scss";
+@import "./variable.scss";
+
+@import "./share/layout.scss";
+@import "./share/header.scss";
+@import "./share/footer.scss";
+
+@import "./banner.scss";
+@import "./home.scss";
+@import "./job.scss";
+@import "./select2.scss";
+
+@import "./verifyDoc.scss";
+
+@import "./carousel.scss";
+
+@import "./partner.scss";
+
+@import "./jobDetail.scss";
+
+@import "./blog.scss";
+
+@import "./contact.scss";
+@import "./input.scss";
+@import "./applyForm.scss";
+@import "./pagination.scss";
+
+@import "./aos.css";
+@import "./dialog.scss";
+@import "./responsive.scss";
+.d{
+    position: absolute;
+}

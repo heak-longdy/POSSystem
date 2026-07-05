@@ -1,0 +1,61 @@
+.ItemTabListingLayout {
+    border-radius: 7px;
+    display      : flex;
+    align-items  : flex-start;
+    height       : 100%;
+    margin-bottom: 25px;
+}
+
+.ItemTabListing {
+    display      : flex;
+    align-items  : center;
+    width        : max-content;
+    display      : flex;
+    flex-wrap    : wrap;
+    padding-left : 0;
+    margin-bottom: 0;
+    list-style   : none;
+    height       : 40px;
+    background   : #e5e5e536;
+    border       : 1px solid #eee;
+    padding      : 0 15px;
+    border-radius: 7px;
+
+    .ITab {
+        color                  : #969ba0;
+        position               : relative;
+        height                 : 100%;
+        font-size              : 14px;
+        display                : flex;
+        align-items            : center;
+        padding                : 5px 10px;
+        border-top-left-radius : 0.75rem;
+        border-top-right-radius: 0.75rem;
+        cursor                 : pointer;
+
+        &.active {
+            color              : blue;
+            font-weight        : unset;
+            -webkit-text-stroke: .3px;
+
+            &:after {
+                width: 95%;
+            }
+        }
+
+        &:after {
+            content           : "";
+            position          : absolute;
+            height            : 4px;
+            background        : blue;
+            width             : 0px;
+            left              : 50%;
+            bottom            : -4px;
+            border-radius     : 10px;
+            transform         : translateX(-50%);
+            -webkit-transition: all 0.2s;
+            -ms-transition    : all 0.2s;
+            transition        : all 0.2s;
+        }
+    }
+}

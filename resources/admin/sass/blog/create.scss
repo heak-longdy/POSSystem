@@ -1,0 +1,157 @@
+.gpFormBlog {
+    display: flex;
+
+    .blogLeftGp {
+        flex: 1;
+    }
+
+    .blogRightGp {
+        width       : 275px;
+        margin-left : 15px;
+        border-left : 1px solid rgb(170 170 170 / 24%);
+        padding-left: 15px;
+
+        .blogRight {
+            width: 100%;
+
+            .gpInput {
+                margin-bottom: 15px;
+
+                label {
+                    font-size: 14px;
+                }
+
+                input {
+                    border-radius: 4px;
+                    border       : 1px solid #d8dce5;
+                    box-sizing   : border-box;
+                    color        : #5a5e66;
+                    background   : #fcfcfc;
+                    display      : inline-block;
+                    font-size    : 14px;
+                    height       : 40px;
+                    line-height  : 1;
+                    outline      : 0;
+                    padding      : 0 15px;
+                    transition   : border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+                    width        : 100%;
+                }
+
+                .error {
+                    font-size: 12px;
+                    color    : #ff9d9d;
+                }
+            }
+
+            .gpRadio {
+                // background   : #e0e0e021;
+                // padding      : 10px;
+                // border-radius: 5px;
+                // box-shadow   : 0 0 3px rgb(0 0 0 / 10%);
+                margin-bottom: 10px;
+
+                .label {
+                    margin-bottom: 3px;
+                }
+
+                .radioGp {
+                    .radioItem {
+                        cursor: pointer;
+
+                        label {
+                            cursor: pointer;
+                        }
+                    }
+
+                }
+
+                .error {
+                    font-size: 12px;
+                    color    : #ff9d9d;
+                }
+            }
+
+            .gpCheckBox {
+                // background   : #e0e0e021;
+                // padding      : 10px;
+                // border-radius: 5px;
+                // box-shadow   : 0 0 3px rgb(0 0 0 / 10%);
+                overflow: hidden;
+                
+
+                .label {
+                    margin-bottom: 5px;
+                }
+
+                .checkboxGp {
+                    max-height   : 350px;
+                    overflow-y   : auto;
+                    background   : #fbfbfb8c;
+                    padding      : 0;
+                    border-radius: 4px;
+                    border       : 1px solid #eeeeee8f;
+                    
+                    .checkItem {
+                        display         : flex;
+                        align-items     : center;
+                        // margin       : 10px 0;
+                        cursor          : pointer;
+                        border-bottom   : 1px solid #eeeeee6e;
+                        padding         : 5px 10px;
+
+                        .typeCheck {
+                            width       : 18px;
+                            height      : 18px;
+                            margin-right: 4px;
+                            cursor      : pointer;
+                        }
+
+                        label {
+                            cursor   : pointer;
+                            width    : 100%;
+                            font-size: 15px;
+                        }
+
+                        &:last-child {
+                            border-bottom: unset;
+                        }
+
+                        &:hover {
+                            background: #eeeeee73;
+                        }
+                    }
+                }
+
+                .error {
+                    font-size: 12px;
+                    color    : #ff9d9d;
+                }
+            }
+        }
+    }
+}
+
+.tox-tinymce {
+    border: 1px solid #e0e0e0 !important;
+}
+
+.tox.tox-tinymce.tox-fullscreen {
+    height: 100vh !important;
+}
+
+.tox-statusbar__text-container {
+    .tox-statusbar__branding {
+        display: none;
+
+        svg {
+            display: block;
+            opacity: 0;
+        }
+    }
+}
+
+.ui-datepicker-title {
+    .ui-datepicker-month {
+        margin-right: 10px !important;
+    }
+}

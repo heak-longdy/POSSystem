@@ -1,0 +1,245 @@
+.formDialogLayout {
+    display        : flex;
+    align-items    : center;
+    justify-content: flex-end;
+    position       : fixed;
+    z-index        : 999;
+    width          : 100%;
+    height         : 100vh;
+    left           : 0;
+    top            : 0;
+    transition     : all 0.5s ease;
+    overflow-y     : auto;
+    color          : black;
+    position       : fixed;
+    transition     : all 0.5s ease;
+    background     : #757575ad;
+
+
+    .formDialog {
+        max-width                   : 100%;
+        height                      : 100vh;
+        width                       : 35%;
+        background                  : #fff;
+        height                      : 100%;
+        overflow-y                  : auto;
+        scrollbar-width             : none;
+        transition                  : all 0.3s ease !important;
+        z-index                     : 200;
+        overflow-x                  : hidden;
+        //background                : #eeeeee;
+        --nav-section-header-color  : rgba(255, 255, 255, 0.5);
+        --nav-group-title-color     : rgba(255, 255, 255, 0.8);
+        display                     : flex;
+        flex-direction              : column;
+        box-shadow                  : 0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
+        position                    : relative;
+
+        .formDialogHeader {
+            font-size      : 24px;
+            display        : flex;
+            align-items    : center;
+            height         : 60px;
+            min-height     : 60px;
+            font-weight    : 700;
+            color          : var(--light);
+            position       : -webkit-sticky;
+            position       : sticky;
+            top            : 0;
+            left           : 0;
+            z-index        : 100;
+            transition     : all 0.3s ease;
+            padding        : 0 15px;
+            box-shadow     : 0 -1px 0 rgba(255, 255, 255, 0.1) inset;
+            justify-content: space-between;
+            box-shadow     : 0 0 3px rgba(0, 0, 0, .1);
+
+            .hTitle {
+                color             : black;
+                word-break        : break-all;
+                overflow          : hidden;
+                text-overflow     : ellipsis;
+                white-space       : initial;
+                display           : -webkit-box;
+                -webkit-line-clamp: 1;
+                -webkit-box-orient: vertical;
+            }
+
+            button {
+                padding   : 0;
+                margin    : 0;
+                min-width : unset;
+                background: unset;
+                color     : red;
+                font-size : 30px;
+
+                span {
+                    font-size  : 28px;
+                    font-weight: 500;
+                }
+            }
+        }
+
+        .formDialogBody {
+            padding            : 0 0 20px;
+            transition         : all 0.3s ease;
+            box-shadow         : var(--nav-group-container-box-shadow-internal);
+            display            : flex;
+            flex-direction     : column;
+            flex-grow          : 1;
+            overflow-x         : hidden;
+            overflow-y         : auto;
+            -ms-scroll-chaining: none;
+            overscroll-behavior: none;
+            padding            : 20px !important;
+            background         : unset;
+
+            .form-wrapper {
+                padding   : 0;
+                background: unset;
+                margin    : 0;
+                height    : 100vh;
+
+                .form-body {
+                    padding   : 0;
+                    width     : 100%;
+                    margin    : 0;
+                    background: unset;
+                    box-shadow: unset;
+
+                    .permissionError {
+                        margin-bottom: 27px;
+                        border       : 1px solid red;
+                        border-radius: 5px;
+                        text-align   : left;
+                        padding      : 0 15px;
+                        display      : flex;
+                        align-items  : center;
+                        height       : 35px;
+                        font-size    : 34px;
+                        background   : #ff000078;
+                        color        : #fff;
+
+                        span {
+                            font-size: 13px;
+                            color    : unset;
+                        }
+                    }
+
+                    .row,
+                    .row-2 .form-row {
+
+                        .form-select-photo {
+                            height: 230px;
+                        }
+                    }
+
+                    .row {
+                        .permissionLayoutGp {
+                            border       : 1px solid #cccccc47;
+                            border-radius: 10px;
+                            position     : relative;
+                            padding-top  : 24px;
+                            margin       : 15px 0;
+                            padding      : 0px 15px 20px;
+
+                            .permissionControl {
+                                .parentLabel {
+                                    border-bottom: none;
+                                }
+                            }
+
+                            .permissionItem {
+                                //padding      : 0 0 5px 10px;
+                                border-radius: 10px;
+                            }
+
+                            .headerListPermission {
+                                position  : absolute;
+                                right     : 0;
+                                top       : -22px;
+                                margin    : 0 27px 0 13px;
+                                padding   : 0;
+                                background: #fff;
+                                border    : none;
+                                height    : auto;
+
+                                .titlePer {
+                                    font-size: 20px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .formDialogFooter {
+            background                               : rgba(0, 0, 0, 0);
+            border                                   : 0;
+            cursor                                   : pointer;
+            display                                  : flex;
+            flex                                     : none;
+            height                                   : 60px;
+            position                                 : relative;
+            --navbar-toggle-icon-color-internal      : var(--navbar-toggle-icon-color, rgba(255, 255, 255, 0.7));
+            --navbar-toggle-icon-color-hover-internal: #fff;
+            padding                                  : 0px 20px;
+            text-align                               : right;
+            display                                  : flex;
+            justify-content                          : flex-end;
+            box-shadow                               : 0 1px 0 rgba(255, 255, 255, 0.1) inset;
+            background-size                          : 200% 100%;
+            background-position                      : 100% 100%;
+            border-radius                            : 0;
+            transition                               : all 0.3s ease !important;
+            align-items                              : center;
+            font-size                                : 14px;
+            padding                                  : 0 25px;
+            box-shadow                               : 0 0 3px rgba(0, 0, 0, .1);
+
+            button {
+                height       : 40px;
+                background   : blue;
+                border-radius: 30px;
+                margin-right : 10px;
+                padding      : 0 25px !important;
+                font-size    : 14px;
+
+                &.submit {
+                    background: blue;
+                }
+
+                &.close {
+                    background : #ff3838;
+                    text-shadow: unset !important;
+                    opacity    : unset !important;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
+
+                i.bx {
+                    font-size   : 20px;
+                    margin-right: 5px;
+                }
+            }
+        }
+
+        .spinner {
+            position       : absolute;
+            height         : 100% !important;
+            display        : flex;
+            height         : fit-content;
+            align-items    : center;
+            justify-content: center;
+            width          : 100%;
+            background     : rgb(156 156 156 / 12%);
+
+            i {
+                font-size: 50px;
+            }
+        }
+    }
+}

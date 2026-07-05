@@ -1,0 +1,69 @@
+// .ms-drop.bottom {
+.ms-parent {
+    width : 100% !important;
+    height: 100% !important;
+    border: none !important;
+
+    button {
+        height     : 100% !important;
+        border     : none !important;
+        min-height : 100%;
+        margin-left: 0 !important;
+        margin     : 0 !important;
+        padding    : 0 5px 0 10px !important;
+    }
+}
+
+.ms-search {
+    input {
+        padding: 0;
+        margin : 0;
+        width  : 100% !important;
+        border : 1px solid rgb(101, 96, 96) !important;
+    }
+}
+
+.ms-select-all {
+    label {
+        input {
+            width       : 20px !important;
+            height      : 20px !important;
+            margin-right: 10px !important;
+        }
+    }
+}
+
+// }
+.ms-drop.bottom {
+    ul {
+        li {
+            label {
+                input {
+                    width       : 20px !important;
+                    height      : 20px !important;
+                    margin-right: 10px !important;
+                }
+            }
+        }
+    }
+
+    input[type=text] {
+        border-radius: 4px;
+        padding      : 4px 10px !important;
+    }
+}
+
+.ms-drop {
+    margin-top: 5px !important;
+
+    &.bottom {
+        border-radius: 8px;
+        border-color : #ccc;
+        border-width : 1px;
+        padding      : 5px 5px;
+    }
+}
+
+.multipleSelect {
+    display: none;
+}

@@ -1,0 +1,113 @@
+.txtHeader2ReportCar {
+    text-align: center;
+
+    img {
+        width : 120px !important;
+        height: 120px;
+    }
+
+    h3 {
+        font-weight        : unset;
+        -webkit-text-stroke: 1px;
+        margin-top: 0;
+    }
+}
+
+.header2ReportCar {
+    width        : 100%;
+    display      : flex;
+    flex-wrap    : wrap;
+    margin-top   : 30px;
+    margin-bottom: 15px;
+    overflow     : hidden;
+
+    .hItem {
+        width          : calc(100% / 3 - 10px);
+        display        : flex;
+        align-items    : flex-start;
+        justify-content: flex-start;
+        margin-right   : 10px;
+        font-size      : 14px;
+
+        label {
+            font-weight        : unset;
+            -webkit-text-stroke: .3px;
+        }
+
+        span {
+            margin: 0 5px;
+        }
+
+        div {
+            flex            : 1;
+            // border-bottom: 1px solid #d8dce5;
+            display         : flex;
+            align-items     : flex-start;
+            word-break      : break-all;
+        }
+    }
+}
+
+.carHistoryLayoutListing {
+    border       : 0.5px solid #eeeeee;
+    border-radius: 4px;
+    overflow     : hidden;
+
+    .carHistoryItemGp {
+        display        : flex;
+        flex-direction : column;
+        justify-content: flex-end;
+
+        .itemHeader {
+            text-align      : start;
+            background      : #eeeeeead;
+            padding         : 4px 14px;
+            // border-radius: 3px;
+
+            h3 {
+                margin             : 0;
+                font-size          : 13px;
+                font-weight        : unset;
+                -webkit-text-stroke: .3px;
+            }
+        }
+
+        .bodyItem {
+            width        : 100%;
+            display      : flex;
+            padding      : 4px 10px;
+            border-bottom: 1px solid #fbfbfb;
+
+            div {
+                text-align : start;
+                font-size  : 12px;
+                display    : flex;
+                align-items: center;
+
+                .inputCheck {
+                    width       : 18px;
+                    height      : 18px;
+                    margin-right: 5px;
+                }
+
+                img {
+                    width       : 20px !important;
+                    height      : 20px !important;
+                    margin-right: 5px;
+                }
+            }
+
+            .wd80 {
+                width: 80%;
+            }
+
+            .wd20 {
+                width: 20%;
+            }
+
+            &:last-child {
+                border-bottom: unset;
+            }
+        }
+    }
+}

@@ -1,0 +1,203 @@
+.itemGpListing {
+    width         : 100%;
+    display       : flex;
+    flex-direction: column;
+    text-align    : left;
+    margin-bottom : 10px;
+
+    h3 {
+        margin-top    : 0;
+        border-bottom : 1px solid #d8dce5;
+        padding-bottom: 4px;
+        display       : flex;
+        align-items   : center;
+        font-size     : 17px;
+        margin-bottom : 10px;
+
+        span {
+            margin-right: 7px;
+            font-size   : 24px;
+        }
+    }
+
+    .itemGp {
+        display: flex;
+
+        .left {
+            flex: 1;
+
+            .txtItem {
+                display    : flex;
+                align-items: center;
+                font-size  : 14px;
+
+                label {
+                    width              : 120px;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .3px;
+                }
+
+                span {
+                    margin: 0 5px;
+                }
+
+                p {
+                    margin     : 0;
+                    display    : flex;
+                    align-items: center;
+
+                    span {
+                        margin             : 0 5px 0 0 !important;
+                        font-size          : 13px;
+                        color              : #2828e0;
+                        font-weight        : 600;
+                        font-weight        : unset;
+                        -webkit-text-stroke: .3px;
+                    }
+                }
+
+                .status {
+                    padding            : 0 12px;
+                    border-radius      : 23px;
+                    color              : white;
+                    font-weight        : 600;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .5px;
+                    height             : 22px;
+                    display            : flex;
+                    align-items        : center;
+                    font-size          : 13px;
+
+                    &.pending {
+                        background: #fbbd44;
+                    }
+
+                    &.approve {
+                        background: #1266f1;
+                    }
+
+                    &.cancel {
+                        background: red;
+                    }
+                }
+
+                .dateTime {
+                    font-weight        : 600;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .5px;
+                }
+
+                .price {
+                    color              : red;
+                    font-size          : 17px;
+                    font-weight        : 600;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .5px;
+                }
+
+                &.listColumn {
+                    flex-direction: column;
+                    align-items   : flex-start;
+                    margin-bottom : 5px;
+
+                    .paymentListGp {
+                        display      : flex;
+                        width        : 100%;
+                        align-items  : center;
+                        padding      : 10px 15px;
+                        background   : #fbfbfb;
+                        border-radius: 10px;
+
+                        img {
+                            width        : 40px;
+                            height       : 40px;
+                            border-radius: 10px;
+                            margin-right : 10px;
+                        }
+
+                        .payTxt {
+                            width      : 100%;
+                            align-items: center;
+
+                            .name {
+                                font-weight        : unset;
+                                -webkit-text-stroke: .3px;
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+
+        .right {
+            width: 140px;
+
+            .img {
+                height       : 100%;
+                width        : 100%;
+                border-radius: 15px;
+            }
+        }
+    }
+
+    .txtItemImg {
+        label {
+            margin-bottom: 5px;
+        }
+
+        .img {
+            width        : 100%;
+            height       : 200px;
+            object-fit   : contain;
+            background   : #eee;
+            border-radius: 10px;
+            cursor       : pointer;
+        }
+    }
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.memberRequestMoneyFooterGp {
+    display        : flex;
+    justify-content: flex-end;
+    border-top     : 1px solid #d8dce5;
+    padding-top    : 15px;
+
+    button {
+        margin-right       : 10px !important;
+        font-weight        : unset;
+        -webkit-text-stroke: .3px;
+        font-size          : 15px;
+
+        &:last-child {
+            margin-right: 0 !important;
+        }
+
+        &.cancel {
+            background: red;
+            color     : white !important;
+
+        }
+
+        &.close {
+            background: unset;
+            color     : red !important;
+        }
+
+        &.approve {
+            background: blue;
+            color     : white !important;
+
+            img {
+                margin-right: 7px;
+            }
+
+        }
+
+    }
+}

@@ -1,0 +1,189 @@
+.reportMemberLayout {
+    width: 100%;
+
+    .txtHeader {
+        h3 {
+            margin-top: 0;
+            font-size : 30px;
+
+            span {
+                font-size: 30px;
+            }
+        }
+    }
+
+    .txtItemRP {
+        margin-bottom : 20px;
+        border-bottom : 3px solid #d8dce5;
+        padding-bottom: 20px;
+
+        .reportTxtGP {
+            width          : 100%;
+            background     : #7575758f;
+            height         : 80px;
+            display        : flex;
+            align-items    : center;
+            justify-content: center;
+            font-size      : 25px;
+            margin-bottom  : 15px;
+            border-radius  : 10px;
+            color          : #fff;
+
+            h3 {
+                font-weight: 400;
+                font-size  : 27px;
+            }
+        }
+
+        .reportTxtBody {
+            .dateTime {
+                span {
+                    margin: 0 10px;
+                }
+            }
+
+            .txtListingGp {
+                display: flex;
+                display: flex;
+                margin : 15px 0;
+
+                .txtLeft {
+                    flex          : 1;
+                    display       : flex;
+                    flex-direction: column;
+                    align-items   : flex-start;
+                    height        : 100%;
+
+                    .item {
+                        display      : flex;
+                        align-items  : flex-start;
+                        margin-bottom: 6px;
+                        height       : 100%;
+                        width        : 90%;
+                        font-size    : 14px;
+
+                        .label {
+                            width          : 85px;
+                            display        : flex;
+                            justify-content: flex-start;
+                        }
+
+                        span {
+                            margin: 0 15px;
+                        }
+
+                        p {
+                            margin         : 0;
+                            flex           : 1;
+                            display        : flex;
+                            word-break     : break-all;
+                            justify-content: flex-start;
+                            text-align     : left;
+                        }
+                    }
+                }
+
+                .txtRight {
+                    flex           : 1;
+                    display        : flex;
+                    justify-content: flex-end;
+                    height         : 100%;
+                    flex-direction : column;
+                    align-items    : flex-end;
+
+                    .item {
+                        display      : flex;
+                        align-items  : flex-start;
+                        margin-bottom: 6px;
+                        height       : 100%;
+                        width        : 90%;
+                        font-size    : 14px;
+
+                        .label {
+                            width          : 110px;
+                            display        : flex;
+                            justify-content: flex-start;
+                        }
+
+                        span {
+                            margin: 0 15px;
+                        }
+
+                        p {
+                            margin         : 0;
+                            flex           : 1;
+                            display        : flex;
+                            word-break     : break-all;
+                            justify-content: flex-start;
+                            text-align     : left;
+                        }
+                    }
+                }
+            }
+
+        }
+
+        .reportFooter {
+            margin-top: 15px;
+
+            .reportTxtfooterItem {
+                height       : 60px;
+                background   : #fff;
+                display      : flex;
+                align-items  : center;
+                border       : 1px solid #e0e0e0;
+                padding      : 0 15px;
+                border-radius: 10px;
+
+                h4 {
+                    margin             : 0;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .3px;
+                }
+
+                .span {
+                    margin: 0 15px;
+                }
+
+                p {
+                    margin             : 0;
+                    font-size          : 25px;
+                    font-weight        : 600;
+                    font-weight        : unset;
+                    -webkit-text-stroke: .6px;
+                }
+            }
+        }
+
+        &:last-child {
+            margin-bottom : 0;
+            padding-bottom: 0;
+            border-bottom : unset !important;
+        }
+    }
+
+    .removeBorderLast {
+        margin-bottom : 0;
+        padding-bottom: 0;
+        border-bottom : unset !important;
+    }
+
+    .EmptyViewGp {
+        display        : flex;
+        flex-direction : column;
+        align-items    : center;
+        justify-content: center;
+        width          : 100%;
+        padding        : 50px 0;
+
+        img {
+            width: 150px;
+        }
+
+        button {
+            background: #1266f1c9;
+            font-size : 13px;
+
+        }
+    }
+}

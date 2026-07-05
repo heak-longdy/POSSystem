@@ -1,0 +1,84 @@
+@mixin btn($b:false) {
+    border    : 1px solid #ccc;
+    background: #fff;
+
+    @if($b=="create") {
+        border    : unset;
+        background: map-get($btn, 'create');
+    }
+
+    @else if($b=="save") {
+        border    : unset;
+        background: map-get($btn, 'save');
+    }
+
+    @else if($b=="delete") {
+        border    : unset;
+        background: map-get($btn, 'delete');
+    }
+}
+
+@mixin tableRow() {
+    $class: 100;
+
+    @for $i from 5 through $class {
+        .table-row-#{$i} {
+            width: #{$i}+'%';
+        }
+    }
+}
+
+@mixin subString($line) {
+
+    &,
+    &>* {
+        overflow        : hidden;
+        text-overflow   : ellipsis;
+        white-space     : nowrap;
+        // word-break   : break-all;
+        line-height     : normal;
+
+        @supports (-webkit-line-clamp: $line) {
+            overflow          : hidden;
+            text-overflow     : ellipsis;
+            white-space       : initial;
+            display           : -webkit-box;
+            -webkit-line-clamp: $line;
+            -webkit-box-orient: vertical;
+        }
+    }
+}
+
+@mixin Grid($item:6, $margin:15px, $border:0px, $full: false) {
+    $m        : $margin * 2;
+    width     : 100%;
+    overflow-x: hidden;
+
+    >* {
+        @if $full !=false {
+            width      : calc(100% + #{$m});
+            margin-left: - #{$margin};
+        }
+
+        @else {
+            width      : 100%;
+            margin-left: 0;
+        }
+
+        display       : flex;
+        flex-direction: row;
+        flex-wrap     : wrap;
+
+        >* {
+            width     : calc((100% / #{$item}) - #{$m} - (#{$border} * 2));
+            margin    : $margin;
+            box-sizing: border-box;
+        }
+    }
+}
+
+@mixin backdrop($color:#ffffff, $backdrop:45px) {
+    backdrop-filter        : blur($backdrop);
+    -webkit-backdrop-filter: blur($backdrop);
+    background             : rgba($color, 70%);
+}

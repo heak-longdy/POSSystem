@@ -1,0 +1,201 @@
+.fontWeight {
+  font-weight: unset;
+  -webkit-text-stroke: 0.7px;
+}
+
+.colorGreen {
+  color: #4CAF50;
+}
+
+.colorRed {
+  color: red;
+}
+
+:root {
+  --border-radius: 10px;
+}
+
+.loading {
+  border: 3px solid #2196F3;
+  border-left-color: transparent;
+  width: 25px;
+  height: 25px;
+  -webkit-animation: spin89345 1s linear infinite;
+          animation: spin89345 1s linear infinite;
+  border-radius: 50%;
+}
+
+@-webkit-keyframes spin89345 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin89345 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.VerifyDocLayout {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.VerifyDocLayout .VerifyDoc {
+  width: 35rem;
+}
+.VerifyDocLayout .VerifyDoc .SearchGp {
+  margin: 15px 0 19px 0;
+  display: flex;
+  grid-gap: 15px;
+  height: 45px;
+}
+.VerifyDocLayout .VerifyDoc .SearchGp input {
+  height: 100%;
+  flex: 1;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(128, 128, 128, 0.5607843137);
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  background-color: #fff;
+  padding: 0 10px;
+}
+.VerifyDocLayout .VerifyDoc .SearchGp button {
+  padding: 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(128, 128, 128, 0.5607843137);
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  background-color: #fff;
+  grid-gap: 5px;
+}
+.VerifyDocLayout .VerifyDoc .SearchGp button svg {
+  width: 20px;
+  height: 20px;
+}
+.VerifyDocLayout .VerifyDoc .SearchGp button:disabled {
+  opacity: 0.5;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem {
+  width: 100%;
+  position: relative;
+  margin-bottom: 19px;
+  padding: 15px;
+  display: flex;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  grid-gap: 15px;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .itemCheck {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background: red;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerImgGp {
+  width: 100px;
+  height: 100px;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerImgGp img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  border-radius: var(--border-radius);
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerTitle {
+  font-weight: 600;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerDate {
+  color: gray;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerBtnGp {
+  margin-top: 15px;
+  display: flex;
+  grid-gap: 15px;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerBtnGp .btnCheck {
+  color: #4CAF50 !important;
+  background: none;
+  border: 1px solid #4CAF50 !important;
+  fill: #4CAF50 !important;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerBtnGp .btnPreview {
+  color: rgba(32, 27, 27, 0.74) !important;
+  background: none;
+  border: 1px solid rgba(32, 27, 27, 0.74) !important;
+  fill: rgba(32, 27, 27, 0.74) !important;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerBtnGp .btnUndo {
+  color: rgba(244, 67, 54, 0.55) !important;
+  background: none;
+  border: 1px solid rgba(244, 67, 54, 0.55) !important;
+  fill: rgba(244, 67, 54, 0.55) !important;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerBtnGp .VerBtn {
+  /* padding: 10px 20px; */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 7px 10px 7px 10px;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerBtnGp .VerBtn .btnCheckText {
+  display: flex;
+  align-items: center;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyItem .VerRight .VerBtnGp .VerBtn:disabled {
+  opacity: 0.5;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyInputCheckBoxIcon {
+  display: flex;
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #4CAF50;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocBody .VerifyItemDocGp .VerifyInputCheckBoxIcon svg {
+  fill: #fff;
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocFooter {
+  justify-content: center;
+  display: flex;
+  width: 100%;
+  height: 50px;
+  font-size: 15px;
+  background-color: #fff;
+  border-radius: var(--border-radius);
+}
+.VerifyDocLayout .VerifyDoc .VerifyDocFooter button {
+  border: none !important;
+  background: none !important;
+  display: flex;
+  align-items: center;
+  grid-gap: 10px;
+  cursor: pointer;
+}
+@media screen and (max-width: 600px) {
+  .VerifyDocLayout .VerifyDoc {
+    padding: 5px 20px 20px 20px;
+  }
+}

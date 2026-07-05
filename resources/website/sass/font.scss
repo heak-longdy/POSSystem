@@ -1,0 +1,47 @@
+@font-face {
+    font-family: Hanuman;
+    src        : url('../../../public/admin-public/fonts/Hanuman-Regular.ttf');
+}
+
+@font-face {
+    font-family: Poppins;
+    src        : url('../../../public/admin-public/fonts/Poppins-Regular.ttf');
+}
+
+@font-face {
+    font-family: Urbanist;
+    src        : url('../../../public/admin-public/fonts/Urbanist-Regular.ttf');
+}
+
+@font-face {
+    font-family: DynaPuff;
+    src        : url('../../../public/admin-public/fonts/DynaPuff-Regular.ttf');
+}
+
+@font-face {
+    font-family: OpenSans;
+    src        : url('../../../public/admin-public/fonts/OpenSans-Regular.ttf');
+}
+
+@font-face {
+    font-family: Khmer_OS_Wat_Phnom;
+    src        : url('../../../public/admin-public/fonts/Kh Muol Regular.ttf');
+}
+
+@font-face {
+    font-family: 'CocomatPro';
+    src: url('../../../public/admin-public/fonts/CocomatPro-Regular.ttf') format('truetype');
+    font-weight: 400; /* Regular weight */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'CocomatPro';
+    src: url('../../../public/admin-public/fonts/CocomatPro-Bold.ttf') format('truetype');
+    font-weight: 600; /* Bold weight */
+    font-style: normal;
+}
+
+*:not(.material-icons):not(.material-symbols-outlined):not(mat-icon):not(.bx) {
+    font-family: 'CocomatPro', sans-serif, 'Urbanist', sans-serif, 'Hanuman', serif !important;
+}

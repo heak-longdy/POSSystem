@@ -1,0 +1,210 @@
+
+.spinLoading {
+    display: flex;
+    align-items: center;
+    font-size: 21px;
+    font-weight: 500;
+}
+.loading {
+    width          : 100%;
+    min-height     : 200px;
+    display        : flex;
+    flex-direction : column;
+    align-items    : center;
+    justify-content: center;
+
+    &.load-top {
+        min-height: unset;
+        position  : absolute;
+        top       : 0;
+        left      : 0;
+        right     : 0;
+        bottom    : 0;
+        z-index   : 99;
+        background: rgba(#fff, .7);
+    }
+
+    span {
+        margin-top: 10px;
+        color     : $primary;
+    }
+
+    &.loadingSubmit {
+        min-height: auto !important;
+        width: auto !important;
+        span {
+            margin-top: 0 !important;
+        }
+
+        #spinner {
+            width : 25px !important;
+            height: 25px !important;
+        }
+    }
+
+    #spinner {
+        width        : 45px;
+        height       : 45px;
+        border       : 4px solid rgba($primary, .1);
+        border-top   : 4px solid $primary;
+        border-radius: 50%;
+    }
+
+    #spinner {
+        -webkit-transition-property      : -webkit-transform;
+        -webkit-transition-duration      : 1.2s;
+        -webkit-animation-name           : rotate;
+        -webkit-animation-iteration-count: infinite;
+        -webkit-animation-timing-function: linear;
+
+        -moz-transition-property      : -moz-transform;
+        -moz-animation-name           : rotate;
+        -moz-animation-duration       : 1.2s;
+        -moz-animation-iteration-count: infinite;
+        -moz-animation-timing-function: linear;
+
+        transition-property      : transform;
+        animation-name           : rotate;
+        animation-duration       : 1.2s;
+        animation-iteration-count: infinite;
+        animation-timing-function: linear;
+    }
+
+    @-webkit-keyframes rotate {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+
+        to {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @-moz-keyframes rotate {
+        from {
+            -moz-transform: rotate(0deg);
+        }
+
+        to {
+            -moz-transform: rotate(360deg);
+        }
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+}
+
+//loadingShimmerLayout
+.loadingShimmerLayout {
+    font-size    : 12px;
+    box-shadow   : 0 0 3px rgb(0 0 0 / 10%);
+    flex-wrap    : wrap;
+    background   : #ffffff9e;
+    padding      : 15px;
+    border-radius: 10px;
+    color        : black;
+    margin-bottom: 15px;
+
+    .itemLoad {
+        display       : flex;
+        // align-items: center;
+        align-items   : flex-start;
+
+        .imgBox {
+            // width        : 50px;
+            // height       : 50px;
+            width        : 80px;
+            height       : 90px;
+            border-radius: 10px;
+            margin-right : 10px;
+            border       : 1px solid #e0e0e0c4;
+            background   : #e0e0e0;
+            position     : relative;
+            overflow     : hidden;
+        }
+
+        .textItemGp {
+            flex: 1;
+
+            .lineBox {
+                width        : 100%;
+                height       : 8px;
+                border-radius: 10px;
+                background   : #e0e0e0;
+                margin-bottom: 8px;
+                position     : relative;
+                overflow     : hidden;
+
+                &-2 {
+                    width        : 70%;
+                    height       : 8px;
+                    border-radius: 10px;
+                    background   : #e0e0e0;
+                    position     : relative;
+                    overflow     : hidden;
+                    margin-bottom: 8px;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+        }
+    }
+
+    .btnActionOrderAddCartGp {
+        padding-top: 10px;
+
+        .addCart {
+            padding   : 0;
+            height    : 28px;
+            background: #e0e0e0;
+            color     : #fff;
+            position  : relative;
+            overflow  : hidden;
+
+        }
+    }
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.loadingShimmerLayout .itemLoad .imgBox::before,
+.loadingShimmerLayout .itemLoad .textItemGp .lineBox::before,
+.loadingShimmerLayout .itemLoad .textItemGp .lineBox-2::before,
+.loadingShimmerLayout .btnActionOrderAddCartGp .addCart::before {
+    content          : "";
+    position         : absolute;
+    width            : 100%;
+    height           : 100%;
+    background-image : linear-gradient(to right, #d9d9d9 0%, #888b94 20%, #d9d9d9 40%, #d9d9d9 100%);
+    background-size  : 450px 400px;
+    background-repeat: no-repeat;
+    animation        : shimmer 1.4s linear infinite;
+}
+
+.loadingShimmerLayout .itemLoad .textItemGp .lineBox::before,
+.loadingShimmerLayout .itemLoad .textItemGp .lineBox-2::before,
+.loadingShimmerLayout .btnActionOrderAddCartGp .addCart::before {
+    animation-delay: .29s;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -450px 0;
+    }
+
+    100% {
+        background-position: 450px 0;
+    }
+}

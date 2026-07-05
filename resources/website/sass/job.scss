@@ -1,0 +1,198 @@
+.jobLayout {
+    display            : flex;
+    justify-content    : center;
+    flex-direction     : column;
+    align-items        : center;
+    padding            : 30px 0;
+    background-repeat  : no-repeat !important;
+    background-position: center center !important;
+}
+
+.jobListing {
+    width: $widthCh;
+}
+
+.jobContainer {
+    width: 100%;
+}
+
+.viewMore {
+    margin         : 20px 0;
+    width          : 65%;
+    display        : flex;
+    justify-content: flex-end;
+}
+
+.viewMore>a {
+    text-decoration: none;
+}
+
+.viewMore>a>div {
+    width        : fit-content;
+    height       : 40px;
+    background   : #9e9e9e00;
+    align-items  : center;
+    display      : flex;
+    padding      : 0 10px 0 17px;
+    border-radius: 0.75rem;
+    border       : 1px solid #80808054;
+
+    background-color: #ff9900;
+    color           : #fff;
+
+    i {
+        font-size: 25px;
+    }
+}
+
+.jobTitle {
+    text-align: center;
+    color     : #ff9900;
+    margin    : 30px 0 60px 0;
+}
+
+
+
+.job-card-grid {
+    /* background-color: #fff; */
+    border-radius  : 8px;
+    /* box-shadow  : 0 4px 8px rgba(0, 0, 0, 0.1); */
+    /* overflow    : hidden; */
+    display        : flex;
+    flex-direction : column;
+    justify-content: space-between;
+    position       : relative;
+    width          : calc(100% / 3 - 20px);
+
+    .bgJob {
+        position        : absolute;
+        height          : calc(100% - 67px);
+        width           : 100%;
+        background-color: #fff;
+        border-radius   : 8px;
+        box-shadow      : rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        bottom          : 0;
+    }
+
+    .jobImg {
+        z-index        : 2;
+        width          : 100%;
+        display        : flex;
+        justify-content: center;
+
+        img {
+            width        : 90%;
+            object-fit   : cover;
+            border-radius: 18px;
+        }
+    }
+}
+
+.job-card-grid img {
+    width     : 100%;
+    height    : 185px;
+    object-fit: cover;
+}
+
+.job-card-grid-content {
+    padding: 20px;
+    z-index: 2;
+}
+
+.job-card-grid-content h3 {
+    font-size          : 16px;
+    color              : #333;
+    margin             : 0 0 10px;
+    overflow           : hidden;
+    text-overflow      : ellipsis;
+    white-space        : initial;
+    display            : -webkit-box;
+    -webkit-line-clamp : 3;
+    -webkit-box-orient : vertical;
+    font-weight        : unset;
+    -webkit-text-stroke: 0.8px;
+}
+
+.job-card-grid-content p {
+    color             : #666;
+    line-height       : 1.5;
+    overflow          : hidden;
+    text-overflow     : ellipsis;
+    white-space       : initial;
+    display           : -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.job-card-grid-footer {
+    display        : flex;
+    justify-content: space-between;
+    align-items    : center;
+    padding        : 15px 0 0px 0px;
+    font-size      : 14px;
+    color          : #999;
+    grid-gap       : 15px;
+}
+
+.job-card-grid-footer a {
+    text-decoration: none !important;
+    color          : #ff9900;
+    font-weight    : bold;
+}
+
+.job-card-grid-footer a:hover {
+    text-decoration: underline;
+}
+
+.wFullJobItem {
+    width        : 100% !important;
+    margin-bottom: 20px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.btnJob {
+    /* padding: 10px 20px; */
+    border       : none;
+    border-radius: 4px;
+    cursor       : pointer;
+    font-size    : 14px;
+    padding      : 8px 8px;
+    border-radius: 0.75rem;
+    display      : flex;
+    align-items  : center;
+    grid-gap     : 7px;
+    background   : none;
+}
+
+.btnJob>i {
+    font-size: 25px;
+}
+
+.btnJob>span {
+    overflow          : hidden;
+    text-overflow     : ellipsis;
+    white-space       : initial;
+    display           : -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    text-align: justify;
+}
+
+.view-job {
+    /* background-color: #ff9900; */
+    /* color: #fff; */
+    color: #545454;
+
+}
+
+.apply {
+    background-color: #ff9900;
+    color           : #fff;
+}
+
+.btnJob:hover {
+    opacity: 0.9;
+}

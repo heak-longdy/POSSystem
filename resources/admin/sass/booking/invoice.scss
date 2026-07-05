@@ -1,0 +1,269 @@
+.inHeaderLy {
+    display    : flex;
+    align-items: center;
+    margin     : 0 0 15px 0;
+
+    .gpLogo {
+        justify-content: flex-start;
+        display        : flex;
+        align-items    : flex-start;
+        flex           : 1;
+
+        img {
+            width : 75px;
+            height: 75px;
+        }
+    }
+
+    .flexLeft {
+        flex           : 1;
+        justify-content: flex-start;
+        display        : flex;
+        flex-direction : column;
+        align-items    : flex-start;
+        line-height    : 20px;
+    }
+
+    .flexRight {
+        flex           : 1;
+        justify-content: flex-end;
+        display        : flex;
+        flex-direction : column;
+        align-items    : flex-end;
+        line-height    : 20px;
+    }
+
+    .h3 {
+        margin        : 5px 0;
+        text-transform: capitalize;
+    }
+
+    .p {
+        margin   : 0;
+        font-size: 13px;
+    }
+}
+
+.cusTableInvoice {
+    width : 100%;
+    border: 1px solid #b7bac1;
+
+    .header {
+        border-bottom: 1px solid #b7bac1;
+        padding      : 0;
+        background   : #eeeeee96;
+
+        div {
+            font-weight        : 600;
+            font-weight        : unset;
+            -webkit-text-stroke: .7px;
+            padding            : 7px 5px;
+        }
+    }
+
+    .bodyTable {
+        width: 100%;
+    }
+}
+
+.tableLayout {
+    width  : 100%;
+    display: flex;
+
+    div {
+        font-size      : 13px;
+        border-right   : 1px solid #b7bac1;
+        align-items    : center;
+        display        : flex;
+        justify-content: center;
+        text-align     : center;
+
+        &:last-child {
+            border-right: unset;
+        }
+    }
+
+    .cusTb10 {
+        width: 10%;
+    }
+
+    .cusTb15 {
+        width: 15%;
+    }
+
+    .cusTb20 {
+        width: 20%;
+    }
+
+    .cusTb30 {
+        width: 30%;
+    }
+
+    .cusTb40 {
+        width: 40%;
+    }
+
+    .cusTb45 {
+        width: 45%;
+    }
+
+    .cusTb50 {
+        width: 50%;
+    }
+
+    .cusTb80 {
+        width: 80%;
+    }
+}
+
+.cusTableInvoiceTotal {
+    width          : 100%;
+    display        : flex;
+    justify-content: flex-end;
+    margin-top     : 10px;
+
+    .totalLayout {
+        width         : 240px;
+        border-radius : 4px;
+        display       : flex;
+        flex-direction: column;
+        border        : 1px solid #e0e0e0;
+        background    : #fbfbfb;
+        line-height   : 30px;
+
+        .itemTotal {
+            display      : flex;
+            border-bottom: 1px solid #eee;
+            padding      : 2px 5px;
+            font-size    : 14px;
+
+            .label {
+                flex           : 1;
+                justify-content: flex-end;
+                display        : flex;
+            }
+
+            .price {
+                flex               : 1;
+                display            : flex;
+                justify-content    : flex-end;
+                font-weight        : unset;
+                -webkit-text-stroke: .7px;
+            }
+
+            &:last-child {
+                border-bottom: unset;
+            }
+        }
+    }
+}
+
+.desInvoiceLayout {
+    margin-top: 20px;
+
+    .desInvoiceGp {
+        display        : flex;
+        justify-content: flex-start;
+        flex-direction : column;
+        align-items    : flex-start;
+
+        h3 {
+            margin          : 0;
+            // border-bottom: 1px solid #e0e0e0;
+        }
+
+        p {
+            margin   : 0;
+            font-size: 13px;
+
+            &:first-child {
+                margin-top: 3px;
+            }
+        }
+    }
+
+    .desHeader {
+        border-bottom: 1px solid #e0e0e0;
+    }
+}
+
+.tbItemList {
+    border-bottom: 1px solid #b7bac1;
+    height       : 100%;
+
+    div {
+        padding: 5px;
+    }
+
+    &:last-child {
+        border-bottom: unset;
+    }
+}
+
+.lineBorder {
+    border-top: 1px solid #ccc;
+    margin    : 5px 0;
+}
+
+.INBtnActionLY {
+    // margin-top: 30px;
+    width: 100%;
+    margin-bottom: 13px;
+
+    .btnActionGp {
+        display        : flex;
+        justify-content: flex-end;
+        margin-bottom  : 15px;
+
+        button {
+            margin-right: 7px;
+
+            &:last-child {
+                margin-right: unset;
+            }
+        }
+
+        .cancel {
+            background: #eb5f5f;
+        }
+
+        .confirm {
+            background: #1266f1;
+        }
+
+        .complete {
+            background: #00b74a;
+        }
+
+        .print {
+            background: #ffa900;
+        }
+
+        .closeInvoice {
+            background: red;
+        }
+
+        .btnIvoiceCheck {
+            display     : flex;
+            margin-right: 7px;
+
+            &:last-child {
+                margin-right: unset;
+            }
+        }
+    }
+}
+
+.invoiceTextLeft {
+    text-align     : start !important;
+    justify-content: flex-start !important;
+}
+
+.model-innermodalCus .buttonClose {
+    background: #fff !important;
+    width     : 35px !important;
+    height    : 35px !important;
+    top       : -2px !important;
+    right     : -55px !important;
+    color     : black !important;
+}

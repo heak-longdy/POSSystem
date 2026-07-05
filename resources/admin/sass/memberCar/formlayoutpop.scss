@@ -1,0 +1,282 @@
+$leftWidth:170px;
+
+.FoomlayoutPopheader {
+    display        : flex;
+    justify-content: flex-start;
+    width          : 100%;
+
+
+    h3 {
+        margin-top         : 0;
+        margin-bottom      : 45px;
+        border-bottom      : 2px solid #eee;
+        /* width           : 100%; */
+        text-align         : start;
+        padding-bottom     : 2px;
+        font-weight        : unset;
+        -webkit-text-stroke: .2px;
+        font-size          : 20px;
+
+        strong {
+            padding: 0 10px;
+        }
+    }
+}
+
+.FormLayoutPop {
+    width: 100%;
+
+    .itemGp {
+        display      : flex;
+        margin-bottom: 20px;
+
+        .labelTextLeft {
+            width              : $leftWidth;
+            font-size          : 18px;
+            font-weight        : unset;
+            -webkit-text-stroke: .7px;
+            text-align         : start;
+        }
+
+        .span {
+            margin: 0 20px;
+        }
+
+        .itemRight {
+            flex: 1;
+
+            .inputItem {
+                display       : flex;
+                flex-direction: column;
+                text-align    : left;
+                margin-bottom : 7px;
+
+                label {
+                    font-size: 14px;
+
+                    span {
+                        color      : #ff9d9d;
+                        margin-left: 3px;
+                    }
+                }
+
+                .error {
+                    color      : #ff9d9d;
+                    font-size  : 12px;
+                    line-height: 1;
+                    padding-top: 4px;
+
+                }
+
+                input {
+                    height   : 38px;
+                    border   : 1px solid #ccc;
+                    padding  : 0 10px;
+                    font-size: 14px;
+                }
+
+                select {
+                    height   : 38px;
+                    border   : 1px solid #ccc;
+                    padding  : 0 10px;
+                    font-size: 14px;
+                    cursor   : pointer;
+                }
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            .form-select-photo {
+                background-color   : #fff;
+                border             : 1px dashed #d9d9d9;
+                border-radius      : 25px;
+                box-sizing         : border-box;
+                width              : 100%;
+                height             : 260px;
+                text-align         : center;
+                position           : relative;
+                // overflow        : hidden;
+                cursor             : pointer;
+                transition         : 0.2s;
+                position           : relative;
+                display            : inline-block;
+                padding            : 5px;
+
+                input {
+                    position: absolute;
+                    top     : 0;
+                    left    : 0;
+                    right   : 0;
+                    bottom  : 0;
+                    width   : 100%;
+                    cursor  : pointer;
+                    opacity : 0;
+                    height  : 100%;
+                }
+
+                &.file {
+                    height: 120px;
+                }
+
+                &.md {
+                    height: 200px;
+                }
+
+                &:hover {
+                    border-color: $primary;
+
+                    .icon svg {
+                        color: $primary;
+                    }
+
+                    .select-photo.active {
+                        opacity   : 1;
+                        background: rgba($primary, 0.5);
+
+                        .icon svg {
+                            color: #fff;
+                        }
+
+                        .title {
+                            color: #fff;
+                        }
+                    }
+                }
+
+                .select-photo {
+                    position       : absolute;
+                    top            : 0;
+                    right          : 0;
+                    bottom         : 0;
+                    left           : 0;
+                    display        : flex;
+                    flex-direction : column;
+                    align-items    : center;
+                    justify-content: center;
+
+                    &.active {
+                        opacity   : 0;
+                        transition: 0.2s;
+                    }
+
+                    .icon {
+                        line-height: 0;
+
+                        svg {
+                            width      : 50px;
+                            height     : 50px;
+                            line-height: 0;
+                            color      : #b4bccc;
+                            transition : 0.2s;
+                        }
+                    }
+
+                    .title {
+                        color     : #5a5e66;
+                        font-size : 14px;
+                        text-align: center;
+                        transition: 0.2s;
+
+                        // b {
+                        //     color: $primary;
+                        // }
+                    }
+                }
+
+                .image-view {
+                    width        : 100%;
+                    height       : 100%;
+                    overflow     : hidden;
+                    border-radius: $border-radius;
+                    opacity      : 0;
+
+                    &.active {
+                        opacity: 1;
+                    }
+
+                    img {
+                        width     : 100%;
+                        height    : 100%;
+                        object-fit: cover;
+
+                        &.img-contain {
+                            object-fit: contain;
+                        }
+                    }
+                }
+
+                .file-select {
+                    display    : flex;
+                    height     : 100%;
+                    align-items: center;
+                    padding    : 0px 20px;
+
+                    svg {
+                        min-width: 70px;
+                        height   : 70px;
+                    }
+
+                    p {
+                        flex       : auto;
+                        word-break : break-all;
+                        line-height: normal;
+                        text-align : left;
+                        padding    : 0 10px;
+                    }
+                }
+            }
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    .popFormActionLayout {
+        width          : 100%;
+        display        : flex;
+        justify-content: flex-end;
+
+        .AcGp {
+            display        : flex;
+            width          : calc(100% - $leftWidth - 45px);
+            justify-content: flex-end;
+
+            .save {
+                display        : flex;
+                justify-content: center;
+                background     : #1266f1d4;
+                align-items    : center;
+            }
+
+            button {
+                .img {
+                    margin-right: 5px;
+                    width       : 20px;
+                    height      : 20px;
+                }
+            }
+        }
+        .AcGpAccepted{
+            width: 100%;
+            .accepted{
+                width: 100%;
+                border-radius: 20px;
+            }
+        }
+
+
+    }
+}
+
+.loadingCus {
+    padding: 140px 0;
+    width  : 100%;
+
+    .img {
+        width : 30px;
+        height: 30px;
+    }
+}

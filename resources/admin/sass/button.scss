@@ -1,0 +1,21 @@
+$BTN:"btn";
+$fm : "form";
+
+.#{$BTN} {
+    border-radius : 20px !important;
+    text-transform: none;
+
+    .bx {
+        font-size   : 24px;
+        margin-right: 5px;
+    }
+
+    font-size: 13px;
+
+    &-create {
+        box-shadow: 0 0 3px rgba(0, 0, 0, .1);
+        background: unset;
+        background: #00b74a;
+
+    }
+}

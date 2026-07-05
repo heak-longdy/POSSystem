@@ -1,0 +1,185 @@
+#order-container {
+    .form-wrapper {
+        max-width: none;
+        .order-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 0.5rem;
+            .invoice {
+                display: flex;
+                flex-direction: column;
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+            .option {
+                display: flex;
+                button {
+                    font-size: 0.8rem;
+                    margin: 0.1rem;
+                    svg {
+                        width: 0.9rem;
+                        margin: auto 0.15rem;
+                    }
+                    &.option-primary {
+                        background-color: $primary !important;
+                    }
+                    &.option-success {
+                        background-color: $success !important;
+                    }
+                    &.option-danger {
+                        background-color: $danger !important;
+                    }
+                    &.option-dark {
+                        background-color: $dark !important;
+                    }
+                }
+            }
+        }
+        .order-contact {
+            display: flex;
+            justify-content: space-between;
+            .user-profile {
+                display: flex;
+                max-width: 500px;
+                .profile-image {
+                    min-width: 145px;
+                    height: 145px;
+                    padding: 0.15rem;
+                    border-radius: 0.1rem;
+                    background-color: #eee;
+                    overflow: hidden;
+                    img {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                    }
+                }
+                .profile-description {
+                    margin: 0 1rem;
+                    width: 100%;
+                    .profile-item {
+                        margin-bottom: 0.4rem;
+                        font-size: 0.8rem;
+                        display: flex;
+                        flex-direction: column;
+                        .header {
+                            font-size: 0.9;
+                            padding: 0;
+                            font-weight: 600;
+                        }
+                        svg {
+                            margin-right: 0.5rem;
+                            width: 0.9rem;
+                        }
+                    }
+                }
+            }
+        }
+        .table {
+            border-radius: 0.2rem;
+            margin: 1.2rem auto;
+            font-size: 0.8rem;
+            .shop-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.4rem 0;
+                a {
+                    display: flex;
+                    align-items: center;
+                    font-size: 1.06rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    &:hover {
+                        color: $primary;
+                    }
+                    svg {
+                        width: 1.06rem;
+                        margin-right: 0.3rem;
+                    }
+                }
+                button {
+                    font-size: 0.8rem;
+                    margin: 0.1rem;
+                    svg {
+                        width: 0.9rem;
+                        margin: auto 0.15rem;
+                    }
+                    &.option-dark {
+                        background-color: $dark !important;
+                    }
+                }
+            }
+            .table-wrapper {
+                padding: 0;
+                .table-header {
+                    padding: 0.5rem 1rem;
+                    height: fit-content;
+                    border: 1px solid #eee;
+                    .row {
+                        span {
+                            font-size: 0.8rem;
+                        }
+                    }
+                    &.bottom {
+                        border: none;
+                        .table-row-10 {
+                            display: flex;
+                            justify-content: space-between;
+                            span {
+                                font-size: 0.9rem;
+                                line-height: 0;
+                            }
+                        }
+                        .table-row-15 {
+                            span {
+                                font-weight: 1rem;
+                                font-weight: 500;
+                            }
+                        }
+                    }
+                    .border-top {
+                        border-top: 1px solid #eee;
+                        padding-top: 0.5rem;
+                    }
+                }
+                .table-body {
+                    border-bottom: 1px solid #eee;
+                    .column {
+                        height: fit-content;
+                        .product-column {
+                            display: flex;
+                            align-items: center;
+                            // justify-content: center;
+                            padding: 0 2rem;
+                            cursor: pointer;
+                            .thumbnail {
+                                max-width: 50px;
+                                height: 50px;
+                                padding: 0;
+                                margin: 0;
+                                img {
+                                    width: 100%;
+                                    height: 100%;
+                                    object-fit: cover;
+                                }
+                            }
+                            .product-content {
+                                margin-left: 1rem;
+                                .span {
+                                    font-size: 0.8rem;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .left {
+                text-align: end;
+            }
+        }
+    }
+}

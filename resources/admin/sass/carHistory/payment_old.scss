@@ -1,0 +1,304 @@
+.paymentDialogLayout {
+    width         : 100%;
+    display       : flex;
+    flex-direction: column;
+
+    .memberCarListing {
+        display       : flex;
+        width         : 100%;
+        margin-bottom : 20px;
+        border-bottom : 1px solid #b7bac1;
+        padding-bottom: 20px;
+        align-items   : center;
+        background    : #eee;
+        padding       : 20px;
+        border-radius : 25px;
+
+        .pLeft {
+            flex          : 1;
+            display       : flex;
+            flex-direction: column;
+            text-align    : left;
+
+            p {
+                margin: 0;
+            }
+
+            h3 {
+                font-size: 30px;
+                margin   : 10px 0;
+            }
+
+            .itemText {
+                display    : flex;
+                align-items: center;
+
+                span {
+                    margin: 0 5px;
+                }
+
+                p {
+                    margin: 0;
+                }
+            }
+        }
+
+        .pRight {
+            width          : 40%;
+            display        : flex;
+            justify-content: flex-end;
+
+            img {
+                width        : 150px;
+                border-radius: 15px;
+            }
+        }
+    }
+
+    .memberListing {
+        width        : 100%;
+        // padding: 0 20px;
+        background   : #eee;
+        padding      : 20px;
+        border-radius: 20px;
+
+        .memberItem {
+            display      : flex;
+            margin-bottom: 5px;
+
+            div {
+                flex   : 1;
+                display: flex;
+            }
+
+            .mLeft {
+                justify-content: flex-start;
+            }
+
+            .mRight {
+                justify-content    : flex-end;
+                font-weight        : unset;
+                -webkit-text-stroke: .3px;
+            }
+        }
+
+    }
+
+    .paymentByListing {
+        display       : flex;
+        flex-direction: column;
+        text-align    : left;
+        padding       : 20px 0;
+
+        .labelGp {
+            label {
+                span {
+                    color : red;
+                    margin: 0 5px;
+                }
+            }
+
+            .error {
+                color    : rgba(255, 56, 56, 0.7411764706);
+                font-size: 11px;
+            }
+        }
+
+        .listingPackage {
+            margin-top: 7px;
+
+            .itemPackage {
+                margin-bottom: 20px;
+                height       : 65px;
+                width        : 100%;
+                align-items  : center;
+                display      : flex;
+                background   : #eee;
+                padding      : 20px;
+                border-radius: 5px;
+                cursor       : pointer;
+                position     : relative;
+
+                &.selectActive {
+                    border    : 2px solid #024de3;
+                    background: #1266f130 !important;
+                }
+
+                .icon {
+                    position: absolute;
+                    right   : -5px;
+                    top     : -11px;
+                    color   : #00b74a;
+                }
+
+                &.error {
+                    border    : 1px solid red;
+                    background: #ff000012 !important;
+                }
+            }
+        }
+    }
+
+    .repairServiceListing {
+        width        : 100%;
+        // padding: 0 20px;
+        background   : #eee;
+        padding      : 20px;
+        border-radius: 20px;
+
+        .rsItemTxt {
+            display    : flex;
+            align-items: center;
+
+            span {
+                margin: 0 5px;
+            }
+
+            p {
+                margin: 0;
+            }
+        }
+
+        .itemListingRSGP {
+            margin-top: 20px;
+        }
+
+        .itemListingRS {
+            display      : flex;
+            border-bottom: 1px solid #e0e0e0;
+            padding      : 10px 5px;
+            font-size    : 14px;
+
+            .RSLeft {
+                flex      : 1;
+                text-align: start;
+
+            }
+
+            .RSRight {
+                flex      : 1;
+                text-align: right;
+            }
+
+            label {
+                font-size: 13px;
+                color    : #757575;
+            }
+
+            h3 {
+                margin: 0;
+            }
+        }
+    }
+
+    .btnPaymentFooterListing {
+        display        : flex;
+        justify-content: flex-end;
+        margin-top     : 15px;
+
+        .btnPaymentCancel {
+            background  : none;
+            color       : #ff3838;
+            margin-right: 15px;
+        }
+
+        .btnPaymentSubmit {
+            background: #024de3;
+            color     : #fff;
+
+            img {
+                margin-right: 5px;
+                width       : 20px;
+                height      : 20px;
+            }
+        }
+    }
+}
+
+.inputPaymentPrice {
+    display       : flex;
+    flex-direction: column;
+
+    .label {
+        font-size: 14px;
+        color    : #757575;
+
+        span {
+            color       : red;
+            margin-right: 5px;
+        }
+    }
+
+    input {
+        height       : 40px;
+        padding      : 0 10px;
+        border       : 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .error {
+        color    : #ff3838bd;
+        font-size: 11px;
+    }
+}
+
+.popUPPaymentAlert {
+    width          : 100%;
+    height         : 100%;
+    position       : fixed;
+    justify-content: center;
+    display        : flex;
+    align-items    : center;
+    overflow       : hidden !important;
+    background     : #fbfbfb7d;
+
+    .iconPG {
+        background     : #0cb00c;
+        color          : white;
+        width          : 70px;
+        height         : 70px;
+        display        : flex;
+        justify-content: center;
+        align-items    : center;
+        border-radius  : 50%;
+
+        svg {
+            width : 55px;
+            height: 55px;
+        }
+    }
+
+    .layoutP {
+        width          : 280px;
+        /* height      : 300px; */
+        background     : #b7bac1;
+        border-radius  : 20px;
+        display        : flex;
+        flex-direction : column;
+        align-items    : center;
+        justify-content: center;
+        padding        : 35px;
+
+        .btnPFooter {
+            .confirm {
+                background     : blue;
+                text-align     : center;
+                display        : flex;
+                justify-content: center;
+
+            }
+        }
+    }
+
+    .PTextG {
+        text-align: center;
+    }
+}
+
+.txtEmptyPayment {
+    margin-top         : 35px;
+    font-size          : 20px;
+    font-weight        : 600;
+    font-weight        : unset;
+    -webkit-text-stroke: .3px;
+}

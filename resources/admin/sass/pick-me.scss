@@ -1,0 +1,74 @@
+$pick-me-theme: $dark;
+
+.pick-me {
+    padding      : 10px;
+    box-sizing   : border-box;
+    background   : #f0f0f0;
+    border-radius: 5px;
+    max-height   : 100%;
+
+    .pick-header {
+        display        : flex;
+        justify-content: space-between;
+        align-items    : center;
+        margin-bottom  : 15px;
+
+        h3 {
+            flex         : auto;
+            margin       : 0;
+            padding      : 10px 0;
+            text-align   : center;
+            background   : $pick-me-theme;
+            color        : #fff;
+            font-weight  : 700;
+            border-radius: 5px;
+            cursor       : pointer;
+        }
+
+        svg {
+            width : 25px;
+            cursor: pointer;
+        }
+    }
+
+    .pick-wrapper {
+        display              : grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap                  : 5px;
+        max-height           : 100%;
+
+        &.pick-year {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .pick-group {
+            max-height           : 230px;
+            display              : grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap                  : 5px;
+            overflow-y           : auto;
+            box-sizing           : border-box;
+            padding-right        : 5px;
+        }
+
+        .pick-item {
+            cursor       : pointer;
+            padding      : 5px 10px;
+            box-sizing   : border-box;
+            border-radius: 5px;
+            text-align   : center;
+            position     : relative;
+
+            svg {
+                width   : 15px;
+                position: absolute;
+                left    : 3px;
+            }
+
+            &.picked {
+                background: $pick-me-theme;
+                color     : #fff;
+            }
+        }
+    }
+}

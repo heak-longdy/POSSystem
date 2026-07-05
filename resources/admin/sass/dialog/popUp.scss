@@ -1,0 +1,76 @@
+.modalCus {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    position       : fixed;
+    z-index        : 999;
+    width          : 100%;
+    height         : 100%;
+    left           : 0;
+    top            : 0;
+    transition: all 0.5s ease;
+    background: #757575ad;
+    padding: 40px 0;
+    overflow-y: auto;
+}
+
+.model-innermodalCus {
+    background-color: white;
+    border-radius   : 1.5em;
+    max-width       : 600px;
+    padding         : 1em;
+    margin          : auto;
+    border          : 1px solid #eee;
+    position        : relative;
+
+    .buttonClose {
+        min-width      : unset !important;
+        background     : red;
+        border-radius  : 50% !important;
+        width          : 30px;
+        height         : 30px;
+        display        : flex;
+        align-items    : center;
+        justify-content: center;
+        top            : -10px;
+        right          : -13px;
+        position       : absolute !important;
+    }
+}
+
+.modal-headermodalCus {
+    display        : flex;
+    align-items    : center;
+    justify-content: space-between;
+    border-bottom  : 2px solid black;
+    padding-bottom : 10px;
+
+    h3 {
+        margin: 0 !important;
+    }
+}
+
+.activePopup {
+
+    height          : 100%;
+    position        : fixed;
+    width           : 100%;
+    top             : 0;
+    z-index         : 1;
+    background-color: rgba(0, 0, 0, .8);
+
+}
+
+.bodyAlert {
+    justify-content: center;
+    display        : flex;
+    flex-direction : column;
+    line-height    : 25px;
+    align-items    : center;
+    width          : 170px;
+    text-align     : center;
+
+    .icon {
+        color: red;
+    }
+}

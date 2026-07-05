@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Clone</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<style>
+    /* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    background-color: #181818;
+    color: white;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+    width: 200px;
+    background-color: #202020;
+    height: 100vh;
+    padding: 10px;
+}
+
+.sidebar .logo {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+.sidebar ul li:hover {
+    color: #ff0000;
+}
+
+/* Main Content */
+.content {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* Search Bar */
+header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+header .search-bar {
+    display: flex;
+    width: 50%;
+}
+
+header .search-bar input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #444;
+    background-color: #121212;
+    color: white;
+}
+
+header .search-bar button {
+    padding: 8px;
+    border: none;
+    background-color: #444;
+    cursor: pointer;
+}
+
+/* Categories */
+.categories {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.categories button {
+    margin-right: 10px;
+    padding: 5px 10px;
+    background-color: #303030;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.categories button:hover {
+    background-color: #444;
+}
+
+/* Video Grid */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.video-card {
+    background-color: #202020;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.video-card img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.video-card p {
+    font-size: 16px;
+    margin: 10px 0 5px;
+}
+
+.video-card small {
+    color: #aaa;
+}
+
+</style>
+<body>
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <div class="logo">YouTube <span>Premium</span></div>
+        <ul>
+            <li>Home</li>
+            <li>Shorts</li>
+            <li>Subscriptions</li>
+            <li>YouTube Music</li>
+            <li>You</li>
+            <li>History</li>
+            <li>Playlists</li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Header Section -->
+        <header>
+            <div class="search-bar">
+                <input type="text" placeholder="Search">
+                <button>🔍</button>
+            </div>
+        </header>
+
+        <!-- Category Tabs -->
+        <div class="categories">
+            <button>All</button>
+            <button>Music</button>
+            <button>Mixes</button>
+            <button>Gaming</button>
+            <button>Live</button>
+        </div>
+
+        <!-- Video Grid -->
+        <section class="video-grid">
+            <div class="video-card">
+                <img src="thumbnail1.jpg" alt="Video Thumbnail">
+                <p>Video Title Here</p>
+                <small>Channel Name • 2M views • 3 days ago</small>
+            </div>
+            <!-- Repeat Video Cards -->
+            <div class="video-card">
+                <img src="thumbnail2.jpg" alt="Video Thumbnail">
+                <p>Another Video</p>
+                <small>Channel Name • 1M views • 1 week ago</small>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

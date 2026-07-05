@@ -1,0 +1,22 @@
+{
+    "/admin-public/js/app.js": "/admin-public/js/app.js",
+    "/admin-public/js/body.js": "/admin-public/js/body.js",
+    "/website/js/app.js": "/website/js/app.js",
+    "/website/js/body.js": "/website/js/body.js",
+    "/admin-public/css/app.css": "/admin-public/css/app.css",
+    "/website/css/app.css": "/website/css/app.css",
+    "/website/form11.css": "/website/form11.css",
+    "/website/verifyDoc.css": "/website/verifyDoc.css",
+    "/website/carousel.css": "/website/carousel.css",
+    "/admin-public/js/tinymce/.npmignore": "/admin-public/js/tinymce/.npmignore",
+    "/admin-public/js/tinymce/CHANGELOG.md": "/admin-public/js/tinymce/CHANGELOG.md",
+    "/admin-public/js/tinymce/README.md": "/admin-public/js/tinymce/README.md",
+    "/admin-public/js/tinymce/bower.json": "/admin-public/js/tinymce/bower.json",
+    "/admin-public/js/tinymce/composer.json": "/admin-public/js/tinymce/composer.json",
+    "/admin-public/js/tinymce/license.txt": "/admin-public/js/tinymce/license.txt",
+    "/admin-public/js/tinymce/package-lock.json": "/admin-public/js/tinymce/package-lock.json",
+    "/admin-public/js/tinymce/package.json": "/admin-public/js/tinymce/package.json",
+    "/admin-public/js/tinymce/tinymce.d.ts": "/admin-public/js/tinymce/tinymce.d.ts",
+    "/admin-public/js/tinymce/tinymce.js": "/admin-public/js/tinymce/tinymce.js",
+    "/admin-public/js/tinymce/tinymce.min.js": "/admin-public/js/tinymce/tinymce.min.js"
+}

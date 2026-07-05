@@ -1,0 +1,52 @@
+{
+    "private": true,
+    "scripts": {
+        "dev": "npm run development",
+        "development": "mix",
+        "watch": "mix watch",
+        "watch-poll": "mix watch -- --watch-options-poll=1000",
+        "hot": "mix watch --hot",
+        "prod": "npm run production",
+        "production": "mix --production"
+    },
+    "devDependencies": {
+        "axios": "^0.25",
+        "browser-sync-webpack-plugin": "^2.3.0",
+        "laravel-mix": "^6.0.6",
+        "lodash": "^4.17.19",
+        "postcss": "^8.1.14",
+        "resolve-url-loader": "^5.0.0",
+        "sass": "^1.51.0",
+        "ts-loader": "^9.3.0",
+        "typescript": "^4.6.4",
+        "vue-loader": "^17.0.1",
+        "vue-template-compiler": "^2.7.14"
+    },
+    "dependencies": {
+        "@alpinejs/collapse": "^3.14.1",
+        "@alpinejs/intersect": "^3.14.1",
+        "@alpinejs/mask": "^3.14.1",
+        "@fancyapps/ui": "^4.0.26",
+        "@splidejs/splide": "^4.1.4",
+        "alpinejs": "^3.10.2",
+        "animejs": "^3.2.1",
+        "aos": "^3.0.0-beta.6",
+        "apexcharts": "^3.39.0",
+        "autoprefixer": "10.4.5",
+        "boxicons": "^2.1.4",
+        "browser-image-compression": "^2.0.2",
+        "browser-sync": "^2.27.9",
+        "choices.js": "^10.2.0",
+        "exceljs": "^4.3.0",
+        "file-saver": "^2.0.5",
+        "firebase": "^9.8.2",
+        "gsap": "^3.10.4",
+        "izitoast": "^1.4.0",
+        "moment": "^2.29.3",
+        "s-event.js": "^1.0.5",
+        "s-mask.js": "^1.0.2",
+        "sass-loader": "^12.6.0",
+        "turbolinks": "^5.2.0",
+        "vue": "^2.7.14"
+    }
+}

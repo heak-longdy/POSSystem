@@ -1,0 +1,209 @@
+$border-color : #ECEDF2;
+
+@mixin font {
+    font-family: 'Poppins', sans-serif, 'Noto Serif SC', serif, 'Nokora', sans-serif;
+}
+
+@mixin input {
+    @include font;
+    border    : none;
+    background: none;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.select2 {
+    width: 100% !important;
+}
+
+.select2-results {
+    font-size       : 14px;
+    // border       : 1px solid #837a74 !important;
+    border-radius   : 4px !important;
+    overflow        : hidden;
+    margin          : 0 5px 5px 5px;
+    border          : unset !important;
+    background-color: #ecedf2 !important;
+}
+
+.select2-container .select2-selection--single {
+    border-radius   : 7px !important;
+    background-color: white !important;
+    display         : flex !important;
+    align-items     : center;
+    border          : 1px solid #d8dce5 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: unset !important;
+    font-size  : 14px;
+    display    : unset;
+    color      : #5a5e66 !important;
+}
+
+// .select2-container .select2-selection--single {
+//     border          : unset !important;
+//     border-radius   : 3px !important;
+//     background-color: white !important;
+//     display         : flex !important;
+//     align-items     : center;
+// }
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    top      : 0 !important;
+    transform: unset !important;
+    height   : 100% !important;
+    position : absolute;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    @include input;
+    padding      : 10px;
+    border-radius: 3px !important;
+    box-sizing   : border-box;
+    border       : 1px solid $border-color !important;
+    padding      : 5px 10px !important;
+    border-radius: 3px !important;
+    box-sizing   : border-box;
+    border       : 1px solid #ECEDF2 !important;
+    background   : #fff;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    border         : 1px solid #d8dce5;
+    height         : 45px;
+    border-radius  : 4px;
+    display        : flex !important;
+    align-items    : center;
+    justify-content: center;
+    color          : #5a5e66 !important;
+}
+
+// .select2-container--default .select2-selection--single .select2-selection__arrow b {
+//     border: none; /* Remove the default arrow */
+//     width: 16px;
+//     height: 16px;
+
+//     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important; /* Replace with your icon */
+//     background-size: contain;
+//     background-repeat: no-repeat;
+// }
+
+.select2-dropdown {
+    top             : 0;
+    border          : unset !important;
+    background-color: white;
+    border          : 1px solid #aaa;
+    border-radius   : 4px;
+    box-sizing      : border-box;
+    display         : block;
+    position        : absolute;
+    left            : -100000px;
+    width           : 100%;
+    z-index         : 1051;
+    background-color: #ecedf2 !important;
+    margin-top      : 2px;
+}
+
+.select2-container .select2-search--inline {
+    width: 100%;
+}
+
+.select2-container--default .select2-search--inline .select2-search__field {
+    border: 0px solid white !important;
+}
+
+.select2-container--default .select2-search--inline .select2-search__field::-webkit-input-placeholder {
+    color: #837a74 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__clear {
+    cursor      : pointer;
+    float       : right;
+    font-weight : bold;
+    margin-top  : 5px;
+    margin-right: 10px;
+    position    : absolute;
+    right       : 0;
+    z-index     : 9999;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    height     : 25px;
+    text-align : center;
+    display    : flex;
+    align-items: center;
+    margin-top : 0 !important;
+}
+
+.select2 .select2-selection {
+    height: 45px !important;
+}
+
+
+.custom-select2 .select2-dropdown {
+    background: #f7f7f7;
+
+    input {
+        border    : 1px solid #ccc !important;
+        background: #fff !important;
+    }
+}
+
+
+.search-select-theme {
+    .select2-dropdown {
+        .select2-search--dropdown .select2-search__field {
+            background-color: #ECEDF2 !important;
+        }
+
+        .select2-results {
+            overflow        : hidden;
+            margin          : 0 5px 5px 5px;
+            border          : unset !important;
+            background-color: #ecedf2 !important;
+        }
+    }
+}
+
+.search-select-salary {
+    .select2-dropdown .select2-search .select2-search__field {
+        display: none !important;
+    }
+}
+
+.select2Group {
+    width   : 100%;
+    position: relative;
+
+    .select2Reset {
+        position : absolute;
+        top      : 50%;
+        right    : 20px;
+        transform: translate(-50%, -50%);
+        cursor   : pointer;
+
+        svg {
+            fill         : gray;
+            font-size    : 20px;
+            width        : 20px;
+            height       : 20px;
+            background   : #fff;
+            border-radius: 50%;
+        }
+
+        &:hover {
+            svg {
+                fill: #ff0000ba;
+            }
+        }
+    }
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered{
+    height: 100%;
+    align-items: center;
+    display: flex !important;
+}

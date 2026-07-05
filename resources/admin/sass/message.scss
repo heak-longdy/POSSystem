@@ -1,0 +1,268 @@
+$fm: "message";
+
+.#{$fm}-admin {
+    width     : 100%;
+    height    : 100%;
+    overflow-y: auto;
+
+    .#{$fm}-bg {
+        width     : 100%;
+        height    : 200px;
+        background: $form-header;
+        position  : fixed;
+        top       : 0;
+        right     : 0;
+        left      : 0;
+    }
+
+    .#{$fm}-wrapper {
+        padding  : 0 100px;
+        margin   : 0 auto;
+        position : relative;
+        height   : 100%;
+        max-width: 1200px;
+
+        .#{$fm}-header {
+            width    : 100%;
+            display  : flex;
+            color    : #fff;
+            font-size: 20px;
+            padding  : 10px 0;
+
+            h3 {
+                display    : flex;
+                align-items: center;
+
+                svg {
+                    margin-right: 10px;
+                    cursor      : pointer;
+                }
+            }
+        }
+
+        .#{$fm}-body {
+            box-sizing   : border-box;
+            background   : #fff;
+            padding      : 40px;
+            border-radius: $border-radius;
+            box-shadow   : $form-shadow;
+
+            .row-2 {
+                width                : 100%;
+                display              : grid;
+                grid-template-columns: repeat(2, 1fr);
+                column-gap           : 20px;
+            }
+
+            .row-3 {
+                width                : 100%;
+                display              : grid;
+                grid-template-columns: repeat(3, 1fr);
+                column-gap           : 20px;
+            }
+
+            .list {
+                width     : 100%;
+                display   : flex;
+                padding   : 3px 0;
+                transition: .2s;
+
+                &:hover {
+                    transition      : .3s;
+                    background-color: #f1f1f1;
+                }
+
+                &.link {
+
+                    span {
+
+                        color     : $primary;
+                        cursor    : pointer;
+                        word-break: break-all;
+                    }
+
+                    span:hover {
+                        text-decoration: underline;
+                    }
+                }
+
+                &.col {
+                    flex-direction: column;
+                }
+
+                p {
+                    min-width  : 150px;
+                    margin     : 0;
+                    font-weight: 700;
+                }
+
+                span {
+                    margin-left: 10px;
+                    display    : flex;
+                    word-break: break-all;
+
+                    svg {
+                        width      : 16px;
+                        margin-left: 10px;
+
+                    }
+                }
+
+                .img {
+                    width        : 100%;
+                    height       : 250px;
+                    border-radius: $border-radius;
+                    overflow     : hidden;
+
+                    img {
+                        width     : 100%;
+                        height    : 100%;
+                        object-fit: cover;
+                    }
+                }
+
+            }
+
+            .step {
+                width: 100%;
+
+                .step-wrapper {
+                    display       : flex;
+                    flex-direction: column;
+
+                    .step-header {
+                        display   : flex;
+                        // padding: 0 100px;
+
+                        // justify-content: space-between;
+                        hr {
+                            flex    : auto;
+                            position: relative;
+                            top     : 25px;
+                            margin  : 0;
+                        }
+
+                        .step-button {
+                            display       : flex;
+                            flex-direction: column;
+                            align-items   : center;
+                            width         : 100px;
+                            cursor        : pointer;
+
+                            &.active {
+                                .icon {
+                                    background: $primary;
+                                    color     : #fff;
+                                }
+
+                                span {
+                                    font-weight: 700;
+                                }
+                            }
+
+                            .icon {
+                                width          : 50px;
+                                height         : 50px;
+                                display        : flex;
+                                align-items    : center;
+                                justify-content: center;
+                                background     : #f1f1f1;
+                                border-radius  : 50%;
+                                color          : $dark;
+                            }
+
+                            span {
+                                margin    : 5px 0;
+                                font-size : 14px;
+                                text-align: center;
+                            }
+                        }
+                    }
+
+                    .step-body {
+                        width  : 100%;
+                        height : auto;
+                        padding: 20px 0;
+
+                        .step-content {
+                            width   : 100%;
+                            position: relative;
+                        }
+                    }
+                }
+            }
+
+            .form-button {
+                width          : 100%;
+                display        : flex;
+                justify-content: flex-end;
+                padding-top    : 10px;
+
+                .left {
+                    display        : flex;
+                    justify-content: flex-end;
+
+                    button {
+                        margin      : 0;
+                        margin-right: 10px;
+                    }
+                }
+
+                .gap {
+                    flex: auto;
+                }
+
+                .right {
+                    display: flex;
+                }
+
+                button {
+                    margin-left  : 10px;
+                    height       : 45px;
+                    font-size    : 14px;
+                    border-radius: 8px;
+                    box-sizing   : border-box;
+                    color        : $dark;
+                    border       : 1px solid $dark;
+                    background   : none;
+
+                    svg {
+                        margin-right: 8px;
+                    }
+
+                    &[color=primary] {
+                        color           : #fff;
+                        background-color: map-get($map: $btn, $key: 'create');
+                        border          : none;
+                    }
+
+                    &[color=danger] {
+                        color           : #fff;
+                        background-color: map-get($map: $btn, $key: 'delete');
+                        border          : none;
+                    }
+
+                    &.icon {
+                        min-width: fit-content;
+
+                        svg {
+                            margin: 0;
+                        }
+
+                        &.right {
+                            svg {
+                                margin     : 0;
+                                margin-left: 8px;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        .#{$fm}-footer {
+            height: 40px;
+        }
+    }
+}

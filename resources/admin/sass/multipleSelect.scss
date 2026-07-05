@@ -1,0 +1,123 @@
+// .multipleSelect {
+//     background-color: #fff;
+//     border-radius   : 4px;
+//     border          : 1px solid #d8dce5 !important;
+//     color           : #5a5e66;
+//     display         : inline-block;
+//     font-size       : 14px;
+//     height          : 40px !important;
+//     line-height     : 1;
+//     outline         : 0;
+//     padding         : 0 15px;
+//     transition      : border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+//     button{
+//         padding: 0 !important;
+//     }
+// }
+.select2-results {
+    .select2-results__options {
+        overflow-x: hidden !important;
+        word-break: break-all !important;
+    }
+}
+
+.Select2StyleCus {
+    .select2.select2-container.select2-container--default {
+        .selection {
+            .select2-selection.select2-selection--multiple {
+                margin             : 0;
+                padding            : 10px 10px 5px 3px !important;
+                overflow           : auto;
+                align-items        : flex-start;
+                min-height         : unset !important;
+                user-select        : none;
+                -webkit-user-select: none;
+                max-height         : 300px !important;
+                height             : auto !important;
+
+                .select2-selection__rendered {
+                    display  : flex !important;
+                    flex-wrap: wrap;
+                    overflow : auto;
+
+                    .select2-search.select2-search--inline {
+                        margin   : 0 0px 0px 7px;
+                        // height: 100%;
+
+                        .select2-search__field {
+                            margin-top : 0 !important;
+                            display    : flex;
+                            align-items: center;
+                            height     : 85%;
+                            margin-left: 5px;
+                            width      : calc(100% - 10px) !important;
+
+                            &:focus-visible {
+                                border       : 1px solid #b7bac1;
+                                padding      : 10px;
+                                padding      : 10px 12px !important;
+                                border-radius: 15px;
+                            }
+                        }
+                    }
+
+                    .select2-selection__choice {
+                        margin-top        : 0 !important;
+                        display           : flex;
+                        align-items       : center;
+                        padding           : 5px 10px;
+                        cursor            : pointer;
+                        margin            : 0 0px 7px 7px;
+                        display           : flex;
+                        flex-direction    : row-reverse !important;
+                        width             : calc(100% / 2 - 7px);
+                        justify-content   : space-between;
+                        border-radius     : 15px;
+                        padding           : 7px 12px !important;
+                        background        : #0d6efd;
+                        color             : #ffff;
+                        overflow          : hidden;
+                        text-overflow     : ellipsis;
+                        white-space       : initial;
+                        -webkit-box-orient: vertical;
+                        word-break        : break-word;
+                        align-items       : flex-start;
+                        height            : 100%;
+
+                        .selection__choice__remove {
+                            color       : unset !important;
+                            margin-right: 0 !important;
+                        }
+
+                        &:last-child {
+                            margin-bottom: 0 !important;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color          : #fff !important;
+        cursor         : pointer;
+        display        : inline-block;
+        font-weight    : bold;
+        margin-right   : 2px;
+        display        : flex;
+        justify-content: center;
+        align-items    : center;
+        width          : 20px;
+        height         : 20px;
+
+        &:hover {
+            color: #fff !important;
+        }
+    }
+
+    .select2-dropdown.select2-dropdown--below {
+        margin : 3px 0;
+        padding: 10px;
+        border : 1px solid #b7bac1 !important;
+    }
+}

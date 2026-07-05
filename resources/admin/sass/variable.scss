@@ -1,0 +1,74 @@
+$heightHeader        :60px;
+$pathLeftRightLayout : 256px;
+$widthSlideBar       :225px;
+$heightHeaderSidebar :70px;
+//height
+$rightHeightHeader   : 50px;
+$rightMarginBottom   : 20px;
+$heightHeaderSidebarRight :100px;
+
+$rightBgHeader : #fff;
+$defaultColor  : #3C91E6;
+
+
+// Color
+$primary : #024de3;
+$danger  : #ff3838;
+$dark    : #231f20;
+$success :#00c753;
+$silver  : #e5e5e5;
+$warning : #ffb800;
+
+$menu-border      : #024de3;
+$logo             : #fff;
+$shadow           : 0 0 10px 1px rgba(0, 0, 0, 0.1);
+// $container        : #edeff1;
+$container        : #fff;
+$label            : #024de3;
+$border           : #d4d4d4;
+$text             : #989898;
+$border-radius    : 10px;
+$tableBorderRadius:15px;
+
+// Login
+$login-bg : linear-gradient(135deg, rgb(31 26 35 / 80%) 0%, #0061f2d6 100%);
+
+//Sidebar
+$sidebar                      : #fff;
+// $header-sidebar            : #fff;
+$header-sidebar               : linear-gradient(135deg, rgba(31, 26, 35, 0.8) 0%, rgba(0, 97, 242, 0.8392156863) 100%);
+$footer-sidebar               : #174195;
+$header-sidebar-text          : #231f20;
+$menu                         : #231f20;
+$menu-active                  : #3A3A3C;
+$menu-text-active             : #fff;
+$sidebar-color                :black;
+$sidebar-color-border         :rgb(229, 234, 239);
+
+// Header
+$header            : #fff;
+$header-title      : #231f20;
+$header-text       : #333;
+$header-tab        : #231f20;
+$header-tab-active : #024de3;
+
+//rightText
+$headerTitle : #fff;
+
+// Form
+$form-header : linear-gradient(135deg, rgb(31 26 35 / 80%) 0%, #F9F9F9 100%);
+$form-shadow : 0px 3px 8px -3px rgb(0 0 0 / 20%);
+
+$scroll:#024de3;
+
+$btn: ('create':#024de3,
+    'edit':#024de3,
+    'delete':#ff3838,
+    'save':#00c753);
+
+//auth
+$form-label      :black;
+$form-radius     :15px;
+$input-background:#F5F5F5;
+$input-radius    :15px;
+$button-radius   :10px;

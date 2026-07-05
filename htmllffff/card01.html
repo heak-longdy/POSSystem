@@ -1,0 +1,617 @@
+<style>
+    /* From Uiverse.io by ilkhoeri */ 
+.card {
+  --black: 0, 0%, 0%;
+  --white: 0, 0%, 100%;
+  --black-muted: 0, 0%, 13%;
+  --white-smoke: 0, 0%, 89%;
+  --green-light: 87, 73%, 63%;
+  --gap: 12px;
+  --w-card: 330px;
+  --h-card: 280px;
+  --p-card: 1rem;
+  --gap-action: 6px;
+  --sz-action: 58px;
+  --index-action: 2;
+  --round-card: calc(var(--sz-action) / 2 + calc(var(--gap-action) / 2));
+
+  width: var(--w-card);
+  height: var(--h-card);
+  border-radius: var(--round-card);
+  position: relative;
+  background-color: var(--color-boxes, hsl(var(--green-light)));
+  padding: var(--p-card);
+  box-shadow: rgba(0, 0, 0, 0.15) -1.95px 1.95px 2.6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.corner {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: auto;
+  right: 0;
+  top: 0;
+  background-color: hsl(var(--white-smoke));
+  z-index: 2;
+  border-bottom-left-radius: var(--round-card);
+  padding-bottom: var(--gap-action);
+  padding-left: var(--gap-action);
+  gap: var(--gap-action);
+}
+.corner i[data-corner] {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  z-index: 2;
+  background-color: hsl(var(--white-smoke));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.corner i[data-corner]::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-top-right-radius: var(--round-card);
+  background-color: var(--color-boxes, hsl(var(--green-light)));
+  z-index: -1;
+}
+.corner i[data-corner="tl"] {
+  top: 0;
+  right: 100%;
+}
+.corner i[data-corner="br"] {
+  right: 0;
+  top: 100%;
+}
+.corner .action {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  height: var(--sz-action);
+  min-height: var(--sz-action);
+  max-height: var(--sz-action);
+  width: var(--sz-action);
+  min-width: var(--sz-action);
+  max-width: var(--sz-action);
+  border: none;
+  outline: none;
+  transition: all 0.5s ease;
+  background-color: hsl(var(--white-smoke));
+  color: hsl(var(--black-muted));
+  box-shadow:
+    rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+    rgba(27, 31, 35, 0.15) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.07) 0px 1px 2px,
+    rgba(0, 0, 0, 0.07) 0px 2px 4px;
+}
+.corner .action:hover {
+  background: hsl(var(--green-light));
+}
+.corner .action svg {
+  width: 32px;
+  height: 32px;
+}
+.corner .action:hover svg {
+  color: white;
+}
+
+.boxes {
+  --sz-img: 46px;
+  gap: 16px;
+  width: 100%;
+  position: relative;
+  z-index: 9;
+  max-width: 50%;
+  height: var(--sz-img);
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+.boxes .caption {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: calc(
+    var(--w-card) - calc(var(--p-card) * 2) -
+      calc(var(--sz-action) * var(--index-action)) -
+      calc(var(--gap-action) * var(--index-action)) - var(--sz-img) - 16px
+  );
+  margin-top: 18px;
+}
+.boxes .name {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.boxes .as {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: hsl(var(--black-muted));
+}
+.boxes .name,
+.boxes .as {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.box-body {
+  --sz-img: 32px;
+  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 9;
+}
+.box-body .box-content {
+  gap: 16px;
+  display: flex;
+  align-items: start;
+  justify-content: flex-start;
+  flex-direction: row;
+  position: relative;
+}
+.box-body .caption {
+  gap: 4px;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  font-weight: 400;
+  display: flex;
+  align-items: start;
+  flex-direction: column;
+}
+
+.box-foot {
+  --sz-img: 36px;
+  position: relative;
+  z-index: 9;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.box-foot::before {
+  content: attr(data-title);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  color: hsl(var(--black-muted));
+  min-width: max-content;
+  font-size: 14px;
+}
+.box-foot-figure {
+  font-weight: 400;
+  outline: 1px solid hsl(var(--black-muted), 0.3);
+  width: max-content;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  position: relative;
+  z-index: 1;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  overflow: hidden;
+}
+.box-foot-figure .img {
+  transition: all 0.25s ease;
+  position: relative;
+  z-index: 1;
+}
+.box-foot-figure button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: none transparent;
+  transition: all 0.25s ease;
+}
+.box-foot-figure button svg {
+  transition: all 0.25s ease;
+  transform: rotate(45deg);
+}
+.box-foot-figure .img:hover {
+  transform: scale(1.2);
+}
+.box-foot-figure .img:hover ~ button svg,
+.box-foot-figure button:hover svg {
+  transform: scale(1.25) rotate(0);
+}
+.box-foot-actions {
+  --sz-toggle: 46px;
+  gap: var(--gap);
+  display: grid;
+  grid-auto-flow: column;
+}
+.box-foot-action {
+  cursor: pointer;
+  border-radius: 9999px;
+  border: none;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--sz-toggle);
+  min-height: var(--sz-toggle);
+  max-height: var(--sz-toggle);
+  width: var(--sz-toggle);
+  min-width: var(--sz-toggle);
+  max-width: var(--sz-toggle);
+  transition: all 0.5s ease;
+  color: hsl(var(--black-muted), 0.75);
+}
+.box-foot-action[aria-label="meets"] {
+  background-color: hsl(var(--black-muted));
+  color: hsl(var(--white-smoke));
+}
+.box-foot-action:hover {
+  color: hsl(var(--black-muted));
+  background-color: hsl(var(--white-smoke), 0.5);
+}
+.box-foot-action svg {
+  height: calc(var(--sz-toggle) * 0.65);
+  min-height: calc(var(--sz-toggle) * 0.65);
+  max-height: calc(var(--sz-toggle) * 0.65);
+  width: calc(var(--sz-toggle) * 0.65);
+  min-width: calc(var(--sz-toggle) * 0.65);
+  max-width: calc(var(--sz-toggle) * 0.65);
+}
+
+.img {
+  font-size: 24px;
+  font-weight: 800;
+  border-radius: 9999px;
+  height: var(--sz-img);
+  min-height: var(--sz-img);
+  max-height: var(--sz-img);
+  width: var(--sz-img);
+  min-width: var(--sz-img);
+  max-width: var(--sz-img);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: hsl(var(--black-muted), 0);
+  border: 1px solid hsl(var(--black-muted), 0);
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select: -moz-none;
+}
+.img svg {
+  position: absolute;
+  background-size: var(--sz-img);
+  height: var(--sz-img);
+  min-height: var(--sz-img);
+  max-height: var(--sz-img);
+  width: var(--sz-img);
+  min-width: var(--sz-img);
+  max-width: var(--sz-img);
+}
+
+.box-body .img {
+  border-radius: 0;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+.font-semibold {
+  font-weight: 600;
+}
+.text-xs {
+  font-size: 12px;
+}
+.text-sm {
+  font-size: 14px;
+}
+
+</style>
+<div class="card">
+    <div class="corner">
+        <i data-corner="tl"></i>
+        <i data-corner="br"></i>
+        <div data-action="notif" class="action">
+            <svg
+                stroke="currentColor"
+                fill="none"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                height="1em"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"></path>
+                <path
+                    d="M16 8m-3 0a3 3 0 1 0 8 0a3 3 0 1 0 -8 0"
+                    class="dot"
+                    fill="red"></path>
+            </svg>
+        </div>
+        <div data-action="more" class="action">
+            <svg
+                stroke="currentColor"
+                fill="none"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                height="1em"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M17 7l-11 11"></path>
+                <path d="M8 7l9 0l0 9"></path>
+            </svg>
+        </div>
+    </div>
+
+    <figure class="boxes">
+        <span class="img">
+            <svg
+                viewBox="0 0 61.7998 61.7998"
+                height="800px"
+                width="800px"
+                xmlns="http://www.w3.org/2000/svg">
+                <g>
+                    <g>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#ffe8be"
+                            d="M31.129 8.432c21.281 0 12.988 35.266 0 35.266-12.266 0-21.281-35.266 0-35.266z"></path>
+                        <circle
+                            r="30.8999"
+                            fill="#e9573e"
+                            cy="30.8999"
+                            cx="30.8999"></circle>
+                        <path fill="#302e33"
+                            d="M19.012 21.716h24.504V48.29H19.013z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#f9dca4"
+                            d="M24.744 38.68l12.931.121v12.918l-12.931-.121V38.68z"></path>
+                        <path
+                            opacity="0.11"
+                            fill-rule="evenodd"
+                            d="M37.677 38.778v3.58c0 .297-.002.113-.002.513a1.602 1.602 0 0 1-.112.838c-4.369 4.164-11.618 1.982-12.73-5.131z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#498bd9"
+                            d="M52.797 52.701c-2.716-6.287-8.913-6.893-15.122-9.83 0 5.414-12.932 4.979-12.932-.264-5.568 2.52-13.63 3.72-16.026 9.801a30.896 30.896 0 0 0 44.08.293z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#f9dca4"
+                            d="M43.391 25.54c2.96 1.29.125 6.535-1.303 6.026-2.302-.822 1.164-3.584 1.303-6.027z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#ffe8be"
+                            d="M31.114 8.666c8.722 0 12.377 6.2 12.601 13.367.307 9.81-5.675 21.43-12.6 21.43-6.56 0-12.706-12.018-12.333-21.928.26-6.953 3.814-12.869 12.332-12.869z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#464449"
+                            d="M39.736 20.216s-5.163 17.76-25.4 11.838c5.053-2.753 4.488-6.772 4.131-11.838z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#464449"
+                            d="M33.665 20.548s2.932 9.395 13.035 10.118a11.655 11.655 0 0 1-2.868-3.36 4.54 4.54 0 0 0 2.838.308c-2.456-1.842-3.068-3.339-2.655-6.89s-10.35-.176-10.35-.176z"></path>
+                        <ellipse
+                            ry="3.6071"
+                            rx="15.57635"
+                            fill="#58b0e0"
+                            cy="23.7702"
+                            cx="31.26417"></ellipse>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#2881bb"
+                            d="M26.971 6.623h8.586a8.529 8.529 0 0 1 8.504 8.503v6.59H18.467v-6.59a8.529 8.529 0 0 1 8.504-8.503z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#ffffff"
+                            d="M26.405 13.19h2.025l1.468 2.923v-1.79a.937.937 0 0 0-.026-.288.222.222 0 0 0-.097-.12.53.53 0 0 0-.236-.034h-.244v-.691h2.066v.691h-.228a.563.563 0 0 0-.245.04.222.222 0 0 0-.102.107.974.974 0 0 0-.028.294v3.876h-1.035l-1.855-3.692v2.584a.89.89 0 0 0 .027.284.202.202 0 0 0 .096.097.587.587 0 0 0 .241.035h.24v.692h-2.067v-.691h.214a.645.645 0 0 0 .244-.031.224.224 0 0 0 .106-.106.517.517 0 0 0 .039-.226v-2.875a.623.623 0 0 0-.035-.243.238.238 0 0 0-.097-.112.435.435 0 0 0-.204-.034h-.267v-.69zm5.153 0h2.485v.691h-.186a.58.58 0 0 0-.247.03.102.102 0 0 0-.05.098.615.615 0 0 0 .116.28l.659 1.091.733-1.131a7.27 7.27 0 0 0 .108-.164.239.239 0 0 0 .014-.082.105.105 0 0 0-.041-.093.395.395 0 0 0-.194-.029h-.257v-.691h1.992v.691a.568.568 0 0 0-.617.338l-1.331 1.947v.894a.945.945 0 0 0 .03.308.202.202 0 0 0 .105.104.806.806 0 0 0 .291.034h.177v.692h-2.442v-.691h.131a.926.926 0 0 0 .326-.035.228.228 0 0 0 .11-.115.918.918 0 0 0 .036-.325v-.783l-1.33-2.03a.886.886 0 0 0-.278-.299.967.967 0 0 0-.34-.039z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#e6e6e6"
+                            d="M30.41 46.686l1.261.012v3.45H30.41v-3.462z"></path>
+                        <path
+                            transform="translate(-25.06876 86.76377) rotate(-89.74558)"
+                            opacity="0.33"
+                            fill="#ffffff"
+                            d="M25.22 55.341h11.642v1.262H25.22z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#e6e6e6"
+                            d="M9.086 52.785a12.8 12.8 0 0 1 6.118-5.923c4.156-1.787 9.588-3.585 9.604-3.59l.32.804c-.015.005-5.457 1.79-9.588 3.566a12.647 12.647 0 0 0-5.848 5.728z"></path>
+                        <path
+                            fill-rule="evenodd"
+                            fill="#e6e6e6"
+                            d="M52.43 53.064a12.792 12.792 0 0 0-6.116-5.919c-4.156-1.787-8.773-3.31-8.788-3.314l-.392.777c.015.005 4.714 1.542 8.844 3.318a12.62 12.62 0 0 1 5.842 5.714l.375-.35z"></path>
+                    </g>
+                </g>
+            </svg>
+        </span>
+        <figcaption class="caption">
+            <p class="name">Jane Doe</p>
+            <span class="as" title="CEO of media Ink">CEO of media Ink</span>
+        </figcaption>
+    </figure>
+
+    <div class="box-body">
+        <div class="box-content">
+            <span class="img">
+                <svg
+                    preserveAspectRatio="xMidYMid"
+                    viewBox="0 -22.5 256 256"
+                    height="800px"
+                    width="800px"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <g>
+                        <polygon
+                            points="144.822496 105.321856 169.778926 133.848796 203.341343 155.294133 209.178931 105.50196 203.341343 56.8331137 169.136495 75.6715889"
+                            fill="#00832D"></polygon>
+                        <path
+                            fill="#0066DA"
+                            d="M0.000557021739,150.659712 L0.000557021739,193.089915 C0.000557021739,202.77838 7.86384724,210.643527 17.5541688,210.643527 L59.9843714,210.643527 L68.7704609,178.585069 L59.9843714,150.659712 L30.8744153,141.873623 L0.000557021739,150.659712 Z"></path>
+                        <polygon
+                            points="59.9838143 9.9475983e-14 0 59.9838143 30.875715 68.7494798 59.9838143 59.9838143 68.6102243 32.4390893"
+                            fill="#E94235"></polygon>
+                        <polygon
+                            points="0.000557021739 150.679394 59.9843714 150.679394 59.9843714 59.9832573 0.000557021739 59.9832573"
+                            fill="#2684FC"></polygon>
+                        <path
+                            fill="#00AC47"
+                            d="M241.658683,25.3977775 L203.341157,56.8342278 L203.341157,155.29339 L241.818362,186.852385 C247.577967,191.364261 256.003849,187.251584 256.003849,179.930462 L256.003849,32.1785888 C256.003849,24.7757699 247.377439,20.6835169 241.658683,25.3977775"></path>
+                        <path
+                            fill="#00AC47"
+                            d="M144.822496,105.321856 L144.822496,150.659712 L59.9843714,150.659712 L59.9843714,210.643527 L185.787731,210.643527 C195.478053,210.643527 203.341343,202.77838 203.341343,193.089915 L203.341343,155.294133 L144.822496,105.321856 Z"></path>
+                        <path
+                            fill="#FFBA00"
+                            d="M185.787731,0 L59.9843714,0 L59.9843714,59.9838143 L144.822496,59.9838143 L144.822496,105.32167 L203.341343,56.832928 L203.341343,17.5536117 C203.341343,7.86329022 195.478053,0 185.787731,0"></path>
+                    </g>
+                </svg>
+            </span>
+            <div class="caption">
+                <p>Google Meet Call</p>
+                <div>
+                    <p class="text-sm">
+                        <time class="font-semibold">28 03 2024</time> at
+                        <time class="font-semibold">2 pm</time>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div data-title="Last seen" class="box-foot">
+        <figure class="box-foot-figure">
+            <span class="img">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="800px"
+                    height="800px"
+                    viewBox="0 0 61.7998 61.7998">
+                    <g data-name="Layer 2" id="Layer_2">
+                        <g data-name="—ÎÓÈ 1" id="_ÎÓÈ_1">
+                            <circle
+                                cx="30.8999"
+                                cy="30.8999"
+                                fill="#58b0e0"
+                                r="30.8999"></circle>
+                            <path
+                                d="M23.255 38.68l15.907.146v15.602l-15.907-.147V38.68z"
+                                fill="#302e33"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M53.478 51.993A30.813 30.813 0 0 1 30.9 61.8a31.225 31.225 0 0 1-3.837-.237A34.072 34.072 0 0 1 15.9 57.919a31.036 31.036 0 0 1-7.857-6.225l1.284-3.1 13.925-6.212c0 4.535 1.31 10.02 7.439 10.113 7.57.113 8.47-5.475 8.47-10.15l12.79 6.282z"
+                                fill="#857a6e"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M31.462 52.495c-3.342-5.472-9.388-6.287-11.359-6.6-5.42-.86-14.56-4.28-8.564-9.72 10.765-9.764 6.898-22.032 19.513-22.032 13.47 0 8.873 12.268 19.638 22.032 5.997 5.44-3.143 8.86-8.565 9.72a14.292 14.292 0 0 0-10.663 6.6z"
+                                fill="#302e33"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M39.964 42.252c-1.125 4.01-4.008 6.397-8.598 6.207-3.94-.163-7.297-2.397-8.11-6.204z"
+                                fill-rule="evenodd"
+                                opacity="0.18"></path>
+                            <path
+                                d="M31.129 8.432c21.281 0 12.987 35.266 0 35.266-12.267 0-21.281-35.266 0-35.266z"
+                                fill="#ffe8be"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M18.365 24.045c-3.07 1.34-.46 7.687 1.472 7.658a31.973 31.973 0 0 1-1.472-7.658z"
+                                fill="#f9dca4"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M44.14 24.045c3.07 1.339.46 7.687-1.471 7.658a31.993 31.993 0 0 0 1.471-7.658z"
+                                fill="#f9dca4"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M19.113 25.706c-2.83-4.958-2.783-9.375-1.362-11.817 2.048-3.52 4.922-3.688 5.315-4.517 4.025-8.479 24.839-2.048 23.97 11.09a14.798 14.798 0 0 0-1.522-2.486s-.075 4.991-1.437 6.957c-1.64.464-15.061.239-20.053-9.948-4.006 2.268-5.06 7.015-4.91 10.72z"
+                                fill="#969696"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M31.15 46.543c-2.66.022-15.617-4.022-12.61-26.045 0 0 .65 9.916 2.775 12.788 1.382 1.868 2.625 2.57 3.82.746 1.248-1.9 3.946-3.473 6.038-1.677 1.737-1.85 4.848-.212 6.084 1.677 1.195 1.823 2.44 1.123 3.822-.746 2.125-2.872 2.586-12.456 2.586-12.456 3.456 23.6-9.855 25.735-12.515 25.713z"
+                                fill="#969696"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M26.527 36.802a7.118 7.118 0 0 1 4.568-2.096 7.29 7.29 0 0 1 4.503 2.099c-.788.525-5.874 1.737-9.071-.003z"
+                                fill="#ffe8be"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M26.611 51.297a29.35 29.35 0 0 0-8.171-3.501c-4.778-.758-13.423-1.518-11.271-10.086C12.023 18.38 18.85 3.688 31.457 3.87c12.836.184 19.09 15.8 23.84 33.865 1.904 7.238-6.79 9.313-11.508 10.06A21.129 21.129 0 0 0 36 51.14c-6.963 4.765-1.812 4.7-9.389.158zm4.851 1.198a14.292 14.292 0 0 1 10.663-6.6c5.422-.86 14.562-4.28 8.565-9.72-10.765-9.764-6.167-22.032-19.638-22.032-12.615 0-8.748 12.268-19.513 22.032-5.997 5.44 3.143 8.86 8.564 9.72 1.97.313 8.017 1.127 11.36 6.6z"
+                                fill="#7d7062"
+                                fill-rule="evenodd"></path>
+                            <path
+                                d="M24.202 50.213s5.988 3.256 7.588 7.992c1.61-5.121 7.627-8.327 7.627-8.327S33.07 52.33 31.7 55.534c-.973-1.722-2.707-3.4-7.497-5.321z"
+                                fill="#302e33"
+                                fill-rule="evenodd"></path>
+                        </g>
+                    </g>
+                </svg>
+            </span>
+            <figcaption class="font-medium">Waiting</figcaption>
+            <button type="button">
+                <svg
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    height="18"
+                    width="18"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17 7l-10 10"></path>
+                    <path d="M8 7l9 0l0 9"></path>
+                </svg>
+            </button>
+        </figure>
+        <div class="box-foot-actions">
+            <button type="button" aria-label="email" class="box-foot-action">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    stroke-linejoin="round"
+                    stroke-linecap="round"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    fill="none"
+                    stroke="currentColor">
+                    <path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
+                    <path
+                        d="M16 12v1.5a2.5 2.5 0 0 0 5 0v-1.5a9 9 0 1 0 -5.5 8.28"></path>
+                </svg>
+            </button>
+            <button type="button" aria-label="meets" class="box-foot-action">
+                <svg
+                    stroke="currentColor"
+                    fill="none"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    height="22"
+                    width="22"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,27 @@
+<?php
+return [
+    
+    'no' => 'No',
+    'yes' => 'Yes',
+    'cancel' => 'Cancel',
+    'confirm' => "Confirm",
+    'delete'   => "Delete",
+    'destroy' => "Destroy",
+    'restore' => "Restore",
+    'agree' => 'Agree',
+    'approve' => 'Approve',
+    'copy' => 'Copy',
+    'change_password' => 'Change Password',
+    'disable' => 'Disable',
+    'edit' => 'Edit',
+    'enable' => 'Enable',
+    'reSend'   => 'Resend',
+    'add_gallery' => 'Add Gallery',
+    'move_to_trash' => 'Move to trash',
+    'permission' => 'Permission',
+    'pending' => 'Pending',
+    'promote_to_student' => 'Promote To Student',
+    'promote_to_agency' => 'Promote To Agency',
+    'qr_code' => 'QR Code',
+    'reject' => 'Reject',
+];
