@@ -1,116 +1,67 @@
 @extends('admin::shared.layout')
 @section('layout')
-    <div class="content-wrapper" x-data="xStockOut">
-        <div class="header">
-            @include('admin::shared.header', ['header_name' => __('Stock Out Management')])
-            <div class="header-tab">
-                <div class="header-tab-wrapper">
-                    <div class="menu-row">
-                        <div class="menu-item {!! Request::is('admin/stock-out/list') ? 'active' : '' !!}" s-click-link="{!! route('admin-stock-out-list') !!}">Data</div>
-                    </div>
-                </div>
-                <div class="header-action-button">
-                    <form class="filter" action="{!! url()->current() !!}" method="GET">
-                        <div class="form-row">
-                            <input type="text" name="search" placeholder="Enter product" value="{!! request('search') !!}">
-                            <i data-feather="filter"></i>
-                        </div>&nbsp;&nbsp;
-                        <div class="category-content-gp">
-                            <select name="shop_id" class="SelectShop" id="shop_id" x-init="fetchSelectShop()" >
-                                <option value=""> Select Shop</option>
-                            </select>
-                        </div>
-                        <div class="form-row form-row-inputCus">
-                            <input type="text" name="date" placeholder="Date" value="{!! request('date') !!}" id="date" autocomplete="off">
-                        </div>
-                        <button mat-flat-button type="submit" class="btn-create bg-success">
-                            <i data-feather="search"></i>
-                            <span>Search</span>
-                        </button>
-                    </form>
-                    @can('stock-out-create')
-                        <button class="btn-create" s-click-link="{!! route('admin-stock-out-create') !!}">
-                            <i data-feather="plus-circle"></i>
-                            <span>Create Stock Out</span>
-                        </button>
-                    @endcan
-                    <button s-click-link="{!! url()->current() !!}">
-                        <i data-feather="refresh-ccw"></i>
-                        <span>@lang('user.button.reload')</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="content-body">
-            @include('admin::pages.inventoryManagement.stockOut.table')
-        </div>
+    @include('admin::shared.header', ['header_name' => 'Stock Out Management'])
+    <div class="content-wrapper" id="app" x-data="xIndex">
+        @component('admin::components.listingData', [
+            'routeName' => $routeName,
+            'createName' => 'Create Stock Out',
+            'createPermission' => 'stock-out-create',
+            'filterStatus' => false,
+            // 'filterView' => 'admin::pages.inventoryManagement.partials.stock-filter',
+            'filterData' => ['shop' => $shop],
+            'showTabs' => true,
+            'exportUrl' => '',
+            'data' => $data,
+            'status' => $status,
+            'tbHeader' => [
+                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
+                ['field' => 'product_title', 'title' => 'Product', 'class' => 'text left', 'colVal' => 14],
+                ['field' => 'category_title', 'title' => 'Category', 'class' => 'text left', 'colVal' => 9],
+                ['field' => 'uom_title', 'title' => 'UOM', 'class' => '', 'colVal' => 5],
+                ['field' => 'qty', 'title' => 'Qty', 'class' => '', 'colVal' => 6],
+                ['field' => 'created_date', 'title' => 'Date', 'class' => '', 'colVal' => 11],
+                ['field' => 'remark', 'title' => 'Remark', 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'shop_title', 'title' => 'Shop', 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'destination_title', 'title' => 'To', 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'request_by_title', 'title' => 'Requested By', 'class' => 'text left', 'colVal' => 8],
+                ['field' => 'stock_status_title', 'title' => 'Status', 'class' => '', 'colVal' => 5],
+                [
+                    'field' => 'action',
+                    'title' => '',
+                    'class' => '',
+                    'colVal' => 5,
+                    'actions' => [
+                        [
+                            'key' => 'active',
+                            'action' => [
+                                ['url' => 'view', 'title' => 'View', 'icon' => 'visibility', 'type' => 'link'],
+                                ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
+                                ['url' => 'delete', 'title' => 'Delete', 'icon' => 'Delete', 'class' => 'text-danger'],
+                            ],
+                        ],
+                        [
+                            'key' => 'disable',
+                            'action' => [['url' => 'status', 'title' => 'Disable', 'icon' => 'hide_source', 'class' => 'text-danger']],
+                        ],
+                        [
+                            'key' => 'enable',
+                            'action' => [['url' => 'status', 'title' => 'Enable', 'icon' => 'refresh']],
+                        ],
+                        [
+                            'key' => 'trash',
+                            'action' => [
+                                ['url' => 'restore', 'title' => 'Restore', 'icon' => 'settings_backup_restore'],
+                                ['url' => 'destroy', 'title' => 'Destroy', 'icon' => 'Delete', 'class' => 'text-danger'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ])
+        @endcomponent
     </div>
 @stop
+
 @section('script')
-    <script lang="ts">
-        $(document).ready(function() {
-            $("#date").datepicker({
-                changeYear: true,
-                gotoCurrent: true,
-                yearRange: "-1:+1",
-                dateFormat: "yy-mm-dd",
-            });
-        });
-    </script>
-    <script>
-        var option = "<option selected></option>";
-        //shop
-        var shop = $(option).val(`{{ isset($shop->id) ? $shop->id : '' }}`).text(
-            `{{ isset($shop->name) ? $shop->name : '' }}`);
-        $('.SelectShop').append(shop).trigger('change');
-
-    </script>
-    <script>
-        const header = {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-                Accept: "application/json",
-            },
-            responseType: "json",
-        };
-        document.addEventListener('alpine:init', () => {
-            Alpine.data("xStockOut", () => ({
-                loading: false,
-                loadingSubmit: false,
-                memberCarData: [],
-                baseImageUrl: "{{ asset('file_manager') }}",
-                dataError: null,
-                init() {},
-                fetchSelectShop() {
-                    $(`#shop_id`).select2({
-                        placeholder: `Select Shop`,
-                        ajax: {
-                            url: '{{ route('admin-select-stock-shop') }}',
-                            dataType: 'json',
-                            type: "GET",
-                            quietMillis: 50,
-                            data: function(param) {
-                                return {
-                                    search: param.term
-                                };
-                            },
-                            processResults: function(data) {
-                                return {
-                                    results: $.map(data.data, function(item) {
-                                        return {
-                                            text: item?.name ? item?.name : '',
-                                            id: item.id
-                                        }
-                                    })
-                                };
-                            }
-                        }
-                    }).on('select2:open', (e) => {
-                        document.querySelector('.select2-search__field').focus();
-                    });
-                },
-            }));
-        });
-    </script>
+    @include('admin::pages.inventoryManagement.partials.stock-index-script')
 @stop
-

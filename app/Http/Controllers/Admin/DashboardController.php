@@ -9,6 +9,8 @@ use App\Models\RevenueDetail;
 use App\Models\ExpenseDetail;
 use App\Models\User;
 use App\Models\CustomerPaid;
+use App\Models\Booking;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -24,6 +26,8 @@ class DashboardController extends Controller
 
         $data['totalCustomerPaidUsd'] = CustomerPaid::sum('amount_usd');
         $data['totalCustomerPaidKhr'] = CustomerPaid::sum('amount_kh');
+        $data['totalBookingRemainingAmount'] = Booking::whereIn('payment_status', ['Pending', 'Partial'])
+            ->sum(DB::raw('total_price - paid_amount'));
         
         return view('admin::pages.dashboard')->with($data);
     }

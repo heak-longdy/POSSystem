@@ -3,6 +3,58 @@
 use Carbon\Carbon;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Route;
+
+// if (!function_exists('CRUD')) {
+//     function CRUD($Controller, $routeName)
+//     {
+//         Route::group([
+//             'prefix' => $routeName,
+//             'as'     => $routeName . '-'
+//         ], function () use ($Controller) {
+//             Route::get('list/{status?}', [$Controller, 'index'])->name('list');
+//             Route::get('create', [$Controller, 'onCreate'])->name('create');
+//             Route::get('edit/{id?}', [$Controller, 'onEdit'])->name('edit');
+//             Route::post('save/{id?}', [$Controller, 'Save'])->name('save');
+//             Route::match(['get', 'post'], 'status/{id}/{status}', [$Controller, 'updateStatus'])->name('status');
+//             Route::post('delete/{id?}', [$Controller, 'delete'])->name('delete');
+//             Route::post('restore/{id?}', [$Controller, 'restore'])->name('restore');
+//             Route::post('destroy/{id?}', [$Controller, 'destroy'])->name('destroy');
+
+//             Route::get('change-password/{id?}', [$Controller, 'onChangePassword'])->name('change-password');
+//             Route::post('save-password/{id?}', [$Controller, 'onSavePassword'])->name('save-password');
+
+//             Route::get('permission/{id?}', [$Controller, 'onPermission'])->name('permission');
+//             Route::post('save-permission/{id?}', [$Controller, 'onSavePermission'])->name('save-permission');
+
+//             Route::get('export', [$Controller, 'export'])->name('export');
+//         });
+//     }
+// }
+
+function CRUD($Controller=null, $routeName=null){
+    Route::group([
+        'prefix' => $routeName,
+        'as'     => $routeName . '-'
+    ], function () use ($Controller) {
+        Route::get('list/{status?}', [$Controller, 'index'])->name('list');
+        Route::get('create', [$Controller, 'onCreate'])->name('create');
+        Route::get('edit/{id?}', [$Controller, 'onEdit'])->name('edit');
+        Route::post('save/{id?}', [$Controller, 'Save'])->name('save');
+        Route::match(['get', 'post'], 'status/{id}/{status}', [$Controller, 'updateStatus'])->name('status');
+        Route::post('delete/{id?}', [$Controller, 'delete'])->name('delete');
+        Route::post('restore/{id?}', [$Controller, 'restore'])->name('restore');
+        Route::post('destroy/{id?}', [$Controller, 'destroy'])->name('destroy');
+
+        Route::get('change-password/{id?}', [$Controller, 'onChangePassword'])->name('change-password');
+        Route::post('save-password/{id?}', [$Controller, 'onSavePassword'])->name('save-password');
+
+        Route::get('permission/{id?}', [$Controller, 'onPermission'])->name('permission');
+        Route::post('save-permission/{id?}', [$Controller, 'onSavePermission'])->name('save-permission');
+
+        Route::get('export', [$Controller, 'export'])->name('export');
+    });
+}
 
 function customUrl($url, $queryParam)
 {

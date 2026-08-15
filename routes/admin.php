@@ -7,6 +7,13 @@ use App\Http\Controllers\Admin as Admin;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController;
+
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ShopController;
+
+use App\Http\Controllers\Admin\BookingController;
+use App\Http\Controllers\Admin\RemainingAmountController;
+
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SettingController;
@@ -17,8 +24,18 @@ use App\Http\Controllers\Admin\JobController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\PlacementTypeController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SectorController;
 use App\Http\Controllers\Admin\TestimonialController;
+use App\Http\Controllers\Admin\SupplierController;
+
+use App\Http\Controllers\Admin\UomController;
+
+use App\Http\Controllers\Admin\Inventory\StockInController;
+use App\Http\Controllers\Admin\Inventory\StockOutController;
+use App\Http\Controllers\Admin\Inventory\StockTransferController;
+use App\Http\Controllers\Admin\Inventory\StockOnHandController;
+use App\Http\Controllers\Admin\Inventory\StockMovementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,57 +48,6 @@ use App\Http\Controllers\Admin\TestimonialController;
 |
 */
 // Auth
-
-// app/helpers.php
-if (!function_exists('CRUD')) {
-    function CRUD($Controller, $routeName)
-    {
-        Route::group([
-            'prefix' => $routeName,
-            'as'     => $routeName . '-'
-        ], function () use ($Controller) {
-            Route::get('list/{status?}', [$Controller, 'index'])->name('list');
-            Route::get('create', [$Controller, 'onCreate'])->name('create');
-            Route::get('edit/{id?}', [$Controller, 'onEdit'])->name('edit');
-            Route::post('save/{id?}', [$Controller, 'Save'])->name('save');
-            Route::match(['get', 'post'], 'status/{id}/{status}', [$Controller, 'updateStatus'])->name('status');
-            Route::post('delete/{id?}', [$Controller, 'delete'])->name('delete');
-            Route::post('restore/{id?}', [$Controller, 'restore'])->name('restore');
-            Route::post('destroy/{id?}', [$Controller, 'destroy'])->name('destroy');
-
-            Route::get('change-password/{id?}', [$Controller, 'onChangePassword'])->name('change-password');
-            Route::post('save-password/{id?}', [$Controller, 'onSavePassword'])->name('save-password');
-
-            Route::get('permission/{id?}', [$Controller, 'onPermission'])->name('permission');
-            Route::post('save-permission/{id?}', [$Controller, 'onSavePermission'])->name('save-permission');
-        });
-    }
-}
-
-
-// function CRUD($Controller, $routeName)
-// {
-//     Route::group([
-//         'prefix' => $routeName,
-//         'as'     => $routeName . '-'
-//     ], function () use ($Controller) {
-//         Route::get('list/{status?}', [$Controller, 'index'])->name('list');
-//         Route::get('create', [$Controller, 'onCreate'])->name('create');
-//         Route::get('edit/{id?}', [$Controller, 'onEdit'])->name('edit');
-//         Route::post('save/{id?}', [$Controller, 'Save'])->name('save');
-//         Route::match(['get', 'post'], 'status/{id}/{status}', [$Controller, 'updateStatus'])->name('status');
-//         Route::post('delete/{id?}', [$Controller, 'delete'])->name('delete');
-//         Route::post('restore/{id?}', [$Controller, 'restore'])->name('restore');
-//         Route::post('destroy/{id?}', [$Controller, 'destroy'])->name('destroy');
-
-//         Route::get('change-password/{id?}', [$Controller, 'onChangePassword'])->name('change-password');
-//         Route::post('save-password/{id?}', [$Controller, 'onSavePassword'])->name('save-password');
-
-//         Route::get('permission/{id?}', [$Controller, 'onPermission'])->name('permission');
-//         Route::post('save-permission/{id?}', [$Controller, 'onSavePermission'])->name('save-permission');
-//     });
-// }
-
 
 Route::prefix('auth')->group(function () {
     Route::get('/', function () {
@@ -102,33 +68,41 @@ Route::middleware(['AdminGuard'])
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         //Service
+        // Route::group([
+        //     'prefix' => 'service',
+        //     'as'     => 'service-'
+        // ], function () {
+        //     Route::get('list/{status?}', [ServiceController::class, 'index'])->name('list');
+        //     Route::get('create/{id?}', [ServiceController::class, 'onCreate'])->name('create');
+        //     Route::post('save/{id?}', [ServiceController::class, 'onSave'])->name('save');
+        //     Route::match(['get', 'post'], 'status/{id}/{status}', [ServiceController::class, 'onUpdateStatus'])->name('status');
+        // });
+
+
+        CRUD(ProductController::class, 'product');
+        CRUD(ShopController::class, 'shop');
         Route::group([
-            'prefix' => 'service',
-            'as'     => 'service-'
+            'prefix' => 'shop',
+            'as'     => 'shop-'
         ], function () {
-            Route::get('list/{status?}', [ServiceController::class, 'index'])->name('list');
-            Route::get('create/{id?}', [ServiceController::class, 'onCreate'])->name('create');
-            Route::post('save/{id?}', [ServiceController::class, 'onSave'])->name('save');
-            Route::match(['get', 'post'], 'status/{id}/{status}', [ServiceController::class, 'onUpdateStatus'])->name('status');
+            Route::get('product/{id}/create', [ShopController::class, 'onCreateProduct'])->name('product-create');
+            Route::get('product/{shopId}/edit/{shopProductId}', [ShopController::class, 'onEditProduct'])->name('product-edit');
+            Route::post('product/{shopId}/delete/{shopProductId}', [ShopController::class, 'deleteProduct'])->name('product-delete');
+            Route::post('product/{shopId}/restore/{shopProductId}', [ShopController::class, 'restoreProduct'])->name('product-restore');
+            Route::post('product/{shopId}/destroy/{shopProductId}', [ShopController::class, 'destroyProduct'])->name('product-destroy');
+            Route::get('product/{id}', [ShopController::class, 'onProduct'])->name('product');
+            Route::post('product/save/{id}', [ShopController::class, 'saveProduct'])->name('product-save');
         });
 
         // setting
-        // Category
-        Route::group([
-            'prefix' => 'category',
-            'as'     => 'category-'
-        ], function () {
-            Route::get('list/{status?}', [CategoryController::class, 'index'])->name('list');
-            Route::get('data', [CategoryController::class, 'data'])->name('data');
-            Route::get('create', [CategoryController::class, 'onCreate'])->name('create');
-            Route::get('edit/{id?}', [CategoryController::class, 'onEdit'])->name('edit');
-            Route::post('save/{id?}', [CategoryController::class, 'onSave'])->name('save');
-            Route::match(['get', 'post'], 'status/{id}/{status}', [CategoryController::class, 'onUpdateStatus'])->name('status');
-        });
+        CRUD(CategoryController::class, 'category');
+
+        CRUD(SupplierController::class, 'supplier');
 
         CRUD(PartnerController::class, 'partner');
         CRUD(SectorController::class, 'sector');
         CRUD(PositionController::class, 'position');
+        CRUD(StaffController::class, 'staff');
         CRUD(UserController::class, 'user');
 
         CRUD(JobController::class, 'internships');
@@ -139,7 +113,7 @@ Route::middleware(['AdminGuard'])
         CRUD(TestimonialController::class, 'testimonial');
 
         CRUD(CustomerController::class, 'customer');
-        Route::get('customer/export', [CustomerController::class, 'export'])->name('customer-export');
+
         CRUD(CustomerPaidController::class, 'customer-paid');
         Route::get('customer-paid/export', [CustomerPaidController::class, 'export'])->name('customer-paid-export');
 
@@ -148,6 +122,78 @@ Route::middleware(['AdminGuard'])
 
         Route::get('/aboutUs', [SettingController::class, 'indexAboutUs'])->name('about-us-index');
         Route::post('/aboutUs/Save', [SettingController::class, 'onStoreAboutUs'])->name('about-us-store');
+
+
+
+         //InventoryManagement
+        //stockIn
+        Route::group([
+            'prefix' => 'stock-in',
+            'as'     => 'stock-in-'
+        ], function () {
+            Route::get('list/{status?}', [StockInController::class, 'index'])->name('list');
+            Route::get('create', [StockInController::class, 'onCreate'])->name('create');
+            Route::get('edit/{id?}', [StockInController::class, 'onEdit'])->name('edit');
+            Route::get('view/{id?}', [StockInController::class, 'onView'])->name('view');
+            Route::post('save/{id?}', [StockInController::class, 'onSave'])->name('save');
+            Route::match(['get', 'post'], 'status/{id}/{status}', [StockInController::class, 'updateStatus'])->name('status');
+            Route::post('delete/{id?}', [StockInController::class, 'delete'])->name('delete');
+            Route::post('restore/{id?}', [StockInController::class, 'restore'])->name('restore');
+            Route::post('destroy/{id?}', [StockInController::class, 'destroy'])->name('destroy');
+        });
+        //stockOut
+        Route::group([
+            'prefix' => 'stock-out',
+            'as'     => 'stock-out-'
+        ], function () {
+            Route::get('list/{status?}', [StockOutController::class, 'index'])->name('list');
+            Route::get('create', [StockOutController::class, 'onCreate'])->name('create');
+            Route::get('edit/{id?}', [StockOutController::class, 'onEdit'])->name('edit');
+            Route::get('view/{id?}', [StockOutController::class, 'onView'])->name('view');
+            Route::post('save/{id?}', [StockOutController::class, 'onSave'])->name('save');
+            Route::match(['get', 'post'], 'status/{id}/{status}', [StockOutController::class, 'updateStatus'])->name('status');
+            Route::post('delete/{id?}', [StockOutController::class, 'delete'])->name('delete');
+            Route::post('restore/{id?}', [StockOutController::class, 'restore'])->name('restore');
+            Route::post('destroy/{id?}', [StockOutController::class, 'destroy'])->name('destroy');
+        });
+        //stockTransfer
+        Route::group([
+            'prefix' => 'stock-transfer',
+            'as'     => 'stock-transfer-'
+        ], function () {
+            Route::get('list/{status?}', [StockTransferController::class, 'index'])->name('list');
+            Route::get('create', [StockTransferController::class, 'onCreate'])->name('create');
+            Route::get('edit/{id?}', [StockTransferController::class, 'onEdit'])->name('edit');
+            Route::get('view/{id?}', [StockTransferController::class, 'onView'])->name('view');
+            Route::post('save/{id?}', [StockTransferController::class, 'onSave'])->name('save');
+            Route::post('update/{id?}', [StockTransferController::class, 'onUpdate'])->name('update');
+            Route::match(['get', 'post'], 'status/{id}/{status}', [StockTransferController::class, 'updateStatus'])->name('status');
+            Route::post('delete/{id?}', [StockTransferController::class, 'delete'])->name('delete');
+            Route::post('restore/{id?}', [StockTransferController::class, 'restore'])->name('restore');
+            Route::post('destroy/{id?}', [StockTransferController::class, 'destroy'])->name('destroy');
+        });
+        //stockOnHand
+        Route::group([
+            'prefix' => 'stock-on-hand',
+            'as'     => 'stock-on-hand-'
+        ], function () {
+            Route::get('list/{status?}', [StockOnHandController::class, 'index'])->name('list');
+            Route::get('view/{id?}', [StockOnHandController::class, 'onView'])->name('view');
+            Route::get('find/{product_id?}/{shop_id?}', [StockOnHandController::class, 'onFind'])->name('onFind');
+            Route::get('report', [StockOnHandController::class, 'report'])->name('report');
+        });
+        //stockMovement
+        Route::group([
+            'prefix' => 'stock-movement',
+            'as'     => 'stock-movement-'
+        ], function () {
+            Route::get('list/{status?}', [StockMovementController::class, 'index'])->name('list');
+            Route::get('view/{id?}', [StockMovementController::class, 'onView'])->name('view');
+            Route::get('report', [StockMovementController::class, 'report'])->name('report');
+        });
+
+        //Setting
+        CRUD(UomController::class, 'uom');
 
         //Select
         Route::group([
@@ -188,10 +234,56 @@ Route::middleware(['AdminGuard'])
             //Sector
             Route::get('sector', [Admin\SelectController::class, 'SelectSectorSearch'])->name('sector');
 
+            //Category
+            Route::get('category', [Admin\SelectController::class, 'SelectCategorySearch'])->name('category');
+
+            //UOM
+            Route::get('uom', [Admin\SelectController::class, 'SelectUOMSearch'])->name('uom');
+
             //placement type
             Route::get('placement-type', [Admin\SelectController::class, 'SelectPlacementTypeSearch'])->name('placement-type');
         });
 
+
+        //Bookings
+        Route::group([
+            'prefix' => 'booking',
+            'as'     => 'booking-'
+        ], function () {
+            Route::get('list/{status?}', [BookingController::class, 'index'])->name('list');
+            Route::get('create', [BookingController::class, 'onCreate'])->name('create');
+            Route::match(['get', 'post'], 'status/{id}/{status}', [BookingController::class, 'updateStatus'])->name('status');
+            Route::get('list-product/{status?}', [BookingController::class, 'product'])->name('list-product');
+            Route::get('edit/{id?}', [BookingController::class, 'onEdit'])->name('edit');
+            Route::post('save/{id?}', [BookingController::class, 'Save'])->name('save');
+            Route::post('delete/{id}', [BookingController::class, 'delete'])->name('delete');
+            Route::post('restore/{id}', [BookingController::class, 'restore'])->name('restore');
+            Route::post('destroy/{id}', [BookingController::class, 'destroy'])->name('destroy');
+
+            Route::get('report', [BookingController::class, 'report'])->name('report');
+            Route::get('payment-details/{id}', [BookingController::class, 'getPaymentDetails'])->name('payment-details');
+            Route::post('add-payment/{id}', [BookingController::class, 'addPayment'])->name('add-payment');
+            Route::put('update-payment/{paymentId}', [BookingController::class, 'updatePayment'])->name('update-payment');
+            Route::delete('delete-payment/{paymentId}', [BookingController::class, 'deletePayment'])->name('delete-payment');
+            Route::post('send-payment-reminder/{id}', [BookingController::class, 'sendPaymentReminder'])->name('send-payment-reminder');
+            Route::post('cancel/{id}', [BookingController::class, 'cancelBooking'])->name('cancel');
+            Route::post('update-payment-status/{id}', [BookingController::class, 'updatePaymentStatus'])->name('update-payment-status');
+        });
+
+        // Remaining Amount Management
+        Route::group([
+            'prefix' => 'remaining-amount',
+            'as'     => 'remaining-amount-'
+        ], function () {
+            Route::get('list/{status?}', [RemainingAmountController::class, 'index'])->name('list');
+            Route::get('create', [RemainingAmountController::class, 'index'])->name('create');
+            Route::get('payment-details/{id}', [RemainingAmountController::class, 'getPaymentDetails'])->name('payment-details');
+            Route::post('add-payment/{id}', [RemainingAmountController::class, 'addPayment'])->name('add-payment');
+            Route::put('update-payment/{paymentId}', [RemainingAmountController::class, 'updatePayment'])->name('update-payment');
+            Route::delete('delete-payment/{paymentId}', [RemainingAmountController::class, 'deletePayment'])->name('delete-payment');
+            Route::post('send-reminder/{id}', [RemainingAmountController::class, 'sendPaymentReminder'])->name('send-reminder');
+            Route::get('report', [RemainingAmountController::class, 'report'])->name('report');
+        });
 
         //Setting
         Route::group([
@@ -233,13 +325,22 @@ Route::middleware(['AdminGuard'])
             Route::post('save/{id?}', [Admin\PageController::class, 'onSave'])->name('save');
         });
 
-        //Contact
+        // Contact
         Route::group([
             'prefix' => 'contact',
             'as' => 'contact-',
         ], function () {
             Route::get('/{type?}', [Admin\ContactController::class, 'index'])->name('contact');
             Route::post('save/{id?}', [Admin\ContactController::class, 'store'])->name('save');
+        });
+
+        // Staff Expense Management
+        CRUD(Admin\StaffExpenseController::class, 'staff-expense');
+        Route::group([
+            'prefix' => 'staff-expense',
+            'as'     => 'staff-expense-',
+        ], function () {
+            Route::get('/staff/{staffId}',  [Admin\StaffExpenseController::class, 'staffHistory'])->name('staff-history');
         });
     });
 

@@ -4,6 +4,8 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use App\Support\Language;
 
 class UserRequest extends FormRequest
 {
@@ -31,6 +33,7 @@ class UserRequest extends FormRequest
             // "phone" => "required|numeric|unique:users,phone," . $acceptedId,
             // "identity" => "required|numeric|unique:users,identity," . $acceptedId,
             "status"    => "required|numeric",
+            "language_preference" => ["required", Rule::in(Language::activeCodes())],
             'password' => $acceptedId ? 'nullable':'required'.'|same:confirm_password|min:6',
             'confirm_password' => $acceptedId ? 'nullable':'required|min:6',
         ];
@@ -41,6 +44,8 @@ class UserRequest extends FormRequest
             "name.required" => "Name is required",
             "status.required" => "Status is required",
             "status.numeric" => "Status is invalid format",
+            "language_preference.required" => "Language Preference is required",
+            "language_preference.in" => "Language Preference is invalid",
             "email.required" => "Email is required",
             "email.unique" => "Email already exists",
             'email.email'    => 'Please provide a valid email address.',

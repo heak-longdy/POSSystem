@@ -9,6 +9,7 @@ use Auth;
 use App\Models\Customer;
 use App\Models\Booking;
 use App\Models\BookingDetail;
+use App\Models\BookingPayment;
 use App\Models\User;
 use App\Models\Shop;
 use App\Models\Order;
@@ -33,8 +34,9 @@ class BookingController extends Controller
   {
     $barber = auth('barber-api')->user();
 
+    $outstandingStatuses = ['Pending', 'Partial'];
     $data_pending = Booking::where('barber_id', $barber->id)
-      ->where('payment_status', 'Pending')
+      ->whereIn('payment_status', $outstandingStatuses)
       ->limit(10)
       ->get();
     // return $data_pending;
@@ -43,23 +45,11 @@ class BookingController extends Controller
       ->limit(10)
       ->get();
 
-    $liability = Booking::where('payment_status', 'Pending')
+    $liability = Booking::whereIn('payment_status', $outstandingStatuses)
       ->where('barber_id', $barber->id)
       //->whereDate('booking_date', '>=', $req->from_date)
       // ->whereDate('booking_date', '<=', $req->to_date)
-      ->sum('total_price');
-
-    $d = Booking::where('payment_status', 'Pending')
-      ->where('barber_id', $barber->id)
-      //->whereDate('booking_date', '>=', $req->from_date)
-      // ->whereDate('booking_date', '<=', $req->to_date)
-      ->sum('total_discount');
-
-    $c = Booking::where('payment_status', 'Pending')
-      ->where('barber_id', $barber->id)
-      //->whereDate('booking_date', '>=', $req->from_date)
-      // ->whereDate('booking_date', '<=', $req->to_date)
-      ->sum('total_commission');
+      ->sum(DB::raw('total_price - paid_amount'));
 
     $total = Booking::where('barber_id', $barber->id)->whereDate('booking_date', '>=', $req->from_date)
       ->whereDate('booking_date', '<=', $req->to_date)
@@ -70,7 +60,7 @@ class BookingController extends Controller
       ->whereDate('booking_date', '<=', $req->to_date)
       ->sum('total_commission');
 
-    $unpaid = $liability - $d - $c;
+    $unpaid = $liability;
     if (count($data_pending) > 0) {
       $message = true;
       $pending = $data_pending;
@@ -366,7 +356,7 @@ class BookingController extends Controller
   }
   public function detail($id)
   {
-    $booking = Booking::where('id', $id)->first();
+    $booking = Booking::with(['payments.createdBy'])->where('id', $id)->first();
     $detail = BookingDetail::with('service')->with('product')->where('booking_id', $booking->id)->get();
     $total = $booking ? $booking->total_price : 0;
     $c = Customer::where('id', $booking->customer_id)->first();
@@ -387,6 +377,9 @@ class BookingController extends Controller
       'total_commission' => $booking->total_commission ? $booking->total_commission : null,
       'total_point' => $booking->total_point ? $booking->total_point : null,
       'total_discount' => $booking->total_discount ? $booking->total_discount : null,
+      'paid_amount' => $booking->paid_amount ? $booking->paid_amount : 0,
+      'remaining_amount' => $booking->remaining_amount,
+      'payments' => $booking ? $booking->payments : [],
       //'discount_type' => $booking->discount_type?$booking->discount_type:null,
       'reward' => $reward,
       'data' => $detail,
@@ -418,9 +411,24 @@ class BookingController extends Controller
         }
         $booking_id  = explode(',', $request->booking_id);
         for ($i = 0; $i < count($booking_id); $i++) {
-          $detail = Booking::where('id', $booking_id[$i])->first();
+          $detail = Booking::where('id', $booking_id[$i])->lockForUpdate()->first();
+          if (!$detail || $detail->payment_status === 'Cancel') {
+            continue;
+          }
+
+          $remaining = max(0, (float) $detail->total_price - (float) ($detail->paid_amount ?? 0));
+          if ($remaining > 0) {
+            BookingPayment::create([
+              'booking_id' => $detail->id,
+              'amount' => $remaining,
+              'note' => 'Paid from barber wallet.',
+              'created_by' => null,
+            ]);
+          }
+
+          $detail->paid_amount = BookingPayment::where('booking_id', $detail->id)->sum('amount');
           $detail->payment_status = 'Paid';
-          $detail->payment_date = date('y-m-d:h:s:i');
+          $detail->payment_date = date('Y-m-d H:i:s');
           $detail->save();
         }
         $wallet = Barber::where('id', $barber->id)->update([
@@ -440,7 +448,7 @@ class BookingController extends Controller
   public function pending(Request $req)
   {
     $barber = auth('barber-api')->user();
-    $data = Booking::where('barber_id', $barber->id)->where('payment_status', 'Pending')->paginate(20);
+    $data = Booking::where('barber_id', $barber->id)->whereIn('payment_status', ['Pending', 'Partial'])->paginate(20);
     if (count($data) > 0) {
       $message = true;
       $b = $data;

@@ -1,0 +1,167 @@
+[
+  {
+    "id": 1,
+    "product_name_khmer": "ភេសជ្ជៈ Red Bull (២៥០ml)",
+    "product_name_english": "Red Bull Energy Drink (250ml)",
+    "category_khmer": "ផលិតផលស្រេច",
+    "category_english": "Finished Goods",
+    "price_usd": 2.5,
+    "uom_khmer": "កំប៉ុង",
+    "uom_english": "Can",
+    "image_url": "/red_bull_can.png"
+  },
+  {
+    "id": 2,
+    "product_name_khmer": "ភេសជ្ជៈ Monster Energy (៤៧៣ml)",
+    "product_name_english": "Monster Energy Original (473ml)",
+    "category_khmer": "ផលិតផលស្រេច",
+    "category_english": "Finished Goods",
+    "price_usd": 2.99,
+    "uom_khmer": "កំប៉ុង",
+    "uom_english": "Can",
+    "image_url": "/monster_energy_can.png"
+  },
+  {
+    "id": 3,
+    "product_name_khmer": "ភេសជ្ជៈ Celsius Sparkling Orange (៣៥៥ml)",
+    "product_name_english": "Celsius Sparkling Orange (355ml)",
+    "category_khmer": "ផលិតផលស្រេច",
+    "category_english": "Finished Goods",
+    "price_usd": 2.49,
+    "uom_khmer": "កំប៉ុង",
+    "uom_english": "Can",
+    "image_url": "/celsius_orange_can.png"
+  },
+  {
+    "id": 4,
+    "product_name_khmer": "ភេសជ្ជៈ C4 Performance Energy (១៦oz)",
+    "product_name_english": "C4 Performance Energy Carbonated (16oz)",
+    "category_khmer": "ផលិតផលស្រេច",
+    "category_english": "Finished Goods",
+    "price_usd": 2.79,
+    "uom_khmer": "កំប៉ុង",
+    "uom_english": "Can",
+    "image_url": "/c4_energy_can.png"
+  },
+  {
+    "id": 5,
+    "product_name_khmer": "ម្សៅកាហ្វេអ៊ីន (Anhydrous Caffeine Powder)",
+    "product_name_english": "Anhydrous Caffeine Powder (Food Grade)",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 45.0,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 6,
+    "product_name_khmer": "ម្សៅតូរីន (Synthetic Taurine Powder)",
+    "product_name_english": "Synthetic Taurine Powder (99%)",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 12.5,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 7,
+    "product_name_khmer": "ម្សៅ L-Theanine",
+    "product_name_english": "L-Theanine Powder",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 68.0,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 8,
+    "product_name_khmer": "វីតាមីន B រួម (B3, B6, B12)",
+    "product_name_english": "Vitamin B Complex Blend (B3, B6, B12)",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 85.0,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 9,
+    "product_name_khmer": "អាស៊ីតស៊ីទ្រីក (Citric Acid)",
+    "product_name_english": "Citric Acid Anhydrous",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 3.2,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 10,
+    "product_name_khmer": "ស្កររុក្ខជាតិ Stevia រាវ (Sweetener)",
+    "product_name_english": "Liquid Stevia Extract (Sweetener)",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 38.0,
+    "uom_khmer": "លីត្រ",
+    "uom_english": "Liter",
+    "image_url": "/stevia_liquid_bottle.png"
+  },
+  {
+    "id": 11,
+    "product_name_khmer": "ម្សៅយិនស៊ិន (Panax Ginseng Extract)",
+    "product_name_english": "Panax Ginseng Extract Powder",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 110.0,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 12,
+    "product_name_khmer": "ម្សៅតែបៃតង (Green Tea Extract)",
+    "product_name_english": "Green Tea Extract (50% EGCG)",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 52.0,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 13,
+    "product_name_khmer": "សារធាតុរក្សាគុណភាព (Potassium Sorbate)",
+    "product_name_english": "Potassium Sorbate (Preservative)",
+    "category_khmer": "វត្ថុធាតុដើម",
+    "category_english": "Raw Material",
+    "price_usd": 6.8,
+    "uom_khmer": "គីឡូក្រាម",
+    "uom_english": "Kilogram",
+    "image_url": "/caffeine_powder.png"
+  },
+  {
+    "id": 14,
+    "product_name_khmer": "កំប៉ុងអាលុយមីញ៉ូម (៣៥៥ml + គម្រប)",
+    "product_name_english": "Aluminium Beverage Cans (355ml + Lid)",
+    "category_khmer": "សម្ភារៈវេចខ្ចប់",
+    "category_english": "Packaging",
+    "price_usd": 0.12,
+    "uom_khmer": "គ្រាប់/កំប៉ុង",
+    "uom_english": "Piece",
+    "image_url": "/empty_aluminium_can.png"
+  },
+  {
+    "id": 15,
+    "product_name_khmer": "ផ្លាស្ទិចកម្ដៅវេចខ្ចប់ (Shrink Wrap Film)",
+    "product_name_english": "Shrink Wrap Film (Tray Packaging)",
+    "category_khmer": "សម្ភារៈវេចខ្ចប់",
+    "category_english": "Packaging",
+    "price_usd": 18.5,
+    "uom_khmer": "ដុំ",
+    "uom_english": "Roll",
+    "image_url": "/shrink_wrap_roll.png"
+  }
+]

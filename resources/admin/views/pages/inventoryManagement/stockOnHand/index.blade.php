@@ -1,51 +1,45 @@
 @extends('admin::shared.layout')
 @section('layout')
+    @include('admin::shared.header', ['header_name' => 'Stock On Hand Management'])
     <div class="content-wrapper" x-data="xStockOnHand">
-        <div class="header">
-            @include('admin::shared.header', ['header_name' => __('Stock On Hand Management')])
-            <div class="header-tab">
-                <div class="header-tab-wrapper">
-                    <div class="menu-row">
-                        <div class="menu-item {!! Request::is('admin/stock-on-hand/list') ? 'active' : '' !!}" s-click-link="{!! route('admin-stock-on-hand-list') !!}">Data</div>
-                    </div>
-                </div>
-                <div class="header-action-button">
-                    <form class="filter" action="{!! url()->current() !!}" method="GET">
-                        <div class="form-row">
-                            <input type="text" name="search" placeholder="Enter product"
-                                value="{!! request('search') !!}">
-                            <i data-feather="filter"></i>
-                        </div>&nbsp;&nbsp;
-                        <div class="category-content-gp">
-                            <select name="shop_id" class="SelectShop" id="shop_id" x-init="fetchSelectShop()">
-                                <option value=""> Select Shop</option>
-                            </select>
-                        </div>
-                        <div class="form-row form-row-inputCus">
-                            <input type="text" name="date" placeholder="Date" value="{!! request('date') !!}"
-                                id="date" autocomplete="off">
-                        </div>
-                        <button mat-flat-button type="submit" class="btn-create bg-success">
-                            <i data-feather="search"></i>
-                            <span>Search</span>
-                        </button>
-                    </form>
-                    @can('stock-on-hand-excel')
-                        <button type="button" @click="excel()" class="btnExcel">
-                            <i class="material-symbols-outlined">upgrade</i>
-                            <span>Excel</span>
-                        </button>
-                    @endcan
-                    <button s-click-link="{!! url()->current() !!}">
-                        <i data-feather="refresh-ccw"></i>
-                        <span>@lang('user.button.reload')</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="content-body">
-            @include('admin::pages.inventoryManagement.stockOnHand.table')
-        </div>
+        @component('admin::components.listingData', [
+            'routeName' => $routeName,
+            'createName' => '',
+            'filterStatus' => false,
+            // 'filterView' => 'admin::pages.inventoryManagement.partials.stock-filter',
+            'filterData' => ['shop' => $shop],
+            'showTabs' => false,
+            'showCreate' => false,
+            'exportAction' => auth()->user()->can('stock-on-hand-excel') ? 'excel()' : null,
+            'exportLabel' => 'Excel',
+            'data' => $data,
+            'status' => $status,
+            'tbHeader' => [
+                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
+                ['field' => 'product_title', 'title' => 'Product', 'class' => 'text left', 'colVal' => 18],
+                ['field' => 'category_title', 'title' => 'Category', 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'uom_title', 'title' => 'UOM', 'class' => '', 'colVal' => 8],
+                ['field' => 'current_stock', 'title' => 'Current Stock', 'class' => '', 'colVal' => 12],
+                ['field' => 'created_date', 'title' => 'Date', 'class' => '', 'colVal' => 14],
+                ['field' => 'shop_title', 'title' => 'Shop', 'class' => 'text left', 'colVal' => 14],
+                ['field' => 'request_by_title', 'title' => 'Requested By', 'class' => 'text left', 'colVal' => 12],
+                [
+                    'field' => 'action',
+                    'title' => '',
+                    'class' => '',
+                    'colVal' => 5,
+                    'actions' => [
+                        [
+                            'key' => 'active',
+                            'action' => [
+                                ['url' => 'view', 'title' => 'View', 'icon' => 'visibility', 'type' => 'link'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ])
+        @endcomponent
         <template x-if="exportLoading">
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
@@ -89,8 +83,11 @@
                 memberCarData: [],
                 baseImageUrl: "{{ asset('file_manager') }}",
                 dataError: null,
+                formData: {!! json_encode(request()->only(['search', 'shop_id', 'date'])) !!},
                 exportLoading: false,
-                init() {},
+                init() {
+                    this.fetchSelectShop();
+                },
                 fetchSelectShop() {
                     $(`#shop_id`).select2({
                         placeholder: `Select Shop`,

@@ -3,6 +3,16 @@
     'createName' => $createName,
     'filterStatus' => $filterStatus,
     'exportUrl' => $exportUrl ?? '',
+    'exportAction' => $exportAction ?? null,
+    'exportLabel' => $exportLabel ?? null,
+    'exportClass' => $exportClass ?? null,
+    'filterView' => $filterView ?? null,
+    'filterData' => $filterData ?? [],
+    'showCreate' => $showCreate ?? true,
+    'showSearch' => $showSearch ?? true,
+    'showTabs' => $showTabs ?? true,
+    'createPermission' => $createPermission ?? null,
+    'tabs' => $tabs ?? null,
 ])
 <div class="content-body">
     <div class="table">
@@ -47,10 +57,29 @@
                                                     @if ($status != 'trash')
                                                         @if ($itHd['key'] == 'active')
                                                             @foreach ($itHd['action'] as $acItem)
+                                                                @php
+                                                                    $visible = true;
+                                                                    if (isset($acItem['visible']) && is_array($acItem['visible'])) {
+                                                                        foreach ($acItem['visible'] as $field => $value) {
+                                                                            if (data_get($item, $field) != $value) {
+                                                                                $visible = false;
+                                                                                break;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                @endphp
+                                                                @continue(!$visible)
                                                                 <li>
                                                                     @if (isset($acItem['type']) && $acItem['type'] == 'link')
                                                                         <a class="dropdown-item"
                                                                             href="{!! route('admin-' . $routeName.'-'.$acItem['url'], $item->id) !!}">
+                                                                            <i
+                                                                                class="material-symbols-outlined">{{ $acItem['icon'] }}</i>
+                                                                            <span>{{ $acItem['title'] }}</span>
+                                                                        </a>
+                                                                    @elseif (isset($acItem['type']) && $acItem['type'] == 'click')
+                                                                        <a class="dropdown-item {!! isset($acItem['class']) ? $acItem['class'] : '' !!}"
+                                                                            @click="{!! $acItem['handler'] !!}({{ $item }}, '{{ $acItem['value'] ?? '' }}')">
                                                                             <i
                                                                                 class="material-symbols-outlined">{{ $acItem['icon'] }}</i>
                                                                             <span>{{ $acItem['title'] }}</span>
@@ -186,10 +215,10 @@
         @else
             @component('admin::components.empty', [
                 'name' => __('No data'),
-                'msg' => 'You can create a new ' . $routeName . ' by clicking the button below',
-                'permission' => 'Position-create',
-                'url' => route('admin-' . $routeName . '-create'),
-                'button' => $createName,
+                'msg' => ($showCreate ?? true) ? 'You can create a new ' . $routeName . ' by clicking the button below' : null,
+                'permission' => ($showCreate ?? true) ? ($createPermission ?? 'Position-create') : null,
+                'url' => ($showCreate ?? true) ? route('admin-' . $routeName . '-create') : null,
+                'button' => ($showCreate ?? true) ? $createName : null,
             ])
             @endcomponent
         @endif

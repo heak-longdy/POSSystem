@@ -70,6 +70,9 @@ return [
             'active' => 'Active',
             'disable' => 'Disable',
         ],
+        'language_preference' => [
+            'label' => 'Language Preference',
+        ],
         'profile' => [
             'label' => 'Profile',
             'placeholder' => 'Enter profile',

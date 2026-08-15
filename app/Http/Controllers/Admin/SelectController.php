@@ -17,6 +17,9 @@ use App\Models\ShopProduct;
 use App\Models\ShopService;
 use App\Models\StockOnHand;
 use App\Models\Supplier;
+use App\Models\Category;
+use App\Models\UOM;
+
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -343,6 +346,38 @@ class SelectController extends Controller
     public function SelectPlacementTypeSearch()
     {
         $data = PlacementType::where('status', 1)->orderBy('created_at', 'desc')->take(50)->get();
+        try {
+            return response()->json(['data' => $data, 'message' => 200]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message'   => 'error'
+            ]);
+        }
+    }
+    public function SelectCategorySearch(Request $req)
+    {
+        $data = Category::where('status', 1)->where(function (Builder $q) use ($req) {
+            if ($req->search) {
+                $q->where('name', 'LIKE', '%' . $req->search . '%');
+            }
+        })->orderBy('created_at', 'asc')->take(50)->get();
+
+        try {
+            return response()->json(['data' => $data, 'message' => 200]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message'   => 'error'
+            ]);
+        }
+    }
+    public function SelectUOMSearch(Request $req)
+    {
+        $data = UOM::where('status', 1)->where(function (Builder $q) use ($req) {
+            if ($req->search) {
+                $q->where('name', 'LIKE', '%' . $req->search . '%');
+            }
+        })->orderBy('created_at', 'asc')->take(50)->get();
+
         try {
             return response()->json(['data' => $data, 'message' => 200]);
         } catch (\Exception $e) {

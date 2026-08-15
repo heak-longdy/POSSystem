@@ -1,0 +1,106 @@
+/* Staff Expense Summary Cards Custom SCSS */
+.expense-summary-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 8px 16px;
+
+    .card-col {
+        flex: 1 1 calc(25% - 16px);
+        min-width: 220px;
+
+        @media (max-width: 992px) {
+            flex: 1 1 calc(50% - 16px);
+        }
+        @media (max-width: 576px) {
+            flex: 1 1 100%;
+        }
+    }
+
+    .expense-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-radius: 12px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: all 0.25s ease-in-out;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-info {
+            display: flex;
+            flex-direction: column;
+
+            .card-label {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 4px;
+            }
+
+            .card-value {
+                font-size: 22px;
+                font-weight: 700;
+                margin: 0;
+                line-height: 1.2;
+            }
+        }
+
+        .card-icon {
+            font-size: 36px;
+            line-height: 1;
+            opacity: 0.75;
+        }
+
+        /* Card Colors & Themes */
+        &.salary {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f0fa 100%);
+            border-color: #b8d9f8;
+            .card-label { color: #1e6091; }
+            .card-value { color: #15466b; }
+            .card-icon { color: #2a75d3; }
+        }
+
+        &.bonus {
+            background: linear-gradient(135deg, #f0fdf4 0%, #e1f9e6 100%);
+            border-color: #a7f3d0;
+            .card-label { color: #15803d; }
+            .card-value { color: #166534; }
+            .card-icon { color: #16a34a; }
+        }
+
+        &.deduction {
+            background: linear-gradient(135deg, #fef2f2 0%, #ffe4e4 100%);
+            border-color: #fca5a5;
+            .card-label { color: #b91c1c; }
+            .card-value { color: #991b1b; }
+            .card-icon { color: #dc2626; }
+        }
+
+        &.net-total {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-color: #bae6fd;
+            .card-label { color: #0369a1; }
+            .card-value { color: #075985; }
+            .card-icon { color: #0284c7; }
+        }
+    }
+}
+
+/* Ensure Table Badges Obey Column Left Alignment */
+.table-body .column .row {
+    &.left, &.text {
+        .badge, span.badge {
+            margin-left: 0 !important;
+            margin-right: auto !important;
+        }
+    }
+}

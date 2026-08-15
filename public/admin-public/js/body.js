@@ -47,7 +47,12 @@ allDropdown.forEach(function (item) {
 
 var toggleSidebar = document.querySelector("button.toggle-sidebar");
 var allSideDivider = document.querySelectorAll("#sidebar .divider");
-menuShowHide == 0 ? sidebar.classList.toggle("hide") : "";
+
+if (menuShowHide === "0") {
+  sidebar.classList.add("hide");
+} else if (menuShowHide === "1") {
+  sidebar.classList.remove("hide");
+}
 
 if (sidebar.classList.contains("hide")) {
   allSideDivider.forEach(function (item) {
@@ -66,9 +71,9 @@ if (sidebar.classList.contains("hide")) {
 
 toggleSidebar.addEventListener("click", function () {
   sidebar.classList.toggle("hide");
-  sidebar.classList[1] ? localStorage.setItem("menu", 0) : localStorage.setItem("menu", 1);
 
   if (sidebar.classList.contains("hide")) {
+    localStorage.setItem("menu", "0");
     allSideDivider.forEach(function (item) {
       item.textContent = "-";
     });
@@ -78,6 +83,7 @@ toggleSidebar.addEventListener("click", function () {
       item.classList.remove("show");
     });
   } else {
+    localStorage.setItem("menu", "1");
     allSideDivider.forEach(function (item) {
       item.textContent = item.dataset.text;
     });

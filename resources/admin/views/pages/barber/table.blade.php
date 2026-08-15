@@ -84,7 +84,7 @@
                                         @if ($status != 'trash')
                                             @can('barber-update')
                                                 <li>
-                                                    <a class="dropdown-item" s-click-link="{!! route('admin-barber-create', $item->id) !!}">
+                                                    <a class="dropdown-item" s-click-link="">
                                                         <i data-feather="edit"></i>
                                                         <span>Edit</span>
                                                     </a>
@@ -111,6 +111,12 @@
                                                     <a class="dropdown-item" s-click-link="{!! route('admin-barber-top-up', $item->id) !!}">
                                                         <i data-feather="dollar-sign" class="text-success"></i>
                                                         <span>Top Up</span>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" s-click-link="{!! route('admin-staff-expense-staff-history', $item->id) !!}">
+                                                        <i data-feather="file-text" class="text-info"></i>
+                                                        <span>Staff Expense Ledger</span>
                                                     </a>
                                                 </li>
                                                 @if ($item->id != Auth::user()->id)

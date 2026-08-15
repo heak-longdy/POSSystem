@@ -274,6 +274,14 @@
                                 </template>
                             </div>
                         </div>
+
+                        <div class="itemForm" style="margin-top: 15px;">
+                            <label>Booking Date<span>*</span></label>
+                            <input type="text" name="booking_date" id="booking_date" x-model="formData.booking_date" placeholder="yyyy-mm-dd" autocomplete="off" />
+                            <template x-for="item in dataError?.booking_date">
+                                <span class="error" x-text="item">Error</span>
+                            </template>
+                        </div>
                     </div>
                     <div class="paymentGp">
                         <div class="titleGp">
@@ -339,6 +347,7 @@
                     status: "confirmed",
                     customer_id: null,
                     disable: false,
+                    booking_date: moment().format('YYYY-MM-DD'),
                 },
                 btnSubmit: 'Save',
                 baseImageUrl: "{{ asset('file_manager') }}",
@@ -351,7 +360,7 @@
                 amountPaid: 0,
                 submitLoading: false,
                 bookingId: null,
-                selectType: "service",
+                selectType: "product", // service, product, both
                 shopData: null,
                 bookingDeleteId: [],
                 init() {
@@ -360,6 +369,7 @@
                     const data = @json($data);
                     if (data) {
                         this.bookingId = data.id;
+                        this.formData.booking_date = data.booking_date ? moment(data.booking_date).format('YYYY-MM-DD') : moment().format('YYYY-MM-DD');
                         let customer = data?.customer ? data?.customer : null;
                         var option = "<option selected></option>";
                         var selectOptionHTML = $(option).val(customer?.id ? customer.id : null).text(
@@ -415,6 +425,18 @@
                         this.calculatorProductPrice();
                     }
                     this.fiterProduct();
+
+                    // Initialize datepicker
+                    $("#booking_date").datepicker({
+                        dateFormat: 'yy-mm-dd',
+                        changeYear: true,
+                        changeMonth: true,
+                        gotoCurrent: true,
+                        yearRange: "-10:+10",
+                        onSelect: (selectedDate) => {
+                            this.formData.booking_date = selectedDate;
+                        }
+                    });
                 },
                 changeSelectType($event) {
                     this.selectType = $event.target.value;
@@ -537,7 +559,6 @@
                             `/admin/select/product?search=${search ? search :''}&shop_id=${this.shopData?.id}&type=${this.selectType}`,
                             (res) => {
                                 this.dataFilter = res?.data;
-                                console.log(this.dataFilter,'this.dataFilterthis.dataFilterthis.dataFilter');
                                 if (this.dataFilter.length > 0) {
                                     this.dataFilter.map(itemVal => {
                                         const item = this.selectType ==
@@ -571,8 +592,7 @@
                                 callback(data);
                             }
                         })
-                        .catch((e) => {
-                        })
+                        .catch((e) => {})
                         .finally(() => {});
                 },
                 totalDiscount(type, price, discount) {
@@ -687,7 +707,11 @@
                 },
                 removeShippingCart(item, index) {
                     this.dataFilter.find(val => {
-                        if (val.id == item.product_id) {
+                        if (val.service_id == item.product_id && item.product_type ==
+                            "service") {
+                            val.addToCart = false;
+                        } else if (val.product_id == item.product_id && item.product_type ==
+                            "product") {
                             val.addToCart = false;
                         }
                     });
@@ -745,8 +769,10 @@
                                     `/admin/select/find-shop-product?shop_id=${this.shopData?.id}&product_id=${val.product_id}`;
                                 await this.fetchData(url, (res) => {
                                     if (res) {
-                                        let currentStock = parseInt(res.current_stock) + parseInt(findBookingDetailQty);
-                                        val.error = currentStock < parseInt(val.product_qty) ? true : false;
+                                        let currentStock = parseInt(res.current_stock) +
+                                            parseInt(findBookingDetailQty);
+                                        val.error = currentStock < parseInt(val
+                                            .product_qty) ? true : false;
                                     } else {
                                         val.error = true;
                                     }

@@ -9,7 +9,7 @@
 <ul class="side-menu">
     <li class="li">
         <a href="{{ route('admin-dashboard') }}" class="overView {{ routeActive('admin/dashboard') ? 'active' : '' }}">
-            <div class="div"><i class='bx bxl-stack-overflow icon'></i> Dashboard</div>
+            <div class="div"><i class='bx bxl-stack-overflow icon'></i> {!! \App\Support\Language::translatedValue(['en' => 'Dashboard', 'km' => 'ផ្ទាំងគ្រប់គ្រង']) !!}</div>
             <div class="iRight">
                 <i class='bx bx-cog bx-tada-hover'></i>
             </div>
@@ -19,9 +19,9 @@
         {{-- @foreach (Menu::menuList() as $key => $item) --}}
         @if (isset($item['type']) && $item['type'] == 'dropdown-multiple')
             <div class="navItemSiderbarGroup li">
-                <li class="divider" data-text="{{ $item['label'] }}"></li>
+                <li class="divider" data-text="{{ \App\Support\Language::translatedValue($item['label']) }}"></li>
                 <div class="navSidber">
-                    @foreach ($item['list-menu'] as $keyListMenu => $itemListMenu)
+                    @foreach (($item['listMenu'] ?? $item['list-menu'] ?? []) as $keyListMenu => $itemListMenu)
                         <li class="">
                             <a href="#" class="{{ routeActive($itemListMenu['active']) ? 'active' : '' }}">
                                 {{-- <i class='bx bxs-inbox '></i> --}}
@@ -32,7 +32,7 @@
                                 {{-- <i class='bx bx-detail icon'></i> --}}
                                 {{-- <i class='bx bx-align-right icon'></i> --}}
                                 {{-- <i class='bx bx-right-indent icon'></i> --}}
-                                {!! Str::limit($itemListMenu['name'][App::getLocale()], 18, ' (...)') !!}
+                                {!! Str::limit(\App\Support\Language::translatedValue($itemListMenu['name']), 18, ' (...)') !!}
                                 <i class='bx bx-chevron-right icon-right'></i>
 
                             </a>
@@ -43,7 +43,7 @@
                                             class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                             <i
                                                 class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
-                                            {!! Str::limit($child['name'][App::getLocale()], 18, ' (...)') !!}
+                                            {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 18, ' (...)') !!}
                                         </a>
                                     </li>
                                 @endforeach
@@ -54,7 +54,7 @@
             </div>
         @elseif(isset($item['type']) && $item['type'] == 'dropdown-single')
             <div class="navItemSiderbarGroup li">
-                <li class="divider" data-text="main"></li>
+                <li class="divider" data-text="{{ \App\Support\Language::translatedValue($item['label'] ?? ['en' => 'Main', 'km' => 'មេ']) }}"></li>
                 <div class="navSidber">
                     <li class="">
                         <a href="#">
@@ -65,7 +65,7 @@
                             {{-- <i class='bx bx-detail icon'></i> --}}
                             {{-- <i class='bx bx-align-right icon'></i> --}}
                             {{-- <i class='bx bx-right-indent icon'></i> --}}
-                            {!! $item['name'][App::getLocale()] !!}
+                            {!! \App\Support\Language::translatedValue($item['name']) !!}
                             <i class='bx bx-chevron-right icon-right'></i>
                         </a>
                         <ul class="side-dropdown">
@@ -75,7 +75,7 @@
                                         class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                         <i
                                             class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
-                                        {!! Str::limit($child['name'][App::getLocale()], 18, ' (...)') !!}
+                                        {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 18, ' (...)') !!}
                                     </a>
                                 </li>
                             @endforeach
@@ -87,7 +87,7 @@
             <li class="li">
                 <a href="{!! url($item['path']) !!}" class="{{ routeActive($item['active']) ? 'active' : '' }}">
                     <i class='bx {{ isset($item['icon']) && $item['icon'] ? $item['icon'] : 'bxs-wrench' }} icon'></i>
-                    {!! Str::limit($item['name'][App::getLocale()], 18, ' (...)') !!}
+                    {!! Str::limit(\App\Support\Language::translatedValue($item['name']), 18, ' (...)') !!}
                 </a>
             </li>
         @endif

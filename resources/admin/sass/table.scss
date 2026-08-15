@@ -342,6 +342,13 @@ $tableRadius:15px;
                         font-size    : 13px;
                         margin       : auto;
 
+                        .row.left &,
+                        .row.text-left &,
+                        .row.textLeft & {
+                            margin-left: 0;
+                            margin-right: auto;
+                        }
+
                         &.warming {
                             background: rgba($warning, 0.1);
                             color     : map-get($map: $btn, $key: "create");

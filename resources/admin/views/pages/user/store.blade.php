@@ -40,6 +40,19 @@
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
+                    <div class="form-row">
+                        <label>@lang('user.form.language_preference.label')<span>*</span></label>
+                        <select name="language_preference">
+                            @foreach (\App\Support\Language::options() as $locale => $label)
+                                <option value="{{ $locale }}" {!! old('language_preference', request('id') ? ($data?->language_preference ?? \App\Support\Language::default()) : \App\Support\Language::default()) == $locale ? 'selected' : '' !!}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('language_preference')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
                 </div>
                 @if (!request('id'))
                     <div class="row-3">

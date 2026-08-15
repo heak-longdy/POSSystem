@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Support\Language;
 
 class User extends Authenticatable
 {
@@ -31,6 +32,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'status',
+        'language_preference',
         'image',
       	'identity_expired_date',
     ];
@@ -64,12 +66,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(ModelHasPermission::class, 'model_id');
     }
-   protected $appends = ['image_url'];
+   protected $appends = ['image_url', 'language_preference_label'];
     public function getImageUrlAttribute()
     {
         if ($this->image != null) {
             return url('file_manager' . $this->image);
         }
         return null;
+    }
+
+    public function getLanguagePreferenceLabelAttribute()
+    {
+        return Language::label(Language::resolve($this->language_preference));
     }
 }

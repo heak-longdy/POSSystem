@@ -1,0 +1,886 @@
+.form-admin.booking {
+    width     : 100%;
+    height    : 100%;
+    overflow-y: auto;
+
+    .form-wrapper {
+        padding  : 20px 30px;
+        margin   : 0 auto;
+        position : relative;
+        height   : 100%;
+        max-width: 100%;
+
+        .form-header {
+            width       : 100%;
+            display     : flex;
+            color       : #fff;
+            /* font-size: 20px; */
+            padding     : 0 0 10px 0;
+            color       : #757575;
+
+            h3 {
+                margin: 0;
+            }
+
+            svg {
+                background-color: #174195 !important;
+            }
+        }
+
+        .form-body {
+            box-sizing   : border-box;
+            background   : #fff;
+            padding      : 40px;
+            border-radius: 5px;
+            box-shadow   : 0px 3px 8px -3px rgb(0 0 0 / 20%);
+        }
+    }
+}
+
+.selectBooking {
+    width       : 100%;
+    height      : 35px;
+    border      : none;
+    cursor      : pointer;
+    padding     : 0 0 0 5px;
+    border-right: 1px solid #e5e5e5;
+}
+
+
+
+.orderLayoutGp {
+    display: flex;
+
+    .productListingGp {
+        width              : 350px;
+        height             : 100%;
+        padding            : 20px;
+        /* height          : 100%; */
+        // background   : #fbfbfb;
+        // background      : #eee !important;
+        background         : #e0e0e0 !important;
+        border-radius      : 16px;
+        height             : calc(100vh - 100px);
+
+        .filterGp {
+            border       : 1px solid #e5e5e5;
+            display      : flex;
+            border-radius: 5px;
+            height       : 40px;
+            align-items  : center;
+            padding      : 0 10px 0 0;
+            background   : #fff;
+            overflow     : hidden;
+
+            input {
+                border      : none;
+                background  : none;
+                flex        : 1;
+                height      : 100%;
+                padding-left: 10px;
+            }
+
+            label {
+                display: flex;
+                cursor : pointer;
+
+                svg {
+                    width : 20px;
+                    height: 20px;
+                    color : #7e8186;
+                }
+            }
+        }
+
+        .productListingFilterGp {
+            margin  : 10px 0;
+            height  : calc(100% - 50px);
+            overflow: auto;
+            padding : 0 10px 0 0;
+
+            &::-webkit-scrollbar {
+                padding: 0 10px 0 0;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                padding: 0 10px 0 0;
+            }
+
+            .itemProductFilter {
+                font-size    : 12px;
+                box-shadow   : 0 0 3px rgb(0 0 0 / 10%);
+                flex-wrap    : wrap;
+                background   : #ffffff9e;
+                padding      : 15px;
+                border-radius: 10px;
+                color        : black;
+                margin-bottom: 15px;
+
+
+                .itemProductF {
+                    display       : flex;
+                    // align-items: center;
+                    align-items   : flex-start;
+
+                    img {
+                        // width        : 50px;
+                        // height       : 50px;
+                        width        : 80px;
+                        height       : 90px;
+                        border-radius: 10px;
+                        margin-right : 10px;
+                        border       : 1px solid #e0e0e0c4;
+                    }
+
+                    .textItemGp {
+                        h3 {
+                            margin             : 0;
+                            font-weight        : unset;
+                            -webkit-text-stroke: 0.3px;
+                        }
+
+                        .priceGp {
+                            display    : flex;
+                            align-items: center;
+
+                            span {
+                                margin: 0 5px;
+                            }
+
+                            p {
+                                margin: 0;
+                                color : red;
+
+                                span {
+                                    margin: 0 !important;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                .btnActionOrderAddCartGp {
+                    padding-top: 10px;
+
+                    .addCart {
+
+                        height    : 28px;
+                        background: #3e66ba;
+                        color     : #fff;
+
+                    }
+                }
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+
+            }
+        }
+    }
+
+    .div {
+        margin-right : 25px;
+        background   : #fff;
+        border-radius: 16px;
+        padding      : 20px;
+        overflow     : hidden;
+
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    .productListingCartGp {
+        flex  : 1;
+        height: calc(100vh - 100px);
+
+        .titleGp {
+            height     : 40px;
+            display    : flex;
+            align-items: center;
+        }
+
+        .productListingOrderCart {
+            margin  : 15px 0;
+            margin  : 10px 0;
+            height  : calc(100% - 50px);
+            overflow: auto;
+            padding : 0 10px 0 0;
+
+            .listingOrderItem {
+                display       : flex;
+                margin-bottom : 10px;
+                border-bottom : 1px solid #cccccc5e;
+                padding-bottom: 10px;
+                position      : relative;
+
+                .productType {
+                    position     : absolute;
+                    color        : red;
+                    color        : #ffff;
+                    padding      : 2px 10px;
+                    border-radius: 10px;
+                    font-size    : 11px;
+                    margin       : 5px;
+                    box-shadow   : brown;
+                    box-shadow   : 0 0 3px rgb(0 0 0 / 10%);
+
+                    &.product {
+                        background: #0080ff;
+                    }
+
+                    &.service {
+                        background: #3d9762;
+                    }
+                }
+
+                &:last-child {
+                    margin-bottom : 0;
+                    border-bottom : unset !important;
+                    padding-bottom: 0;
+                }
+
+                .imageOrderGp {
+                    position: relative;
+
+                    img {
+                        width          : 110px;
+                        height         : 110px;
+                        object-fit     : cover;
+                        border-radius  : 15px;
+                        margin-right   : 10px;
+                        object-position: center;
+                        border         : 1px solid #e0e0e0a6;
+                        cursor         : pointer;
+                    }
+
+                    .typeSeller {
+                        position       : absolute;
+                        top            : 0;
+                        border         : 1px solid red;
+                        border-radius  : 50%;
+                        padding        : 0px;
+                        width          : 27px;
+                        height         : 27px;
+                        font-size      : 10px;
+                        display        : flex;
+                        justify-content: center;
+                        align-items    : center;
+                        background     : #ff3838;
+                        color          : #fff;
+                        margin         : 4px;
+                    }
+                }
+
+                .textGpOrder {
+                    font-size: 14px;
+
+                    h3 {
+                        margin             : 0 0 0 0;
+                        font-weight        : unset;
+                        -webkit-text-stroke: .3px;
+                    }
+
+                    .priceOrderGp {
+                        // padding-left : 10px;
+                        // border-left  : 2px solid #231f20;
+                        // line-height  : 27px;
+                        // z-index      : 1;
+                        // border-radius: 6px;
+                        // position     : relative;
+                        // margin       : 15px 0 18px 0;
+                        // line-height  : 10px;
+
+                        .label {
+                            position           : absolute;
+                            line-height        : 0;
+                            font-weight        : 600;
+                            font-weight        : unset;
+                            -webkit-text-stroke: 0.5px;
+                        }
+
+                        .priceGp {
+                            display       : flex;
+                            align-items   : center;
+                            font-size     : 12px;
+                            line-height   : 25px;
+                            // padding-top: 8px;
+
+                            span {
+                                margin: 0 5px;
+                            }
+
+                            p {
+                                margin: 0;
+                                color : red;
+
+                                span {
+                                    margin: 0 !important;
+                                }
+                            }
+                        }
+
+                        .discountGp {
+                            display    : flex;
+                            align-items: center;
+                            font-size  : 12px;
+
+                            span {
+                                margin: 0 5px;
+                            }
+
+                            p {
+                                margin: 0;
+
+                                span {
+                                    margin: 0 !important;
+                                }
+                            }
+                        }
+                    }
+
+                    .qtyOrderGp {
+                        display       : flex;
+                        flex-direction: column;
+                        border        : 1px solid #e5e5e5;
+                        margin-top    : 10px;
+                        position      : relative;
+                        padding       : 5px 5px 3px 5px;
+                        background    : #fff;
+                        border-radius : 5px;
+                        width         : 127px;
+
+                        &.red {
+                            border: 1px solid #ff9d9d !important;
+                        }
+
+                        label {
+                            position  : absolute;
+                            top       : -10px;
+                            padding   : 0 5px 0 0px;
+                            background: #fff;
+                            font-size : 12px;
+                        }
+
+                        input {
+                            border    : none;
+                            /* z-index: 2; */
+                            overflow  : hidden;
+                        }
+
+                        &.commissionBooking {
+                            width: 127px !important;
+                        }
+                    }
+
+                    .removeOrderGp {
+                        margin-top : 10px;
+                        display    : flex;
+                        align-items: center;
+                        font-size  : 14px;
+                        cursor     : pointer;
+                        color      : #8f8888;
+                        width      : 85px;
+
+                        label {
+                            cursor: pointer;
+
+                            &:hover {
+                                color: red;
+                            }
+                        }
+
+                        svg {
+
+                            width       : 17px;
+                            height      : 17px;
+                            margin-right: 5px;
+
+                        }
+
+                        span {
+                            font-size   : 17px;
+                            margin-right: 5px;
+                        }
+
+                        &:hover {
+                            color: red;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .paymentListTotalGp {
+        width        : 320px;
+        height       : 100%;
+        padding      : 0 !important;
+        background   : none !important;
+        border-radius: 0 !important;
+        height       : calc(100vh - 100px);
+        overflow     : auto;
+
+        .infoFormPaymentLayout {
+            margin-bottom: 25px;
+            border       : 1px solid #ccc;
+            position     : relative;
+            margin-top   : 10px;
+            border-radius: 10px;
+            padding      : 10px 15px 25px 15px;
+
+            .label {
+                position  : absolute;
+                top       : -16px;
+                background: #edeff1;
+                padding   : 0 7px;
+                color     : #5a5e66;
+            }
+
+            .itemForm {
+                margin-top    : 5px;
+                padding       : 0 7px;
+                display       : flex;
+                flex-direction: column;
+
+                label {
+                    font-size: 14px;
+
+                    span {
+                        color: red;
+                    }
+                }
+
+                input {
+                    width        : 100%;
+                    border       : 1px solid #d8dce5;
+                    height       : 40px;
+                    border-radius: 5px;
+                    padding      : 0 15px;
+                    cursor       : pointer !important;
+                    color        : #444;
+                    font-size    : 15px;
+                }
+            }
+        }
+
+        .paymentGp {
+            padding      : 20px;
+            background   : #fff;
+            border-radius: 16px;
+
+            .titleGp {
+                height     : 40px;
+                display    : flex;
+                align-items: center;
+            }
+
+            .bodyTotalGp {
+                margin       : 15px 0px;
+                background   : #eee;
+                padding      : 15px 20px;
+                border-radius: 5px;
+
+                .itemTotal {
+                    display       : flex;
+                    margin-bottom : 5px;
+                    padding-bottom: 5px;
+                    border-bottom : 1px solid #ccc;
+                    font-size     : 15px;
+
+                    label {
+                        width: 130px;
+                    }
+
+                    span {
+                        margin: 0 5px;
+                    }
+
+                    div {
+                        margin         : 0;
+                        flex           : 1;
+                        display        : flex;
+                        justify-content: flex-end;
+                        word-break     : break-word;
+                    }
+
+                    &:last-child {
+                        margin : 0;
+                        padding: 0;
+                        border : none;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.orderBtnActionGp {
+    width         : 100%;
+    align-items   : center;
+    text-align    : center;
+    display       : flex;
+    flex-direction: column;
+
+    button {
+        width          : 100%;
+        display        : flex;
+        justify-content: center;
+        margin-bottom  : 10px;
+        font-size      : 14px;
+
+        &:last-child {
+            margin: 0;
+        }
+    }
+
+    .paymentSub {
+        width          : 80% !important;
+        border-radius  : 30px !important;
+        padding        : 3px 0 !important;
+        display        : flex;
+        justify-content: center;
+        background     : #3daa87;
+    }
+
+    .cancel {
+        background: none;
+        color     : red !important;
+        background: none;
+
+    }
+}
+
+.form-header {
+    h3 {
+        svg {
+            background   : red;
+            border-radius: 50%;
+            color        : #fff !important;
+            padding      : 5px;
+            cursor       : pointer;
+        }
+    }
+}
+
+.emptyDataLayout {
+
+    display        : flex;
+    flex-direction : column;
+    justify-content: center;
+    align-items    : center;
+    margin-top     : 25px;
+
+    span {
+        font-size    : 45px;
+        margin-bottom: 10px;
+    }
+
+    .image {
+        width          : 140px;
+        height         : 140px;
+        display        : flex;
+        justify-content: center;
+        margin         : 50px 0 0 0;
+
+        img {
+            width : 100%;
+            height: 100%;
+        }
+    }
+
+    .textEmpty {
+        p {
+            margin   : 0;
+            font-size: 15px;
+        }
+    }
+}
+
+.selectOptionLayoutBooking {
+    &.radioLayout {
+        background   : #fff;
+        border-radius: 10px;
+        padding      : 7px 12px 12px;
+        margin       : 5px 0;
+        border       : 1px solid #d8dce5;
+    }
+
+    label {
+        span {
+            color: red;
+        }
+    }
+
+
+    select {
+        height       : 40px;
+        border-radius: 5px;
+        padding      : 0 5px;
+        border       : 1px solid #e5e5e5;
+        cursor       : pointer;
+    }
+
+    .radioGp {
+        .radioItem {
+            cursor     : pointer;
+            display    : flex;
+            align-items: center;
+            margin-top : 3px;
+
+            label {
+                cursor     : pointer;
+                margin-left: 7px;
+                height     : 20px;
+            }
+
+            input {
+                width : 15px !important;
+                height: 15px !important;
+            }
+        }
+
+    }
+}
+
+span.error {
+    color    : #ff0000a3;
+    font-size: 11px;
+}
+
+.listingPriceTypeGp {
+    // padding-left : 10px;
+    // border-left  : 2px solid #231f20;
+    // line-height  : 27px;
+    // z-index      : 1;
+    // border-radius: 6px;
+    // position     : relative;
+    // margin       : 15px 0 15px 0;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .label {
+        position           : absolute;
+        // top: -15px;
+        line-height        : 0;
+        font-weight        : 600;
+        font-weight        : unset;
+        -webkit-text-stroke: .5px;
+    }
+
+    .listingGp {
+        padding-top: 0;
+
+        .itemLS {
+            display    : flex;
+            align-items: center;
+            line-height: 20px;
+
+            span {
+                margin: 0 5px;
+            }
+
+            p {
+                margin: 0;
+
+                span {
+                    margin: 0 !important;
+                }
+            }
+
+            &.price {
+                color: red;
+            }
+        }
+    }
+}
+
+.addToCartBG {
+    background: #5a5e6630 !important;
+}
+
+.errorCenter {
+    width     : 100%;
+    text-align: center;
+}
+
+.bookingShopInfoII {
+    padding      : 20px 20px 25px 20px;
+    background   : #fff;
+    border-radius: 16px;
+    margin-bottom: 35px;
+
+    h3 {
+        margin-top   : 0;
+        margin-bottom: 10px;
+    }
+
+    .shopInfoHeader {
+        display: flex;
+
+        img {
+            width        : 55px;
+            height       : 55px;
+            border-radius: 15px;
+            margin-right : 10px;
+            object-fit   : cover;
+        }
+
+        .infoText {
+            line-height: 22px;
+            margin-top : 5px;
+
+            h4,
+            p {
+                margin: 0;
+
+                svg {
+                    width : 14px;
+                    height: 14px;
+                }
+            }
+
+            p {
+
+                display    : flex;
+                align-items: center;
+                color      : #716c6c;
+                font-size  : 12px;
+            }
+        }
+    }
+
+    .shopInfoBody {
+
+        margin-top : 10px;
+        border-top : 1px solid #b7bac1;
+        padding-top: 10px;
+
+        h4,
+        p {
+            margin: 0;
+
+            svg {
+                width : 14px;
+                height: 14px;
+            }
+        }
+
+        h4 {
+            margin-bottom: 5px !important;
+        }
+
+        p {
+            font-size: 12px;
+        }
+    }
+}
+
+.bookingShopInfo {
+    display          : flex;
+    flex-direction   : column;
+    align-items      : center;
+    margin-bottom    : 15px;
+    // background    : #fbfbfb;
+    padding          : 0 25px 25px;
+    border-radius    : 15px;
+
+    img {
+        width        : 100px;
+        height       : 100px;
+        border-radius: 50%;
+        margin-right : 10px;
+    }
+
+    .infoText {
+        line-height: 22px;
+        margin-top : 5px;
+
+        h3,
+        p {
+            margin: 0;
+
+            svg {
+                width : 14px;
+                height: 14px;
+            }
+        }
+
+        p {
+
+            display    : flex;
+            align-items: center;
+            color      : #716c6c;
+            font-size  : 12px;
+        }
+    }
+}
+
+.btnExcel {
+    background: #174195 !important;
+    color     : white !important;
+
+    i {
+        font-size: 18px !important;
+    }
+}
+
+.loadingFullSizeLayout {
+    position        : fixed;
+    bottom          : 0;
+    left            : 0;
+    right           : 0;
+    top             : 0;
+    z-index         : 9999;
+    background-color: rgba(255, 255, 255, .7);
+    display         : flex;
+    align-items     : center;
+    justify-content : center;
+    border-radius   : 4px;
+    margin          : 0 auto;
+    flex-direction  : column;
+
+    .loading.loadingSubmit #spinner {
+        width : 55px !important;
+        height: 55px !important;
+    }
+}
+
+.qtyOrderGp2 {
+    display  : flex;
+    flex-wrap: wrap;
+
+    .qtyOrderGp {
+        margin-right: 10px;
+
+        .discountSelect {
+            display: flex;
+
+            select {
+                border      : unset !important;
+                width       : 50px;
+                font-size   : 12px;
+                cursor      : pointer;
+                text-align  : center;
+                margin-right: 5px;
+                border-right: 1px solid #e5e5e5 !important;
+            }
+        }
+
+        &:last-child {
+            margin-right: 0 !important;
+        }
+    }
+}
+
+.qtyOrderGpSpan {
+    .spanQty {
+        color      : #ff9d9d;
+        font-size  : 10px;
+        line-height: 1;
+        padding-top: 4px;
+    }
+}

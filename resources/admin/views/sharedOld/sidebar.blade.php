@@ -14,7 +14,7 @@
                     x-init="firstCheck({!! $key !!}, {{ routeActive($item['active']) }})">
                     <div class="menu-text">
                         <i data-feather="{!! $item['icon'] !!}"></i>
-                        <span>{!! $item['name'][App::getLocale()] !!}</span>
+                        <span>{!! \App\Support\Language::translatedValue($item['name']) !!}</span>
                         @isset($item['children'])
                             <p :class="{ show: show_menu === {!! $key !!} }">
                                 <i data-feather="chevron-down" class="angle-icon"></i>
@@ -31,7 +31,7 @@
                                     auth()->user()->canany($child['permission'])))
                                 <div class="sub-item {!! routeActive($child['active']) ? 'active' : '' !!}" s-click-link="{!! url($child['path']) !!}">
                                     <i data-feather="disc"></i>
-                                    <span>{!! $child['name'][App::getLocale()] !!}</span>
+                                    <span>{!! \App\Support\Language::translatedValue($child['name']) !!}</span>
                                 </div>
                             @endif
                         @endforeach

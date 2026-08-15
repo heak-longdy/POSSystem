@@ -18,8 +18,12 @@ class PermissionSeeder extends Seeder
     public function run()
     {
         Schema::disableForeignKeyConstraints();
-        ModulePermission::truncate();
-        Permission::truncate();
+        if (Schema::hasTable('module_permissions')) {
+            ModulePermission::truncate();
+        }
+        if (Schema::hasTable('permissions')) {
+            Permission::truncate();
+        }
         Schema::enableForeignKeyConstraints();
         $view = "View";
         $create = "Create";
@@ -831,8 +835,51 @@ class PermissionSeeder extends Seeder
                 'module_id' => $topUpRate->id,
             ]
         ]);
-        //endPoint
-
+        //Staff Expense
+        $stStaffExpense = $this->increaseIndex();
+        $staffExpense = ModulePermission::create([
+            'name' => 'Staff Expense',
+            'parent_id' => $stStaffExpense,
+            'sort_no' => $stStaffExpense,
+        ]);
+        Permission::insert([
+            [
+                'display_name' => $view,
+                'name' => 'staff-expense-view',
+                'guard_name' => 'web',
+                'module_id' => $staffExpense->id,
+            ],
+            [
+                'display_name' => $create,
+                'name' => 'staff-expense-create',
+                'guard_name' => 'web',
+                'module_id' => $staffExpense->id,
+            ],
+            [
+                'display_name' => $edit,
+                'name' => 'staff-expense-update',
+                'guard_name' => 'web',
+                'module_id' => $staffExpense->id,
+            ],
+            [
+                'display_name' => $delete,
+                'name' => 'staff-expense-delete',
+                'guard_name' => 'web',
+                'module_id' => $staffExpense->id,
+            ],
+            [
+                'display_name' => $trash,
+                'name' => 'staff-expense-restore',
+                'guard_name' => 'web',
+                'module_id' => $staffExpense->id,
+            ],
+            [
+                'display_name' => $destroy,
+                'name' => 'staff-expense-force-delete',
+                'guard_name' => 'web',
+                'module_id' => $staffExpense->id,
+            ],
+        ]);
     }
     public function increaseIndex()
     {

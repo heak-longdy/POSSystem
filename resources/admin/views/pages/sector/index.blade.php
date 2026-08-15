@@ -4,7 +4,7 @@
     <div class="content-wrapper" id="app" x-data="xIndex">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
-            'createName' => 'Create Sector',
+            'createName' => 'Create Sector' . __('global.page.empty_title'),
             'filterStatus' => true,
             'data' => $data,
             'status' => $status,

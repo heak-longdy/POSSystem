@@ -139,6 +139,7 @@ return [
         'booking-view' => 'View',
         'booking-create' => 'Create',
         'booking-update' => 'Update',
+        'booking-delete' => 'Delete',
         'booking-print' => 'Print',
         // exchange reward
         'exchange-reward-view' => 'View',

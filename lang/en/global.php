@@ -22,7 +22,7 @@ return [
     // page
     'page' => [
         'share'                 => 'Share',
-        'empty_title'           => 'No data found',
+        'empty_title'           => 'No data found33333',
         'empty_message'         => 'No data in this page',
         'view_detail'           => 'View Detail',
         'view_more'             => 'View More',

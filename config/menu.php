@@ -56,11 +56,56 @@ return [
     // ],
     [
         'type'  => 'single',
+        'active' => 'admin/product/*',
+        'path' => 'admin/product/list/1',
+        'permission' => ['product-view'],
+        'name' => [
+            'en' => 'Product',
+            'km' => 'ផលិតផល',
+        ],
+        'icon' => 'bx-package',
+    ],
+    [
+        'type'  => 'single',
+        'active' => 'admin/booking/*',
+        'path' => 'admin/booking/list/1',
+        'permission' => 'booking-view',
+        'name' => [
+            'en' => 'Bookings',
+            'km' => 'ការកក់',
+        ],
+        'icon' => 'bx-calendar',
+    ],
+    [
+        'type'  => 'single',
+        'active' => 'admin/remaining-amount/*',
+        'path' => 'admin/remaining-amount/list/all',
+        'permission' => 'booking-view',
+        'name' => [
+            'en' => 'Remaining Amount',
+            'km' => 'គ្រប់គ្រងទឹកប្រាក់នៅសល់',
+        ],
+        'icon' => 'bx-wallet',
+    ],
+    [
+        'type'  => 'single',
+        'active' => 'admin/shop/*',
+        'path' => 'admin/shop/list/1',
+        'permission' => ['shop-view'],
+        'name' => [
+            'en' => 'Shop',
+            'km' => 'ហាង',
+        ],
+        'icon' => 'bx-store-alt',
+    ],
+    [
+        'type'  => 'single',
         'active' => 'admin/customer/*',
         'path' => 'admin/customer/list/1',
         'permission' => ['customer-view'],
         'name' => [
             'en' => 'Customer',
+            'km' => 'អតិថិជន',
         ],
         'icon' => 'bx-user',
     ],
@@ -71,6 +116,7 @@ return [
         'permission' => ['customer-paid-view'],
         'name' => [
             'en' => 'Pay Note',
+            'km' => 'កំណត់ត្រាបង់ប្រាក់',
         ],
         'icon' => 'bx-dollar',
     ],
@@ -81,6 +127,7 @@ return [
         'permission' => ['testimonial-view'],
         'name' => [
             'en' => 'Testimonial',
+            'km' => 'មតិយោបល់',
         ],
         'icon' => 'bx-network-chart',
         'dropDown' => 'disable',
@@ -184,10 +231,85 @@ return [
     //         ],
     //     ],
     // ],
+
+    // Inventory Management
+    [
+        'type'  => 'dropdown-multiple',
+        'label' => [
+            'en' => 'Inventory Management',
+            'km' => 'ការកំណត់ និងកម្មវិធី',
+        ],
+        'listMenu' => [
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-in/*',
+                'path' => 'admin/stock-in/list/1',
+                'permission' => ['stock-in-view'],
+                'name' => [
+                    'en' => 'Stock In',
+                    'km' => 'ការបញ្ចូលស្តុក',
+                ],
+                'icon' => 'bx-universal-access',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-out/*',
+                'path' => 'admin/stock-out/list/1',
+                'permission' => ['stock-out-view'],
+                'name' => [
+                    'en' => 'Stock Out',
+                    'km' => 'ការបញ្ចូលស្តុក',
+                ],
+                'icon' => 'bx-universal-access',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-transfer/*',
+                'path' => 'admin/stock-transfer/list/1',
+                'permission' => ['stock-transfer-view'],
+                'name' => [
+                    'en' => 'Stock Transfer',
+                    'km' => 'ការផ្លាស់ប្ដូរស្តុក',
+                ],
+                'icon' => 'bxl-redux',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-on-hand/*',
+                'path' => 'admin/stock-on-hand/list/1',
+                'permission' => ['stock-on-hand-view'],
+                'name' => [
+                    'en' => 'Stock On Hand',
+                    'km' => 'ស្តុកដែលមាន',
+                ],
+                'icon' => 'bx-infinite',
+                'dropDown' => 'disable',
+            ],
+            [
+                'active' => 'admin/stock-movement/*',
+                'path' => 'admin/stock-movement/list/1',
+                'permission' => ['stock-movement-view'],
+                'name' => [
+                    'en' => 'Stock Movement',
+                    'km' => 'ការផ្លាស់ប្ដូរស្តុក',
+                ],
+                'icon' => 'bx-user',
+                'dropDown' => 'disable',
+                'children' => [],
+            ]
+        ]
+    ],
+
     // Setting
     [
         'type'  => 'dropdown-multiple',
-        'label' => 'Setting & Application',
+        'label' => [
+            'en' => 'Setting & Application',
+            'km' => 'ការកំណត់ និងកម្មវិធី',
+        ],
         'listMenu' => [
             // [
             //     'path' => 'admin/OurService',
@@ -207,8 +329,33 @@ return [
                 'permission' => ['position-view'],
                 'name' => [
                     'en' => 'Position',
+                    'km' => 'មុខតំណែង',
                 ],
                 'icon' => 'bx-universal-access',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/staff/*',
+                'path' => 'admin/staff/list/1',
+                'permission' => ['staff-view'],
+                'name' => [
+                    'en' => 'Staff Management',
+                    'km' => 'ការគ្រប់គ្រងបុគ្គលិក',
+                ],
+                'icon' => 'bx-group',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/staff-expense*',
+                'path' => 'admin/staff-expense/list/1',
+                'permission' => ['staff-expense-view', 'staff-view'],
+                'name' => [
+                    'en' => 'Staff Expenses',
+                    'km' => 'ចំណាយបុគ្គលិក',
+                ],
+                'icon' => 'bx-dollar-circle',
                 'dropDown' => 'disable',
             ],
             [
@@ -218,6 +365,7 @@ return [
                 'permission' => ['sector-view'],
                 'name' => [
                     'en' => 'Sector',
+                    'km' => 'ផ្នែក',
                 ],
                 'icon' => 'bx-compass',
                 'dropDown' => 'disable',
@@ -229,6 +377,7 @@ return [
                 'permission' => ['partner-view'],
                 'name' => [
                     'en' => 'Partner',
+                    'km' => 'ដៃគូ',
                 ],
                 'icon' => 'bxl-redux',
                 'dropDown' => 'disable',
@@ -240,6 +389,7 @@ return [
                 'permission' => ['placement-type-view'],
                 'name' => [
                     'en' => 'Placement Type',
+                    'km' => 'ប្រភេទការដាក់ទីតាំង',
                 ],
                 'icon' => 'bx-badge-check',
                 'dropDown' => 'disable',
@@ -250,6 +400,7 @@ return [
                 'permission' => 'user-view',
                 'name' => [
                     'en' => 'User Management',
+                    'km' => 'ការគ្រប់គ្រងអ្នកប្រើប្រាស់',
                 ],
                 'icon' => 'bx-user',
                 'dropDown' => 'disable',
@@ -262,10 +413,11 @@ return [
                 //     'en' => 'Reports',
                 // ],
                 // 'icon' => 'bxs-report',
-                'active' => 'admin/contact*,admin/about/privacy*,admin/OurService*,admin/aboutUs*',
-                'permission' => ['contact-view', 'about-view'],
+                'active' => 'admin/contact*,admin/about/privacy*,admin/OurService*,admin/aboutUs*,admin/uom/*,admin/category/*,admin/supplier/*',
+                'permission' => ['contact-view', 'about-view', 'uom-view'],
                 'name' => [
                     'en' => 'Setting',
+                    'km' => 'ការកំណត់',
                 ],
                 'icon' => 'bx-wrench',
                 'children' => [
@@ -275,6 +427,7 @@ return [
                         'permission' => 'our-service-view',
                         'name' => [
                             'en' => 'Our Service',
+                            'km' => 'សេវាកម្មរបស់យើង',
                         ],
                         'icon' => 'bx-server',
                     ],
@@ -284,6 +437,7 @@ return [
                         'permission' => 'contact-view',
                         'name' => [
                             'en' => 'Contact',
+                            'km' => 'ទំនាក់ទំនង',
                         ],
                         'icon' => 'bx-book',
                     ],
@@ -293,9 +447,40 @@ return [
                         'permission' => 'about-view',
                         'name' => [
                             'en' => 'About',
+                            'km' => 'អំពីយើង',
                         ],
                         'icon' => 'bx-help-circle',
                     ],
+                    [
+                        'active' => 'admin/category/*',
+                        'path' => 'admin/category/list/1',
+                        'permission' => 'category-view',
+                        'name' => [
+                            'en' => 'Category',
+                            'km' => 'ប្រភេទ',
+                        ],
+                        'icon' => 'bx-category',
+                    ],
+                    [
+                        'active' => 'admin/supplier/*',
+                        'path' => 'admin/supplier/list/1',
+                        'permission' => 'supplier-view',
+                        'name' => [
+                            'en' => 'Supplier',
+                            'km' => 'អ្នកផ្គត់ផ្គង់',
+                        ],
+                        'icon' => 'bx-ruler',
+                    ],
+                    [
+                        'active' => 'admin/uom/*',
+                        'path' => 'admin/uom/list/1',
+                        'permission' => 'uom-view',
+                        'name' => [
+                            'en' => 'Unit of Measure',
+                            'km' => 'Unit of Measure',
+                        ],
+                        'icon' => 'bx-ruler',
+                    ]
                 ],
             ],
         ]

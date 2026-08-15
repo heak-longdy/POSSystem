@@ -18,7 +18,8 @@
                     'rowClass' => 'thumbnailIcon',
                 ],
                 ['field' => 'name', 'title' => 'Name', 'class' => 'text left', 'colVal' => 34],
-                ['field' => 'email', 'title' => 'Email', 'class' => 'text left', 'colVal' => 40],
+                ['field' => 'email', 'title' => 'Email', 'class' => 'text left', 'colVal' => 30],
+                ['field' => 'language_preference_label', 'title' => 'Language', 'class' => 'text left', 'colVal' => 10],
                 ['field' => 'created_date', 'title' => 'Post Date', 'class' => '', 'colVal' => 10],
                 [
                     'field' => 'action',

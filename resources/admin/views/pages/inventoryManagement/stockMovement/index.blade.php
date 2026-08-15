@@ -1,64 +1,47 @@
 @extends('admin::shared.layout')
 @section('layout')
+    @include('admin::shared.header', ['header_name' => 'Stock Movement Management'])
     <div class="content-wrapper" x-data="xStockMovement">
-        <div class="header">
-            @include('admin::shared.header', ['header_name' => __('Stock Movement Management')])
-            <div class="header-tab">
-                <div class="header-tab-wrapper">
-                    <div class="menu-row">
-                        <div class="menu-item {!! Request::is('admin/stock-movement/list') ? 'active' : '' !!}" s-click-link="{!! route('admin-stock-movement-list') !!}">Data</div>
-                    </div>
-                </div>
-                <div class="header-action-button">
-                    <form class="filter" action="{!! url()->current() !!}" method="GET">
-                        <div class="form-row form-row-inputCus">
-                            <select name="status_type" id="status_type" style="width: 100%;">
-                                <option value="">All Status</option>
-                                <option value="stock_in" {!! request('status_type') == 'stock_in' ? 'selected' : '' !!}>Stock In</option>
-                                <option value="stock_out" {!! request('status_type') == 'stock_out' ? 'selected' : '' !!}>Stock Out</option>
-                                <option value="stock_transfer" {!! request('status_type') == 'stock_transfer' ? 'selected' : '' !!}>Stock Transfer</option>
-                            </select>
-                        </div>
-                        <div class="form-row" style="min-width: 135px !important;">
-                            <input type="text" name="search" placeholder="Enter product"
-                                value="{!! request('search') !!}">
-                            <i data-feather="filter"></i>
-                        </div>&nbsp;
-                        <div class="category-content-gp" style="width: 140px;">
-                            <select name="shop_id" class="SelectShop" id="shop_id" x-init="fetchSelectShop()">
-                                <option value=""> Select Shop</option>
-                            </select>
-                        </div>
-                        <div class="form-row form-row-inputCus"
-                            style="margin-left:0;min-width:100px !important;width:100px !important;">
-                            <input type="text" name="from_date" placeholder="From date" value="{!! request('from_date') !!}"
-                                id="fromDate" autocomplete="off">
-                        </div>
-                        <div class="form-row form-row-inputCus" style="min-width:100px !important;width:100px !important;">
-                            <input type="text" name="to_date" placeholder="To Date" value="{!! request('to_date') !!}"
-                                id="toDate" autocomplete="off">
-                        </div>
-                        <button mat-flat-button type="submit" class="btn-create bg-success"
-                            style="min-width: auto;cursor: pointer;">
-                            <i data-feather="search" style="margin-right: 0;"></i>
-                        </button>
-                    </form>
-                    @can('stock-movement-excel')
-                        <button type="button" @click="excel()" class="btnExcel">
-                            <i class="material-symbols-outlined">upgrade</i>
-                            <span>Excel</span>
-                        </button>
-                    @endcan
-                    <button s-click-link="{!! url()->current() !!}">
-                        <i data-feather="refresh-ccw"></i>
-                        <span>@lang('user.button.reload')</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="content-body">
-            @include('admin::pages.inventoryManagement.stockMovement.table')
-        </div>
+        @component('admin::components.listingData', [
+            'routeName' => $routeName,
+            'createName' => '',
+            'filterStatus' => false,
+            // 'filterView' => 'admin::pages.inventoryManagement.partials.stock-movement-filter',
+            'filterData' => ['shop' => $shop],
+            'showTabs' => false,
+            'showCreate' => false,
+            'exportAction' => auth()->user()->can('stock-movement-excel') ? 'excel()' : null,
+            'exportLabel' => 'Excel',
+            'data' => $data,
+            'status' => $status,
+            'tbHeader' => [
+                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
+                ['field' => 'product_title', 'title' => 'Product', 'class' => 'text left', 'colVal' => 14],
+                ['field' => 'category_title', 'title' => 'Category', 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'uom_title', 'title' => 'UOM', 'class' => '', 'colVal' => 7],
+                ['field' => 'qty', 'title' => 'Qty', 'class' => '', 'colVal' => 8],
+                ['field' => 'stock_status_title', 'title' => 'Status', 'class' => '', 'colVal' => 10],
+                ['field' => 'from_title', 'title' => 'From', 'class' => 'text left', 'colVal' => 11],
+                ['field' => 'to_title', 'title' => 'To', 'class' => 'text left', 'colVal' => 11],
+                ['field' => 'created_date', 'title' => 'Date', 'class' => '', 'colVal' => 11],
+                ['field' => 'request_by_title', 'title' => 'Requested By', 'class' => 'text left', 'colVal' => 8],
+                [
+                    'field' => 'action',
+                    'title' => '',
+                    'class' => '',
+                    'colVal' => 5,
+                    'actions' => [
+                        [
+                            'key' => 'active',
+                            'action' => [
+                                ['url' => 'view', 'title' => 'View', 'icon' => 'visibility', 'type' => 'link'],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ])
+        @endcomponent
         <template x-if="exportLoading">
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
@@ -122,8 +105,11 @@
                 memberCarData: [],
                 baseImageUrl: "{{ asset('file_manager') }}",
                 dataError: null,
+                formData: {!! json_encode(request()->only(['status_type', 'search', 'shop_id', 'from_date', 'to_date'])) !!},
                 exportLoading: false,
-                init() {},
+                init() {
+                    this.fetchSelectShop();
+                },
                 fetchSelectShop() {
                     $(`#shop_id`).select2({
                         placeholder: `Select Shop`,

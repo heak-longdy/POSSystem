@@ -11,4 +11,9 @@ class Position extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'positions';
     protected $fillable = ['image', 'title', 'status', 'order', 'user'];
+
+    public function staff()
+    {
+        return $this->hasMany(Staff::class, 'position_id');
+    }
 }

@@ -1,9 +1,6 @@
-
 <div class="table">
-    
     @if ($data->count() > 0)
         <div class="table-wrapper">
-            
             <div class="table-header">
                 <div class="row table-row-5">
                     <span>Nº</span>
@@ -122,7 +119,7 @@
                     </div>
                 @endforeach
             </div>
-            <div class="paginationLayout">
+            <div class="table-footer">
                 @include('admin::components.pagination', ['paginate' => $data])
             </div>
         </div>

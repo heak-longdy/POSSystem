@@ -3,6 +3,11 @@
     <div class="container">
         <div class="container-wrapper">
             <div id="sidebar" class="sidebar" x-cloak>
+                <script>
+                    if (localStorage.getItem("menu") === "0") {
+                        document.getElementById("sidebar").classList.add("hide");
+                    }
+                </script>
                 @include('admin::shared.sidebar')
             </div>
             

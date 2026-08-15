@@ -37,25 +37,24 @@
                             <input type="text" name="to_date" placeholder="To Date" value="{!! $lastMonthDay ? $lastMonthDay : request('to_date') !!}"
                                 id="to_date" autocomplete="off">
                         </div>
-                        <div class="form-row">
-                            <input type="text" name="timepicker" placeholder="From Date" value="" id="timepicker" autocomplete="off">
-                        </div>
                         <button mat-flat-button type="submit" class="btn-create bg-success">
                             <i data-feather="search"></i>
                             <span>Search</span>
                         </button>
                     </form>
-
+                    <button class="btn-create" s-click-link="{!! route('admin-booking-create') !!}">
+                        <i data-feather="plus-circle"></i>
+                        <span>Create Booking</span>
+                    </button>
                     <button s-click-link="{!! url()->current() !!}">
                         <i data-feather="refresh-ccw"></i>
-                        <span>@lang('adminGlobal.button.reload')</span>
+                        <span>@lang('adminGlobal.button.reload')d</span>
                     </button>
                 </div>
             </div>
         </div>
         <div class="content-body">
-            @include('admin::pages.booking.table')
-            {{-- <div class="table">
+            <div class="table">
                 @if ($data->count() > 0)
                     <div class="table-wrapper">
                         <div class="table-header">
@@ -80,6 +79,9 @@
                             <div class="row table-row-10">
                                 <span>Order Date</span>
                             </div>
+                            {{-- <div class="row table-row-5">
+                        <span></span>
+                    </div> --}}
                         </div>
                         <div class="table-body">
                             @foreach ($data as $index => $item)
@@ -110,6 +112,23 @@
                                     <div class="row table-row-10">
                                         <span>{!! isset($item->order_date) ? $item->order_date : '---' !!}</span>
                                     </div>
+                                    {{-- <div class="row table-row-5">
+                                <div class="dropdown">
+                                    <i data-feather="more-vertical" class="action-btn" id="dropdownMenuButton"
+                                        data-mdb-toggle="dropdown" aria-expanded="false">
+                                    </i>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        @can('customer-update')
+                                            <li>
+                                                <a class="dropdown-item" s-click-link="{!! route('admin-customer-booking-detail', $item->id) !!}">
+                                                    <i data-feather="eye"></i>
+                                                    <span>Detail</span>
+                                                </a>
+                                            </li>
+                                        @endcan
+                                    </ul>
+                                </div>
+                            </div> --}}
                                 </div>
                             @endforeach
                         </div>
@@ -125,7 +144,7 @@
                     ])
                     @endcomponent
                 @endif
-            </div> --}}
+            </div>
         </div>
     @stop
     @section('script')
@@ -169,17 +188,6 @@
                     onSelect: function(selected) {
                         $("#from_date").datepicker("option", "maxDate", selected)
                     }
-                });
-                $('#timepicker').timepicker({
-                    'timeFormat': 'H:i',
-                    'interval': 30, // Interval between selectable times (in minutes)
-                    'minTime': '0:00am',
-                    'maxTime': '11:59pm',
-                    'defaultTime': 'now',
-                    'startTime': '00:00',
-                    'dynamic': false,
-                    'dropdown': true,
-                    'scrollbar': true
                 });
             });
         </script>

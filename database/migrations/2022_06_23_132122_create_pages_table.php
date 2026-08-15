@@ -11,25 +11,25 @@ return new class extends Migration
      *
      * @return void
      */
-    // public function up()
-    // {
-    //     Schema::create('pages', function (Blueprint $table) {
-    //         $table->increments('id');
-    //         $table->json('title')->nullable();
-    //         $table->json('content')->nullable();
-    //         $table->string('type');
-    //         $table->tinyInteger('status');
-    //         $table->timestamps();
-    //     });
-    // }
+    public function up()
+    {
+        Schema::create('pages', function (Blueprint $table) {
+            $table->increments('id');
+            $table->json('title')->nullable();
+            $table->json('content')->nullable();
+            $table->string('type');
+            $table->tinyInteger('status');
+            $table->timestamps();
+        });
+    }
 
-    // /**
-    //  * Reverse the migrations.
-    //  *
-    //  * @return void
-    //  */
-    // public function down()
-    // {
-    //     Schema::dropIfExists('pages');
-    // }
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('pages');
+    }
 };

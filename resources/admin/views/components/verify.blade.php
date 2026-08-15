@@ -65,6 +65,11 @@
                 cb(urlRute)
             },
             onConfirm() {
+                if (this.typeAction == 'manual') {
+                    this.$store.confirmDialog.close(true);
+                    return;
+                }
+
                 this.funStatusTrash(url => {
                     this.disabled = true;
                     this.loading = true;

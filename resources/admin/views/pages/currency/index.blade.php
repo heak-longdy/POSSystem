@@ -45,7 +45,7 @@
                 </div>
                 <div class="navHeaderRight">
                     @can('barber-create')
-                        <button class="btn btn-create" s-click-link="{!! route('admin-barber-create') !!}">
+                        <button class="btn btn-create" s-click-link="">
                             <i class='bx bx-plus-circle'></i>
                             <span>@lang('user.button.create')</span>
                         </button>

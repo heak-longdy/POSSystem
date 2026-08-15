@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders Cart UI</title>
+  <style>
+    :root {
+      --bg: #f6f6f5;
+      --panel: #ffffff;
+      --soft: #f7f7f6;
+      --soft-strong: #f0f0ef;
+      --line: #e6e6e4;
+      --line-soft: #eeeeec;
+      --text: #171716;
+      --muted: #646461;
+      --faint: #9a9a95;
+      --accent: #2f7cf6;
+      --danger: #c64658;
+      --shadow: 0 1px 9px rgba(20, 20, 20, 0.045);
+      --radius: 8px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f1f1ef;
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #f8f8f7 0%, #eeeeec 100%);
+    }
+
+    .app {
+      width: min(100%, 2174px);
+      height: min(1740px, calc(100vh - 28px));
+      min-height: 760px;
+      display: grid;
+      grid-template-columns: minmax(760px, 1fr) minmax(430px, 29%);
+      grid-template-rows: 96px 64px minmax(0, 1fr);
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 14px 42px rgba(24, 24, 22, 0.08);
+    }
+
+    .header-left,
+    .header-right,
+    .crumbs,
+    .cart-kicker {
+      display: flex;
+      align-items: center;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-left,
+    .crumbs,
+    .catalog {
+      border-right: 1px solid var(--line);
+    }
+
+    .header-left {
+      grid-column: 1;
+      grid-row: 1;
+      justify-content: space-between;
+      padding: 0 27px 0 58px;
+    }
+
+    .header-right {
+      grid-column: 2;
+      grid-row: 1;
+      padding: 0 31px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 27px;
+      font-weight: 650;
+      color: #141413;
+      white-space: nowrap;
+    }
+
+    .brand svg {
+      width: 34px;
+      height: 34px;
+      stroke-width: 2.3;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .icon-btn,
+    .scan-btn,
+    .sort-btn,
+    .qty-btn,
+    .add-btn,
+    .apply-btn,
+    .pay-btn {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .icon-btn {
+      position: relative;
+      width: 55px;
+      height: 55px;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-btn svg {
+      width: 25px;
+      height: 25px;
+      stroke-width: 2;
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #ea2465;
+      color: #fff;
+      border: 3px solid #fff;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .cart-title {
+      font-size: 27px;
+      font-weight: 650;
+    }
+
+    .crumbs {
+      grid-column: 1;
+      grid-row: 2;
+      gap: 18px;
+      padding: 0 50px;
+      background: #fbfbfa;
+      color: #4d4d4a;
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .crumbs svg {
+      width: 18px;
+      height: 18px;
+      color: #797975;
+    }
+
+    .crumbs .active {
+      color: #252523;
+      padding-bottom: 9px;
+      border-bottom: 2px solid #d7d7d4;
+    }
+
+    .cart-kicker {
+      grid-column: 2;
+      grid-row: 2;
+      padding: 0 28px;
+      background: #fbfbfa;
+      color: #5a5a56;
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .catalog {
+      grid-column: 1;
+      grid-row: 3;
+      min-width: 0;
+      padding: 24px 28px 36px 50px;
+      overflow: auto;
+      background: var(--panel);
+      scrollbar-color: #222220 #f4f4f2;
+      scrollbar-width: thin;
+    }
+
+    .catalog::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .catalog::-webkit-scrollbar-track {
+      background: #f4f4f2;
+    }
+
+    .catalog::-webkit-scrollbar-thumb {
+      background: #242422;
+      border-radius: 999px;
+      border: 3px solid #f4f4f2;
+    }
+
+    .catalog-head,
+    .filter-row,
+    .cart-head,
+    .totals-row,
+    .promo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .catalog-head {
+      margin-bottom: 37px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 25px;
+      line-height: 1.15;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: 25px;
+      line-height: 1.15;
+      font-weight: 650;
+    }
+
+    h3 {
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 650;
+    }
+
+    .catalog-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 420px;
+    }
+
+    .scan-btn {
+      height: 59px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      padding: 0 22px;
+      font-size: 18px;
+      font-weight: 550;
+      white-space: nowrap;
+    }
+
+    .scan-btn svg,
+    .sort-btn svg,
+    .add-btn svg,
+    .pay-btn svg {
+      width: 23px;
+      height: 23px;
+      stroke-width: 2;
+    }
+
+    .search-field {
+      height: 59px;
+      flex: 1;
+      min-width: 230px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 17px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: #8c8c88;
+      box-shadow: var(--shadow);
+    }
+
+    .search-field svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 2;
+    }
+
+    .search-field input {
+      min-width: 0;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 18px;
+    }
+
+    .search-field input::placeholder {
+      color: #8f8f8a;
+    }
+
+    .filter-row {
+      margin-bottom: 48px;
+    }
+
+    .tabs {
+      min-width: 0;
+      display: inline-grid;
+      grid-template-columns: repeat(6, minmax(92px, 1fr));
+      gap: 0;
+      padding: 6px;
+      border-radius: 0;
+      background: #f2f2f1;
+    }
+
+    .tab {
+      min-width: 0;
+      height: 49px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #3f3f3c;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: #fff;
+      color: #1c1c1b;
+      box-shadow: 0 2px 8px rgba(18, 18, 16, 0.05);
+    }
+
+    .sort-btn {
+      height: 59px;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 22px;
+      font-size: 18px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 22px;
+      padding-bottom: 20px;
+    }
+
+    .product-card {
+      min-width: 0;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(22, 22, 20, 0.035);
+    }
+
+    .product-media {
+      aspect-ratio: 1.64;
+      background-color: #f8f8f7;
+      background-image: url("Order.png");
+      background-repeat: no-repeat;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .photo-hoodie,
+    .photo-blazer,
+    .photo-skirt,
+    .photo-shirt,
+    .photo-pleated,
+    .photo-cardigan {
+      background-size: 462.6% 608.4%;
+    }
+
+    .photo-hoodie {
+      background-position: 3.05% 27.92%;
+    }
+
+    .photo-blazer {
+      background-position: 32.16% 27.92%;
+    }
+
+    .photo-skirt {
+      background-position: 61.03% 27.92%;
+    }
+
+    .photo-shirt {
+      background-position: 3.05% 72.49%;
+    }
+
+    .photo-pleated {
+      background-position: 32.16% 72.49%;
+    }
+
+    .photo-cardigan {
+      background-position: 61.03% 72.49%;
+    }
+
+    .product-body {
+      padding: 18px 28px 0;
+    }
+
+    .product-title {
+      margin-bottom: 7px;
+      font-size: 22px;
+      line-height: 1.18;
+      font-weight: 650;
+    }
+
+    .product-type {
+      margin-bottom: 23px;
+      color: #4f4f4b;
+      font-size: 16px;
+    }
+
+    .option-row {
+      min-height: 51px;
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .option-label {
+      color: #5b5b57;
+      font-size: 16px;
+      font-weight: 550;
+    }
+
+    .sizes {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(34px, 1fr));
+      gap: 7px;
+    }
+
+    .size-pill {
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #f0f0ef;
+      border-radius: 4px;
+      color: #2c2c2a;
+      background: #fff;
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .size-pill.muted {
+      color: #a0a09a;
+      font-weight: 500;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .dot {
+      width: 27px;
+      height: 27px;
+      flex: 0 0 27px;
+      border-radius: 50%;
+      border: 1px solid #ededeb;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.02);
+    }
+
+    .dot.black {
+      background: #222321;
+    }
+
+    .dot.gray {
+      background: #ababaa;
+    }
+
+    .dot.light {
+      background: #fbfbfa;
+    }
+
+    .dot.blue {
+      background: #687da8;
+    }
+
+    .dot.taupe {
+      background: #a2a09b;
+    }
+
+    .dot.charcoal {
+      background: #303230;
+    }
+
+    .dot.sand {
+      background: #b8a388;
+    }
+
+    .product-foot {
+      min-height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 28px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .price {
+      color: #111110;
+      font-size: 27px;
+      line-height: 1;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .add-btn {
+      height: 55px;
+      min-width: 194px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      padding: 0 18px;
+      font-size: 18px;
+      font-weight: 550;
+      white-space: nowrap;
+    }
+
+    .cart {
+      grid-column: 2;
+      grid-row: 3;
+      min-width: 0;
+      overflow: auto;
+      background: #fff;
+    }
+
+    .cart-head {
+      padding: 43px 28px 37px;
+      font-size: 19px;
+      color: #4a4a47;
+    }
+
+    .clear-btn {
+      border: 0;
+      background: transparent;
+      color: var(--danger);
+      font-size: 18px;
+      font-weight: 650;
+      padding: 4px 0;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 154px minmax(0, 1fr);
+      gap: 28px;
+      padding: 0 28px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .cart-item + .cart-item {
+      padding-top: 31px;
+    }
+
+    .cart-thumb {
+      width: 154px;
+      aspect-ratio: 1;
+      border-radius: 7px;
+      background-color: #f5f5f4;
+      background-image: url("Order.png");
+      background-repeat: no-repeat;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.015);
+    }
+
+    .thumb-skirt,
+    .thumb-blazer,
+    .thumb-cardigan {
+      background-size: 1411.7% 1129.9%;
+    }
+
+    .thumb-skirt {
+      background-position: 78.15% 17.97%;
+    }
+
+    .thumb-blazer {
+      background-position: 78.15% 38.95%;
+    }
+
+    .thumb-cardigan {
+      background-position: 78.15% 58.72%;
+    }
+
+    .cart-info {
+      min-width: 0;
+    }
+
+    .cart-name {
+      margin: 4px 0 6px;
+      font-size: 22px;
+      line-height: 1.22;
+      font-weight: 650;
+    }
+
+    .cart-type {
+      color: #565652;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .cart-options {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 13px;
+      color: #686864;
+      font-size: 16px;
+    }
+
+    .cart-chip {
+      min-width: 46px;
+      height: 31px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      background: #fff;
+      box-shadow: 0 1px 8px rgba(18, 18, 17, 0.04);
+      color: #262624;
+      font-weight: 650;
+    }
+
+    .cart-color {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid #ececea;
+      display: inline-block;
+    }
+
+    .cart-color.blue {
+      background: #6c7fab;
+    }
+
+    .cart-color.taupe {
+      background: #aaa7a3;
+    }
+
+    .cart-color.light {
+      background: #cdcdca;
+    }
+
+    .cart-price {
+      margin-bottom: 28px;
+      color: #111110;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 650;
+    }
+
+    .qty {
+      display: inline-grid;
+      grid-template-columns: 55px 55px 55px;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .qty-btn {
+      width: 55px;
+      height: 55px;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .qty-value {
+      text-align: center;
+      font-size: 22px;
+    }
+
+    .payment {
+      padding: 0 28px 28px;
+    }
+
+    .payment-title {
+      margin: 22px -28px 0;
+      padding: 15px 28px 13px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfbfa;
+      color: #4f4f4b;
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .totals {
+      padding: 30px 0 25px;
+      display: grid;
+      gap: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .totals-row {
+      color: #595956;
+      font-size: 19px;
+    }
+
+    .totals-row strong {
+      color: #161615;
+      font-size: 25px;
+    }
+
+    .total-line {
+      padding: 32px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #444440;
+      font-size: 17px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .total-line strong {
+      color: #111110;
+      font-size: 25px;
+    }
+
+    .promo-row {
+      margin-bottom: 27px;
+    }
+
+    .promo-field {
+      height: 57px;
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: #6a6a66;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .promo-field svg {
+      width: 24px;
+      height: 24px;
+      stroke-width: 2;
+    }
+
+    .promo-field input {
+      min-width: 0;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: transparent;
+      font-size: 18px;
+    }
+
+    .apply-btn {
+      height: 57px;
+      padding: 0 24px;
+      font-size: 18px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .payment-select {
+      width: 100%;
+      height: 57px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+      font-weight: 650;
+    }
+
+    .payment-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .visa-mark {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0;
+      color: #1b3d94;
+    }
+
+    .pay-btn {
+      width: 100%;
+      height: 77px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border-color: #1c62d9;
+      background: var(--accent);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 750;
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 8px 18px rgba(47, 124, 246, 0.25);
+    }
+
+    .pay-btn svg {
+      stroke-width: 2.6;
+    }
+
+    @media (max-width: 1600px) {
+      .product-body,
+      .product-foot {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .product-foot {
+        gap: 8px;
+      }
+
+      .option-row {
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 6px;
+      }
+
+      .sizes {
+        gap: 5px;
+      }
+
+      .size-pill {
+        height: 31px;
+        font-size: 14px;
+      }
+
+      .price {
+        font-size: 24px;
+      }
+
+      .add-btn {
+        min-width: 0;
+        height: 54px;
+        padding: 0 12px;
+        font-size: 16px;
+      }
+
+      .add-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .cart-options {
+        gap: 10px;
+      }
+
+      .cart-chip {
+        min-width: 40px;
+        height: 30px;
+      }
+
+      .cart-color {
+        width: 30px;
+        height: 30px;
+      }
+    }
+
+    @media (max-width: 1350px) {
+      .app {
+        grid-template-columns: minmax(640px, 1fr) 410px;
+      }
+
+      .header-left {
+        padding-left: 34px;
+      }
+
+      .crumbs,
+      .catalog {
+        padding-left: 34px;
+      }
+
+      .catalog-actions {
+        min-width: 370px;
+      }
+
+      .products {
+        gap: 16px;
+      }
+
+      .cart-item {
+        grid-template-columns: 116px minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .cart-thumb {
+        width: 116px;
+      }
+    }
+
+    @media (max-width: 1220px) {
+      .products {
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+      }
+    }
+
+    @media (max-width: 1040px) {
+      .page {
+        padding: 0;
+      }
+
+      .app {
+        height: auto;
+        min-height: 100vh;
+        border-radius: 0;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+        overflow: visible;
+      }
+
+      .header-left,
+      .header-right,
+      .crumbs,
+      .cart-kicker,
+      .catalog,
+      .cart {
+        grid-column: 1;
+        border-right: 0;
+      }
+
+      .header-left {
+        grid-row: 1;
+        min-height: 86px;
+      }
+
+      .crumbs {
+        grid-row: 2;
+        min-height: 58px;
+      }
+
+      .catalog {
+        grid-row: 3;
+        overflow: visible;
+      }
+
+      .header-right,
+      .cart-kicker {
+        display: none;
+      }
+
+      .cart {
+        grid-row: 4;
+        overflow: visible;
+        border-top: 1px solid var(--line);
+      }
+
+      .products {
+        grid-template-columns: repeat(2, minmax(240px, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .header-left {
+        padding: 18px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .crumbs,
+      .catalog,
+      .cart-head,
+      .payment {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .catalog-head,
+      .filter-row,
+      .catalog-actions,
+      .promo-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .catalog-actions {
+        min-width: 0;
+      }
+
+      .tabs {
+        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .sort-btn,
+      .scan-btn,
+      .search-field {
+        width: 100%;
+      }
+
+      .products {
+        grid-template-columns: 1fr;
+      }
+
+      .cart-item {
+        grid-template-columns: 96px minmax(0, 1fr);
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .cart-thumb {
+        width: 96px;
+      }
+
+      .qty {
+        grid-template-columns: 46px 42px 46px;
+        gap: 8px;
+      }
+
+      .qty-btn {
+        width: 46px;
+        height: 46px;
+      }
+
+      .payment-title {
+        margin-left: -18px;
+        margin-right: -18px;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="app">
+      <header class="header-left">
+        <div class="brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 10h16l-1.7 9H5.7L4 10Z"></path>
+            <path d="M8 10 10 5"></path>
+            <path d="m16 10-2-5"></path>
+            <path d="M9 14v2"></path>
+            <path d="M15 14v2"></path>
+            <path d="M3 10h18"></path>
+          </svg>
+          <span>Orders</span>
+        </div>
+
+        <div class="header-actions">
+          <button class="icon-btn" aria-label="Delivery">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10 17H6a2 2 0 0 1-2-2V5h10v10"></path>
+              <path d="M14 8h3l3 4v3h-2"></path>
+              <path d="M7 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0"></path>
+              <path d="M16 17a2 2 0 1 0 4 0 2 2 0 0 0-4 0"></path>
+            </svg>
+          </button>
+          <button class="icon-btn" aria-label="Messages">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"></path>
+              <path d="M8 10h8"></path>
+              <path d="M8 14h5"></path>
+            </svg>
+            <span class="badge-count">8</span>
+          </button>
+          <button class="icon-btn" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
+              <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <header class="header-right">
+        <div class="cart-title">Cart</div>
+      </header>
+
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <span>Menu</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+        <span class="active">Orders</span>
+      </nav>
+
+      <div class="cart-kicker">Cart Details</div>
+
+      <main class="catalog">
+        <section class="catalog-head">
+          <h1>List Product</h1>
+          <div class="catalog-actions">
+            <button class="scan-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 7V5a1 1 0 0 1 1-1h2"></path>
+                <path d="M17 4h2a1 1 0 0 1 1 1v2"></path>
+                <path d="M20 17v2a1 1 0 0 1-1 1h-2"></path>
+                <path d="M7 20H5a1 1 0 0 1-1-1v-2"></path>
+                <path d="M8 7v10"></path>
+                <path d="M12 7v10"></path>
+                <path d="M16 7v10"></path>
+              </svg>
+              <span>Scan Barcode</span>
+            </button>
+            <label class="search-field">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m21 21-4.3-4.3"></path>
+                <circle cx="11" cy="11" r="7"></circle>
+              </svg>
+              <input type="search" placeholder="Search">
+            </label>
+          </div>
+        </section>
+
+        <section class="filter-row" aria-label="Product filters">
+          <div class="tabs">
+            <button class="tab active">All Product</button>
+            <button class="tab">Men</button>
+            <button class="tab">Women</button>
+            <button class="tab">Unisex</button>
+            <button class="tab">Kids</button>
+            <button class="tab">Accessories</button>
+          </div>
+          <button class="sort-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 6h16"></path>
+              <path d="M7 12h10"></path>
+              <path d="M10 18h4"></path>
+            </svg>
+            <span>Newest</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </button>
+        </section>
+
+        <section class="products" aria-label="Products">
+          <article class="product-card">
+            <div class="product-media photo-hoodie" role="img" aria-label="Gray cropped crewneck sweatshirt"></div>
+            <div class="product-body">
+              <h2 class="product-title">Crewneck Terkonek</h2>
+              <p class="product-type">Men</p>
+              <div class="option-row">
+                <span class="option-label">Size</span>
+                <div class="sizes">
+                  <span class="size-pill">XS</span>
+                  <span class="size-pill muted">S</span>
+                  <span class="size-pill">M</span>
+                  <span class="size-pill muted">L</span>
+                  <span class="size-pill">XL</span>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Colors</span>
+                <div class="dots">
+                  <span class="dot black"></span>
+                  <span class="dot gray"></span>
+                  <span class="dot light"></span>
+                </div>
+              </div>
+            </div>
+            <div class="product-foot">
+              <span class="price">$29.56</span>
+              <button class="add-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-media photo-blazer" role="img" aria-label="Plaid double-breasted blazer"></div>
+            <div class="product-body">
+              <h2 class="product-title">Tempest Blazer</h2>
+              <p class="product-type">Unisex</p>
+              <div class="option-row">
+                <span class="option-label">Size</span>
+                <div class="sizes">
+                  <span class="size-pill">XS</span>
+                  <span class="size-pill">S</span>
+                  <span class="size-pill">M</span>
+                  <span class="size-pill muted">L</span>
+                  <span class="size-pill muted">XL</span>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Colors</span>
+                <div class="dots">
+                  <span class="dot taupe"></span>
+                  <span class="dot blue"></span>
+                  <span class="dot charcoal"></span>
+                </div>
+              </div>
+            </div>
+            <div class="product-foot">
+              <span class="price">$30.14</span>
+              <button class="add-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-media photo-skirt" role="img" aria-label="Blue skirt"></div>
+            <div class="product-body">
+              <h2 class="product-title">Crossbow of Skirt</h2>
+              <p class="product-type">Women</p>
+              <div class="option-row">
+                <span class="option-label">Size</span>
+                <div class="sizes">
+                  <span class="size-pill">XS</span>
+                  <span class="size-pill">S</span>
+                  <span class="size-pill muted">M</span>
+                  <span class="size-pill">L</span>
+                  <span class="size-pill">XL</span>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Colors</span>
+                <div class="dots">
+                  <span class="dot blue"></span>
+                  <span class="dot gray"></span>
+                  <span class="dot taupe"></span>
+                </div>
+              </div>
+            </div>
+            <div class="product-foot">
+              <span class="price">$33.44</span>
+              <button class="add-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-media photo-shirt" role="img" aria-label="Light blue shirt"></div>
+            <div class="product-body">
+              <h2 class="product-title">Unique Owkegas</h2>
+              <p class="product-type">Unisex</p>
+              <div class="option-row">
+                <span class="option-label">Size</span>
+                <div class="sizes">
+                  <span class="size-pill">XS</span>
+                  <span class="size-pill">S</span>
+                  <span class="size-pill">M</span>
+                  <span class="size-pill">L</span>
+                  <span class="size-pill">XL</span>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Colors</span>
+                <div class="dots">
+                  <span class="dot blue"></span>
+                  <span class="dot gray"></span>
+                  <span class="dot black"></span>
+                </div>
+              </div>
+            </div>
+            <div class="product-foot">
+              <span class="price">$35.12</span>
+              <button class="add-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-media photo-pleated" role="img" aria-label="Pleated beige skirt"></div>
+            <div class="product-body">
+              <h2 class="product-title">Steppy Lany Skirt</h2>
+              <p class="product-type">Women</p>
+              <div class="option-row">
+                <span class="option-label">Size</span>
+                <div class="sizes">
+                  <span class="size-pill muted">XS</span>
+                  <span class="size-pill">S</span>
+                  <span class="size-pill">M</span>
+                  <span class="size-pill">L</span>
+                  <span class="size-pill">XL</span>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Colors</span>
+                <div class="dots">
+                  <span class="dot sand"></span>
+                  <span class="dot charcoal"></span>
+                </div>
+              </div>
+            </div>
+            <div class="product-foot">
+              <span class="price">$35.21</span>
+              <button class="add-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="product-card">
+            <div class="product-media photo-cardigan" role="img" aria-label="Gray cardigan"></div>
+            <div class="product-body">
+              <h2 class="product-title">Marbot x Jira Cardigan</h2>
+              <p class="product-type">Unisex</p>
+              <div class="option-row">
+                <span class="option-label">Size</span>
+                <div class="sizes">
+                  <span class="size-pill">XS</span>
+                  <span class="size-pill muted">S</span>
+                  <span class="size-pill">M</span>
+                  <span class="size-pill">L</span>
+                  <span class="size-pill">XL</span>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Colors</span>
+                <div class="dots">
+                  <span class="dot gray"></span>
+                  <span class="dot blue"></span>
+                  <span class="dot black"></span>
+                </div>
+              </div>
+            </div>
+            <div class="product-foot">
+              <span class="price">$36.95</span>
+              <button class="add-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 5v14"></path>
+                  <path d="M5 12h14"></path>
+                </svg>
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <aside class="cart" aria-label="Cart">
+        <div class="cart-head">
+          <span>3 Items Selected</span>
+          <button class="clear-btn">Clear</button>
+        </div>
+
+        <article class="cart-item">
+          <div class="cart-thumb thumb-skirt" role="img" aria-label="Crossbow of Skirt thumbnail"></div>
+          <div class="cart-info">
+            <h3 class="cart-name">Crossbow of Skirt</h3>
+            <p class="cart-type">Women</p>
+            <div class="cart-options">
+              <span>Size</span>
+              <span class="cart-chip">XS</span>
+              <span>Color</span>
+              <span class="cart-color blue"></span>
+            </div>
+            <div class="cart-price">$33,44</div>
+            <div class="qty" aria-label="Quantity selector">
+              <button class="qty-btn" aria-label="Decrease">-</button>
+              <span class="qty-value">1</span>
+              <button class="qty-btn" aria-label="Increase">+</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="cart-item">
+          <div class="cart-thumb thumb-blazer" role="img" aria-label="Darbot x Nike Cardigan thumbnail"></div>
+          <div class="cart-info">
+            <h3 class="cart-name">Darbot x Nike Cardigan</h3>
+            <p class="cart-type">Unisex</p>
+            <div class="cart-options">
+              <span>Size</span>
+              <span class="cart-chip">XS</span>
+              <span>Color</span>
+              <span class="cart-color taupe"></span>
+            </div>
+            <div class="cart-price">$60.28</div>
+            <div class="qty" aria-label="Quantity selector">
+              <button class="qty-btn" aria-label="Decrease">-</button>
+              <span class="qty-value">2</span>
+              <button class="qty-btn" aria-label="Increase">+</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="cart-item">
+          <div class="cart-thumb thumb-cardigan" role="img" aria-label="Cardigan thumbnail"></div>
+          <div class="cart-info">
+            <h3 class="cart-name">Darbot x Nike Cardigan</h3>
+            <p class="cart-type">Unisex</p>
+            <div class="cart-options">
+              <span>Size</span>
+              <span class="cart-chip">M</span>
+              <span>Color</span>
+              <span class="cart-color light"></span>
+            </div>
+            <div class="cart-price">$110.85</div>
+          </div>
+        </article>
+
+        <section class="payment">
+          <div class="payment-title">Payment Details</div>
+          <div class="totals">
+            <div class="totals-row">
+              <span>Sub Totals</span>
+              <span>$204.87</span>
+            </div>
+            <div class="totals-row">
+              <span>Discount</span>
+              <span>$0</span>
+            </div>
+            <div class="totals-row">
+              <span>PPN 11%</span>
+              <span>$12.3</span>
+            </div>
+          </div>
+
+          <div class="total-line">
+            <span>Total</span>
+            <strong>$217.12</strong>
+          </div>
+
+          <div class="promo-row">
+            <label class="promo-field">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 9a3 3 0 1 0 0 6v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a3 3 0 1 1 0-6V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3Z"></path>
+                <path d="M13 5v2"></path>
+                <path d="M13 17v2"></path>
+                <path d="M13 11v2"></path>
+              </svg>
+              <input type="text" placeholder="Promo code">
+            </label>
+            <button class="apply-btn">Apply</button>
+          </div>
+
+          <button class="payment-select">
+            <span class="payment-brand"><span class="visa-mark">VISA</span> VISA</span>
+            <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"></path>
+            </svg>
+          </button>
+
+          <button class="pay-btn">
+            <span>Pay</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17 17 7"></path>
+              <path d="M7 7h10v10"></path>
+            </svg>
+          </button>
+        </section>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

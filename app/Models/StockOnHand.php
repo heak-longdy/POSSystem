@@ -20,7 +20,12 @@ class StockOnHand extends Model
         'request_by_type'
     ];
     protected $appends = [
-        'created_date'
+        'created_date',
+        'product_title',
+        'shop_title',
+        'category_title',
+        'uom_title',
+        'request_by_title',
     ];
     public function product()
     {
@@ -33,6 +38,34 @@ class StockOnHand extends Model
     public function getCreatedDateAttribute()
     {
         return $this->created_at ? Carbon::parse($this->created_at)->format('d/M/Y h:i A') : null;
+    }
+    public function getProductTitleAttribute()
+    {
+        return $this->product ? $this->product->name : null;
+    }
+    public function getShopTitleAttribute()
+    {
+        return $this->shop ? $this->shop->name : null;
+    }
+    public function getCategoryTitleAttribute()
+    {
+        return $this->product && $this->product->category ? $this->product->category->name : null;
+    }
+    public function getUomTitleAttribute()
+    {
+        return $this->product && $this->product->uom ? $this->product->uom->name : null;
+    }
+    public function getRequestByTitleAttribute()
+    {
+        if ($this->request_by_type === 'admin') {
+            return $this->user ? $this->user->username : null;
+        }
+
+        if ($this->request_by_type === 'barber') {
+            return $this->barber ? $this->barber->name : null;
+        }
+
+        return null;
     }
     public function user()
     {
