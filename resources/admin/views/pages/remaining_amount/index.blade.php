@@ -2,37 +2,6 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => 'Remaining Amount Management'])
     <div class="content-wrapper" id="app" x-data="xRemainingAmount">
-        <!-- Top Financial Metric Cards -->
-        <div class="remaining-summary-ribbon">
-            <div class="remaining-stat-card remaining-stat-card--total">
-                <div class="stat-card__icon">
-                    <i class='bx bx-receipt'></i>
-                </div>
-                <div class="stat-card__content">
-                    <span class="stat-card__label">Total Amount</span>
-                    <span class="stat-card__value">{{ number_format($financialTotal, 2) }}៛</span>
-                </div>
-            </div>
-            <div class="remaining-stat-card remaining-stat-card--paid">
-                <div class="stat-card__icon">
-                    <i class='bx bx-check-shield'></i>
-                </div>
-                <div class="stat-card__content">
-                    <span class="stat-card__label">Total Paid</span>
-                    <span class="stat-card__value">{{ number_format($financialPaid, 2) }}៛</span>
-                </div>
-            </div>
-            <div class="remaining-stat-card remaining-stat-card--remaining">
-                <div class="stat-card__icon">
-                    <i class='bx bx-wallet-alt'></i>
-                </div>
-                <div class="stat-card__content">
-                    <span class="stat-card__label">Total Remaining</span>
-                    <span class="stat-card__value">{{ number_format($financialRemaining, 2) }}៛</span>
-                </div>
-            </div>
-        </div>
-
         @php
             $tabQuery = request()->except(['page', 'payment_status']);
             $tabUrl = function ($tabStatus) use ($tabQuery) {
@@ -375,427 +344,6 @@
         </template>
     </div>
 
-    <style>
-        /* Top Financial Summary Ribbon */
-        .remaining-summary-ribbon {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        .remaining-stat-card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-            border: 1px solid #e2e8f0;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .remaining-stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
-        }
-        .remaining-stat-card .stat-card__icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        .remaining-stat-card--total .stat-card__icon {
-            background: #eff6ff;
-            color: #3b82f6;
-        }
-        .remaining-stat-card--paid .stat-card__icon {
-            background: #ecfdf5;
-            color: #10b981;
-        }
-        .remaining-stat-card--remaining .stat-card__icon {
-            background: #fff1f2;
-            color: #f43f5e;
-        }
-        .stat-card__content {
-            display: flex;
-            flex-direction: column;
-        }
-        .stat-card__label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .stat-card__value {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-top: 2px;
-        }
-
-        /* Payment Modal Styling */
-        .payment-modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-        }
-        .payment-modal-card {
-            background: #ffffff;
-            width: 100%;
-            max-width: 680px;
-            max-height: 90vh;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            animation: modalFadeIn 0.25s ease-out;
-        }
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.96) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .payment-modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 24px;
-            border-bottom: 1px solid #f1f5f9;
-            background: #f8fafc;
-        }
-        .payment-modal-header .header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .modal-badge-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            background: #e0e7ff;
-            color: #4f46e5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-        .modal-title {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        .modal-subtitle {
-            margin: 2px 0 0;
-            font-size: 13px;
-            color: #64748b;
-        }
-        .btn-close-modal {
-            background: none;
-            border: none;
-            font-size: 26px;
-            line-height: 1;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 6px;
-        }
-        .btn-close-modal:hover {
-            color: #1e293b;
-            background: #e2e8f0;
-        }
-        .payment-modal-body {
-            padding: 24px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* Modal Financial Breakdown Cards */
-        .modal-ledger-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 14px 18px;
-        }
-        .summary-col {
-            display: flex;
-            flex-direction: column;
-        }
-        .summary-label {
-            font-size: 11px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .summary-val {
-            font-size: 17px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-top: 2px;
-        }
-
-        /* Progress Bar */
-        .modal-progress-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .progress-bar-rail {
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 999px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            transition: width 0.3s ease;
-        }
-        .progress-bar-fill.fill-pending { background: #f59e0b; }
-        .progress-bar-fill.fill-partial { background: #3b82f6; }
-        .progress-bar-fill.fill-paid { background: #10b981; }
-        .progress-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-        }
-
-        /* Modal Tabs */
-        .modal-nav-tabs {
-            display: flex;
-            gap: 8px;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 8px;
-        }
-        .modal-tab-btn {
-            background: none;
-            border: none;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-        }
-        .modal-tab-btn:hover {
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-        .modal-tab-btn.is-active {
-            background: #e0e7ff;
-            color: #4338ca;
-        }
-
-        /* Form Grid */
-        .modal-form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-        .modal-form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .modal-form-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #475569;
-        }
-        .modal-input, .modal-select {
-            width: 100%;
-            height: 40px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 0 12px;
-            font-size: 14px;
-            color: #1e293b;
-            background: #ffffff;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .modal-input:focus, .modal-select:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-        }
-        .input-with-action {
-            display: flex;
-            gap: 8px;
-        }
-        .btn-quick-full {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 0 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #475569;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .btn-quick-full:hover {
-            background: #e2e8f0;
-            color: #1e293b;
-        }
-        .modal-form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 18px;
-        }
-        .btn-primary-action {
-            background: #4f46e5;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
-        .btn-primary-action:hover {
-            background: #4338ca;
-        }
-        .btn-secondary-action {
-            background: #fefce8;
-            color: #854d0e;
-            border: 1px solid #fef08a;
-            border-radius: 8px;
-            padding: 10px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-secondary-action:hover {
-            background: #fef9c3;
-        }
-
-        /* History Table */
-        .history-table-container {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .history-data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        .history-data-table th {
-            background: #f8fafc;
-            padding: 10px 14px;
-            font-weight: 600;
-            color: #64748b;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-        }
-        .history-data-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #1e293b;
-        }
-        .badge-method {
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .badge-cash { background: #dcfce7; color: #15803d; }
-        .badge-aba { background: #e0f2fe; color: #0369a1; }
-        .badge-card { background: #f3e8ff; color: #7e22ce; }
-        .badge-qr { background: #ffedd5; color: #c2410c; }
-        .btn-table-icon {
-            background: none;
-            border: none;
-            font-size: 16px;
-            color: #64748b;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-        }
-        .btn-table-icon:hover {
-            background: #f1f5f9;
-            color: #1e293b;
-        }
-        .empty-history-state {
-            padding: 40px 20px;
-            text-align: center;
-            color: #94a3b8;
-        }
-        .empty-history-state i {
-            font-size: 36px;
-            margin-bottom: 8px;
-        }
-
-        /* Inline Edit */
-        .cell-edit-container {
-            background: #f8fbff;
-            padding: 14px !important;
-        }
-        .inline-edit-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-        }
-        .modal-input-sm, .modal-select-sm {
-            width: 100%;
-            height: 32px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            padding: 0 8px;
-            font-size: 12px;
-        }
-        .btn-save-sm {
-            background: #4f46e5;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-cancel-sm {
-            background: #e2e8f0;
-            color: #475569;
-            border: none;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-    </style>
 @stop
 
 @section('script')
@@ -1007,20 +555,52 @@
                         this.paymentSubmitting = false;
                     });
                 },
-                deletePayment(pay) {
-                    if (!confirm('Are you sure you want to delete this payment record?')) {
+                confirmPaymentAction(message, btnSave, onConfirm) {
+                    const confirmDialog = this.$store?.confirmDialog;
+                    if (confirmDialog && typeof confirmDialog.open === 'function') {
+                        confirmDialog.open({
+                            data: {
+                                message: message,
+                                btnClose: `{{ __('action_button.cancel') }}`,
+                                btnSave: btnSave || 'Delete',
+                                typeAction: 'manual',
+                                digPosition: 'posTop',
+                                class: 'deleteDialog',
+                                width: '18rem',
+                            },
+                            afterClosed: (result) => {
+                                if (result) {
+                                    onConfirm();
+                                }
+                            }
+                        });
                         return;
                     }
-                    this.paymentSubmitting = true;
-                    Axios.delete(`{{ url('admin/remaining-amount/delete-payment') }}/${pay.id}`, {
-                        data: { _token: '{{ csrf_token() }}' }
-                    }).then((res) => {
-                        this.activeBooking = res.data;
-                        reloadData(`{{ url()->full() }}`);
-                    }).catch((err) => {
-                        alert(err.response?.data?.error || 'Unable to delete payment.');
-                    }).finally(() => {
-                        this.paymentSubmitting = false;
+
+                    if (window.confirm(message.replace(/<[^>]*>/g, ''))) {
+                        onConfirm();
+                    }
+                },
+                deletePayment(pay) {
+                    const amount = pay.amount_formatted || (Number(pay.amount || 0).toFixed(2) + '៛');
+                    const method = pay.payment_method || 'Cash';
+                    const message = `Are you sure want to delete payment of <b>${amount}</b> (${method})?`;
+
+                    this.confirmPaymentAction(message, 'Delete Payment', () => {
+                        this.paymentSubmitting = true;
+                        Axios.delete(`{{ url('admin/remaining-amount/delete-payment') }}/${pay.id}`, {
+                            data: { _token: '{{ csrf_token() }}' }
+                        }).then((res) => {
+                            this.activeBooking = res.data;
+                            reloadData(`{{ url()->full() }}`);
+                        }).catch((err) => {
+                            const message = err.response?.data?.error ||
+                                Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
+                                'Unable to delete payment.';
+                            alert(message);
+                        }).finally(() => {
+                            this.paymentSubmitting = false;
+                        });
                     });
                 },
                 sendReminderNotification() {

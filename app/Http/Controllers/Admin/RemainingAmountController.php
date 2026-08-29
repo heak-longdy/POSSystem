@@ -88,12 +88,6 @@ class RemainingAmountController extends Controller
             });
         }
 
-        // Compute Financial Summary across filtered query
-        $totalsQuery = clone $query;
-        $financialTotal = (float) $totalsQuery->sum('total_price');
-        $financialPaid = (float) $totalsQuery->sum('paid_amount');
-        $financialRemaining = max(0, $financialTotal - $financialPaid);
-
         $bookings = $query->orderBy('booking_date', 'desc')
             ->paginate(50)
             ->appends($req->query());
@@ -108,9 +102,6 @@ class RemainingAmountController extends Controller
             'barber' => $req->barber_id ? Barber::find($req->barber_id) : null,
             'firstMonthDay' => $dates['from'],
             'lastMonthDay' => $dates['to'],
-            'financialTotal' => $financialTotal,
-            'financialPaid' => $financialPaid,
-            'financialRemaining' => $financialRemaining,
         ]);
     }
 
