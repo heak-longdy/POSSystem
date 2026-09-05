@@ -48,7 +48,7 @@
 
                     <button s-click-link="{!! url()->current() !!}">
                         <i data-feather="refresh-ccw"></i>
-                        <span>@lang('adminGlobal.button.reload')</span>
+                        <span>@lang('global.button.reload')</span>
                     </button>
                 </div>
             </div>
@@ -120,7 +120,7 @@
                 @else
                     @component('admin::components.empty', [
                         'name' => __('No data'),
-                        'msg' => __('adminGlobal.empty.descriptionSlide'),
+                        'msg' => __('global.empty.descriptionSlide'),
                         'permission' => 'Customer-create',
                     ])
                     @endcomponent

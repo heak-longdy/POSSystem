@@ -27,6 +27,7 @@ return [
         'type' => 'Type',
         'geo-data' => 'Geo Data',
         'store' => 'Store',
+        'shop' => 'Shop',
         'service' => 'Service',
         'product' => 'Product',
         'point-value' => 'Point Value',
@@ -105,6 +106,11 @@ return [
         'store-create' => 'Create',
         'store-update' => 'Update',
         'store-delete' => 'Delete',
+        // shop
+        'shop-view' => 'View',
+        'shop-create' => 'Create',
+        'shop-update' => 'Update',
+        'shop-delete' => 'Delete',
         // product
         'product-view' => 'View',
         'product-create' => 'Create',

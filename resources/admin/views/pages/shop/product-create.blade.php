@@ -7,10 +7,10 @@
             <div class="form-header">
                 <h3 class="shop-product-page-title">
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-product', $id) !!}"></i>
-                    <span>Add Product to Shop</span>
+                    <span x-text="isEditMode() ? '{{ __('shop.product.title_edit') }}' : '{{ __('shop.product.title_create') }}'">{{ __('shop.product.title_create') }}</span>
                 </h3>
                 <div class="shop-product-context">
-                    <span>Shop</span>
+                    <span>{{ __('shop.name') }}</span>
                     <strong>{{ $shop?->name }}</strong>
                 </div>
             </div>
@@ -22,17 +22,17 @@
 
                 <div class="shop-product-toolbar">
                     <div class="shop-product-toolbar-text">
-                        <strong>Product assignment</strong>
-                        <span>Choose products and configure shop-specific price, points, limit, commission, and status.</span>
+                        <strong>{{ __('shop.product.toolbar_title') }}</strong>
+                        <span>{{ __('shop.product.toolbar_desc') }}</span>
                     </div>
                     {{-- <button type="button" color="primary" @click="addRow" :disabled="!canAddRow()" x-show="!isEditMode()" style="display: none;">
                         <i class="material-symbols-outlined">add</i>
-                        <span>Add Product</span>
+                        <span>{{ __('shop.button.add_product_row') }}</span>
                     </button> --}}
                 </div>
 
                 <div class="shop-product-alert" x-show="products.length === 0 && !isEditMode()" style="display: none;">
-                    All active products are already assigned to this shop.
+                    {{ __('shop.product.all_assigned_alert') }}
                 </div>
 
                 <template x-if="productRows.length > 0">
@@ -46,8 +46,8 @@
 
                             <div class="shop-product-row-header">
                                 <div>
-                                    <span x-text="row.id ? 'Assigned product' : `Product ${index + 1}`"></span>
-                                    <h4 x-text="row.product_name || 'Select a product'"></h4>
+                                    <span x-text="row.id ? '{{ __('shop.product.assigned_product') }}' : `{{ __('shop.product.product_label') }} ${index + 1}`"></span>
+                                    <h4 x-text="row.product_name || '{{ __('shop.product.select_product') }}'"></h4>
                                 </div>
                                 <template x-if="!row.id">
                                     <button type="button" class="shop-product-remove" @click="removeRow(index)">
@@ -61,7 +61,7 @@
                                     <img :src="productImage(row)" onerror="this.src='{{ asset('images/logo/default.png') }}'" alt="">
                                 </div>
                                 <div class="form-row">
-                                    <label>Product <span>*</span></label>
+                                    <label>{{ __('shop.product.product') }} <span>*</span></label>
                                     <template x-if="row.id">
                                         <div class="shop-product-readonly-wrap">
                                             <input type="hidden" :name="`products[${index}][product_id]`"
@@ -72,7 +72,7 @@
                                     <template x-if="!row.id">
                                         <select :name="`products[${index}][product_id]`" x-model="row.product_id"
                                             @change="syncProduct(row)">
-                                            <option value="">Select Product</option>
+                                            <option value="">{{ __('shop.product.select_product') }}</option>
                                             <template x-for="product in availableProducts(row)" :key="product.id">
                                                 <option :value="product.id" x-text="product.name"></option>
                                             </template>
@@ -90,57 +90,59 @@
 
                             <div class="shop-product-grid">
                                 <div class="form-row iconInput">
-                                    <label>Price <span>*</span></label>
+                                    <label>{{ __('shop.table.price') }} <span>*</span></label>
                                     <input type="number" step="0.01" :name="`products[${index}][price]`"
-                                        x-model="row.price" placeholder="Enter price ...">
+                                        x-model="row.price" placeholder="{{ __('shop.placeholder.enter_price') }}">
                                     <i class='bx bx-dollar'></i>
                                     <template x-if="fieldError(index, 'price')">
                                         <label class="error" x-text="fieldError(index, 'price')"></label>
                                     </template>
                                 </div>
                                 <div class="form-row iconInput">
-                                    <label>Point</label>
+                                    <label>{{ __('shop.table.point') }}</label>
                                     <input type="number" step="0.01" :name="`products[${index}][point]`"
-                                        x-model="row.point" placeholder="Enter point ...">
+                                        x-model="row.point" placeholder="{{ __('shop.placeholder.enter_point') }}">
                                     <i class='bx bx-badge-check'></i>
                                     <template x-if="fieldError(index, 'point')">
                                         <label class="error" x-text="fieldError(index, 'point')"></label>
                                     </template>
                                 </div>
                                 <div class="form-row iconInput">
-                                    <label>Max Qty</label>
+                                    <label>{{ __('shop.table.max_qty') }}</label>
                                     <input type="number" step="1" :name="`products[${index}][max_qty]`"
-                                        x-model="row.max_qty" placeholder="Enter max qty ...">
+                                        x-model="row.max_qty" placeholder="{{ __('shop.placeholder.enter_max_qty') }}">
                                     <i class='bx bx-package'></i>
                                     <template x-if="fieldError(index, 'max_qty')">
                                         <label class="error" x-text="fieldError(index, 'max_qty')"></label>
                                     </template>
                                 </div>
                                 <div class="form-row iconInput">
-                                    <label>Commission</label>
+                                    <label>{{ __('shop.table.commission') }}</label>
                                     <input type="number" step="0.01" :name="`products[${index}][commission]`"
-                                        x-model="row.commission" placeholder="Enter commission ...">
+                                        x-model="row.commission" placeholder="{{ __('shop.placeholder.enter_commission') }}">
                                     <i class='bx bx-money'></i>
                                     <template x-if="fieldError(index, 'commission')">
                                         <label class="error" x-text="fieldError(index, 'commission')"></label>
                                     </template>
                                 </div>
                                 <div class="form-row">
-                                    <label>Commission Type</label>
+                                    <label>{{ __('shop.table.commission_type') }}</label>
                                     <select :name="`products[${index}][commission_type]`" x-model="row.commission_type">
-                                        <option value="">Select Type</option>
-                                        <option value="khr">KHR</option>
-                                        <option value="percent">%</option>
+                                        <option value="">{{ __('shop.select_type') }}</option>
+                                        <option value="usd">{{ __('shop.commission_usd') }}</option>
+                                        <option value="percent">{{ __('shop.commission_percent') }}</option>
                                     </select>
                                     <template x-if="fieldError(index, 'commission_type')">
                                         <label class="error" x-text="fieldError(index, 'commission_type')"></label>
                                     </template>
                                 </div>
                                 <div class="form-row">
-                                    <label>Status <span>*</span></label>
+                                    <label>{{ __('shop.table.status') }} <span>*</span></label>
                                     <select :name="`products[${index}][status]`" x-model="row.status">
                                         @foreach (config('dummy.status') as $key => $item)
-                                            <option value="{{ $key }}">{{ $item }}</option>
+                                            <option value="{{ $key }}">
+                                                {{ $key == 1 ? __('global.form.status.active') : __('global.form.status.disable') }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     <template x-if="fieldError(index, 'status')">
@@ -154,18 +156,18 @@
                 <div style="margin-bottom: 40px;">
                     <button type="button" class="add_button" color="primary" @click="addRow" :disabled="!canAddRow()" x-show="!isEditMode()" style="display: none;">
                         <i class="material-symbols-outlined">add</i>
-                        <span>Add Product</span>
+                        <span>{{ __('shop.button.add_product_row') }}</span>
                     </button>
                 </div>
 
                 <div class="form-button">
                     <button type="submit" color="primary" :disabled="products.length === 0 && !isEditMode()">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ __('global.button.submit') }}</span>
                     </button>
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-product', $id) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>
@@ -489,7 +491,7 @@
                         point: '',
                         max_qty: '',
                         commission: '',
-                        commission_type: 'khr',
+                        commission_type: 'usd',
                         status: '1',
                     };
                 },
@@ -506,7 +508,7 @@
                         point: row?.point ?? '',
                         max_qty: row?.max_qty ?? '',
                         commission: row?.commission ?? '',
-                        commission_type: row?.commission_type ?? 'khr',
+                        commission_type: row?.commission_type ?? 'usd',
                         status: row?.status ? String(row.status) : '1',
                     };
                 },
@@ -543,7 +545,7 @@
                     row.product_category = product.category ?? '';
                     row.price = product.price ?? '';
                     row.commission = product.commission ?? '';
-                    row.commission_type = row.commission_type || 'khr';
+                    row.commission_type = row.commission_type || 'usd';
                 },
                 canAddRow() {
                     const hasBlankNewRow = this.productRows.some((row) => !row.id && !row.product_id);

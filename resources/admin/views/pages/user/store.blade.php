@@ -12,11 +12,27 @@
             </div>
             {{ csrf_field() }}
             <div class="form-body">
-                <div class="row-3">
+                <div class="row-2">
                     <div class="form-row">
                         <label>Name <span>*</span> </label>
                         <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="Enter name ...">
                         @error('name')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
+                    <div class="form-row">
+                        <label>@lang('user.form.role.label')</label>
+                        <select name="role">
+                            <option value="">-- @lang('user.filter.role') --</option>
+                            @foreach (config('dummy.user.role') as $key => $roleName)
+                                @if ($key != 'super_admin' || (auth()->check() && auth()->user()->role === 'super_admin'))
+                                    <option value="{{ $key }}" {!! (request('id') && $data?->role == $key) || old('role') == $key ? 'selected' : '' !!}>
+                                        {{ ucfirst(str_replace('_', ' ', $roleName)) }}
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                        @error('role')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
@@ -30,7 +46,7 @@
                         @enderror
                     </div>
                     <div class="form-row">
-                        <label>@lang('adminGlobal.form.status.label')<span>*</span></label>
+                        <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
                             @foreach (config('dummy.status') as $key => $item)
                                 <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
@@ -82,7 +98,7 @@
                                     <i class='bx bx-cloud-upload'></i>
                                 </div>
                                 <div class="title">
-                                    <p>@lang('adminGlobal.form.image.placeholder')</p>
+                                    <p>@lang('global.form.image.placeholder')</p>
                                 </div>
                             </div>
                             <template x-if="image">

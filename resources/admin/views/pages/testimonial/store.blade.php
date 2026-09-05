@@ -23,7 +23,7 @@
                 </div>
                 <div class="row-3">
                     <div class="form-row wLen1">
-                        <label>@lang('adminGlobal.form.status.label')<span>*</span></label>
+                        <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
                             @foreach (config('dummy.status') as $key => $item)
                                 <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
@@ -52,7 +52,7 @@
                                     <i class='bx bx-cloud-upload'></i>
                                 </div>
                                 <div class="title">
-                                    <p>@lang('adminGlobal.form.image.placeholder')</p>
+                                    <p>@lang('global.form.image.placeholder')</p>
                                 </div>
                             </div>
                             <template x-if="image">

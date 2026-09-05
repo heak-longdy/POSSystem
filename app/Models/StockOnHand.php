@@ -57,15 +57,7 @@ class StockOnHand extends Model
     }
     public function getRequestByTitleAttribute()
     {
-        if ($this->request_by_type === 'admin') {
-            return $this->user ? $this->user->username : null;
-        }
-
-        if ($this->request_by_type === 'barber') {
-            return $this->barber ? $this->barber->name : null;
-        }
-
-        return null;
+        return $this->user ? $this->user->name : null;
     }
     public function user()
     {

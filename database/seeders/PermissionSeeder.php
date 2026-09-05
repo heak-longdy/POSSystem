@@ -51,6 +51,8 @@ class PermissionSeeder extends Seeder
         $stCustomerPoint = $this->increaseIndex();
         $stReportTransaction = $this->increaseIndex();
         $stReportSummary = $this->increaseIndex();
+        $stReportSales = $this->increaseIndex();
+        $stReportInventory = $this->increaseIndex();
 
         $stStockIn = $this->increaseIndex();
         $stStockOut = $this->increaseIndex();
@@ -464,7 +466,51 @@ class PermissionSeeder extends Seeder
                 'module_id' => $reportSummary->id,
             ]
         ]);
-        //endReportTransaction
+        //endReportSummary
+
+        //reportSales
+        $reportSales = ModulePermission::create([
+            'name' => 'Report Sales',
+            'parent_id' => $stReportSales,
+            'sort_no' => $stReportSales,
+        ]);
+        Permission::insert([
+            [
+                'display_name' => $view,
+                'name' => 'report-sales-view',
+                'guard_name' => 'web',
+                'module_id' => $reportSales->id,
+            ],
+            [
+                'display_name' => $excel,
+                'name' => 'report-sales-excel',
+                'guard_name' => 'web',
+                'module_id' => $reportSales->id,
+            ]
+        ]);
+        //endReportSales
+
+        //reportInventory
+        $reportInventory = ModulePermission::create([
+            'name' => 'Report Inventory Movement',
+            'parent_id' => $stReportInventory,
+            'sort_no' => $stReportInventory,
+        ]);
+        Permission::insert([
+            [
+                'display_name' => $view,
+                'name' => 'report-inventory-view',
+                'guard_name' => 'web',
+                'module_id' => $reportInventory->id,
+            ],
+            [
+                'display_name' => $excel,
+                'name' => 'report-inventory-excel',
+                'guard_name' => 'web',
+                'module_id' => $reportInventory->id,
+            ]
+        ]);
+        //endReportInventory
 
 
         // InventoryManagement

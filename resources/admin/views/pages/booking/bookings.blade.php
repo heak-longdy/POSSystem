@@ -1,6 +1,6 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Booking Management'])
+    @include('admin::shared.header', ['header_name' => __('booking.title')])
     <div class="content-wrapper" id="app" x-data="xIndex">
         @php
             $bookingTabQuery = request()->except(['page', 'payment_status']);
@@ -12,7 +12,7 @@
         @endphp
         @component('admin::components.listingData', [
             'routeName' => $routeName,
-            'createName' => 'Create Booking',
+            'createName' => __('booking.button.create'),
             'createPermission' => 'booking-create',
             'filterStatus' => false,
             // 'filterView' => 'admin::pages.booking.filter',
@@ -26,53 +26,53 @@
             'showTabs' => true,
             'tabs' => [
                 [
-                    'label' => 'Pending',
+                    'label' => __('booking.tab.pending'),
                     'icon' => 'bx bx-time-five',
                     'url' => $bookingTabUrl('Pending'),
                     'active' => $status === 'Pending',
                 ],
                 [
-                    'label' => 'Paid',
+                    'label' => __('booking.tab.paid'),
                     'icon' => 'bx bx-check-circle',
                     'url' => $bookingTabUrl('Paid'),
                     'active' => $status === 'Paid',
                 ],
                 [
-                    'label' => 'Partial',
+                    'label' => __('booking.tab.partial'),
                     'icon' => 'bx bx-credit-card',
                     'url' => $bookingTabUrl('Partial'),
                     'active' => $status === 'Partial',
                 ],
                 [
-                    'label' => 'Rejected',
+                    'label' => __('booking.tab.rejected'),
                     'icon' => 'bx bx-x-circle',
                     'url' => $bookingTabUrl('Rejected'),
                     'active' => $status === 'Rejected',
                 ],
                 [
-                    'label' => 'Trash',
+                    'label' => __('booking.tab.trash'),
                     'icon' => 'bx bx-trash-alt',
                     'url' => $bookingTabUrl('trash'),
                     'active' => $status === 'trash',
                 ],
             ],
             'exportAction' => 'excel()',
-            'exportLabel' => 'Excel',
+            'exportLabel' => __('booking.button.excel'),
             'exportClass' => 'btnExcel',
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
-                ['field' => 'invoice_title', 'title' => 'Booking ID', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'shop_title', 'title' => 'Shop', 'class' => 'text left', 'colVal' => 15],
-                ['field' => 'customer_title', 'title' => 'Customer', 'class' => 'text left', 'colVal' => 15],
-                ['field' => 'booking_items_title', 'title' => 'Services/Products', 'class' => 'text left', 'colVal' => 20],
-                ['field' => 'payment_status_title', 'title' => 'Pay Status', 'class' => '', 'colVal' => 10],
-                ['field' => 'total_price_title', 'title' => 'Total', 'class' => '', 'colVal' => 10],
-                ['field' => 'paid_amount_title', 'title' => 'Paid', 'class' => '', 'colVal' => 8],
-                ['field' => 'remaining_amount_title', 'title' => 'Remaining', 'class' => '', 'colVal' => 10],
-                ['field' => 'total_discount_title', 'title' => 'Discount', 'class' => '', 'colVal' => 10],
-                ['field' => 'booking_date_title', 'title' => 'Booking Date', 'class' => '', 'colVal' => 12],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
+                ['field' => 'invoice_title', 'title' => __('booking.table.booking_id'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'shop_title', 'title' => __('booking.table.shop'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'customer_title', 'title' => __('booking.table.customer'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'booking_items_title', 'title' => __('booking.table.services_products'), 'class' => 'text left', 'colVal' => 20],
+                ['field' => 'payment_status_title', 'title' => __('booking.table.pay_status'), 'class' => '', 'colVal' => 10],
+                ['field' => 'total_price_title', 'title' => __('booking.table.total'), 'class' => '', 'colVal' => 10],
+                ['field' => 'paid_amount_title', 'title' => __('booking.table.paid'), 'class' => '', 'colVal' => 8],
+                ['field' => 'remaining_amount_title', 'title' => __('booking.table.remaining'), 'class' => '', 'colVal' => 10],
+                ['field' => 'total_discount_title', 'title' => __('booking.table.discount'), 'class' => '', 'colVal' => 10],
+                ['field' => 'booking_date_title', 'title' => __('booking.table.booking_date'), 'class' => '', 'colVal' => 12],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -84,14 +84,14 @@
                             'action' => [
                                 [
                                     'url' => 'edit',
-                                    'title' => 'Edit',
+                                    'title' => __('global.action.edit'),
                                     'icon' => 'edit',
                                     'type' => 'link',
                                     'visible' => ['payment_status' => 'Pending'],
                                 ],
                                 [
                                     'url' => 'edit',
-                                    'title' => 'Payment',
+                                    'title' => __('booking.action.payment'),
                                     'icon' => 'payments',
                                     'type' => 'link',
                                     'class' => 'text-success',
@@ -99,7 +99,7 @@
                                 ],
                                 [
                                     'url' => 'edit',
-                                    'title' => 'Payment',
+                                    'title' => __('booking.action.payment'),
                                     'icon' => 'payments',
                                     'type' => 'link',
                                     'class' => 'text-success',
@@ -107,7 +107,7 @@
                                 ],
                                 [
                                     'url' => 'cancel',
-                                    'title' => 'Reject',
+                                    'title' => __('booking.action.reject'),
                                     'icon' => 'cancel',
                                     'type' => 'click',
                                     'handler' => 'cancelBooking',
@@ -117,7 +117,7 @@
                                 ],
                                 [
                                     'url' => 'delete',
-                                    'title' => 'Delete',
+                                    'title' => __('global.action.delete'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                     'visible' => ['payment_status' => 'Pending'],
@@ -127,8 +127,8 @@
                         [
                             'key' => 'trash',
                             'action' => [
-                                ['url' => 'restore', 'title' => 'Restore', 'icon' => 'settings_backup_restore'],
-                                ['url' => 'destroy', 'title' => 'Destroy', 'icon' => 'Delete', 'class' => 'text-danger'],
+                                ['url' => 'restore', 'title' => __('global.action.restore'), 'icon' => 'settings_backup_restore'],
+                                ['url' => 'destroy', 'title' => __('global.action.destroy'), 'icon' => 'Delete', 'class' => 'text-danger'],
                             ],
                         ],
                     ],
@@ -141,7 +141,7 @@
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
                     <span id="spinner"></span>
-                    <label>Export excel ...</label>
+                    <label>{{ __('booking.export_excel') }}</label>
                 </div>
             </div>
         </template>
@@ -202,7 +202,7 @@
                 },
                 fetchSelectShop() {
                     $('#shop_id').select2({
-                        placeholder: 'Select Shop',
+                        placeholder: '{{ __('booking.select_shop') }}',
                         ajax: {
                             url: '{{ route('admin-select-shop') }}',
                             dataType: 'json',
@@ -222,7 +222,7 @@
                 },
                 fetchSelectBarber() {
                     $('#barber_id').select2({
-                        placeholder: 'Select Barber',
+                        placeholder: '{{ __('booking.select_barber') }}',
                         ajax: {
                             url: '{{ route('admin-select-barber') }}',
                             dataType: 'json',
@@ -241,9 +241,10 @@
                     });
                 },
                 verifyDialog(data, typeAction, btn) {
+                    const confirmTemplate = "{{ __('booking.confirm.action', ['action' => '__ACTION__']) }}";
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to ${btn} ?`,
+                            message: confirmTemplate.replace('__ACTION__', btn),
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: btn,
                             item: data,
@@ -261,11 +262,12 @@
                     });
                 },
                 cancelBooking(item) {
+                    const rejectTemplate = "{{ __('booking.confirm.reject', ['invoice' => '__INVOICE__']) }}";
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to reject booking <b>${item.invoice_title}</b> ?`,
+                            message: rejectTemplate.replace('__INVOICE__', '<b>' + (item?.invoice_title || '') + '</b>'),
                             btnClose: `{{ __('action_button.cancel') }}`,
-                            btnSave: 'Reject Booking',
+                            btnSave: '{{ __('booking.action.reject_booking') }}',
                             item: item,
                             typeAction: 'manual',
                             digPosition: "posTop",
@@ -306,23 +308,23 @@
                 },
                 runExcelExport(rows) {
                     const workbook = new ExcelJS.Workbook();
-                    const worksheet = workbook.addWorksheet('Booking Report');
+                    const worksheet = workbook.addWorksheet(@json(__('booking.excel_report')));
                     worksheet.columns = [
-                        { header: 'Booking ID', key: 'booking_id', width: 16 },
-                        { header: 'Booking Date', key: 'booking_date', width: 18 },
-                        { header: 'Shop', key: 'shop', width: 22 },
-                        { header: 'Barber', key: 'barber', width: 22 },
-                        { header: 'Customer Phone', key: 'customer_phone', width: 18 },
-                        { header: 'Item', key: 'item', width: 28 },
-                        { header: 'Type', key: 'type', width: 12 },
-                        { header: 'Qty', key: 'qty', width: 8 },
-                        { header: 'Price', key: 'price', width: 14 },
-                        { header: 'Discount', key: 'discount', width: 14 },
-                        { header: 'Commission', key: 'commission', width: 14 },
-                        { header: 'Pay Status', key: 'payment_status', width: 14 },
-                        { header: 'Paid Amount', key: 'paid_amount', width: 14 },
-                        { header: 'Remaining Amount', key: 'remaining_amount', width: 18 },
-                        { header: 'Pay Date', key: 'payment_date', width: 18 },
+                        { header: @json(__('booking.table.booking_id')), key: 'booking_id', width: 16 },
+                        { header: @json(__('booking.table.booking_date')), key: 'booking_date', width: 18 },
+                        { header: @json(__('booking.table.shop')), key: 'shop', width: 22 },
+                        { header: @json(__('booking.table.barber')), key: 'barber', width: 22 },
+                        { header: @json(__('booking.table.customer_phone')), key: 'customer_phone', width: 18 },
+                        { header: @json(__('booking.table.item')), key: 'item', width: 28 },
+                        { header: @json(__('booking.table.type')), key: 'type', width: 12 },
+                        { header: @json(__('booking.table.qty')), key: 'qty', width: 8 },
+                        { header: @json(__('booking.table.price')), key: 'price', width: 14 },
+                        { header: @json(__('booking.table.discount')), key: 'discount', width: 14 },
+                        { header: @json(__('booking.table.commission')), key: 'commission', width: 14 },
+                        { header: @json(__('booking.table.pay_status')), key: 'payment_status', width: 14 },
+                        { header: @json(__('booking.table.paid')), key: 'paid_amount', width: 14 },
+                        { header: @json(__('booking.table.remaining')), key: 'remaining_amount', width: 18 },
+                        { header: @json(__('booking.table.pay_date')), key: 'payment_date', width: 18 },
                     ];
 
                     rows.forEach((item) => {
@@ -357,7 +359,10 @@
                     return date ? moment(date).format('YYYY-MM-DD HH:mm') : '';
                 },
                 bookingStatusLabel(status) {
-                    return status === 'Cancel' ? 'Rejected' : (status || '');
+                    if (status === 'Paid') return @json(__('booking.status.paid'));
+                    if (status === 'Partial') return @json(__('booking.status.partial'));
+                    if (status === 'Cancel') return @json(__('booking.status.rejected'));
+                    return @json(__('booking.status.pending'));
                 },
                 discountAmount(item) {
                     const discount = item?.type === 'product' ? item?.product_discount : item?.service_discount;

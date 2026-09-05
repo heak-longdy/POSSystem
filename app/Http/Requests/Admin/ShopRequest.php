@@ -29,7 +29,7 @@ class ShopRequest extends FormRequest
             'name' => [
                 'required',
                 'max:50',
-                Rule::unique('products', 'name')->ignore($this->route('id')),
+                Rule::unique('shops', 'name')->ignore($this->route('id')),
             ],
             'phone' => 'required|max:20',
             'address' => 'required|string',
@@ -40,14 +40,14 @@ class ShopRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'Name is required',
-            'name.max' => 'Name must not exceed 50 characters.',
-            'name.unique' => 'Name already exists.',
-            'phone.required' => 'Phone is required',
-            'phone.max' => 'Phone must not exceed 20 characters.',
-            'address.required' => 'Address is required',
-            'status.required' => 'Status is required',
-            'status.max' => 'Status must not exceed 1 characters.',
+            'name.required' => __('shop.validation.name_required'),
+            'name.max' => __('shop.validation.name_max'),
+            'name.unique' => __('shop.validation.name_unique'),
+            'phone.required' => __('shop.validation.phone_required'),
+            'phone.max' => __('shop.validation.phone_max'),
+            'address.required' => __('shop.validation.address_required'),
+            'status.required' => __('shop.validation.status_required'),
+            'status.max' => __('shop.validation.status_max'),
         ];
     }
 }

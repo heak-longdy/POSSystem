@@ -48,7 +48,7 @@
             @component('admin::components.empty',
                 [
                     'name' => __('No data'),
-                   // 'msg' => __('adminGlobal.empty.descriptionSlide'),
+                   // 'msg' => __('global.empty.descriptionSlide'),
                    // 'permission' => 'customer-create',
                 ])
             @endcomponent

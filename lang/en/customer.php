@@ -3,34 +3,39 @@
 return [
     'name' => 'Customer',
     'title' => 'Customer Management',
-    'tab' => [
-        'active' => 'Active',
-        'disable' => 'Disable',
-        'trash' => 'Trash',
-    ],
-    'breadcrumb' => [
-        'all' => 'All',
-    ],
-    'filter' => [
-        'search' => 'Search...',
-        'all' => 'All',
-        'role' => 'Select Role',
-    ],
+    'customer_report' => 'Customer Report',
+
     'button' => [
-        'create' => 'Create New',
+        'create' => 'Create Customer',
         'import' => 'Import Customers',
-        'reload' => 'Refresh',
-        'search' => 'Search',
     ],
+
     'empty' => [
         'title' => 'Customer is empty',
         'description' => 'You can create a new Customer by clicking the button below.',
     ],
+
     'form' => [
         'title' => [
-            'change_password' => 'Change Password',
-            'create' => 'Create New Customer',
+            'create' => 'Create Customer',
             'update' => 'Update Customer',
+            'change_password' => 'Change Password',
+        ],
+        'name' => [
+            'label' => 'Name',
+            'placeholder' => 'Enter name ...',
+        ],
+        'phone' => [
+            'label' => 'Phone',
+            'placeholder' => 'Enter phone ...',
+        ],
+        'email' => [
+            'label' => 'Email',
+            'placeholder' => 'Enter email ...',
+        ],
+        'address' => [
+            'label' => 'Address',
+            'placeholder' => 'Enter address ...',
         ],
         'password' => [
             'label' => 'Password',
@@ -44,52 +49,23 @@ return [
             'label' => 'Confirm Password',
             'placeholder' => 'Confirm password',
         ],
-        'name' => [
-            'label' => 'Name',
-            'placeholder' => 'Enter name',
-        ],
-        'first_name' => [
-            'label' => 'First Name',
-            'placeholder' => 'Enter first name',
-        ],
-        'last_name' => [
-            'label' => 'Last Name',
-            'placeholder' => 'Enter last name',
-        ],
-        'email' => [
-            'label' => 'Email',
-            'placeholder' => 'Enter email',
-        ],
-        'phone' => [
-            'label' => 'Phone',
-            'placeholder' => 'Enter phone',
-        ],
-        'status' => [
-            'label' => 'Status',
-            'active' => 'Active',
-            'disable' => 'Disable',
-        ],
         'profile' => [
             'label' => 'Profile',
             'placeholder' => 'Enter profile',
-        ],
-        'role' => [
-            'label' => 'Role',
-            'placeholder' => 'Enter role',
-        ],
-        'button' => [
-            'update' => 'Update',
-            'submit' => 'Submit',
-            'cancel' => 'Cancel',
         ],
         'id_card' => [
             'label' => 'ID Card',
             'placeholder' => 'Enter id card',
         ],
-        'gender' => [
-            'label' => 'Gender',
-            'male' => 'Male',
-            'female' => 'Female'
-        ],
+    ],
+
+    'validation' => [
+        'name_required' => 'Please enter the customer name.',
+        'name_max' => 'The name may not be greater than 255 characters.',
+        'password_required' => 'Password is required.',
+        'password_min' => 'Password must be at least 6 characters.',
+        'password_confirmed' => 'Password confirmation does not match.',
+        'status_required' => 'Status is required.',
+        'status_boolean' => 'Status must be true or false.',
     ],
 ];

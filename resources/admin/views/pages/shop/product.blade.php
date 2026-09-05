@@ -1,6 +1,6 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Shop Product'])
+    @include('admin::shared.header', ['header_name' => __('shop.product.title')])
     <div class="content-wrapper" id="app" x-data="xShopProductListing">
         <div class="header box-shadow-bottom">
             <div class="header-tab">
@@ -9,15 +9,15 @@
                         <div class="tabs">
                             <a href="{!! route('admin-' . $routeName . '-list', 1) !!}">
                                 <i class='bx bx-store'></i>
-                                Shop
+                                {{ __('shop.tab.shop') }}
                             </a>
                             <a href="{!! route('admin-' . $routeName . '-product', $id) !!}" class="{!! $status != 'trash' ? 'tabActive' : '' !!}">
                                 <i class='bx bx-package'></i>
-                                Product
+                                {{ __('shop.tab.product') }}
                             </a>
                             <a href="{!! route('admin-' . $routeName . '-product', ['id' => $id, 'status' => 'trash']) !!}" class="{!! $status == 'trash' ? 'tabActive' : '' !!}">
                                 <i class='bx bx-trash-alt'></i>
-                                Trash
+                                {{ __('global.tab.trash') }}
                             </a>
                         </div>
                     </div>
@@ -25,7 +25,7 @@
                 <div class="header-action-button">
                     <form class="filter" action="{!! url()->current() !!}" method="GET">
                         <div class="form-row w200">
-                            <input type="text" name="search" placeholder="Search..." value="{{ request('search') }}">
+                            <input type="text" name="search" placeholder="{{ __('global.filter.search') }}" value="{{ request('search') }}">
                         </div>
                         <button mat-flat-button type="submit" class="bg-success btnSearch">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -41,7 +41,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
-                        <span>Reload</span>
+                        <span>{{ __('global.button.reload') }}</span>
                     </button>
                     @if ($status != 'trash')
                         <button class="btn btn-create" s-click-link="{!! route('admin-' . $routeName . '-product-create', $id) !!}">
@@ -49,7 +49,7 @@
                                 stroke-width="1.5" stroke="currentColor" class="size-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                             </svg>
-                            <span>Add Product to Shop</span>
+                            <span>{{ __('shop.button.add_product') }}</span>
                         </button>
                     @endif
                 </div>
@@ -64,16 +64,16 @@
                             @include('admin::components.pagination', ['paginate' => $products])
                         </div>
                         <div class="table-header">
-                            <div class="row table-row-5"><span>Nº</span></div>
-                            <div class="row table-row-8 text left"><span>Image</span></div>
-                            <div class="row table-row-20 text left"><span>Product</span></div>
-                            <div class="row table-row-12 text left"><span>Category</span></div>
-                            <div class="row table-row-8 text left"><span>UOM</span></div>
-                            <div class="row table-row-9"><span>Price</span></div>
-                            <div class="row table-row-7"><span>Point</span></div>
-                            <div class="row table-row-7"><span>Max Qty</span></div>
-                            <div class="row table-row-9"><span>Commission</span></div>
-                            <div class="row table-row-10"><span>Status</span></div>
+                            <div class="row table-row-5"><span>{{ __('shop.table.no') }}</span></div>
+                            <div class="row table-row-8 text left"><span>{{ __('shop.table.image') }}</span></div>
+                            <div class="row table-row-20 text left"><span>{{ __('shop.table.product') }}</span></div>
+                            <div class="row table-row-12 text left"><span>{{ __('shop.table.category') }}</span></div>
+                            <div class="row table-row-8 text left"><span>{{ __('shop.table.uom') }}</span></div>
+                            <div class="row table-row-9"><span>{{ __('shop.table.price') }}</span></div>
+                            <div class="row table-row-7"><span>{{ __('shop.table.point') }}</span></div>
+                            <div class="row table-row-7"><span>{{ __('shop.table.max_qty') }}</span></div>
+                            <div class="row table-row-9"><span>{{ __('shop.table.commission') }}</span></div>
+                            <div class="row table-row-10"><span>{{ __('shop.table.status') }}</span></div>
                             <div class="row table-row-5"><span></span></div>
                         </div>
                         <div class="table-body">
@@ -109,14 +109,14 @@
                                     <div class="row table-row-9">
                                         <span>
                                             @if ($item->commission !== null)
-                                                {{ number_format($item->commission, 2) }}{{ $item->commission_type == 'percent' ? '%' : '៛' }}
+                                                {{ number_format($item->commission, 2) }}{{ $item->commission_type == 'percent' ? '%' : ' $' }}
                                             @else
                                                 ---
                                             @endif
                                         </span>
                                     </div>
                                     <div class="row table-row-10">
-                                        <span>{{ config('dummy.status')[$item->status] ?? '---' }}</span>
+                                        <span>{{ $item->status == 1 ? __('global.tab.active') : ($item->status == 2 ? __('global.tab.disable') : '---') }}</span>
                                     </div>
                                     <div class="row table-row-5">
                                         <div class="dropdown">
@@ -129,14 +129,14 @@
                                                         <a class="dropdown-item"
                                                             href="{!! route('admin-' . $routeName . '-product-edit', ['shopId' => $id, 'shopProductId' => $item->id]) !!}">
                                                             <i class="material-symbols-outlined">edit</i>
-                                                            <span>Edit</span>
+                                                            <span>{{ __('shop.action.edit') }}</span>
                                                         </a>
                                                     </li>
                                                     <li>
                                                         <a class="dropdown-item text-danger"
                                                             @click="verifyDialog({{ $item }},'delete','Delete')">
                                                             <i class="material-symbols-outlined">Delete</i>
-                                                            <span>Delete</span>
+                                                            <span>{{ __('shop.action.delete') }}</span>
                                                         </a>
                                                     </li>
                                                 @else
@@ -144,14 +144,14 @@
                                                         <a class="dropdown-item"
                                                             @click="verifyDialog({{ $item }},'restore','Restore')">
                                                             <i class="material-symbols-outlined">settings_backup_restore</i>
-                                                            <span>Restore</span>
+                                                            <span>{{ __('shop.action.restore') }}</span>
                                                         </a>
                                                     </li>
                                                     <li>
                                                         <a class="dropdown-item text-danger"
                                                             @click="verifyDialog({{ $item }},'destroy','Destroy')">
                                                             <i class="material-symbols-outlined">Delete</i>
-                                                            <span>Destroy</span>
+                                                            <span>{{ __('shop.action.destroy') }}</span>
                                                         </a>
                                                     </li>
                                                 @endif
@@ -167,10 +167,10 @@
                     </div>
                 @else
                     @component('admin::components.empty', [
-                        'name' => $status == 'trash' ? 'No trash product' : 'No product',
-                        'msg' => $status == 'trash' ? 'Trash product data not found.' : 'You can add a product to this shop by clicking the button below',
+                        'name' => $status == 'trash' ? __('shop.empty.trash_title') : __('shop.empty.title'),
+                        'msg' => $status == 'trash' ? __('shop.empty.trash_description') : __('shop.empty.description'),
                         'url' => $status == 'trash' ? null : route('admin-' . $routeName . '-product-create', $id),
-                        'button' => $status == 'trash' ? null : 'Add Product to Shop',
+                        'button' => $status == 'trash' ? null : __('shop.button.add_product'),
                     ])
                     @endcomponent
                 @endif
@@ -185,9 +185,11 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('xShopProductListing', () => ({
                 verifyDialog(data, typeAction, btn) {
+                    const confirmTemplate = `{{ __('shop.dialog.confirm_action', ['action' => '__ACTION__']) }}`;
+                    const confirmMsg = confirmTemplate.replace('__ACTION__', btn);
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to ${btn} ?`,
+                            message: confirmMsg,
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: btn,
                             item: data,

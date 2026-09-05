@@ -40,14 +40,14 @@
                 </div>
                 <div class="row">
                     <div class="form-row">
-                        <label>@lang('adminGlobal.form.image.label')</label>
+                        <label>@lang('global.form.image.label')</label>
                         <div class="form-select-photo image">
                             <div class="select-photo {!! isset($data) && $data->profile != null ? 'active' : '' !!}">
                                 <div class="icon">
                                     <i data-feather="image"></i>
                                 </div>
                                 <div class="title">
-                                    <span>@lang('adminGlobal.form.image.placeholder')</span>
+                                    <span>@lang('global.form.image.placeholder')</span>
                                 </div>
                             </div>
                             <div class="image-view {!! isset($data) && $data->profile != null ? 'active' : '' !!}">

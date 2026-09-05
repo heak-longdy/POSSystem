@@ -212,7 +212,7 @@ class StockTransactionService
             'price' => $product->price,
             'max_qty' => 0,
             'status' => 1,
-            'commission_type' => 'khr',
+            'commission_type' => 'usd',
             'commission' => 0,
         ]);
     }

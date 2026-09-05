@@ -69,11 +69,11 @@ class StockTransfer extends Model
     }
     public function getRequestByTitleAttribute()
     {
-        if ($this->request_by_type === 'admin') {
+        if ($this->request_by_type == 'admin') {
             return $this->user ? $this->user->username : null;
         }
 
-        if ($this->request_by_type === 'barber') {
+        if ($this->request_by_type == 'barber') {
             return $this->barber ? $this->barber->name : null;
         }
 

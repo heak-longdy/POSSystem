@@ -130,10 +130,10 @@
         @component('admin::components.empty',
             [
                 'name' => __('No data'),
-                'msg' => __('adminGlobal.empty.descriptionSlide'),
+                'msg' => __('global.empty.descriptionSlide'),
                 'permission' => 'Customer-create',
                 'url' => route('admin-customer-create'),
-                'button' => __('adminGlobal.button.createSlide'),
+                'button' => __('global.button.createSlide'),
             ])
         @endcomponent
     @endif

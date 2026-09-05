@@ -215,7 +215,7 @@
                 @else
                     @component('admin::components.empty', [
                         'name' => __('No data'),
-                        'msg' => __('adminGlobal.empty.descriptionReportTransaction'),
+                        'msg' => __('global.empty.descriptionReportTransaction'),
                         'permission' => 'report-transaction-create',
                     ])
                     @endcomponent

@@ -14,6 +14,7 @@ use App\Models\ModulePermission;
 use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 use App\Services\Tools;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -84,10 +85,16 @@ class UserController extends Controller
         } else {
             unset($req["password"]);
         }
-        if ($req->input('save_opt') == 'save_new') {
-            return $this->tools->onSave($this->table, $req, $id, $this->routeName, 'back');
+        $redirect = $req->input('save_opt') == 'save_new' ? 'back' : null;
+        $response = $this->tools->onSave($this->table, $req, $id, $this->routeName, $redirect);
+        if ($req->filled('role')) {
+            $user = $id ? User::find($id) : User::where('email', $req->email)->first();
+            if ($user) {
+                Role::firstOrCreate(['name' => $req->role, 'guard_name' => 'web']);
+                $user->syncRoles([$req->role]);
+            }
         }
-        return $this->tools->onSave($this->table, $req, $id, $this->routeName);
+        return $response;
     }
     public function updateStatus($id, $status)
     {
@@ -129,5 +136,66 @@ class UserController extends Controller
             Session::flash("warning", "change password unsuccess");
         }
         return redirect()->route("admin-user-list", 1);
+    }
+
+    public function onPermission(Request $req, $id = null)
+    {
+        $userId = $id ?? $req->id;
+        $user = User::findOrFail($userId);
+
+        if ($user->role === 'super_admin' && (!Auth::check() || Auth::user()->role !== 'super_admin')) {
+            Session::flash('warning', 'Cannot modify super admin permissions.');
+            return redirect()->route('admin-user-list', 1);
+        }
+
+        $groupedModules = ModulePermission::with('permission')
+            ->orderBy('sort_no')
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->parent_name ?: 'General';
+            });
+
+        $userPermissions = $user->permissions->pluck('name')->toArray();
+
+        return view($this->layout . 'permission', [
+            'user' => $user,
+            'groupedModules' => $groupedModules,
+            'userPermissions' => $userPermissions,
+        ]);
+    }
+
+    public function onSavePermission(Request $req, $id = null)
+    {
+        $userId = $id ?? $req->id;
+        $user = User::findOrFail($userId);
+
+        if ($user->role === 'super_admin' && (!Auth::check() || Auth::user()->role !== 'super_admin')) {
+            Session::flash('warning', 'Cannot modify super admin permissions.');
+            return redirect()->route('admin-user-list', 1);
+        }
+
+        DB::beginTransaction();
+        try {
+            $permissions = $req->input('permission', []);
+            if (!is_array($permissions)) {
+                $permissions = [];
+            }
+            $user->syncPermissions($permissions);
+            DB::commit();
+            Session::flash('success', 'Set permission successful!');
+
+            if ($req->ajax() || $req->wantsJson()) {
+                return response()->json([
+                    'error' => false,
+                    'message' => 'Set permission successful!',
+                ]);
+            }
+
+            return redirect()->route('admin-user-list', 1);
+        } catch (Exception $error) {
+            DB::rollback();
+            Session::flash('warning', 'Failed to update permissions: ' . $error->getMessage());
+            return redirect()->back();
+        }
     }
 }

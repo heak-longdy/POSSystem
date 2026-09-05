@@ -90,7 +90,7 @@
                     </div>
 
                     <div class="form-row">
-                        <label>@lang('adminGlobal.form.status.label') <span>*</span></label>
+                        <label>@lang('global.form.status.label') <span>*</span></label>
                         <select name="status" id="status">
                             @foreach (config('dummy.status') as $key => $item)
                                 <option value="{{ $key }}" {!! (request('id') && $data?->status == $key) || old('status', 1) == $key ? 'selected' : '' !!}>{{ $item }}</option>

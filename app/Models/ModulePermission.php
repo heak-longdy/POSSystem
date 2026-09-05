@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class ModulePermission extends Model
 {
     protected $table = 'module_permissions';
+    protected $guarded = [];
     public function permission()
     {
         return $this->hasMany(Permission::class, 'module_id');

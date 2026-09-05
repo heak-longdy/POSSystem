@@ -10,7 +10,7 @@
                         <div class="menu-item {!! Request::is('admin/barber/list/2') ? 'active' : '' !!}" s-click-link="{!! route('admin-barber-list', 2) !!}">
                             Disable</div>
                         <div class="menu-item {!! Request::is('admin/barber/list/trash') ? 'active' : '' !!}" s-click-link="{!! route('admin-barber-list', 'trash') !!}">
-                            @lang('adminGlobal.tab.trash')</div>
+                            @lang('global.tab.trash')</div>
                     </div>
                 </div>
                 <div class="header-action-button">

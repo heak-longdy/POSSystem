@@ -10,9 +10,11 @@ class BaseWebSiteController extends Controller
     public $contact;
     public function __construct()
     {
-        $this->contact      = Contact::first();
-        View()->share([
-            'contact'   => $this->contact,
-        ]);
+        if (\Illuminate\Support\Facades\Schema::hasTable('contacts')) {
+            $this->contact = Contact::first();
+            View()->share([
+                'contact' => $this->contact,
+            ]);
+        }
     }
 }

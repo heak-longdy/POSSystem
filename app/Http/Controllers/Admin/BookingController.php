@@ -164,7 +164,7 @@ class BookingController extends Controller
 
         $booking = Booking::with(['customer', 'shop', 'barber', 'payments.createdBy'])->find($id);
         if (!$booking) {
-            Session::flash('warning', 'Booking not found.');
+            Session::flash('warning', __('booking.message.not_found'));
             return redirect()->route('admin-' . $this->routeName . '-list', 1);
         }
 
@@ -225,7 +225,7 @@ class BookingController extends Controller
             );
 
             DB::commit();
-            Session::flash('success', $bookingId ? 'Update success.' : 'Create success.');
+            Session::flash('success', $bookingId ? __('booking.message.update_success') : __('booking.message.create_success'));
 
             $savedBooking = $booking->fresh();
 
@@ -296,7 +296,7 @@ class BookingController extends Controller
 
             $booking = $this->syncBookingPaymentState($booking);
             DB::commit();
-            Session::flash('success', 'Payment status updated successfully.');
+            Session::flash('success', __('booking.message.payment_status_success'));
 
             return response()->json($this->paymentResponse($booking));
         } catch (ValidationException $e) {
@@ -305,7 +305,7 @@ class BookingController extends Controller
             return response()->json(['message' => 'error', 'errors' => $e->errors()], 422);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Payment status update unsuccess!');
+            Session::flash('warning', __('booking.message.payment_status_error'));
 
             return response()->json(['message' => 'error', 'error' => $e->getMessage()], 500);
         }
@@ -485,9 +485,9 @@ class BookingController extends Controller
 
         $customerName = $booking->customer?->name ?: 'Customer';
         $invoice = $booking->invoice_number ?: '#' . $booking->id;
-        $totalFormatted = number_format((float) ($booking->total_price ?? 0), 2) . '៛';
-        $paidFormatted = number_format((float) ($booking->paid_amount ?? 0), 2) . '៛';
-        $remainingFormatted = number_format($remaining, 2) . '៛';
+        $totalFormatted = '$' . number_format((float) ($booking->total_price ?? 0), 2);
+        $paidFormatted = '$' . number_format((float) ($booking->paid_amount ?? 0), 2);
+        $remainingFormatted = '$' . number_format($remaining, 2);
         $bookingDateFormatted = $booking->booking_date ? Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---';
 
         $title = "Payment Reminder: Booking {$invoice}";
@@ -531,7 +531,7 @@ class BookingController extends Controller
             ]);
 
             DB::commit();
-            Session::flash('success', 'Booking rejected successfully.');
+            Session::flash('success', __('booking.message.reject_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -540,7 +540,7 @@ class BookingController extends Controller
             return response()->json(['message' => 'error', 'errors' => $e->errors()], 422);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Booking reject unsuccess!');
+            Session::flash('warning', __('booking.message.reject_error'));
 
             return response()->json(['message' => 'error', 'error' => $e->getMessage()], 500);
         }
@@ -559,7 +559,7 @@ class BookingController extends Controller
             $booking->delete();
 
             DB::commit();
-            Session::flash('success', 'Delete success!');
+            Session::flash('success', __('booking.message.delete_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -568,7 +568,7 @@ class BookingController extends Controller
             return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Delete unsuccess!');
+            Session::flash('warning', __('booking.message.delete_error'));
 
             return response()->json(['message' => 'unsuccess', 'status' => 404, 'error' => $e->getMessage()], 404);
         }
@@ -588,7 +588,7 @@ class BookingController extends Controller
             }
 
             DB::commit();
-            Session::flash('success', 'Restore success!');
+            Session::flash('success', __('booking.message.restore_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -597,7 +597,7 @@ class BookingController extends Controller
             return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Restore unsuccess!');
+            Session::flash('warning', __('booking.message.restore_error'));
 
             return response()->json(['message' => 'unsuccess', 'status' => 404, 'error' => $e->getMessage()], 404);
         }
@@ -622,7 +622,7 @@ class BookingController extends Controller
             $booking->forceDelete();
 
             DB::commit();
-            Session::flash('success', 'Delete success!');
+            Session::flash('success', __('booking.message.delete_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -631,7 +631,7 @@ class BookingController extends Controller
             return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Delete unsuccess!');
+            Session::flash('warning', __('booking.message.delete_error'));
 
             return response()->json(['message' => 'unsuccess', 'status' => 404, 'error' => $e->getMessage()], 404);
         }
@@ -716,7 +716,7 @@ class BookingController extends Controller
                 'id' => $payment->id,
                 'booking_id' => $payment->booking_id,
                 'amount' => (float) ($payment->amount ?? 0),
-                'amount_formatted' => number_format((float) ($payment->amount ?? 0), 2) . '៛',
+                'amount_formatted' => '$' . number_format((float) ($payment->amount ?? 0), 2),
                 'payment_method' => $payment->payment_method ?: 'Cash',
                 'payment_date' => $payment->payment_date
                     ? Carbon::parse($payment->payment_date)->format('Y-m-d H:i:s')
@@ -736,11 +736,11 @@ class BookingController extends Controller
             'id' => $booking->id,
             'invoice_number' => $booking->invoice_number ?: '#' . $booking->id,
             'total_price' => (float) ($booking->total_price ?? 0),
-            'total_price_formatted' => number_format((float) ($booking->total_price ?? 0), 2) . '៛',
+            'total_price_formatted' => '$' . number_format((float) ($booking->total_price ?? 0), 2),
             'paid_amount' => (float) ($booking->paid_amount ?? 0),
-            'paid_amount_formatted' => number_format((float) ($booking->paid_amount ?? 0), 2) . '៛',
+            'paid_amount_formatted' => '$' . number_format((float) ($booking->paid_amount ?? 0), 2),
             'remaining_amount' => (float) $booking->remaining_amount,
-            'remaining_amount_formatted' => number_format((float) $booking->remaining_amount, 2) . '៛',
+            'remaining_amount_formatted' => '$' . number_format((float) $booking->remaining_amount, 2),
             'payment_status' => $booking->payment_status ?: 'Pending',
             'payment_date' => $booking->payment_date,
             'payments' => $payments,
@@ -875,9 +875,9 @@ class BookingController extends Controller
             'service_discount' => $type === 'service' ? ($itemData->discount ?? 0) : 0,
             'service_discount_type' => $type === 'service' ? ($itemData->discountType ?? null) : null,
             'product_commission' => $type === 'product' ? ($itemData->commission ?? 0) : 0,
-            'product_commission_type' => $type === 'product' ? ($itemData->commissionType ?? 'khr') : null,
+            'product_commission_type' => $type === 'product' ? ($itemData->commissionType ?? 'usd') : null,
             'service_commission' => $type === 'service' ? ($itemData->commission ?? 0) : 0,
-            'service_commission_type' => $type === 'service' ? ($itemData->commissionType ?? 'khr') : null,
+            'service_commission_type' => $type === 'service' ? ($itemData->commissionType ?? 'usd') : null,
         ]);
     }
 
@@ -1082,9 +1082,14 @@ class BookingController extends Controller
         };
     }
 
-    private function bookingStatusLabel($status)
+    public static function bookingStatusLabel($status)
     {
-        return $status === 'Cancel' ? 'Rejected' : ($status ?: 'Pending');
+        return match ($status) {
+            'Paid' => __('booking.status.paid'),
+            'Partial' => __('booking.status.partial'),
+            'Cancel' => __('booking.status.rejected'),
+            default => __('booking.status.pending'),
+        };
     }
 
     private function dateRange(Request $req, $defaultToMonth = true)
@@ -1112,11 +1117,11 @@ class BookingController extends Controller
             $item->customer_title = $this->customerTitle($item);
             $item->booking_items_title = $this->bookingItemsTitle($item);
             $item->payment_status_title = $this->paymentStatusBadge($item);
-            $item->total_price_title = number_format((float) ($item->total_price ?? 0), 2) . '៛';
-            $item->paid_amount_title = number_format((float) ($item->paid_amount ?? 0), 2) . '៛';
-            $item->remaining_amount_title = number_format((float) ($item->remaining_amount ?? 0), 2) . '៛';
-            $item->total_commission_title = number_format((float) ($item->total_commission ?? 0), 2) . '៛';
-            $item->total_discount_title = number_format((float) ($item->total_discount ?? 0), 2) . '៛';
+            $item->total_price_title = '$' . number_format((float) ($item->total_price ?? 0), 2);
+            $item->paid_amount_title = '$' . number_format((float) ($item->paid_amount ?? 0), 2);
+            $item->remaining_amount_title = '$' . number_format((float) ($item->remaining_amount ?? 0), 2);
+            $item->total_commission_title = '$' . number_format((float) ($item->total_commission ?? 0), 2);
+            $item->total_discount_title = '$' . number_format((float) ($item->total_discount ?? 0), 2);
             $item->can_reject = $item->payment_status === 'Pending' && (float) ($item->paid_amount ?? 0) <= 0;
             $item->booking_date_title = $item->booking_date
                 ? Carbon::parse($item->booking_date)->format('Y-m-d H:i')

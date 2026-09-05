@@ -181,12 +181,12 @@ class ShopController extends Controller
             }
 
             DB::commit();
-            Session::flash('success', 'Shop products saved successfully.');
+            Session::flash('success', __('shop.message.products_saved'));
 
             return redirect()->route('admin-shop-product', $shop->id);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Shop products save unsuccess!');
+            Session::flash('warning', __('shop.message.products_save_failed'));
 
             return redirect()->back()->withInput();
         }
@@ -197,7 +197,7 @@ class ShopController extends Controller
         try {
             ShopProduct::where('shop_id', $shopId)->where('id', $shopProductId)->firstOrFail()->delete();
             DB::commit();
-            Session::flash('success', 'Delete success!');
+            Session::flash('success', __('shop.message.delete_success'));
 
             return response()->json([
                 'message' => 'success',
@@ -205,7 +205,7 @@ class ShopController extends Controller
             ]);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Delete unsuccess!');
+            Session::flash('warning', __('shop.message.delete_failed'));
 
             return response()->json([
                 'message' => 'unsuccess',
@@ -220,7 +220,7 @@ class ShopController extends Controller
         try {
             ShopProduct::withTrashed()->where('shop_id', $shopId)->where('id', $shopProductId)->firstOrFail()->restore();
             DB::commit();
-            Session::flash('success', 'Restore success!');
+            Session::flash('success', __('shop.message.restore_success'));
 
             return response()->json([
                 'message' => 'success',
@@ -228,7 +228,7 @@ class ShopController extends Controller
             ]);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Move to restore unsuccess!');
+            Session::flash('warning', __('shop.message.restore_failed'));
 
             return response()->json([
                 'message' => 'unsuccess',
@@ -243,7 +243,7 @@ class ShopController extends Controller
         try {
             ShopProduct::withTrashed()->where('shop_id', $shopId)->where('id', $shopProductId)->firstOrFail()->forceDelete();
             DB::commit();
-            Session::flash('success', 'Delete success!');
+            Session::flash('success', __('shop.message.destroy_success'));
 
             return response()->json([
                 'message' => 'success',
@@ -251,7 +251,7 @@ class ShopController extends Controller
             ]);
         } catch (Throwable $e) {
             DB::rollBack();
-            Session::flash('warning', 'Delete unsuccess!');
+            Session::flash('warning', __('shop.message.destroy_failed'));
 
             return response()->json([
                 'message' => 'unsuccess',

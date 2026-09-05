@@ -1,13 +1,13 @@
 @extends('admin::shared.layout')
 @php
     $isEditing = !empty($id);
-    $headerName = $isEditing ? 'Edit Booking' : 'Create Booking';
+    $headerName = $isEditing ? __('booking.form.edit_title') : __('booking.form.create_title');
     $bookingReference = $isEditing
         ? (($data->invoice_number ?? null) ? '#' . $data->invoice_number : '#' . $id)
         : null;
-    $bookingPageTitle = $isEditing ? 'Edit Booking' : 'Order Details';
-    $bookingActionLabel = $isEditing ? 'Update Booking' : 'Confirm Booking';
-    $bookingConfirmMessage = $isEditing ? 'Are you sure to update booking?' : 'Are you sure to confirm booking?';
+    $bookingPageTitle = $isEditing ? __('booking.form.edit_title') : __('booking.order_details');
+    $bookingActionLabel = $isEditing ? __('booking.button.update_booking') : __('booking.button.confirm_booking');
+    $bookingConfirmMessage = $isEditing ? __('booking.confirm.update') : __('booking.confirm.create');
 @endphp
 @section('layout')
     @include('admin::shared.header', ['header_name' => $headerName])
@@ -20,10 +20,10 @@
                     <div class="booking-pos-section-header">
                         <div class="title-wrap">
                             <i data-feather="clock"></i>
-                            <h2>Recent Bookings</h2>
+                            <h2>{{ __('booking.recent_bookings') }}</h2>
                         </div>
                         <button type="button" class="btn-link-all" s-click-link="{{ route('admin-booking-list', 'Pending') }}">
-                            <span>View all</span>
+                            <span>{{ __('booking.view_all') }}</span>
                             <i data-feather="arrow-right"></i>
                         </button>
                     </div>
@@ -38,15 +38,14 @@
                                         : ($recentStatus === 'Cancel'
                                         ? 'canceled'
                                         : 'waiting'));
-                                $recentStatusLabel = $recentStatus === 'Paid'
-                                    ? 'Ready'
-                                    : ($recentStatus === 'Partial'
-                                        ? 'Partial'
-                                        : ($recentStatus === 'Cancel'
-                                        ? 'Canceled'
-                                        : 'Waiting'));
+                                $recentStatusLabel = match ($recentStatus) {
+                                    'Paid' => __('booking.status.ready'),
+                                    'Partial' => __('booking.status.partial'),
+                                    'Cancel' => __('booking.status.canceled'),
+                                    default => __('booking.status.waiting'),
+                                };
                                 $recentCustomer = $recentBooking->customer?->name
-                                    ?: ($recentBooking->customer?->phone ?: 'Walk-in customer');
+                                    ?: ($recentBooking->customer?->phone ?: __('booking.walk_in_customer'));
                                 $customerInitials = strtoupper(substr($recentCustomer, 0, 2));
                                 $recentDate = $recentBooking->booking_date
                                     ? \Carbon\Carbon::parse($recentBooking->booking_date)->format('d M Y, h:i a')
@@ -75,7 +74,7 @@
                         @empty
                             <div class="booking-pos-order-empty">
                                 <i data-feather="calendar"></i>
-                                <span>No recent bookings</span>
+                                <span>{{ __('booking.no_recent_bookings') }}</span>
                             </div>
                         @endforelse
                     </div>
@@ -87,34 +86,9 @@
                         <div class="catalog-header-left">
                             <div class="title-wrap">
                                 <i data-feather="grid"></i>
-                                <h2>Menu Catalog</h2>
+                                <h2>{{ __('booking.menu_catalog') }}</h2>
                             </div>
-                            <!-- Category Filter Tabs -->
-                            {{-- <div class="booking-pos-tabs" role="tablist">
-                                <button type="button" class="booking-pos-tab"
-                                    :class="selectType === 'all' ? 'active' : ''" @click="changeSelectType('all')">
-                                    <i data-feather="layers"></i>
-                                    <span>All</span>
-                                </button>
-                                <button type="button" class="booking-pos-tab"
-                                    :class="selectType === 'product' ? 'active' : ''" @click="changeSelectType('product')">
-                                    <i data-feather="package"></i>
-                                    <span>Products</span>
-                                </button>
-                                <button type="button" class="booking-pos-tab"
-                                    :class="selectType === 'service' ? 'active' : ''" @click="changeSelectType('service')">
-                                    <i data-feather="scissors"></i>
-                                    <span>Services</span>
-                                </button>
-                            </div> --}}
                         </div>
-
-                        <!-- Catalog Search Input -->
-                        {{-- <div class="booking-pos-search-box">
-                            <i data-feather="search"></i>
-                            <input type="search" placeholder="Search catalog items..." x-ref="bookingSearch" x-model="searchFilter"
-                                x-on:input="fiterProduct($event.target.value)" autocomplete="off">
-                        </div> --}}
                     </div>
                     <div style="margin-bottom: 14px;display:flex;grid-gap: 200px;">
                         <!-- Category Filter Tabs -->
@@ -122,23 +96,23 @@
                             <button type="button" class="booking-pos-tab"
                                 :class="selectType === 'all' ? 'active' : ''" @click="changeSelectType('all')">
                                 <i data-feather="layers"></i>
-                                <span>All</span>
+                                <span>{{ __('booking.tab.all') }}</span>
                             </button>
                             <button type="button" class="booking-pos-tab"
                                 :class="selectType === 'product' ? 'active' : ''" @click="changeSelectType('product')">
                                 <i data-feather="package"></i>
-                                <span>Products</span>
+                                <span>{{ __('booking.tab.products') }}</span>
                             </button>
                             <button type="button" class="booking-pos-tab"
                                 :class="selectType === 'service' ? 'active' : ''" @click="changeSelectType('service')">
                                 <i data-feather="scissors"></i>
-                                <span>Services</span>
+                                <span>{{ __('booking.tab.services') }}</span>
                             </button>
                         </div>
                         <!-- Catalog Search Input -->
                         <div class="booking-pos-search-box">
                             <i data-feather="search"></i>
-                            <input type="search" placeholder="Search catalog items..." x-ref="bookingSearch" x-model="searchFilter"
+                            <input type="search" placeholder="{{ __('booking.search_catalog') }}" x-ref="bookingSearch" x-model="searchFilter"
                                 x-on:input="fiterProduct($event.target.value)" autocomplete="off">
                         </div>
                     </div>
@@ -203,7 +177,7 @@
                                                 :class="item?.addToCart ? 'is-added' : ''"
                                                 :disabled="!canEditBookingItems()" @click="addToCart(item)">
                                                 <i data-feather="shopping-cart"></i>
-                                                <span x-text="item?.addToCart ? 'Add more' : 'Add to cart'"></span>
+                                                <span x-text="item?.addToCart ? '{{ __('booking.button.add_more') }}' : '{{ __('booking.button.add_to_cart') }}'"></span>
                                             </button>
                                         </div>
                                     </article>
@@ -216,8 +190,8 @@
                                 <div class="empty-icon-wrap">
                                     <i data-feather="search"></i>
                                 </div>
-                                <h3>No menu items found</h3>
-                                <p>Try adjusting your search query or switching category filters above.</p>
+                                <h3>{{ __('booking.empty.no_items_found') }}</h3>
+                                <p>{{ __('booking.empty.try_adjusting_search') }}</p>
                             </div>
                         </template>
                     </div>
@@ -237,7 +211,7 @@
                         </div>
                         <span class="cart-items-counter">
                             <i data-feather="shopping-bag"></i>
-                            <span x-text="(dataCart?.length || 0) + ' items'"></span>
+                            <span x-text="(dataCart?.length || 0) + ' ' + @json(__('booking.items'))"></span>
                         </span>
                     </div>
 
@@ -256,44 +230,44 @@
                     <div class="sidebar-form-card">
                         <div class="sidebar-section-title">
                             <i data-feather="user"></i>
-                            <span>Customer & Shop Information</span>
+                            <span>{{ __('booking.form.customer_shop_info') }}</span>
                         </div>
                         <div class="sidebar-form-grid">
                             <div class="form-group form-group--full">
-                                <label><i data-feather="user"></i> Customer</label>
+                                <label><i data-feather="user"></i> {{ __('booking.form.customer') }}</label>
                                 <select name="customer_id" id="customer_id" x-model="formData.customer_id"
                                     :disabled="!canEditBookingItems()"
                                     class="booking-select booking-select--customer" x-init="fetchSelectCustomer()">
-                                    <option value="">Select customer</option>
+                                    <option value="">{{ __('booking.form.select_customer') }}</option>
                                 </select>
                                 <template x-for="item in dataError?.customer_id">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
                             <div class="form-group">
-                                <label><i data-feather="home"></i> Shop</label>
+                                <label><i data-feather="home"></i> {{ __('booking.form.shop') }}</label>
                                 <select name="shop_id" id="shop_id" x-model="formData.shop_id"
                                     :disabled="!canEditBookingItems()"
                                     class="booking-select booking-select--shop" x-init="fetchSelectShop()">
-                                    <option value="">Select shop</option>
+                                    <option value="">{{ __('booking.form.select_shop') }}</option>
                                 </select>
                                 <template x-for="item in dataError?.shop_id">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
                             <div class="form-group">
-                                <label><i data-feather="user-check"></i> Barber</label>
+                                <label><i data-feather="user-check"></i> {{ __('booking.form.barber') }}</label>
                                 <select name="barber_id" id="barber_id" x-model="formData.barber_id"
                                     :disabled="!canEditBookingItems()"
                                     class="booking-select booking-select--barber" x-init="fetchSelectBarber()">
-                                    <option value="">Select barber</option>
+                                    <option value="">{{ __('booking.form.select_barber') }}</option>
                                 </select>
                                 <template x-for="item in dataError?.barber_id">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
                             <div class="form-group form-group--full">
-                                <label><i data-feather="calendar"></i> Booking Date</label>
+                                <label><i data-feather="calendar"></i> {{ __('booking.form.booking_date') }}</label>
                                 <input type="text" id="booking_date" x-model="formData.booking_date"
                                     :disabled="!canEditBookingItems()" autocomplete="off" class="sidebar-date-input">
                                 <template x-for="item in dataError?.booking_date">
@@ -309,12 +283,12 @@
                     <div class="cart-head-row">
                         <div class="cart-head-title">
                             <i data-feather="shopping-cart"></i>
-                            <span>Order Items</span>
+                            <span>{{ __('booking.order_items') }}</span>
                         </div>
                         <button type="button" class="btn-clear-cart" :disabled="!canEditBookingItems()"
-                            @click="resetCart()" title="Clear cart">
+                            @click="resetCart()" title="{{ __('booking.button.reset_order') }}">
                             <i data-feather="trash-2"></i>
-                            <span>Reset Order</span>
+                            <span>{{ __('booking.button.reset_order') }}</span>
                         </button>
                     </div>
 
@@ -332,15 +306,15 @@
                                                 <div>
                                                     <h3 class="booking-pos-cart-name" x-text="item?.name"></h3>
                                                     <span class="booking-pos-cart-type" :class="item.product_type"
-                                                        x-text="item.product_type === 'service' ? 'Service' : 'Product'"></span>
+                                                        x-text="item.product_type === 'service' ? @json(__('booking.tab.service')) : @json(__('booking.tab.product'))"></span>
                                                 </div>
                                                 <div class="booking-pos-cart-actions">
-                                                    <button type="button" @click="focusCartItem(item)" title="Edit item"
-                                                        aria-label="Edit item" :disabled="!canEditBookingItems()">
+                                                    <button type="button" @click="focusCartItem(item)" title="{{ __('booking.action.edit') }}"
+                                                        aria-label="{{ __('booking.action.edit') }}" :disabled="!canEditBookingItems()">
                                                         <i data-feather="edit-2"></i>
                                                     </button>
                                                     <button type="button" class="btn-remove" @click="removeShippingCart(item, index)"
-                                                        title="Remove item" aria-label="Remove item"
+                                                        title="{{ __('booking.action.delete') }}" aria-label="{{ __('booking.action.delete') }}"
                                                         :disabled="!canEditBookingItems()">
                                                         <i data-feather="trash-2"></i>
                                                     </button>
@@ -349,20 +323,20 @@
 
                                             <div class="booking-pos-cart-adjustments">
                                                 <div class="booking-pos-adjustment">
-                                                    <label>Unit Price</label>
+                                                    <label>{{ __('booking.unit_price') }}</label>
                                                     <input type="number" min="0" step="0.01" data-cart-price
                                                         x-model="item.itemData.price"
                                                         :disabled="!canEditBookingItems()"
                                                         x-on:input="priceRealTimeAction(item)">
                                                 </div>
                                                 <div class="booking-pos-adjustment">
-                                                    <label>Discount</label>
+                                                    <label>{{ __('booking.discount') }}</label>
                                                     <div class="booking-discount-control">
                                                         <select x-model="item.itemData.discountType"
                                                             :value="item?.itemData?.discountType"
                                                             :disabled="!canEditBookingItems()"
                                                             @change="discountSelectOpton($event, item)">
-                                                            <option value="khr">៛</option>
+                                                            <option value="usd">$</option>
                                                             <option value="percent">%</option>
                                                         </select>
                                                         <input type="number" min="1" step="1"
@@ -373,8 +347,8 @@
                                                 </div>
                                                 <div class="booking-pos-adjustment"
                                                     x-show="item?.itemData?.commission || item?.itemData?.commission === 0">
-                                                    <label>Commission (<span
-                                                            x-text="item?.itemData?.commissionType === 'percent' ? '%' : '៛'"></span>)</label>
+                                                    <label>{{ __('booking.commission') }} (<span
+                                                            x-text="item?.itemData?.commissionType === 'percent' ? '%' : '$'"></span>)</label>
                                                     <input type="number" min="1" step="1"
                                                         x-model="item.itemData.commission"
                                                         :disabled="!canEditBookingItems()"
@@ -396,11 +370,11 @@
                                                         aria-label="Increase">+</button>
                                                 </div>
                                                 <div class="booking-pos-service-qty" x-show="item.product_type !== 'product'">
-                                                    Qty: <span>1</span>
+                                                    {{ __('booking.qty') }}: <span>1</span>
                                                 </div>
 
                                                 <div class="booking-pos-cart-price">
-                                                    <span class="subtext">Total:</span>
+                                                    <span class="subtext">{{ __('booking.total') }}:</span>
                                                     <strong x-text="formatCurrency(cartLineTotal(item))"></strong>
                                                 </div>
                                             </div>
@@ -408,7 +382,7 @@
                                             <template x-if="item?.error">
                                                 <span class="booking-cart-error">
                                                     <i data-feather="alert-triangle"></i>
-                                                    Limited in stock or out of stock.
+                                                    {{ __('booking.limited_or_out_of_stock') }}
                                                 </span>
                                             </template>
                                         </div>
@@ -420,8 +394,8 @@
                         <template x-if="!dataCart?.length">
                             <div class="sidebar-empty-cart">
                                 <i data-feather="shopping-bag"></i>
-                                <p>No items added yet</p>
-                                <small>Select items from catalog on left to build order.</small>
+                                <p>{{ __('booking.empty_cart.title') }}</p>
+                                <small>{{ __('booking.empty_cart.description') }}</small>
                             </div>
                         </template>
 
@@ -438,41 +412,41 @@
                         <label class="payment-method-btn" :class="formData.pay_way === 'Cash' ? 'is-active' : ''">
                             <input type="radio" name="pay_way" value="Cash" x-model="formData.pay_way" :disabled="!canEditBookingItems()">
                             <i data-feather="dollar-sign"></i>
-                            <span>Cash</span>
+                            <span>{{ __('booking.payment.cash') }}</span>
                         </label>
                         <label class="payment-method-btn" :class="formData.pay_way === 'ABA' ? 'is-active' : ''">
                             <input type="radio" name="pay_way" value="ABA" x-model="formData.pay_way" :disabled="!canEditBookingItems()">
                             <i data-feather="smartphone"></i>
-                            <span>ABA</span>
+                            <span>{{ __('booking.payment.aba') }}</span>
                         </label>
                         <label class="payment-method-btn" :class="formData.pay_way === 'Card' ? 'is-active' : ''">
                             <input type="radio" name="pay_way" value="Card" x-model="formData.pay_way" :disabled="!canEditBookingItems()">
                             <i data-feather="credit-card"></i>
-                            <span>Card</span>
+                            <span>{{ __('booking.payment.card') }}</span>
                         </label>
                         <label class="payment-method-btn" :class="formData.pay_way === 'QR' ? 'is-active' : ''">
                             <input type="radio" name="pay_way" value="QR" x-model="formData.pay_way" :disabled="!canEditBookingItems()">
                             <i data-feather="grid"></i>
-                            <span>QR</span>
+                            <span>{{ __('booking.payment.qr') }}</span>
                         </label>
                     </div>
 
                     <!-- Payment Summary Breakdown -->
                     <div class="payment-summary-box">
                         <div class="summary-line">
-                            <span>Subtotal</span>
+                            <span>{{ __('booking.subtotal') }}</span>
                             <span x-text="formatCurrency(subTotal)"></span>
                         </div>
                         <div class="summary-line">
-                            <span>Discount</span>
+                            <span>{{ __('booking.discount') }}</span>
                             <span class="deduct" x-text="formatDeductionCurrency(subTotal - total)"></span>
                         </div>
                         <div class="summary-line">
-                            <span>Commission</span>
+                            <span>{{ __('booking.commission') }}</span>
                             <span class="deduct" x-text="formatDeductionCurrency(commissionTotal)"></span>
                         </div>
                         <div class="summary-total-line">
-                            <span>Total Payable</span>
+                            <span>{{ __('booking.total_payable') }}</span>
                             <strong x-text="formatCurrency(amountPaid)"></strong>
                         </div>
                     </div>
@@ -480,9 +454,9 @@
                     <!-- New Booking Partial Payment -->
                     <template x-if="!bookingId">
                         <div class="partial-payment-input-wrap">
-                            <label><i data-feather="dollar-sign"></i> Initial Partial Payment</label>
+                            <label><i data-feather="dollar-sign"></i> {{ __('booking.initial_partial_payment') }}</label>
                             <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
-                                :max="subTotal" placeholder="Partial payment amount..." autocomplete="off">
+                                :max="subTotal" placeholder="{{ __('booking.placeholder.partial_payment') }}" autocomplete="off">
                         </div>
                     </template>
 
@@ -491,7 +465,7 @@
                         <div class="booking-payment-ledger">
                             <div class="booking-payment-progress-wrapper">
                                 <div class="booking-payment-progress-head">
-                                    <span>Payment Progress</span>
+                                    <span>{{ __('booking.payment_progress') }}</span>
                                     <strong x-text="paymentProgressPercentage() + '%'"></strong>
                                 </div>
                                 <div class="booking-payment-progress-bar">
@@ -500,15 +474,15 @@
                             </div>
                             <div class="booking-payment-ledger-grid">
                                 <div class="booking-payment-ledger-card">
-                                    <span class="label">Paid</span>
+                                    <span class="label">{{ __('booking.paid') }}</span>
                                     <strong class="val val--paid" x-text="formatCurrency(paidAmount)"></strong>
                                 </div>
                                 <div class="booking-payment-ledger-card">
-                                    <span class="label">Remaining</span>
+                                    <span class="label">{{ __('booking.remaining') }}</span>
                                     <strong class="val val--remaining" x-text="formatCurrency(remainingAmount)"></strong>
                                 </div>
                                 <div class="booking-payment-ledger-card">
-                                    <span class="label">Status</span>
+                                    <span class="label">{{ __('booking.status_label') }}</span>
                                     <span class="booking-payment-status-pill" :class="statusClass(bookingStatus)"
                                         x-text="statusLabel(bookingStatus)"></span>
                                 </div>
@@ -521,22 +495,22 @@
                         <div class="booking-payment-form booking-payment-form--record">
                             <div class="booking-payment-form-title">
                                 <i data-feather="plus-circle"></i>
-                                Record Payment
+                                {{ __('booking.record_payment') }}
                             </div>
                             <div class="sidebar-form-grid">
                                 <div class="form-group">
-                                    <label>Amount</label>
+                                    <label>{{ __('booking.amount') }}</label>
                                     <input type="number" min="0.01" step="0.01" x-model="paymentAmount"
-                                        :max="remainingAmount" placeholder="Amount..." autocomplete="off">
+                                        :max="remainingAmount" placeholder="{{ __('booking.placeholder.amount') }}" autocomplete="off">
                                 </div>
                                 <div class="form-group">
-                                    <label>Note</label>
-                                    <input type="text" x-model="paymentNote" placeholder="Note..." maxlength="500" autocomplete="off">
+                                    <label>{{ __('booking.note') }}</label>
+                                    <input type="text" x-model="paymentNote" placeholder="{{ __('booking.placeholder.note') }}" maxlength="500" autocomplete="off">
                                 </div>
                             </div>
                             <button type="button" class="booking-pos-pay-btn booking-pos-pay-btn--record" :disabled="paymentLoading"
                                 @click="submitPayment()">
-                                <span x-text="paymentLoading ? 'Recording...' : 'Record Payment'"></span>
+                                <span x-text="paymentLoading ? @json(__('booking.recording')) : @json(__('booking.record_payment'))"></span>
                             </button>
                         </div>
                     </template>
@@ -547,7 +521,7 @@
                         <span class="booking-spinner" x-show="submitLoading">
                             <span id="spinner"></span>
                         </span>
-                        <span x-text="!canEditBookingItems() ? 'Booking Locked' : (submitLoading ? 'Saving...' : btnSubmit)"></span>
+                        <span x-text="!canEditBookingItems() ? @json(__('booking.booking_locked')) : (submitLoading ? @json(__('booking.saving')) : btnSubmit)"></span>
                         <i data-feather="arrow-right" x-show="!submitLoading"></i>
                     </button>
                 </div>
@@ -765,7 +739,7 @@
                 },
                 fetchSelectShop() {
                     $('#shop_id').select2({
-                        placeholder: 'Select shop',
+                        placeholder: @json(__('booking.form.select_shop')),
                         ajax: {
                             url: '{{ route('admin-select-shop') }}',
                             dataType: 'json',
@@ -799,7 +773,7 @@
                 },
                 fetchSelectBarber() {
                     $('#barber_id').select2({
-                        placeholder: 'Select barber',
+                        placeholder: @json(__('booking.form.select_barber')),
                         allowClear: true,
                         ajax: {
                             url: '{{ route('admin-select-barber') }}',
@@ -825,7 +799,7 @@
                 },
                 fetchSelectCustomer() {
                     $('#customer_id').select2({
-                        placeholder: 'Select customer',
+                        placeholder: @json(__('booking.form.select_customer')),
                         ajax: {
                             url: '{{ route('admin-select-customer') }}',
                             dataType: 'json',
@@ -933,7 +907,7 @@
                     return Number(item?.price ?? this.catalogSource(item)?.price ?? 0);
                 },
                 catalogBadge(item) {
-                    return item?.product_type === 'service' ? 'Service' : 'Product';
+                    return item?.product_type === 'service' ? @json(__('booking.tab.service')) : @json(__('booking.tab.product'));
                 },
                 catalogDiscountText(item) {
                     const type = item?.type;
@@ -943,14 +917,15 @@
                 catalogCommissionText(item) {
                     const type = item?.commission_type;
                     const commission = Number(item?.commission || 0);
-                    return type === 'percent' ? `Comm ${commission}%` : `Comm ${this.formatCurrency(commission)}`;
+                    const commText = @json(__('booking.commission_short'));
+                    return type === 'percent' ? `${commText} ${commission}%` : `${commText} ${this.formatCurrency(commission)}`;
                 },
                 formatCurrency(value) {
                     const amount = Number(value || 0);
-                    return `${amount.toLocaleString('en-US', {
+                    return `$${amount.toLocaleString('en-US', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
-                    })}៛`;
+                    })}`;
                 },
                 formatDeductionCurrency(value) {
                     const amount = Number(value || 0);
@@ -971,15 +946,15 @@
                 },
                 statusLabel(status) {
                     if (status === 'Paid') {
-                        return 'Ready';
+                        return @json(__('booking.status.ready'));
                     }
                     if (status === 'Partial') {
-                        return 'Partial';
+                        return @json(__('booking.status.partial'));
                     }
                     if (status === 'Cancel') {
-                        return 'Rejected';
+                        return @json(__('booking.status.canceled'));
                     }
-                    return 'Waiting';
+                    return @json(__('booking.status.waiting'));
                 },
                 statusClass(status) {
                     if (status === 'Paid') {
@@ -1116,7 +1091,7 @@
                 },
                 discountRealTiemAction(item) {
                     if (!item.itemData.discountType || item.itemData.discountType === null || item.itemData.discountType === 'null') {
-                        item.itemData.discountType = 'khr';
+                        item.itemData.discountType = 'usd';
                     }
                     item.itemData.discount = parseFloat(item.itemData.discount || 0);
                     item.itemData.total = this.totalDiscount(item?.itemData.discountType, item.itemData.price, item?.itemData.discount);
@@ -1177,7 +1152,7 @@
 
                     if (type === 'percent') {
                         amount = basePrice - (basePrice * baseDiscount / 100);
-                    } else if (type === 'khr') {
+                    } else if (type === 'usd' || type === 'khr') {
                         amount = baseDiscount > basePrice ? 0 : basePrice - baseDiscount;
                     } else {
                         amount = basePrice;
@@ -1270,8 +1245,9 @@
 
                     this.productValidation((valid) => {
                         if (valid.length > 0) {
+                            const stockTemplate = @json(__('booking.validation.out_of_stock_item'));
                             this.setValidationErrors({
-                                dataCarts: valid.map((name) => `${name} is limited in stock or out of stock.`)
+                                dataCarts: valid.map((name) => stockTemplate.replace(':name', name))
                             });
                             return true;
                         }
@@ -1287,9 +1263,9 @@
                     if (confirmDialog && typeof confirmDialog.open === 'function') {
                         confirmDialog.open({
                             data: {
-                                title: 'Message',
+                                title: @json(__('booking.dialog.message')),
                                 message: this.confirmMessage,
-                                btnClose: 'Close',
+                                btnClose: @json(__('booking.button.close')),
                                 btnSave: this.btnSubmit,
                             },
                             afterClosed: (result) => {
@@ -1313,9 +1289,9 @@
                     if (confirmDialog && typeof confirmDialog.open === 'function') {
                         confirmDialog.open({
                             data: {
-                                title: 'Message',
+                                title: @json(__('booking.dialog.message')),
                                 message: message,
-                                btnClose: 'Close',
+                                btnClose: @json(__('booking.button.close')),
                                 btnSave: btnSave,
                             },
                             afterClosed: (result) => {
@@ -1337,14 +1313,14 @@
 
                     if (amount <= 0) {
                         this.setValidationErrors({
-                            amount: ['Payment amount is required.']
+                            amount: [@json(__('booking.validation.payment_amount_required'))]
                         });
                         return;
                     }
 
                     if (amount > Number(this.remainingAmount || 0)) {
                         this.setValidationErrors({
-                            amount: ['Payment amount exceeds remaining balance.']
+                            amount: [@json(__('booking.validation.payment_amount_exceeds'))]
                         });
                         return;
                     }
@@ -1386,14 +1362,14 @@
 
                     if (amount <= 0) {
                         this.setValidationErrors({
-                            amount: ['Payment amount is required.']
+                            amount: [@json(__('booking.validation.payment_amount_required'))]
                         });
                         return;
                     }
 
                     if (amount > availableBalance) {
                         this.setValidationErrors({
-                            amount: ['Payment amount exceeds available balance.']
+                            amount: [@json(__('booking.validation.payment_amount_exceeds'))]
                         });
                         return;
                     }
@@ -1416,7 +1392,7 @@
                     });
                 },
                 deletePayment(pay) {
-                    this.confirmPaymentAction('Delete this payment record?', 'Delete Payment', () => {
+                    this.confirmPaymentAction(@json(__('booking.confirm.delete_payment')), @json(__('booking.button.delete_payment')), () => {
                         this.paymentLoading = true;
                         Axios.delete(`{{ url('admin/booking/delete-payment') }}/${pay.id}`, {
                             data: {
@@ -1484,28 +1460,28 @@
                     const shopId = this.formData.shop_id || this.shopData?.id;
 
                     if (!shopId) {
-                        errors.shop_id = ['Shop is required'];
+                        errors.shop_id = [@json(__('booking.validation.shop_required'))];
                     }
 
                     if (!this.formData.customer_id) {
-                        errors.customer_id = ['Customer is required'];
+                        errors.customer_id = [@json(__('booking.validation.customer_required'))];
                     }
 
                     if (!this.formData.booking_date) {
-                        errors.booking_date = ['Booking date is required'];
+                        errors.booking_date = [@json(__('booking.validation.booking_date_required'))];
                     }
 
                     if (!this.dataCart?.length) {
-                        errors.dataCarts = ['Shopping cart is required'];
+                        errors.dataCarts = [@json(__('booking.validation.cart_required'))];
                     } else if (this.dataCart.some((item) => !item?.product_id || !item?.product_type)) {
-                        errors.dataCarts = ['Shopping cart item is invalid.'];
+                        errors.dataCarts = [@json(__('booking.validation.cart_item_invalid'))];
                     }
 
                     const partialPayment = Number(this.formData.partial_payment_amount || 0);
                     if (partialPayment < 0) {
-                        errors.partial_payment_amount = ['Partial payment amount must be at least 0'];
+                        errors.partial_payment_amount = [@json(__('booking.validation.partial_min'))];
                     } else if (partialPayment > Number(this.subTotal || 0)) {
-                        errors.partial_payment_amount = ['Partial payment amount exceeds booking total.'];
+                        errors.partial_payment_amount = [@json(__('booking.validation.partial_max'))];
                     }
 
                     return errors;

@@ -1,20 +1,20 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Shop Management'])
+    @include('admin::shared.header', ['header_name' => __('shop.title')])
     <div class="content-wrapper" id="app" x-data="xIndex">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
-            'createName' => 'Create Shop',
+            'createName' => __('shop.button.create'),
             'filterStatus' => true,
             'exportUrl' => $exportUrl ?? '',
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
-                ['field' => 'image_url', 'title' => 'Image', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'name', 'title' => 'Name', 'class' => 'text left', 'colVal' => 25],
-                ['field' => 'phone', 'title' => 'Phone Number', 'class' => 'text left', 'colVal' => 15],
-                ['field' => 'address', 'title' => 'Address', 'class' => 'text left', 'colVal' => 40],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
+                ['field' => 'image_url', 'title' => __('global.table.image'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 25],
+                ['field' => 'phone', 'title' => __('global.table.phone'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'address', 'title' => __('global.table.address'), 'class' => 'text left', 'colVal' => 40],
                 [
                     'field' => 'action',
                     'title' => "",
@@ -24,11 +24,11 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
-                                ['url' => 'product', 'title' => 'Product', 'icon' => 'inventory_2', 'type' => 'link'],
+                                ['url' => 'edit', 'title' => __('global.action.edit'), 'icon' => 'edit', 'type' => 'link'],
+                                ['url' => 'product', 'title' => __('shop.action.product'), 'icon' => 'inventory_2', 'type' => 'link'],
                                 [
                                     'url' => 'delete',
-                                    'title' => 'Delete',
+                                    'title' => __('global.action.delete'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -39,7 +39,7 @@
                             'action' => [
                                 [
                                     'url' => 'status',
-                                    'title' => 'Disable',
+                                    'title' => __('global.action.disable'),
                                     'icon' => 'hide_source',
                                     'class' => 'text-danger',
                                 ],
@@ -47,19 +47,19 @@
                         ],
                         [
                             'key' => 'enable',
-                            'action' => [['url' => 'status', 'title' => 'Enable', 'icon' => 'refresh']],
+                            'action' => [['url' => 'status', 'title' => __('global.action.enable'), 'icon' => 'refresh']],
                         ],
                         [
                             'key' => 'trash',
                             'action' => [
                                 [
                                     'url' => 'restore',
-                                    'title' => 'Restore',
+                                    'title' => __('global.action.restore'),
                                     'icon' => 'settings_backup_restore',
                                 ],
                                 [
                                     'url' => 'destroy',
-                                    'title' => 'Destroy',
+                                    'title' => __('global.action.destroy'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -116,9 +116,11 @@
                 },
                 verifyDialog(data, typeAction, btn) {
                     console.log(btn, 'btn');
+                    const confirmTemplate = `{{ __('global.dialog.confirm_action', ['action' => '__ACTION__']) }}`;
+                    const confirmMsg = confirmTemplate.replace('__ACTION__', btn);
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to ${btn} ?`,
+                            message: confirmMsg,
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: btn,
                             item: data,

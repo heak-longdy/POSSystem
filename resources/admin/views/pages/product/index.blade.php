@@ -1,22 +1,42 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Product Management'])
+    @include('admin::shared.header', ['header_name' => __('product.title')])
     <div class="content-wrapper" id="app" x-data="xIndex">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
-            'createName' => 'Create Product',
+            'createName' => __('product.button.create'),
             'filterStatus' => true,
             'exportUrl' => $exportUrl ?? '',
             'data' => $data,
             'status' => $status,
+            'tabs' => [
+                [
+                    'url' => route('admin-' . $routeName . '-list', 1),
+                    'active' => Request::is('admin/' . $routeName . '/list/1'),
+                    'icon' => 'bx bx-data',
+                    'label' => __('global.tab.active'),
+                ],
+                [
+                    'url' => route('admin-' . $routeName . '-list', 2),
+                    'active' => Request::is('admin/' . $routeName . '/list/2'),
+                    'icon' => 'bx bx-navigation',
+                    'label' => __('global.tab.disable'),
+                ],
+                [
+                    'url' => route('admin-' . $routeName . '-list', 'trash'),
+                    'active' => Request::is('admin/' . $routeName . '/list/trash'),
+                    'icon' => 'bx bx-trash-alt',
+                    'label' => __('global.tab.trash'),
+                ],
+            ],
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
-                ['field' => 'image_url', 'title' => 'Image', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'name', 'title' => 'Name', 'class' => 'text left', 'colVal' => 25],
-                ['field' => 'category_title', 'title' => 'Category', 'class' => 'text left', 'colVal' => 15],
-                ['field' => 'uom_title', 'title' => 'UOM', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'CostUsdFor', 'title' => 'Cost', 'class' => 'text left', 'colVal' => 15],
-                ['field' => 'PriceUsdFor', 'title' => 'Price', 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
+                ['field' => 'image_url', 'title' => __('global.table.image'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 25],
+                ['field' => 'category_title', 'title' => __('global.table.category'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'uom_title', 'title' => __('global.table.uom'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'CostUsdFor', 'title' => __('global.table.cost'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'PriceUsdFor', 'title' => __('global.table.price'), 'class' => 'text left', 'colVal' => 15],
                 [
                     'field' => 'action',
                     'title' => "",
@@ -26,10 +46,10 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
+                                ['url' => 'edit', 'title' => __('global.action.edit'), 'icon' => 'edit', 'type' => 'link'],
                                 [
                                     'url' => 'delete',
-                                    'title' => 'Delete',
+                                    'title' => __('global.action.delete'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -40,7 +60,7 @@
                             'action' => [
                                 [
                                     'url' => 'status',
-                                    'title' => 'Disable',
+                                    'title' => __('global.action.disable'),
                                     'icon' => 'hide_source',
                                     'class' => 'text-danger',
                                 ],
@@ -48,19 +68,19 @@
                         ],
                         [
                             'key' => 'enable',
-                            'action' => [['url' => 'status', 'title' => 'Enable', 'icon' => 'refresh']],
+                            'action' => [['url' => 'status', 'title' => __('global.action.enable'), 'icon' => 'refresh']],
                         ],
                         [
                             'key' => 'trash',
                             'action' => [
                                 [
                                     'url' => 'restore',
-                                    'title' => 'Restore',
+                                    'title' => __('global.action.restore'),
                                     'icon' => 'settings_backup_restore',
                                 ],
                                 [
                                     'url' => 'destroy',
-                                    'title' => 'Destroy',
+                                    'title' => __('global.action.destroy'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -84,14 +104,6 @@
                 professionList: [],
                 async init() {
                     this.loading = true;
-                    // const data = @json($data ?? '');
-                    // console.log(data,'dd');
-                    // await this.fetchData('/admin/select/group-class', (res) => {
-                    //     this.groupClassList = res;
-                    // });
-                    // await this.fetchData('/admin/select/profession', (res) => {
-                    //     this.professionList = res;
-                    // });
                     this.loading = false;
                 },
                 async fetchData(url, callback) {
@@ -116,10 +128,11 @@
                     });
                 },
                 verifyDialog(data, typeAction, btn) {
-                    console.log(btn, 'btn');
+                    const confirmTemplate = `{{ __('global.dialog.confirm_action', ['action' => '__ACTION__']) }}`;
+                    const confirmMsg = confirmTemplate.replace('__ACTION__', btn);
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to ${btn} ?`,
+                            message: confirmMsg,
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: btn,
                             item: data,

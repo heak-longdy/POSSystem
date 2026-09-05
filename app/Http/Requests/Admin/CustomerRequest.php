@@ -38,13 +38,13 @@ class CustomerRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required'        => 'Please enter the customer name.',
-            'name.max'             => 'The name may not be greater than 255 characters.',
-            'password.required'    => 'Password is required.',
-            'password.min'         => 'Password must be at least 6 characters.',
-            'password.confirmed'   => 'Password confirmation does not match.',
-            'status.required'      => 'Status is required.',
-            'status.boolean'       => 'Status must be true or false.',
+            'name.required'        => __('customer.validation.name_required'),
+            'name.max'             => __('customer.validation.name_max'),
+            'password.required'    => __('customer.validation.password_required'),
+            'password.min'         => __('customer.validation.password_min'),
+            'password.confirmed'   => __('customer.validation.password_confirmed'),
+            'status.required'      => __('customer.validation.status_required'),
+            'status.boolean'       => __('customer.validation.status_boolean'),
             // Add more messages as needed
         ];
     }

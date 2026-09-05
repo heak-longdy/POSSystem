@@ -34,10 +34,10 @@
                                                         <label>Price</label>
                                                         <span>:</span>
                                                         <p x-show="selectType=='product'"
-                                                            x-text=" (item?.price ? item?.price?.toFixed(2) : item?.product?.price?.toFixed(2)) + '៛'">
+                                                            x-text=" (item?.price ? item?.price?.toFixed(2) : item?.product?.price?.toFixed(2)) + ' $'">
                                                         </p>
                                                         <p x-show="selectType=='service'"
-                                                            x-text="(item?.price ? item?.price?.toFixed(2) : item?.service?.price?.toFixed(2)) + '៛' ">
+                                                            x-text="(item?.price ? item?.price?.toFixed(2) : item?.service?.price?.toFixed(2)) + ' $'">
                                                         </p>
                                                     </div>
                                                     <div class="itemLS" x-show="item?.discount">
@@ -48,9 +48,9 @@
                                                                 <span
                                                                     x-text="(item?.discount ? item.discount : 0)+'%'"></span>
                                                             </template>
-                                                            <template x-if="item?.type=='khr'">
+                                                            <template x-if="item?.type=='usd' || item?.type=='khr'">
                                                                 <span
-                                                                    x-text="(item?.discount ? item?.discount?.toFixed(2) : 0)+'៛'"></span>
+                                                                    x-text="(item?.discount ? item?.discount?.toFixed(2) : 0)+' $'"></span>
                                                             </template>
                                                         </p>
                                                     </div>
@@ -62,9 +62,9 @@
                                                                 <span
                                                                     x-text="(item?.commission ? item.commission : 0)+'%'"></span>
                                                             </template>
-                                                            <template x-if="item?.commission_type=='khr'">
+                                                            <template x-if="item?.commission_type=='usd' || item?.commission_type=='khr'">
                                                                 <span
-                                                                    x-text="(item?.commission ? item.commission.toFixed(2) : 0)+'៛'"></span>
+                                                                    x-text="(item?.commission ? item.commission.toFixed(2) : 0)+' $'"></span>
                                                             </template>
                                                         </p>
                                                     </div>
@@ -129,7 +129,7 @@
                                                 <label>Price</label>
                                                 <span>:</span>
                                                 <p
-                                                    x-text="(item?.itemData?.price ? item.itemData?.price?.toFixed(2) : 0) + '៛'">
+                                                    x-text="(item?.itemData?.price ? item.itemData?.price?.toFixed(2) : 0) + ' $'">
                                                 </p>
                                             </div>
                                             {{-- <div class="discountGp" x-show="item?.itemData?.discount">
@@ -140,9 +140,9 @@
                                                         <span
                                                             x-text="(item?.itemData?.discount ? item?.itemData?.discount : 0) + '%'"></span>
                                                     </template>
-                                                    <template x-if="item?.itemData?.discountType=='khr'">
+                                                    <template x-if="item?.itemData?.discountType=='usd' || item?.itemData?.discountType=='khr'">
                                                         <span
-                                                            x-text="(item?.itemData?.discount ? item?.itemData?.discount : 0) + '៛'"></span>
+                                                            x-text="(item?.itemData?.discount ? item?.itemData?.discount : 0) + ' $'"></span>
                                                     </template>
                                                 </p>
                                             </div> --}}
@@ -154,9 +154,9 @@
                                                         <span
                                                             x-text="(item?.itemData?.commission ? item?.itemData?.commission : 0) + '%'"></span>
                                                     </template>
-                                                    <template x-if="item?.itemData?.commissionType=='khr'">
+                                                    <template x-if="item?.itemData?.commissionType=='usd' || item?.itemData?.commissionType=='khr'">
                                                         <span
-                                                            x-text="(item?.itemData?.commission ? item?.itemData?.commission.toFixed(2) : 0) + '៛'"></span>
+                                                            x-text="(item?.itemData?.commission ? item?.itemData?.commission.toFixed(2) : 0) + ' $'"></span>
                                                     </template>
                                                 </p>
                                             </div> --}}
@@ -184,7 +184,7 @@
                                         <div class="qtyOrderGp2">
                                             <div class="qtyOrderGp commissionBooking" x-show="item?.itemData?.commission">
                                                 <label>Commission&nbsp;(<span
-                                                        x-text="item?.itemData?.commissionType=='percent'?'%':'៛'"></span>)</label>
+                                                        x-text="item?.itemData?.commissionType=='percent'?'%':'$'"></span>)</label>
                                                 <input type="number" min="1" step="1"
                                                     x-model="item.itemData.commission"
                                                     x-on:input="commissionRealTimeAction(item)" />
@@ -197,7 +197,7 @@
                                                     <select x-model="item.itemData.discountType"
                                                         :value="item?.itemData?.discountType"
                                                         @change="discountSelectOpton($event,item)">
-                                                        <option value="khr">៛</option>
+                                                        <option value="usd">$</option>
                                                         <option value="percent">%</option>
                                                     </select>
                                                     <input type="number" min="1" step="1"
@@ -292,27 +292,27 @@
                             <div class="itemTotal">
                                 <label>Sub Total</label>
                                 <span>:</span>
-                                <div x-text="subTotal.toFixed(2)+'៛'" x-model="subTotal"></div>
+                                <div x-text="subTotal.toFixed(2)+' $'" x-model="subTotal"></div>
                             </div>
                             <div class="itemTotal">
                                 <label>Total Commission</label>
                                 <span>:</span>
-                                <div x-text="commissionTotal.toFixed(2)+'៛'" x-model="commissionTotal"></div>
+                                <div x-text="commissionTotal.toFixed(2)+' $'" x-model="commissionTotal"></div>
                             </div>
                             <div class="itemTotal">
                                 <label>Total Price</label>
                                 <span>:</span>
-                                <div x-text="total.toFixed(2)+'៛'" x-model="total"></div>
+                                <div x-text="total.toFixed(2)+' $'" x-model="total"></div>
                             </div>
                             <div class="itemTotal">
                                 <label>Total Discount</label>
                                 <span>:</span>
-                                <div x-text="(subTotal - total).toFixed(2) +'៛'"></div>
+                                <div x-text="(subTotal - total).toFixed(2) +' $'"></div>
                             </div>
                             <div class="itemTotal">
                                 <label>Amount Paid</label>
                                 <span>:</span>
-                                <div x-text="amountPaid.toFixed(2)+'៛'" x-model="amountPaid"></div>
+                                <div x-text="amountPaid.toFixed(2)+' $'" x-model="amountPaid"></div>
                             </div>
                         </div>
                         <div class="orderBtnActionGp">
@@ -396,7 +396,7 @@
                                     ?.service_discount_type : val?.product_discount_type;
                                 if (discountType == "percent") {
                                     total = price - (price * (discount ? discount : 0) / 100);
-                                } else if (discountType == "khr") {
+                                } else if (discountType == "usd" || discountType == "khr") {
                                     total = discount && discount > price ? 0 : price - (
                                         discount ? discount : 0);
                                 }
@@ -599,7 +599,7 @@
                     let amount = 0;
                     if (type == "percent") {
                         amount = price - (price * (discount ? discount : 0) / 100);
-                    } else if (type == "khr") {
+                    } else if (type == "usd" || type == "khr") {
                         amount = discount && discount > price ? 0 : price - (discount ? discount : 0);
                     }
                     return amount;
@@ -676,7 +676,7 @@
                 discountRealTiemAction(item) {
                     if (!item.itemData.discountType || item.itemData.discountType == null || item
                         .itemData.discountType == "null") {
-                        item.itemData.discountType = "khr";
+                        item.itemData.discountType = "usd";
                     }
                     item.itemData.discount = parseFloat(item.itemData.discount);
                     item.itemData.total = this.totalDiscount(item?.itemData.discountType, item.itemData

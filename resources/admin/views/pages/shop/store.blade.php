@@ -7,23 +7,23 @@
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}"></i>
-                    {{ $id ? 'Update Shop' : 'Create Shop' }}
+                    {{ $id ? __('shop.form.title.update') : __('shop.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
             <div class="form-body">
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Name <span>*</span> </label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="Enter name ...">
+                        <label>{{ __('shop.form.name.label') }} <span>*</span> </label>
+                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('shop.form.name.placeholder') }}">
                         <i class='bx bx-font-family'></i>
                         @error('name')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
                     <div class="form-row iconInput">
-                        <label>Phone Number <span>*</span> </label>
-                        <input type="text" name="phone" value="{!! request('id') ? $data?->phone : old('phone') !!}" placeholder="Enter phone ...">
+                        <label>{{ __('shop.form.phone.label') }} <span>*</span> </label>
+                        <input type="text" name="phone" value="{!! request('id') ? $data?->phone : old('phone') !!}" placeholder="{{ __('shop.form.phone.placeholder') }}">
                         <i class='bx bx-phone'></i>
                         @error('phone')
                             <label class="error">{{ $message }}</label>
@@ -31,32 +31,22 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <label>Address<span>*</span></label>
-                    <textarea type="text" rows="8" name="address" placeholder="Enter address ..." id="address">{!! isset($data) ? $data?->address : old('address') !!}</textarea>
+                    <label>{{ __('shop.form.address.label') }}<span>*</span></label>
+                    <textarea type="text" rows="8" name="address" placeholder="{{ __('shop.form.address.placeholder') }}" id="address">{!! isset($data) ? $data?->address : old('address') !!}</textarea>
                     @error('address')
                         <label class="error">{{ $message }}</label>
                     @enderror
                 </div>
-                {{-- <div class="row-2">
-                    <div class="form-row">
-                        <label>@lang('adminGlobal.form.status.label')<span>*</span></label>
-                        <select name="status">
-                            @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div> --}}
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Image</label>
+                        <label>{{ __('shop.form.image.label') }}</label>
                         <div class="form-select-photo image" @click="selectImage(event)">
                             <div class="select-photo" :class='{ active: image }'>
                                 <div class="icon">
                                     <i class='bx bx-cloud-upload'></i>
                                 </div>
                                 <div class="title">
-                                    <p>@lang('adminGlobal.form.image.placeholder')</p>
+                                    <p>@lang('global.form.image.placeholder')</p>
                                 </div>
                             </div>
                             <template x-if="image">
@@ -71,10 +61,12 @@
                         @enderror
                     </div>
                     <div class="form-row">
-                        <label>@lang('adminGlobal.form.status.label')<span>*</span></label>
+                        <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
                             @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
+                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>
+                                    {{ $key == 1 ? __('global.form.status.active') : __('global.form.status.disable') }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -82,15 +74,15 @@
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ __('global.button.submit') }}</span>
                     </button>
                     <button type="submit" name="save_opt" value="save_new" color="success">
                         <i data-feather="save"></i>
-                        <span>Save & New</span>
+                        <span>{{ __('global.button.save_new') }}</span>
                     </button>
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>

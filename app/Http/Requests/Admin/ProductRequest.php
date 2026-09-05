@@ -42,17 +42,17 @@ class ProductRequest extends FormRequest
     public function messages()
     {
         return [
-            'category_id.required' => 'Category is required',
-            'uom_id.required' => 'UOM is required',
-            'name.required' => 'Name is required',
-            'name.max' => 'Name must not exceed 50 characters.',
-            'name.unique' => 'Name already exists.',
-            'cost.required' => 'Cost is required',
-            'price.required' => 'Price is required',
-            'cost.numeric' => 'Cost format invalid',
-            'price.numeric' => 'Price format invalid',
-            'status.required' => 'Status is required',
-            'status.max' => 'Status must not exceed 1 characters.',
+            'category_id.required' => __('product.validation.category_required'),
+            'uom_id.required' => __('product.validation.uom_required'),
+            'name.required' => __('product.validation.name_required'),
+            'name.max' => __('product.validation.name_max'),
+            'name.unique' => __('product.validation.name_unique'),
+            'cost.required' => __('product.validation.cost_required'),
+            'price.required' => __('product.validation.price_required'),
+            'cost.numeric' => __('product.validation.cost_numeric'),
+            'price.numeric' => __('product.validation.price_numeric'),
+            'status.required' => __('product.validation.status_required'),
+            'status.max' => __('product.validation.status_max'),
         ];
     }
 }

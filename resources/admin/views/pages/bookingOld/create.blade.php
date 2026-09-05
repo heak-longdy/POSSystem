@@ -46,7 +46,7 @@
                                     <i data-feather="image"></i>
                                 </div>
                                 <div class="title">
-                                    <span>@lang('adminGlobal.form.image.placeholder')</span>
+                                    <span>@lang('global.form.image.placeholder')</span>
                                 </div>
                             </div>
                             <div class="image-view">
@@ -62,10 +62,10 @@
                         @enderror
                     </div>
                     {{-- <div class="form-row">
-                        <label>@lang('adminGlobal.form.status.label')<span>*</span></label>
+                        <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
-                            <option value="1" {!! (request('id') && $data->status == 1) || old('status') == 1 ? 'selected' : '' !!}>@lang('adminGlobal.form.status.active')</option>
-                            <option value="2" {!! (request('id') && $data->status == 2) || old('status') == 2 ? 'selected' : '' !!}>@lang('adminGlobal.form.status.disable')</option>
+                            <option value="1" {!! (request('id') && $data->status == 1) || old('status') == 1 ? 'selected' : '' !!}>@lang('global.form.status.active')</option>
+                            <option value="2" {!! (request('id') && $data->status == 2) || old('status') == 2 ? 'selected' : '' !!}>@lang('global.form.status.disable')</option>
                         </select>
                     </div> --}}
                 </div>

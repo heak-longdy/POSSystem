@@ -33,6 +33,7 @@ class UserRequest extends FormRequest
             // "phone" => "required|numeric|unique:users,phone," . $acceptedId,
             // "identity" => "required|numeric|unique:users,identity," . $acceptedId,
             "status"    => "required|numeric",
+            "role"      => "nullable|string",
             "language_preference" => ["required", Rule::in(Language::activeCodes())],
             'password' => $acceptedId ? 'nullable':'required'.'|same:confirm_password|min:6',
             'confirm_password' => $acceptedId ? 'nullable':'required|min:6',

@@ -7,15 +7,15 @@
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}"></i>
-                    {{ $id ? 'Update Customer' : 'Create Customer' }}
+                    {{ $id ? __('customer.form.title.update') : __('customer.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
             <div class="form-body">
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Name <span>*</span> </label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="Enter name ...">
+                        <label>{{ __('customer.form.name.label') }} <span>*</span> </label>
+                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('customer.form.name.placeholder') }}">
                         <i class='bx bx-font-family'></i>
                         @error('name')
                             <label class="error">{{ $message }}</label>
@@ -25,15 +25,15 @@
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ __('global.button.submit') }}</span>
                     </button>
                     <button type="submit" name="save_opt" value="save_new" color="success">
                         <i data-feather="save"></i>
-                        <span>Save & New</span>
+                        <span>{{ __('global.button.save_new') }}</span>
                     </button>
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>

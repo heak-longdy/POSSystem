@@ -2,20 +2,20 @@
 @section('layout')
     <div class="content-wrapper">
         <div class="header">
-            @include('admin::shared.header', ['header_name' => 'Product Order'])
+            @include('admin::shared.header', ['header_name' => __('booking.product_order')])
             <div class="header-tab">
                 <div class="header-tab-wrapper">
                     <div class="menu-row">
                         <div class="menu-item {!! Request::is('admin/booking/list/1') ? 'active' : '' !!}" s-click-link="{!! route('admin-booking-list', 1) !!}">
-                            Service</div>
-                        <div class="menu-item {!! Request::is('admin/booking/list-product/1') ? 'active' : '' !!}" s-click-link="{!! route('admin-booking-list-product', 2) !!}">Product</div>
+                            {{ __('booking.tab.service') }}</div>
+                        <div class="menu-item {!! Request::is('admin/booking/list-product/1') ? 'active' : '' !!}" s-click-link="{!! route('admin-booking-list-product', 2) !!}">{{ __('booking.tab.product') }}</div>
                     </div>
                 </div>
                 <div class="header-action-button">
                     <form class="filter" action="{!! url()->current() !!}" method="GET">
                         <div class="form-row">
                             <select name="shop_id">
-                                <option value="">All Shop</option>
+                                <option value="">{{ __('booking.filter.all_shop') }}</option>
                                 @foreach ($shops as $shop)
                                     <option value="{{ $shop->id }}"> {{ $shop->name }}</option>
                                 @endforeach
@@ -23,32 +23,32 @@
                         </div>
                         <div class="form-row">
                             <select name="barber_id">
-                                <option value=""> All Barberdd</option>
+                                <option value="">{{ __('booking.filter.all_barber') }}</option>
                                 @foreach ($barbers as $barber)
                                     <option value="{{ $barber->id }}"> {{ $barber->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="form-row">
-                            <input type="text" name="from_date" placeholder="From Date" value="{!! $firstMonthDay ? $firstMonthDay : request('from_date') !!}"
+                            <input type="text" name="from_date" placeholder="{{ __('booking.placeholder.from_date') }}" value="{!! $firstMonthDay ? $firstMonthDay : request('from_date') !!}"
                                 id="from_date" autocomplete="off">
                         </div>
                         <div class="form-row">
-                            <input type="text" name="to_date" placeholder="To Date" value="{!! $lastMonthDay ? $lastMonthDay : request('to_date') !!}"
+                            <input type="text" name="to_date" placeholder="{{ __('booking.placeholder.to_date') }}" value="{!! $lastMonthDay ? $lastMonthDay : request('to_date') !!}"
                                 id="to_date" autocomplete="off">
                         </div>
                         <button mat-flat-button type="submit" class="btn-create bg-success">
                             <i data-feather="search"></i>
-                            <span>Search</span>
+                            <span>{{ __('booking.button.search') }}</span>
                         </button>
                     </form>
                     <button class="btn-create" s-click-link="{!! route('admin-booking-create') !!}">
                         <i data-feather="plus-circle"></i>
-                        <span>Create Booking</span>
+                        <span>{{ __('booking.button.create') }}</span>
                     </button>
                     <button s-click-link="{!! url()->current() !!}">
                         <i data-feather="refresh-ccw"></i>
-                        <span>@lang('adminGlobal.button.reload')d</span>
+                        <span>{{ __('booking.button.reload') }}</span>
                     </button>
                 </div>
             </div>
@@ -59,25 +59,25 @@
                     <div class="table-wrapper">
                         <div class="table-header">
                             <div class="row table-row-5">
-                                <span>Nº</span>
+                                <span>{{ __('booking.table.no') }}</span>
                             </div>
                             <div class="row table-row-15">
-                                <span>Shop</span>
+                                <span>{{ __('booking.table.shop') }}</span>
                             </div>
                             <div class="row table-row-15">
-                                <span>Barbor</span>
+                                <span>{{ __('booking.table.barber') }}</span>
                             </div>
                             <div class="row table-row-30">
-                                <span>Product</span>
+                                <span>{{ __('booking.table.product') }}</span>
                             </div>
                             <div class="row table-row-15">
-                                <span>Total Price $</span>
+                                <span>{{ __('booking.table.total_price') }}</span>
                             </div>
                             <div class="row table-row-10">
-                                <span>Commission $</span>
+                                <span>{{ __('booking.table.commission') }} $</span>
                             </div>
                             <div class="row table-row-10">
-                                <span>Order Date</span>
+                                <span>{{ __('booking.table.order_date') }}</span>
                             </div>
                             {{-- <div class="row table-row-5">
                         <span></span>
@@ -98,7 +98,7 @@
                                     <div class="row table-row-30">
                                         @foreach ($item->orders as $order)
                                             <span>
-                                                {!! isset($order->product) ? $order->product->name : '---' !!} (Price : {!! isset($order) ? $order->price : '---' !!} $ , QTY
+                                                {!! isset($order->product) ? $order->product->name : '---' !!} ({{ __('booking.table.price') }} : {!! isset($order) ? $order->price : '---' !!} $ , {{ __('booking.table.qty') }}
                                                 {!! isset($order) ? $order->qty : '---' !!})
                                             </span>
                                         @endforeach
@@ -119,7 +119,7 @@
                                     </i>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         @can('customer-update')
-                                            <li>
+                                             <li>
                                                 <a class="dropdown-item" s-click-link="{!! route('admin-customer-booking-detail', $item->id) !!}">
                                                     <i data-feather="eye"></i>
                                                     <span>Detail</span>
@@ -138,8 +138,8 @@
                     </div>
                 @else
                     @component('admin::components.empty', [
-                        'name' => __('No data'),
-                        'msg' => __('adminGlobal.empty.descriptionSlide'),
+                        'name' => __('booking.empty.no_data'),
+                        'msg' => __('global.empty.descriptionSlide'),
                         'permission' => 'Customer-create',
                     ])
                     @endcomponent

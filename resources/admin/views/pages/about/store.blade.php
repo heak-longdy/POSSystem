@@ -38,7 +38,7 @@
                                                 <i class='bx bx-cloud-upload'></i>
                                             </div>
                                             <div class="title">
-                                                <p>@lang('adminGlobal.form.image.placeholder')</p>
+                                                <p>@lang('global.form.image.placeholder')</p>
                                             </div>
                                         </div>
                                         <template x-if="image">

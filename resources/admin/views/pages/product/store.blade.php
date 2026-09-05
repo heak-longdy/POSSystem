@@ -7,17 +7,17 @@
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}"></i>
-                    {{ $id ? 'Update Product' : 'Create Product' }}
+                    {{ $id ? __('product.form.title.update') : __('product.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
             <div class="form-body">
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Category<span>*</span></label>
+                        <label>{{ __('product.form.category.label') }}<span>*</span></label>
                         <div class="select2Group">
                             <select name="category_id" class="SelectCategory" id="category_id" x-init="fetchSelectCategory()">
-                                <option value=""> Select Category</option>
+                                <option value=""> {{ __('product.form.category.placeholder') }}</option>
                             </select>
                             <div class="select2Reset" x-show="category?.id" @click="$select2Data('#category_id')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -33,10 +33,10 @@
                         @enderror
                     </div>
                     <div class="form-row">
-                        <label>UOM<span>*</span></label>
+                        <label>{{ __('product.form.uom.label') }}<span>*</span></label>
                         <div class="select2Group">
                             <select name="uom_id" class="SelectUom" id="uom_id" x-init="fetchSelectUOM()">
-                                <option value=""> Select UOM</option>
+                                <option value=""> {{ __('product.form.uom.placeholder') }}</option>
                             </select>
                             <div class="select2Reset" x-show="uom?.id" @click="$select2Data('#uom_id')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -54,8 +54,8 @@
                 </div>
                 <div class="row">
                     <div class="form-row iconInput">
-                        <label>Name <span>*</span> </label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="Enter name ...">
+                        <label>{{ __('product.form.name.label') }} <span>*</span> </label>
+                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('product.form.name.placeholder') }}">
                         <i class='bx bx-font-family'></i>
                         @error('name')
                             <label class="error">{{ $message }}</label>
@@ -64,16 +64,16 @@
                 </div>
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Cost</label>
-                        <input type="number" step="0.01" name="cost" value="{!! request('id') ? $data?->cost : old('cost') !!}" placeholder="Enter cost ...">
+                        <label>{{ __('product.form.cost.label') }}</label>
+                        <input type="number" step="0.01" name="cost" value="{!! request('id') ? $data?->cost : old('cost') !!}" placeholder="{{ __('product.form.cost.placeholder') }}">
                         <i class='bx bx-dollar'></i>
                         @error('cost')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
                     <div class="form-row iconInput">
-                        <label>Price</label>
-                        <input type="number" step="0.01" name="price" value="{!! request('id') ? $data?->price : old('price') !!}" placeholder="Enter price ...">
+                        <label>{{ __('product.form.price.label') }}</label>
+                        <input type="number" step="0.01" name="price" value="{!! request('id') ? $data?->price : old('price') !!}" placeholder="{{ __('product.form.price.placeholder') }}">
                         <i class='bx bx-dollar'></i>
                         @error('price')
                             <label class="error">{{ $message }}</label>
@@ -82,24 +82,23 @@
                 </div>
                 <div class="row-2">
                     <div class="form-row">
-                        <label>@lang('adminGlobal.form.status.label')<span>*</span></label>
+                        <label>{{ __('product.form.status.label') }}<span>*</span></label>
                         <select name="status">
-                            @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
-                            @endforeach
+                            <option value="1" {!! (request('id') && $data->status == 1) || old('status') == 1 ? 'selected' : '' !!}>{{ __('product.form.status.active') }}</option>
+                            <option value="2" {!! (request('id') && $data->status == 2) || old('status') == 2 ? 'selected' : '' !!}>{{ __('product.form.status.disable') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Image</label>
+                        <label>{{ __('product.form.photo.label') }}</label>
                         <div class="form-select-photo image" @click="selectImage(event)">
                             <div class="select-photo" :class='{ active: image }'>
                                 <div class="icon">
                                     <i class='bx bx-cloud-upload'></i>
                                 </div>
                                 <div class="title">
-                                    <p>@lang('adminGlobal.form.image.placeholder')</p>
+                                    <p>{{ __('product.form.photo.placeholder') }}</p>
                                 </div>
                             </div>
                             <template x-if="image">
@@ -117,15 +116,15 @@
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ __('global.button.submit') }}</span>
                     </button>
                     <button type="submit" name="save_opt" value="save_new" color="success">
                         <i data-feather="save"></i>
-                        <span>Save & New</span>
+                        <span>{{ __('global.button.save_new') }}</span>
                     </button>
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>
@@ -387,7 +386,7 @@
                 },
                 fetchSelectUOM() {
                     $(`#uom_id`).select2({
-                        placeholder: `Select UOM`,
+                        placeholder: `{{ __('product.form.uom.placeholder') }}`,
                         ajax: {
                             url: '{{ route('admin-select-uom') }}',
                             dataType: 'json',
@@ -424,7 +423,7 @@
                 },
                 fetchSelectCategory() {
                     $(`#category_id`).select2({
-                        placeholder: `Select Category`,
+                        placeholder: `{{ __('product.form.category.placeholder') }}`,
                         ajax: {
                             url: '{{ route('admin-select-category') }}',
                             dataType: 'json',

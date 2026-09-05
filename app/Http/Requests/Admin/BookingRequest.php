@@ -47,17 +47,17 @@ class BookingRequest extends FormRequest
     public function messages()
     {
         return [
-            'dataCarts.required'   => "Shopping cart is required",
-            'dataCarts.json'   => "Shopping cart format invalid",
-            'shop_id.required'   => "Shop is required",
-            'shop_id.exists'   => "Shop is invalid",
-            'barber_id.exists'   => "Barber is invalid",
-            'customer_id.required'   => "Customer is required",
-            'customer_id.exists'   => "Customer is invalid",
-            'booking_date.required' => "Booking date is required",
-            'booking_date.date' => "Booking date format invalid",
-            'partial_payment_amount.numeric' => "Partial payment amount must be numeric",
-            'partial_payment_amount.min' => "Partial payment amount must be at least 0",
+            'dataCarts.required'   => __('booking.validation.cart_required'),
+            'dataCarts.json'   => __('booking.validation.cart_invalid'),
+            'shop_id.required'   => __('booking.validation.shop_required'),
+            'shop_id.exists'   => __('booking.validation.shop_invalid'),
+            'barber_id.exists'   => __('booking.validation.barber_invalid'),
+            'customer_id.required'   => __('booking.validation.customer_required'),
+            'customer_id.exists'   => __('booking.validation.customer_invalid'),
+            'booking_date.required' => __('booking.validation.booking_date_required'),
+            'booking_date.date' => __('booking.validation.booking_date_invalid'),
+            'partial_payment_amount.numeric' => __('booking.validation.partial_numeric'),
+            'partial_payment_amount.min' => __('booking.validation.partial_min'),
         ];
     }
 }

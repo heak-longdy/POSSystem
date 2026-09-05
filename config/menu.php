@@ -303,6 +303,65 @@ return [
         ]
     ],
 
+    // Report Management
+    [
+        'type'  => 'dropdown-multiple',
+        'label' => [
+            'en' => 'Report Management',
+            'km' => 'ការគ្រប់គ្រងរបាយការណ៍',
+        ],
+        'listMenu' => [
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/order-transaction*',
+                'path' => 'admin/report/order-transaction/daily',
+                'permission' => ['report-transaction-view', 'report-sales-view', 'booking-view'],
+                'name' => [
+                    'en' => 'Order Transaction Report',
+                    'km' => 'របាយការណ៍ប្រតិបត្តិការបញ្ជាទិញ',
+                ],
+                'icon' => 'bx-receipt',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/sales*',
+                'path' => 'admin/report/sales/daily',
+                'permission' => ['report-sales-view', 'booking-view'],
+                'name' => [
+                    'en' => 'Sales Report',
+                    'km' => 'របាយការណ៍ការលក់',
+                ],
+                'icon' => 'bx-bar-chart-alt-2',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/inventory-movement*',
+                'path' => 'admin/report/inventory-movement/daily',
+                'permission' => ['report-inventory-view', 'stock-movement-view', 'report-sales-view'],
+                'name' => [
+                    'en' => 'Inventory Movement Report',
+                    'km' => 'របាយការណ៍បម្រែបម្រួលស្តុក',
+                ],
+                'icon' => 'bx-transfer-alt',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/staff-expense*',
+                'path' => 'admin/report/staff-expense/daily',
+                'permission' => ['staff-expense-view', 'report-sales-view', 'booking-view'],
+                'name' => [
+                    'en' => 'Staff Expense Report',
+                    'km' => 'របាយការណ៍ចំណាយបុគ្គលិក',
+                ],
+                'icon' => 'bx-wallet-alt',
+                'dropDown' => 'disable',
+            ],
+        ]
+    ],
+
     // Setting
     [
         'type'  => 'dropdown-multiple',

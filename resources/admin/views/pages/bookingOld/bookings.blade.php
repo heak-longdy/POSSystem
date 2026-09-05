@@ -156,7 +156,7 @@
                         {{-- <div class="menu-item {!! Request::is('admin/booking/list/1') ? 'active' : '' !!}" s-click-link="{!! route('admin-booking-list', 1) !!}">
                             Data</div>
                         <div class="menu-item {!! Request::is('admin/booking/list/trash') ? 'active' : '' !!}" s-click-link="{!! route('admin-booking-list', 'trash') !!}">
-                            @lang('adminGlobal.tab.trash')</div> --}}
+                            @lang('global.tab.trash')</div> --}}
                         <div class="tabs">
                             <a href="#" class="tabActive">
                                 <i class='bx bx-data'></i>

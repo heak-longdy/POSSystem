@@ -85,7 +85,7 @@
                 'msg' => "You can create a new position by clicking the button below",
                 'permission' => 'Position-create',
                 'url' => route('admin-position-create'),
-                'button' => __('adminGlobal.button.createPosition'),
+                'button' => __('global.button.createPosition'),
             ])
         @endcomponent
     @endif

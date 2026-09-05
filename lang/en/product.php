@@ -2,7 +2,12 @@
 
 return [
     'name' => 'Product',
+    'name_title' => 'Name',
     'title' => 'Product Management',
+    'cost' => 'Cost',
+    'price' => 'Price',
+    'uom' => 'UOM',
+    'category' => 'Category',
     'real_estate_title' => 'Real Estate Management',
     'hotel_title' => 'Hotel Management',
     'product_report' => 'Product Report',
@@ -10,31 +15,40 @@ return [
     'dropdown' => [
         'child' => 'Child',
     ],
-    'tab' => [
-        'active' => 'Active',
-        'disable' => 'Disable',
-        'trash' => 'Trash',
-    ],
-    'breadcrumb' => [
-        'all' => 'All',
-    ],
-    'filter' => [
-        'search' => 'Search...',
-        'all' => 'All',
+    'table' => [
+        'category' => 'Category',
+        'uom' => 'UOM',
+        'cost' => 'Cost',
+        'price' => 'Price',
     ],
     'button' => [
-        'create' => 'Create New',
+        'create' => 'Create Product',
         'import' => 'Import Products',
-        'reload' => 'Refresh',
-        'search' => 'Search',
-    ],
-    'empty' => [
-        'title' => ':name is empty',
-        'description' => 'You can create a new :name by clicking the button below.',
     ],
     'empty_gallery' => [
         'title' => 'Gallery is empty',
         'description' => 'You can add image to gallery by click the button below.'
+    ],
+    'export' => [
+        'id' => 'ID',
+        'name' => 'Name',
+        'cost' => 'Cost',
+        'price' => 'Price',
+        'commission' => 'Commission',
+        'created_at' => 'Created At',
+    ],
+    'validation' => [
+        'category_required' => 'Category is required',
+        'uom_required' => 'UOM is required',
+        'name_required' => 'Name is required',
+        'name_max' => 'Name must not exceed 50 characters.',
+        'name_unique' => 'Name already exists.',
+        'cost_required' => 'Cost is required',
+        'price_required' => 'Price is required',
+        'cost_numeric' => 'Cost format invalid',
+        'price_numeric' => 'Price format invalid',
+        'status_required' => 'Status is required',
+        'status_max' => 'Status must not exceed 1 characters.',
     ],
     'form' => [
         'title' => [
@@ -60,14 +74,18 @@ return [
         'button' => [
             'update' => 'Update',
             'submit' => 'Submit',
+            'save_new' => 'Save & New',
             'cancel' => 'Cancel',
             'copy' => 'Save Copy'
         ],
         'photo' => [
-            'label' => 'Thumbnail',
+            'label' => 'Image',
+            'thumbnail' => 'Thumbnail',
             'placeholder' => 'Enter thumbnail',
         ],
         'name' => [
+            'label' => 'Name',
+            'placeholder' => 'Enter name ...',
             'en' => [
                 'label' => 'Name English',
                 'placeholder' => 'Enter name English'
@@ -80,6 +98,22 @@ return [
                 'label' => 'Name Chinese',
                 'placeholder' => 'Enter name Chinese'
             ]
+        ],
+        'cost' => [
+            'label' => 'Cost',
+            'placeholder' => 'Enter cost ...',
+        ],
+        'price' => [
+            'label' => 'Price',
+            'placeholder' => 'Enter price ...',
+        ],
+        'category' => [
+            'label' => 'Category',
+            'placeholder' => 'Select Category',
+        ],
+        'uom' => [
+            'label' => 'UOM',
+            'placeholder' => 'Select UOM',
         ],
         'ordering' => [
             'label' => 'Ordering',
@@ -96,10 +130,6 @@ return [
                 'km' => 'Enter Khmer\'s description',
                 'zh' => 'Enter Chinese\'s description',
             ],
-        ],
-        'price' => [
-            'label' => 'Price',
-            'placeholder' => 'Enter price',
         ],
         'discount' => [
             'label' => 'Discount',
@@ -147,9 +177,6 @@ return [
         ],
         'brand' => [
             'label' => 'Choose Brand'
-        ],
-        'category' => [
-            'label' => 'Choose Category'
         ],
         'bedroom_number' => [
             'en' => [
@@ -225,5 +252,4 @@ return [
             'zh' => 'Description Chinese',
         ],
     ],
-
 ];

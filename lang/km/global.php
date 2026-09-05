@@ -1,7 +1,145 @@
 <?php
 
 return [
-    // header
+    // Top-level shortcuts
+    'no'                     => 'ល.រ',
+    'image'                  => 'រូបភាព',
+    'name'                   => 'ឈ្មោះ',
+    'category'               => 'ប្រភេទ',
+    'uom'                    => 'ខ្នាត',
+    'cost'                   => 'តម្លៃដើម',
+    'price'                  => 'តម្លៃលក់',
+    'status'                 => 'ស្ថានភាព',
+    'action'                 => 'សកម្មភាព',
+    'edit'                   => 'កែប្រែ',
+    'delete'                 => 'លុប',
+    'disable'                => 'បិទដំណើរការ',
+    'enable'                 => 'បើកដំណើរការ',
+    'restore'                => 'ស្តារឡើងវិញ',
+    'destroy'                => 'លុបជាអចិន្ត្រៃយ៍',
+    'cancel'                 => 'បោះបង់',
+    'confirm'                => 'បញ្ជាក់',
+
+    // Table headers
+    'table' => [
+        'no'                 => 'ល.រ',
+        'name'               => 'ឈ្មោះ',
+        'image'              => 'រូបភាព',
+        'phone'              => 'លេខទូរស័ព្ទ',
+        'email'              => 'អ៊ីមែល',
+        'address'            => 'អាសយដ្ឋាន',
+        'category'           => 'ប្រភេទ',
+        'uom'                => 'ខ្នាត',
+        'cost'               => 'តម្លៃដើម',
+        'price'              => 'តម្លៃលក់',
+        'point'              => 'ពិន្ទុ',
+        'max_qty'            => 'ចំនួនអតិបរមា',
+        'commission'         => 'កម្រៃជើងសារ',
+        'status'             => 'ស្ថានភាព',
+        'action'             => 'សកម្មភាព',
+        'actions'            => 'សកម្មភាព',
+        'created_at'         => 'កាលបរិច្ឆេទបង្កើត',
+        'date'               => 'កាលបរិច្ឆេទ',
+        'product'            => 'ផលិតផល',
+        'description'        => 'ការពិពណ៌នា',
+    ],
+
+    // Actions
+    'action' => [
+        'edit'               => 'កែប្រែ',
+        'delete'             => 'លុប',
+        'disable'            => 'បិទដំណើរការ',
+        'enable'             => 'បើកដំណើរការ',
+        'restore'            => 'ស្តារឡើងវិញ',
+        'destroy'            => 'លុបជាអចិន្ត្រៃយ៍',
+        'view'               => 'មើល',
+        'detail'             => 'មើលលម្អិត',
+        'cancel'             => 'បោះបង់',
+        'confirm'            => 'បញ្ជាក់',
+    ],
+
+    // Buttons
+    'button' => [
+        'create'             => 'បង្កើត',
+        'create_new'         => 'បង្កើតថ្មី',
+        'submit'             => 'រក្សាទុក',
+        'save'               => 'រក្សាទុក',
+        'save_new'           => 'រក្សាទុក & បង្កើតថ្មី',
+        'cancel'             => 'បោះបង់',
+        'reload'             => 'ផ្ទុកឡើងវិញ',
+        'refresh'            => 'ផ្ទុកឡើងវិញ',
+        'search'             => 'ស្វែងរក',
+        'export'             => 'នាំចេញ',
+        'import'             => 'នាំចូល',
+        'update'             => 'កែប្រែ',
+        'back'               => 'ត្រឡប់ក្រោយ',
+        'close'              => 'បិទ',
+        'confirm'            => 'បញ្ជាក់',
+        'reset'              => 'កំណត់ឡើងវិញ',
+        'createPosition'     => 'បង្កើតតួនាទី',
+        'createSlide'        => 'បង្កើតស្លាយ',
+    ],
+
+    // Tabs
+    'tab' => [
+        'all'                => 'ទាំងអស់',
+        'active'             => 'សកម្ម',
+        'disable'            => 'អសកម្ម',
+        'trash'              => 'ធុងសំរាម',
+        'pending'            => 'រង់ចាំ',
+        'confirmed'          => 'បានបញ្ជាក់',
+        'cancelled'          => 'បានបោះបង់',
+        'completed'          => 'បានបញ្ចប់',
+        'data'               => 'ទិន្នន័យ',
+        'cancel'             => 'បោះបង់',
+        'approve'            => 'អនុម័ត',
+        'shop'               => 'ហាង',
+        'product'            => 'ផលិតផល',
+    ],
+
+    // Breadcrumbs
+    'breadcrumb' => [
+        'all'                => 'ទាំងអស់',
+    ],
+
+    // Filters
+    'filter' => [
+        'search'             => 'ស្វែងរក...',
+        'all'                => 'ទាំងអស់',
+        'all_status'         => 'ស្ថានភាពទាំងអស់',
+        'role'               => 'ជ្រើសរើសតួនាទី',
+    ],
+
+    // Dialogs & Confirmations
+    'dialog' => [
+        'confirm_title'      => 'ការបញ្ជាក់',
+        'confirm_action'     => 'តើអ្នកប្រាកដជាចង់ :action មែនទេ?',
+        'confirm_delete'     => 'តើអ្នកប្រាកដជាចង់លុបមែនទេ?',
+        'yes'                => 'បាទ/ចាស',
+        'no'                 => 'ទេ',
+    ],
+
+    // Empty states
+    'empty' => [
+        'title'                          => 'មិនមានទិន្នន័យទេ',
+        'description'                    => 'មិនមានទិន្នន័យនៅក្នុងទំព័រនេះទេ',
+        'descriptionSlide'               => 'មិនមានស្លាយទេ',
+        'descriptionReportTransaction'   => 'មិនមានរបាយការណ៍ប្រតិបត្តិការទេ',
+    ],
+
+    // Messages
+    'message' => [
+        'delete_success'     => 'លុបបានជោគជ័យ!',
+        'restore_success'    => 'ស្តារឡើងវិញបានជោគជ័យ!',
+    ],
+
+    // Validations
+    'validation' => [
+        'status_required'    => 'សូមជ្រើសរើសស្ថានភាព',
+        'status_boolean'     => 'ស្ថានភាពមិនត្រឹមត្រូវ',
+    ],
+
+    // Header
     'header' => [
         'home'                  => 'ទំព័រដើម',
         'menu'                  => 'ម៉ឺនុយ',
@@ -19,12 +157,12 @@ return [
         'cart'                  => 'កន្ត្រក់',
     ],
 
-    // page
+    // Page
     'page' => [
         'share'                 => 'ចែករំលែក',
         'empty_title'           => 'មិនមានប្រភេទទំព័រនេះ',
         'empty_message'         => 'មិនមានទំព័រនេះទេ',
-        'view_detail'           => 'មើលលំអិត',
+        'view_detail'           => 'មើលលម្អិត',
         'view_more'             => 'មើលបន្ថែម',
         'show'                  => 'បង្ហាញ',
         'of'                    => 'នៃ',
@@ -55,44 +193,144 @@ return [
         'call'                  => 'ទាក់ទង',
         'go_to_shop'            => 'ចូលទៅកាន់ហាង',
         'irresponsibility'      => 'ការមិនទទួលខុសត្រូវ',
-        'location'              => 'ទីតាំង',
         'posted'                => 'បានចុះផ្សាយ',
         'viewer'                => 'អ្នកមើល',
-        'find_store_by_location'    => 'ស្វែងរកហាងតាមទីតាំង',
-        'province_city'             => 'ខេត្ត/ក្រុង',
-        'district_khan'             => 'ស្រុក/ខណ្ឌ',
-        'commune_sangkat'           => 'ឃុំ/សង្កាត់',
-        'village'                   => 'ភូមិ',
-        'find_store'                => 'ស្វែងរកហាង',
-        'category_list'             => 'ប្រភេទផលិតផល',
-        'all'                       => 'ទាំងអស់',
-        'type_of_store'             => 'ប្រភេទហាង',
-        'categories'                => 'ប្រភេទទំនិញ',
-        'brands'                    => 'ម៉ាក',
-        'contact_information'       => 'ព័ត៌មានទំនាក់ទំនង',
-        'location_information'      => 'ទីតាំង',
-        'leave_us_a_message'        => 'ផ្ញើសារមកកាន់យើងខ្ញុំ',
-        'send'                      => 'បញ្ជួន',
-        'welcome_back'              => 'សូមស្វាគមន៍ !',
-        'to_keep_connected'         => 'ដើម្បីរក្សាទំនាក់ទំនងជាមួយយើង សូមចូលប្រើប្រាស់ដោយព័ត៌មានរបស់អ្នក',
-        'hello'                     => 'ជម្រាបសួរ !',
+        'find_store_by_location'=> 'ស្វែងរកហាងតាមទីតាំង',
+        'province_city'         => 'ខេត្ត/ក្រុង',
+        'district_khan'         => 'ស្រុក/ខណ្ឌ',
+        'commune_sangkat'       => 'ឃុំ/សង្កាត់',
+        'village'               => 'ភូមិ',
+        'find_store'            => 'ស្វែងរកហាង',
+        'all'                   => 'ទាំងអស់',
+        'type_of_store'         => 'ប្រភេទហាង',
+        'categories'            => 'ប្រភេទទំនិញ',
+        'brands'                => 'ម៉ាក',
+        'contact_information'   => 'ព័ត៌មានទំនាក់ទំនង',
+        'location_information'  => 'ទីតាំង',
+        'leave_us_a_message'    => 'ផ្ញើសារមកកាន់យើងខ្ញុំ',
+        'send'                  => 'បញ្ជួន',
+        'welcome_back'          => 'សូមស្វាគមន៍ !',
+        'to_keep_connected'     => 'ដើម្បីរក្សាទំនាក់ទំនងជាមួយយើង សូមចូលប្រើប្រាស់ដោយព័ត៌មានរបស់អ្នក',
+        'hello'                 => 'ជម្រាបសួរ !',
         'to_go_through_the_process' => 'បញ្ចូលព័ត៌មានលម្អិតផ្ទាល់ខ្លួនរបស់អ្នក ហើយចាប់ផ្តើមការធ្វើដំណើរជាមួយយើង',
-        'shop_now'                  => 'ទិញឥវ៉ាន់ឥលូវនេះ',
-        'enter_search_keyword'      => 'ស្វែងរក...',
-        'popular_categories'        => 'ប្រភេទទំនិញពេញនិយម',
-        'products'                  => 'ផលិតផល',
-        'none'                      => 'មិនមាន',
-        'no_description'            => 'មិនមានការពណ៌នា',
-        'core_features'             => 'មុខងារពិសេស',
-        'show_all'                  => 'Show All',
+        'shop_now'              => 'ទិញឥវ៉ាន់ឥលូវនេះ',
+        'enter_search_keyword'  => 'ស្វែងរក...',
+        'popular_categories'    => 'ប្រភេទទំនិញពេញនិយម',
+        'products'              => 'ផលិតផល',
+        'none'                  => 'មិនមាន',
+        'no_description'        => 'មិនមានការពណ៌នា',
+        'core_features'         => 'មុខងារពិសេស',
+        'show_all'              => 'បង្ហាញទាំងអស់',
     ],
 
-    // footer
+    // Form
+    'form' => [
+        'sing_in'                => 'ចូលប្រើប្រាស់',
+        'sing_up'                => 'ចុះឈ្មោះ',
+        'login_with_facebook'    => 'ចូលដោយ Facebook',
+        'login_with_google'      => 'ចូលដោយ Google',
+        'with_email'             => 'ដោយអ៊ីមែល',
+        'with_phone'             => 'ដោយលេខទូរស័ព្ទ',
+        'email_/_phone'          => 'អ៊ីមែល / លេខទូរស័ព្ទ',
+        'enter_email_/_phone'    => 'បញ្ចូលអ៊ីមែល / លេខទូរស័ព្ទ',
+        'name'                   => [
+            'label'              => 'ឈ្មោះ',
+            'placeholder'        => 'បញ្ចូលឈ្មោះ...',
+        ],
+        'phone'                  => [
+            'label'              => 'លេខទូរស័ព្ទ',
+            'placeholder'        => 'បញ្ចូលលេខទូរស័ព្ទ...',
+        ],
+        'email'                  => [
+            'label'              => 'អ៊ីមែល',
+            'placeholder'        => 'បញ្ចូលអ៊ីមែល...',
+        ],
+        'address'                => [
+            'label'              => 'អាសយដ្ឋាន',
+            'placeholder'        => 'បញ្ចូលអាសយដ្ឋាន...',
+        ],
+        'password'               => [
+            'label'              => 'ពាក្យសម្ងាត់',
+            'placeholder'        => 'បញ្ចូលពាក្យសម្ងាត់',
+        ],
+        'enter_password'         => 'បញ្ចូលពាក្យសម្ងាត់',
+        'confirm_password'       => 'បញ្ជាក់ពាក្យសម្ងាត់',
+        'enter_confirm_password' => 'បញ្ចូលបញ្ជាក់ពាក្យសម្ងាត់',
+        'forgot_password'        => 'ភ្លេចពាក្យសម្ងាត់?',
+        'reset_password'         => 'កំណត់ពាក្យសម្ងាត់ឡើងវិញ',
+        'send_reset_link'        => 'ផ្ញើតំណកំណត់ឡើងវិញ',
+        'or'                     => 'ឬ',
+        'new_password'           => [
+            'label'              => 'ពាក្យសម្ងាត់ថ្មី',
+            'placeholder'        => 'បញ្ចូលពាក្យសម្ងាត់ថ្មី',
+        ],
+        'confirm_new_password'   => 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
+        'enter_new_password'     => 'បញ្ចូលពាក្យសម្ងាត់ថ្មី',
+        'enter_confirm_new_password' => 'បញ្ចូលពាក្យសម្ងាត់ថ្មីម្តងទៀត',
+        'password_confirmation'  => [
+            'label'              => 'បញ្ជាក់ពាក្យសម្ងាត់',
+            'placeholder'        => 'បញ្ជាក់ពាក្យសម្ងាត់',
+        ],
+        'dont_have_account'      => 'មិនទាន់មានគណនី?',
+        'create_account'         => 'បង្កើតគណនី',
+        'already_have_account'   => 'មានគណនីរួចហើយ?',
+        'show_password'          => 'បង្ហាញពាក្យសម្ងាត់',
+        'hide_password'          => 'លាក់ពាក្យសម្ងាត់',
+        'cancel'                 => 'បោះបង់',
+        'save'                   => 'រក្សាទុក',
+        'status'                 => [
+            'label'              => 'ស្ថានភាព',
+            'active'             => 'សកម្ម',
+            'disable'            => 'អសកម្ម',
+        ],
+        'image'                  => [
+            'label'              => 'រូបភាព',
+            'placeholder'        => 'ជ្រើសរើសរូបភាពដើម្បីផ្ទុកឡើង។',
+        ],
+        'button'                 => [
+            'update'             => 'កែប្រែ',
+            'submit'             => 'រក្សាទុក',
+            'save_new'           => 'រក្សាទុក & បង្កើតថ្មី',
+            'cancel'             => 'បោះបង់',
+        ],
+        'gender'                 => [
+            'label'              => 'ភេទ',
+            'placeholder'        => 'ជ្រើសរើសភេទ',
+            'male'               => 'ប្រុស',
+            'female'             => 'ស្រី',
+            'other'              => 'ផ្សេងទៀត',
+        ],
+        'role'                   => [
+            'label'              => 'តួនាទី',
+            'placeholder'        => 'ជ្រើសរើសតួនាទី',
+        ],
+        'description'            => [
+            'label'              => 'ការពិពណ៌នា',
+            'placeholder'        => 'បញ្ចូលការពិពណ៌នា...',
+        ],
+        'selectOption' => [
+            'department'         => 'ជ្រើសរើសនាយកដ្ឋាន',
+            'placeholderDepartment' => 'ជ្រើសរើសនាយកដ្ឋាន',
+            'garage'             => 'ជ្រើសរើសយានដ្ឋាន',
+            'placeholderGarage'  => 'ជ្រើសរើសយានដ្ឋាន',
+            'company'            => 'ជ្រើសរើសក្រុមហ៊ុន',
+            'placeholderCompany' => 'ជ្រើសរើសក្រុមហ៊ុន',
+            'car'                => 'ជ្រើសរើសរថយន្ត',
+            'placeholderCar'     => 'ជ្រើសរើសរថយន្ត',
+        ],
+        'filter' => [
+            'search'             => 'ស្វែងរកឈ្មោះ',
+            'username'           => 'ស្វែងរកឈ្មោះគណនី',
+            'searchBrand'        => 'ស្វែងរកម៉ាក',
+        ],
+    ],
+
+    // Footer
     'footer' => [
         'about_us'              => 'អំពីយើង',
         'contact_us'            => 'ទំនាក់ទំនង',
         'address'               => 'អាសយដ្ឋាន',
         'phone'                 => 'ទូរស័ព្ទ',
-        'email'                 => 'អ៊ីម៉ែល',
+        'email'                 => 'អ៊ីមែល',
     ],
 ];

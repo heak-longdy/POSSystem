@@ -36,6 +36,10 @@ use App\Http\Controllers\Admin\Inventory\StockOutController;
 use App\Http\Controllers\Admin\Inventory\StockTransferController;
 use App\Http\Controllers\Admin\Inventory\StockOnHandController;
 use App\Http\Controllers\Admin\Inventory\StockMovementController;
+use App\Http\Controllers\Admin\Report\SalesReportController;
+use App\Http\Controllers\Admin\Report\OrderTransactionReportController;
+use App\Http\Controllers\Admin\Report\InventoryMovementReportController;
+use App\Http\Controllers\Admin\Report\StaffExpenseReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -341,6 +345,54 @@ Route::middleware(['AdminGuard'])
             'as'     => 'staff-expense-',
         ], function () {
             Route::get('/staff/{staffId}',  [Admin\StaffExpenseController::class, 'staffHistory'])->name('staff-history');
+        });
+
+        // Report Management - Sales Report
+        Route::group([
+            'prefix' => 'report/sales',
+            'as'     => 'report-sales-',
+        ], function () {
+            Route::get('/', [SalesReportController::class, 'index'])->name('index');
+            Route::get('daily', [SalesReportController::class, 'daily'])->name('daily');
+            Route::get('monthly', [SalesReportController::class, 'monthly'])->name('monthly');
+            Route::get('report', [SalesReportController::class, 'report'])->name('report');
+            Route::get('details/{period}', [SalesReportController::class, 'details'])->name('details');
+        });
+
+        // Report Management - Order Transaction Report
+        Route::group([
+            'prefix' => 'report/order-transaction',
+            'as'     => 'report-order-transaction-',
+        ], function () {
+            Route::get('/', [OrderTransactionReportController::class, 'index'])->name('index');
+            Route::get('daily', [OrderTransactionReportController::class, 'daily'])->name('daily');
+            Route::get('monthly', [OrderTransactionReportController::class, 'monthly'])->name('monthly');
+            Route::get('report', [OrderTransactionReportController::class, 'report'])->name('report');
+            Route::get('details/{period}', [OrderTransactionReportController::class, 'details'])->name('details');
+        });
+
+        // Report Management - Inventory Movement Report
+        Route::group([
+            'prefix' => 'report/inventory-movement',
+            'as'     => 'report-inventory-movement-',
+        ], function () {
+            Route::get('/', [InventoryMovementReportController::class, 'index'])->name('index');
+            Route::get('daily', [InventoryMovementReportController::class, 'daily'])->name('daily');
+            Route::get('monthly', [InventoryMovementReportController::class, 'monthly'])->name('monthly');
+            Route::get('report', [InventoryMovementReportController::class, 'report'])->name('report');
+            Route::get('details/{period}', [InventoryMovementReportController::class, 'details'])->name('details');
+        });
+
+        // Report Management - Staff Expense Report
+        Route::group([
+            'prefix' => 'report/staff-expense',
+            'as'     => 'report-staff-expense-',
+        ], function () {
+            Route::get('/', [StaffExpenseReportController::class, 'index'])->name('index');
+            Route::get('daily', [StaffExpenseReportController::class, 'daily'])->name('daily');
+            Route::get('monthly', [StaffExpenseReportController::class, 'monthly'])->name('monthly');
+            Route::get('report', [StaffExpenseReportController::class, 'report'])->name('report');
+            Route::get('details/{period}', [StaffExpenseReportController::class, 'details'])->name('details');
         });
     });
 

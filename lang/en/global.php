@@ -1,7 +1,145 @@
 <?php
 
 return [
-    // header
+    // Top-level shortcuts
+    'no'                     => 'No',
+    'image'                  => 'Image',
+    'name'                   => 'Name',
+    'category'               => 'Category',
+    'uom'                    => 'UOM',
+    'cost'                   => 'Cost',
+    'price'                  => 'Price',
+    'status'                 => 'Status',
+    'action'                 => 'Action',
+    'edit'                   => 'Edit',
+    'delete'                 => 'Delete',
+    'disable'                => 'Disable',
+    'enable'                 => 'Enable',
+    'restore'                => 'Restore',
+    'destroy'                => 'Destroy',
+    'cancel'                 => 'Cancel',
+    'confirm'                => 'Confirm',
+
+    // Table headers
+    'table' => [
+        'no'                 => 'Nº',
+        'name'               => 'Name',
+        'image'              => 'Image',
+        'phone'              => 'Phone Number',
+        'email'              => 'Email',
+        'address'            => 'Address',
+        'category'           => 'Category',
+        'uom'                => 'UOM',
+        'cost'               => 'Cost',
+        'price'              => 'Price',
+        'point'              => 'Point',
+        'max_qty'            => 'Max Qty',
+        'commission'         => 'Commission',
+        'status'             => 'Status',
+        'action'             => 'Action',
+        'actions'            => 'Actions',
+        'created_at'         => 'Created At',
+        'date'               => 'Date',
+        'product'            => 'Product',
+        'description'        => 'Description',
+    ],
+
+    // Actions
+    'action' => [
+        'edit'               => 'Edit',
+        'delete'             => 'Delete',
+        'disable'            => 'Disable',
+        'enable'             => 'Enable',
+        'restore'            => 'Restore',
+        'destroy'            => 'Destroy',
+        'view'               => 'View',
+        'detail'             => 'View Detail',
+        'cancel'             => 'Cancel',
+        'confirm'            => 'Confirm',
+    ],
+
+    // Buttons
+    'button' => [
+        'create'             => 'Create',
+        'create_new'         => 'Create New',
+        'submit'             => 'Submit',
+        'save'               => 'Save',
+        'save_new'           => 'Save & New',
+        'cancel'             => 'Cancel',
+        'reload'             => 'Refresh',
+        'refresh'            => 'Refresh',
+        'search'             => 'Search',
+        'export'             => 'Export',
+        'import'             => 'Import',
+        'update'             => 'Update',
+        'back'               => 'Back',
+        'close'              => 'Close',
+        'confirm'            => 'Confirm',
+        'reset'              => 'Reset',
+        'createPosition'     => 'Create Position',
+        'createSlide'        => 'Create Slide',
+    ],
+
+    // Tabs
+    'tab' => [
+        'all'                => 'All',
+        'active'             => 'Active',
+        'disable'            => 'Disable',
+        'trash'              => 'Trash',
+        'pending'            => 'Pending',
+        'confirmed'          => 'Confirmed',
+        'cancelled'          => 'Cancelled',
+        'completed'          => 'Completed',
+        'data'               => 'Data',
+        'cancel'             => 'Cancel',
+        'approve'            => 'Approve',
+        'shop'               => 'Shop',
+        'product'            => 'Product',
+    ],
+
+    // Breadcrumbs
+    'breadcrumb' => [
+        'all'                => 'All',
+    ],
+
+    // Filters
+    'filter' => [
+        'search'             => 'Search...',
+        'all'                => 'All',
+        'all_status'         => 'All Status',
+        'role'               => 'Select Role',
+    ],
+
+    // Dialogs & Confirmations
+    'dialog' => [
+        'confirm_title'      => 'Confirmation',
+        'confirm_action'     => 'Are you sure you want to :action?',
+        'confirm_delete'     => 'Are you sure you want to delete?',
+        'yes'                => 'Yes',
+        'no'                 => 'No',
+    ],
+
+    // Empty states
+    'empty' => [
+        'title'                          => 'No data found',
+        'description'                    => 'No data available in this page.',
+        'descriptionSlide'               => 'Slide is empty',
+        'descriptionReportTransaction'   => 'Report is empty',
+    ],
+
+    // Messages
+    'message' => [
+        'delete_success'     => 'Deleted successfully!',
+        'restore_success'    => 'Restored successfully!',
+    ],
+
+    // Validations
+    'validation' => [
+        'status_required'    => 'Status is required.',
+        'status_boolean'     => 'Status must be true or false.',
+    ],
+
+    // Header
     'header' => [
         'home'                  => 'Home',
         'menu'                  => 'Menu',
@@ -19,10 +157,10 @@ return [
         'cart'                  => 'Cart',
     ],
 
-    // page
+    // Page
     'page' => [
         'share'                 => 'Share',
-        'empty_title'           => 'No data found33333',
+        'empty_title'           => 'No data found',
         'empty_message'         => 'No data in this page',
         'view_detail'           => 'View Detail',
         'view_more'             => 'View More',
@@ -55,43 +193,41 @@ return [
         'call'                  => 'Call',
         'go_to_shop'            => 'Go To Shop',
         'irresponsibility'      => 'Irresponsibility',
-        'location'              => 'Location',
         'posted'                => 'Posted',
         'viewer'                => 'Viewer',
         'facebook'              => 'Facebook',
         'messenger'             => 'Messenger',
         'telegram'              => 'Telegram',
         'we_chat'               => 'WeChat',
-        'find_store_by_location'    => 'Find Store By Location',
-        'province_city'             => 'Provinces/Cities',
-        'district_khan'             => 'Districts/Khan',
-        'commune_sangkat'           => 'Communes/Sangkat',
-        'village'                   => 'Villages',
-        'find_store'                => 'Find Store',
-        'category_list'             => 'Category List',
-        'all'                       => 'All',
-        'type_of_store'             => 'Type of Stores',
-        'categories'                => 'Categories',
-        'brands'                    => 'Brands',
-        'contact_information'       => 'Contact Information',
-        'location_information'      => 'Location Information',
-        'leave_us_a_message'        => 'Leave Us A Message',
-        'send'                      => 'Send',
-        'welcome_back'              => 'Welcome Back !',
-        'to_keep_connected'         => 'To keep connected with us please login with your personal info',
-        'hello'                     => 'Hello !',
+        'find_store_by_location'=> 'Find Store By Location',
+        'province_city'         => 'Provinces/Cities',
+        'district_khan'         => 'Districts/Khan',
+        'commune_sangkat'       => 'Communes/Sangkat',
+        'village'               => 'Villages',
+        'find_store'            => 'Find Store',
+        'all'                   => 'All',
+        'type_of_store'         => 'Type of Stores',
+        'categories'            => 'Categories',
+        'brands'                => 'Brands',
+        'contact_information'   => 'Contact Information',
+        'location_information'  => 'Location Information',
+        'leave_us_a_message'    => 'Leave Us A Message',
+        'send'                  => 'Send',
+        'welcome_back'          => 'Welcome Back !',
+        'to_keep_connected'     => 'To keep connected with us please login with your personal info',
+        'hello'                 => 'Hello !',
         'to_go_through_the_process' => 'Enter your personal details and start journey with us',
-        'shop_now'                  => 'Shop Now',
-        'enter_search_keyword'      => 'Search...',
-        'popular_categories'        => 'Popular Categories',
-        'products'                  => 'Product(s)',
-        'none'                      => 'None',
-        'no_description'            => 'No description',
-        'core_features'             => 'CORE FEATURES',
-        'show_all'                  => 'Show All',
+        'shop_now'              => 'Shop Now',
+        'enter_search_keyword'  => 'Search...',
+        'popular_categories'    => 'Popular Categories',
+        'products'              => 'Product(s)',
+        'none'                  => 'None',
+        'no_description'        => 'No description',
+        'core_features'         => 'CORE FEATURES',
+        'show_all'              => 'Show All',
     ],
 
-    // auth
+    // Form
     'form' => [
         'sing_in'                => 'Sign In',
         'sing_up'                => 'Sign Up',
@@ -101,10 +237,26 @@ return [
         'with_phone'             => 'With Phone',
         'email_/_phone'          => 'Email / Phone',
         'enter_email_/_phone'    => 'Enter email / phone',
-        'name'                   => 'Name',
-        'email'                  => 'Email',
-        'phone'                  => 'Phone',
-        'password'               => 'Password',
+        'name'                   => [
+            'label'              => 'Name',
+            'placeholder'        => 'Enter name...',
+        ],
+        'phone'                  => [
+            'label'              => 'Phone Number',
+            'placeholder'        => 'Enter phone...',
+        ],
+        'email'                  => [
+            'label'              => 'Email',
+            'placeholder'        => 'Enter email...',
+        ],
+        'address'                => [
+            'label'              => 'Address',
+            'placeholder'        => 'Enter address...',
+        ],
+        'password'               => [
+            'label'              => 'Password',
+            'placeholder'        => 'Enter password',
+        ],
         'enter_password'         => 'Enter password',
         'confirm_password'       => 'Confirm Password',
         'enter_confirm_password' => 'Enter confirm password',
@@ -112,10 +264,17 @@ return [
         'reset_password'         => 'Reset Password',
         'send_reset_link'        => 'Send Reset Link',
         'or'                     => 'Or',
-        'new_password'           => 'New Password',
+        'new_password'           => [
+            'label'              => 'New Password',
+            'placeholder'        => 'Enter new password',
+        ],
         'confirm_new_password'   => 'Confirm New Password',
         'enter_new_password'     => 'Enter new password',
         'enter_confirm_new_password' => 'Enter new password again',
+        'password_confirmation'  => [
+            'label'              => 'Confirm Password',
+            'placeholder'        => 'Confirm password',
+        ],
         'dont_have_account'      => 'Don\'t have an account?',
         'create_account'         => 'Create Account',
         'already_have_account'   => 'Already have an account?',
@@ -123,24 +282,54 @@ return [
         'hide_password'          => 'Hide Password',
         'cancel'                 => 'Cancel',
         'save'                   => 'Save',
+        'status'                 => [
+            'label'              => 'Status',
+            'active'             => 'Active',
+            'disable'            => 'Disable',
+        ],
+        'image'                  => [
+            'label'              => 'Image',
+            'placeholder'        => 'Browser file to upload.',
+        ],
+        'button'                 => [
+            'update'             => 'Update',
+            'submit'             => 'Submit',
+            'save_new'           => 'Save & New',
+            'cancel'             => 'Cancel',
+        ],
+        'gender'                 => [
+            'label'              => 'Gender',
+            'placeholder'        => 'Enter gender',
+            'male'               => 'Male',
+            'female'             => 'Female',
+            'other'              => 'Other',
+        ],
+        'role'                   => [
+            'label'              => 'Role',
+            'placeholder'        => 'Select role',
+        ],
+        'description'            => [
+            'label'              => 'Description',
+            'placeholder'        => 'Enter description...',
+        ],
         'selectOption' => [
-            'department' => 'Select Department',
+            'department'         => 'Select Department',
             'placeholderDepartment' => 'Select Department',
-            'garage' => 'Select Garage',
-            'placeholderGarage' => 'Select Garage',
-            'company' => 'Select Company',
+            'garage'             => 'Select Garage',
+            'placeholderGarage'  => 'Select Garage',
+            'company'            => 'Select Company',
             'placeholderCompany' => 'Select Company',
-            'car'   => 'Select Car',
-            'placeholderCar' => 'Select Car',
+            'car'                => 'Select Car',
+            'placeholderCar'     => 'Select Car',
         ],
         'filter' => [
-            'search' => 'Search name',
-            'username' => 'Search username',
-            'searchBrand' => 'Search brand',
+            'search'             => 'Search name',
+            'username'           => 'Search username',
+            'searchBrand'        => 'Search brand',
         ],
     ],
 
-    // footer
+    // Footer
     'footer' => [
         'about_us'              => 'About Us',
         'contact_us'            => 'Contact Us',

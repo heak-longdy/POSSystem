@@ -32,6 +32,12 @@
                             'action' => [
                                 ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
                                 [
+                                    'url' => 'permission',
+                                    'title' => __('action_button.permission'),
+                                    'icon' => 'security',
+                                    'type' => 'link',
+                                ],
+                                [
                                     'url' => 'change-password',
                                     'title' => 'Change Password',
                                     'icon' => 'password',

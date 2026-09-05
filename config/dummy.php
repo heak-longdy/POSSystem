@@ -9,6 +9,9 @@ return [
         'role' => [
             'super_admin' => 'super_admin',
             'admin' => 'admin',
+            'manager' => 'manager',
+            'cashier' => 'cashier',
+            'staff' => 'staff',
         ]
     ],
     'months' => [

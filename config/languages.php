@@ -17,11 +17,5 @@ return [
             'direction' => 'ltr',
             'active' => true,
         ],
-        'zh' => [
-            'name' => 'Chinese',
-            'native_name' => '中文',
-            'direction' => 'ltr',
-            'active' => true,
-        ],
     ],
 ];

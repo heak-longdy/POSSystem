@@ -33,12 +33,10 @@ return [
             'name' => [
                 'en' => 'Jobs',
                 'km' => 'ការងារ',
-                'zh' => '工作',
             ],
             'description' => [
                 'en' => 'Find the best jobs you interested in',
                 'km' => 'ស្វែងរកការងារដែលអ្នកចាប់អារម្មណ៍',
-                'zh' => '找到最好的工作',
             ],
         ],
 
@@ -49,12 +47,10 @@ return [
             'name' => [
                 'en' => 'Hotels',
                 'km' => 'សណ្ឋាគារ',
-                'zh' => '酒店',
             ],
             'description' => [
                 'en' => 'Find the best hotels you like',
                 'km' => 'ស្វែងរកសណ្ឋាគារដែលអ្នកចូលចិត្ត',
-                'zh' => '找到最好的酒店你喜欢',
             ],
         ],
 
@@ -65,12 +61,10 @@ return [
             'name' => [
                 'en' => 'Real Estates',
                 'km' => 'អចលនទ្រព្យ',
-                'zh' => '房地产',
             ],
             'description' => [
                 'en' => 'Find the best real estates you like',
                 'km' => 'ស្វែងរកអចលនទ្រព្យដែលអ្នកចូរចិត្ត',
-                'zh' => '找到最好的房地产你喜欢',
             ],
         ],
 
@@ -81,12 +75,10 @@ return [
             'name' => [
                 'en' => 'General Products',
                 'km' => 'ផលិតផលទូទៅ',
-                'zh' => '通用产品',
             ],
             'description' => [
                 'en' => 'Buy the best products you like',
                 'km' => 'ទិញផលិតផលដែលអ្នកចូរចិត្ត',
-                'zh' => '购买最好的产品你喜欢',
             ],
         ],
     ],

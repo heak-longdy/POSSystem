@@ -109,11 +109,11 @@ class RemainingAmountController extends Controller
     {
         $booking = Booking::with(['payments.createdBy', 'customer', 'shop', 'barber', 'bookingDetail.service', 'bookingDetail.product'])->find($id);
         if (!$booking) {
-            return response()->json(['message' => 'error', 'error' => 'Booking not found.'], 404);
+            return response()->json(['message' => 'error', 'error' => __('booking.message.not_found')], 404);
         }
 
         $res = $this->paymentResponse($booking);
-        $res['customer_name'] = $booking->customer?->name ?: ($booking->customer?->phone ?: 'Walk-in customer');
+        $res['customer_name'] = $booking->customer?->name ?: ($booking->customer?->phone ?: __('booking.walk_in_customer'));
         $res['customer_phone'] = $booking->customer?->phone ?: '---';
         $res['shop_name'] = $booking->shop?->name ?: '---';
         $res['barber_name'] = $booking->barber?->name ?: '---';
@@ -129,27 +129,41 @@ class RemainingAmountController extends Controller
             'payment_method' => 'nullable|string|max:50',
             'payment_date' => 'nullable|date',
             'note' => 'nullable|string|max:500',
+        ], [
+            'amount.required' => __('booking.validation.payment_amount_required'),
+            'amount.numeric' => __('booking.validation.partial_numeric'),
+            'amount.min' => __('booking.validation.partial_min'),
         ]);
+
+        $booking = Booking::findOrFail($id);
+        if ($booking->payment_status === 'Cancel') {
+            return response()->json([
+                'message' => 'error',
+                'errors' => [
+                    'payment_status' => [__('remaining_amount.message.cannot_add_payment_rejected')],
+                ],
+            ], 422);
+        }
+        if ($booking->payment_status === 'Paid') {
+            return response()->json([
+                'message' => 'error',
+                'errors' => [
+                    'payment_status' => [__('remaining_amount.message.booking_already_paid')],
+                ],
+            ], 422);
+        }
+        if ((float) $req->amount > (float) $booking->remaining_amount) {
+            return response()->json([
+                'message' => 'error',
+                'errors' => [
+                    'amount' => [__('booking.validation.payment_amount_exceeds')],
+                ],
+            ], 422);
+        }
 
         DB::beginTransaction();
         try {
             $booking = Booking::where('id', $id)->lockForUpdate()->firstOrFail();
-            if ($booking->payment_status === 'Cancel') {
-                throw ValidationException::withMessages([
-                    'payment_status' => 'Cannot add payment to a rejected booking.',
-                ]);
-            }
-            if ($booking->payment_status === 'Paid') {
-                throw ValidationException::withMessages([
-                    'payment_status' => 'Booking is already fully paid.',
-                ]);
-            }
-            if ((float) $req->amount > (float) $booking->remaining_amount) {
-                throw ValidationException::withMessages([
-                    'amount' => 'Payment amount exceeds remaining balance.',
-                ]);
-            }
-
             $paymentMethod = $req->payment_method ?: ($booking->pay_way ?: 'Cash');
             $paymentDate = $req->payment_date
                 ? Carbon::parse($req->payment_date)->format('Y-m-d H:i:s')
@@ -186,6 +200,10 @@ class RemainingAmountController extends Controller
             'payment_method' => 'nullable|string|max:50',
             'payment_date' => 'nullable|date',
             'note' => 'nullable|string|max:500',
+        ], [
+            'amount.required' => __('booking.validation.payment_amount_required'),
+            'amount.numeric' => __('booking.validation.partial_numeric'),
+            'amount.min' => __('booking.validation.partial_min'),
         ]);
 
         DB::beginTransaction();
@@ -194,14 +212,14 @@ class RemainingAmountController extends Controller
             $booking = Booking::where('id', $payment->booking_id)->lockForUpdate()->firstOrFail();
             if ($booking->payment_status === 'Cancel') {
                 throw ValidationException::withMessages([
-                    'payment_status' => 'Cannot edit payment on a rejected booking.',
+                    'payment_status' => __('remaining_amount.message.cannot_edit_payment_rejected'),
                 ]);
             }
 
             $availableBalance = (float) $booking->remaining_amount + (float) $payment->amount;
             if ((float) $req->amount > $availableBalance) {
                 throw ValidationException::withMessages([
-                    'amount' => 'Payment amount exceeds available balance.',
+                    'amount' => __('remaining_amount.message.payment_exceeds_available'),
                 ]);
             }
 
@@ -242,7 +260,7 @@ class RemainingAmountController extends Controller
             $booking = Booking::where('id', $payment->booking_id)->lockForUpdate()->firstOrFail();
             if ($booking->payment_status === 'Cancel') {
                 throw ValidationException::withMessages([
-                    'payment_status' => 'Cannot delete payment on a rejected booking.',
+                    'payment_status' => __('remaining_amount.message.cannot_delete_payment_rejected'),
                 ]);
             }
 
@@ -266,27 +284,33 @@ class RemainingAmountController extends Controller
     {
         $booking = Booking::with(['customer', 'shop'])->find($id);
         if (!$booking) {
-            return response()->json(['message' => 'error', 'error' => 'Booking not found.'], 404);
+            return response()->json(['message' => 'error', 'error' => __('booking.message.not_found')], 404);
         }
 
         if ($booking->payment_status === 'Cancel') {
-            return response()->json(['message' => 'error', 'error' => 'Cannot send reminder for a rejected booking.'], 422);
+            return response()->json(['message' => 'error', 'error' => __('remaining_amount.message.cannot_send_reminder_rejected')], 422);
         }
 
         $remaining = (float) $booking->remaining_amount;
         if ($remaining <= 0) {
-            return response()->json(['message' => 'error', 'error' => 'This booking does not have any outstanding balance.'], 422);
+            return response()->json(['message' => 'error', 'error' => __('remaining_amount.message.no_outstanding_balance')], 422);
         }
 
-        $customerName = $booking->customer?->name ?: 'Customer';
+        $customerName = $booking->customer?->name ?: ($booking->customer?->phone ?: __('booking.walk_in_customer'));
         $invoice = $booking->invoice_number ?: '#' . $booking->id;
-        $totalFormatted = number_format((float) ($booking->total_price ?? 0), 2) . '៛';
-        $paidFormatted = number_format((float) ($booking->paid_amount ?? 0), 2) . '៛';
-        $remainingFormatted = number_format($remaining, 2) . '៛';
+        $totalFormatted = '$' . number_format((float) ($booking->total_price ?? 0), 2);
+        $paidFormatted = '$' . number_format((float) ($booking->paid_amount ?? 0), 2);
+        $remainingFormatted = '$' . number_format($remaining, 2);
         $bookingDateFormatted = $booking->booking_date ? Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---';
 
-        $title = "Payment Reminder: Booking {$invoice}";
-        $description = "Dear {$customerName}, this is a friendly reminder that you have an outstanding balance of {$remainingFormatted} (Total: {$totalFormatted}, Paid: {$paidFormatted}) for your booking on {$bookingDateFormatted}.";
+        $title = __('remaining_amount.notification.reminder_title', ['invoice' => $invoice]);
+        $description = __('remaining_amount.notification.reminder_desc', [
+            'customer' => $customerName,
+            'remaining' => $remainingFormatted,
+            'total' => $totalFormatted,
+            'paid' => $paidFormatted,
+            'date' => $bookingDateFormatted,
+        ]);
 
         $notification = null;
         try {
@@ -311,7 +335,7 @@ class RemainingAmountController extends Controller
             'message' => 'success',
             'status' => 200,
             'notification' => $notification,
-            'success_message' => "Payment reminder sent successfully for booking {$invoice}."
+            'success_message' => __('remaining_amount.message.reminder_sent_booking', ['invoice' => $invoice])
         ]);
     }
 
@@ -392,7 +416,7 @@ class RemainingAmountController extends Controller
                 'id' => $payment->id,
                 'booking_id' => $payment->booking_id,
                 'amount' => (float) ($payment->amount ?? 0),
-                'amount_formatted' => number_format((float) ($payment->amount ?? 0), 2) . '៛',
+                'amount_formatted' => '$' . number_format((float) ($payment->amount ?? 0), 2),
                 'payment_method' => $payment->payment_method ?: 'Cash',
                 'payment_date' => $payment->payment_date
                     ? Carbon::parse($payment->payment_date)->format('Y-m-d H:i:s')
@@ -412,11 +436,11 @@ class RemainingAmountController extends Controller
             'id' => $booking->id,
             'invoice_number' => $booking->invoice_number ?: '#' . $booking->id,
             'total_price' => (float) ($booking->total_price ?? 0),
-            'total_price_formatted' => number_format((float) ($booking->total_price ?? 0), 2) . '៛',
+            'total_price_formatted' => '$' . number_format((float) ($booking->total_price ?? 0), 2),
             'paid_amount' => (float) ($booking->paid_amount ?? 0),
-            'paid_amount_formatted' => number_format((float) ($booking->paid_amount ?? 0), 2) . '៛',
+            'paid_amount_formatted' => '$' . number_format((float) ($booking->paid_amount ?? 0), 2),
             'remaining_amount' => (float) $booking->remaining_amount,
-            'remaining_amount_formatted' => number_format((float) $booking->remaining_amount, 2) . '៛',
+            'remaining_amount_formatted' => '$' . number_format((float) $booking->remaining_amount, 2),
             'payment_status' => $booking->payment_status ?: 'Pending',
             'payment_date' => $booking->payment_date,
             'payments' => $payments,
@@ -460,10 +484,10 @@ class RemainingAmountController extends Controller
             $item->customer_title = $this->customerTitle($item);
             $item->booking_items_title = $this->bookingItemsTitle($item);
             $item->payment_status_title = $this->paymentStatusBadge($item);
-            $item->total_price_title = number_format((float) ($item->total_price ?? 0), 2) . '៛';
-            $item->paid_amount_title = number_format((float) ($item->paid_amount ?? 0), 2) . '៛';
-            $item->remaining_amount_title = number_format((float) ($item->remaining_amount ?? 0), 2) . '៛';
-            $item->total_discount_title = number_format((float) ($item->total_discount ?? 0), 2) . '៛';
+            $item->total_price_title = '$' . number_format((float) ($item->total_price ?? 0), 2);
+            $item->paid_amount_title = '$' . number_format((float) ($item->paid_amount ?? 0), 2);
+            $item->remaining_amount_title = '$' . number_format((float) ($item->remaining_amount ?? 0), 2);
+            $item->total_discount_title = '$' . number_format((float) ($item->total_discount ?? 0), 2);
             $item->booking_date_title = $item->booking_date
                 ? Carbon::parse($item->booking_date)->format('Y-m-d H:i')
                 : '---';
@@ -472,7 +496,7 @@ class RemainingAmountController extends Controller
 
     private function customerTitle(Booking $booking)
     {
-        $name = e($booking->customer?->name ?: '---');
+        $name = e($booking->customer?->name ?: ($booking->customer?->phone ?: __('booking.walk_in_customer')));
         $phone = e($booking->customer?->phone ?: '---');
 
         return "<span>{$name}</span><small>{$phone}</small>";
@@ -495,6 +519,7 @@ class RemainingAmountController extends Controller
     private function paymentStatusBadge(Booking $booking)
     {
         $status = $booking->payment_status ?: 'Pending';
+        $label = BookingController::bookingStatusLabel($status);
         $class = match ($status) {
             'Paid' => 'bg-success',
             'Partial' => 'bg-info',
@@ -505,6 +530,6 @@ class RemainingAmountController extends Controller
             ? '<small class="text-muted">' . e(Carbon::parse($booking->payment_date)->format('Y-m-d H:i')) . '</small>'
             : '';
 
-        return '<span class="badge ' . $class . '" style="margin-bottom:7px;">' . e($status) . '</span>' . $date;
+        return '<span class="badge ' . $class . '" style="margin-bottom:7px;">' . e($label) . '</span>' . $date;
     }
 }
