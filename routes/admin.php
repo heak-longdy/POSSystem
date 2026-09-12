@@ -259,6 +259,7 @@ Route::middleware(['AdminGuard'])
             Route::match(['get', 'post'], 'status/{id}/{status}', [BookingController::class, 'updateStatus'])->name('status');
             Route::get('list-product/{status?}', [BookingController::class, 'product'])->name('list-product');
             Route::get('edit/{id?}', [BookingController::class, 'onEdit'])->name('edit');
+            Route::get('detail/{id}', [BookingController::class, 'show'])->name('detail');
             Route::post('save/{id?}', [BookingController::class, 'Save'])->name('save');
             Route::post('delete/{id}', [BookingController::class, 'delete'])->name('delete');
             Route::post('restore/{id}', [BookingController::class, 'restore'])->name('restore');

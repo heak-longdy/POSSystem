@@ -186,4 +186,42 @@ class BookingLocalizationTest extends TestCase
         $this->assertEquals('Rejected', BookingController::bookingStatusLabel('Cancel'));
         $this->assertEquals('Pending', BookingController::bookingStatusLabel('Pending'));
     }
+
+    /** @test */
+    public function it_renders_booking_detail_page_in_english_and_khmer()
+    {
+        $booking = Booking::create([
+            'customer_id' => $this->customer->id,
+            'shop_id' => $this->shop->id,
+            'total_price' => 150.00,
+            'paid_amount' => 50.00,
+            'payment_status' => 'Partial',
+            'booking_date' => now(),
+            'invoice_number' => 'BK-TEST-001',
+        ]);
+
+        $this->actingAs($this->enUser);
+        $enList = $this->get(route('admin-booking-list', 'Pending'));
+        $enList->assertStatus(200);
+        $enList->assertSee('View Details');
+
+        $enResponse = $this->get(route('admin-booking-detail', $booking->id));
+        $enResponse->assertStatus(200);
+        $enResponse->assertSee('Booking Details');
+        $enResponse->assertSee('BK-TEST-001');
+        $enResponse->assertSee('Total Bill');
+        $enResponse->assertSee('Balance Due');
+
+        $this->actingAs($this->kmUser);
+        $kmList = $this->get(route('admin-booking-list', 'Pending'));
+        $kmList->assertStatus(200);
+        $kmList->assertSee('មើលព័ត៌មានលម្អិត');
+
+        $kmResponse = $this->get(route('admin-booking-detail', $booking->id));
+        $kmResponse->assertStatus(200);
+        $kmResponse->assertSee('ព័ត៌មានលម្អិតនៃការកក់');
+        $kmResponse->assertSee('BK-TEST-001');
+        $kmResponse->assertSee('តម្លៃសរុប');
+        $kmResponse->assertSee('ប្រាក់នៅខ្វះ');
+    }
 }

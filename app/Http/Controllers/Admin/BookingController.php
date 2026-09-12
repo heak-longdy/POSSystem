@@ -33,7 +33,7 @@ class BookingController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:booking-view', ['only' => ['index', 'product', 'getPaymentDetails']]);
+        $this->middleware('permission:booking-view', ['only' => ['index', 'product', 'getPaymentDetails', 'show']]);
         $this->middleware('permission:booking-create', ['only' => ['onCreate', 'save', 'Save']]);
         $this->middleware('permission:booking-update', ['only' => ['onEdit', 'edit', 'save', 'Save', 'restore', 'updatePaymentStatus', 'cancelBooking', 'addPayment', 'updatePayment', 'sendPaymentReminder']]);
         $this->middleware('permission:booking-delete', ['only' => ['delete', 'restore', 'destroy', 'deletePayment']]);
@@ -177,6 +177,36 @@ class BookingController extends Controller
         );
 
         return view($this->layout . 'createBooking', $this->formData($booking));
+    }
+
+    public function show($id = null)
+    {
+        if (!$id) {
+            return redirect()->route('admin-' . $this->routeName . '-list', 'Pending');
+        }
+
+        $booking = Booking::withTrashed()->with([
+            'customer',
+            'shop',
+            'barber',
+            'bookingDetail' => function ($detail) {
+                $detail->withTrashed()->with(['service', 'product']);
+            },
+            'payments.createdBy',
+        ])->find($id);
+
+        if (!$booking) {
+            Session::flash('warning', __('booking.message.not_found'));
+            return redirect()->route('admin-' . $this->routeName . '-list', 'Pending');
+        }
+
+        $data['booking'] = $booking;
+        $data['routeName'] = $this->routeName;
+        $data['canEdit'] = $booking->payment_status === 'Pending' && !$booking->trashed();
+        $data['canAddPayment'] = $booking->payment_status !== 'Cancel' && !$booking->trashed() && (float) $booking->remaining_amount > 0;
+        $data['canCancel'] = $booking->payment_status === 'Pending' && !$booking->trashed() && (float) ($booking->paid_amount ?? 0) <= 0;
+
+        return view($this->layout . 'detail', $data);
     }
 
     public function Save(BookingRequest $req, $id = '')

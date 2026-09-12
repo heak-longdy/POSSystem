@@ -83,6 +83,12 @@
                             'key' => 'active',
                             'action' => [
                                 [
+                                    'url' => 'detail',
+                                    'title' => __('booking.action.view_detail'),
+                                    'icon' => 'visibility',
+                                    'type' => 'link',
+                                ],
+                                [
                                     'url' => 'edit',
                                     'title' => __('global.action.edit'),
                                     'icon' => 'edit',
@@ -127,6 +133,12 @@
                         [
                             'key' => 'trash',
                             'action' => [
+                                [
+                                    'url' => 'detail',
+                                    'title' => __('booking.action.view_detail'),
+                                    'icon' => 'visibility',
+                                    'type' => 'link',
+                                ],
                                 ['url' => 'restore', 'title' => __('global.action.restore'), 'icon' => 'settings_backup_restore'],
                                 ['url' => 'destroy', 'title' => __('global.action.destroy'), 'icon' => 'Delete', 'class' => 'text-danger'],
                             ],
