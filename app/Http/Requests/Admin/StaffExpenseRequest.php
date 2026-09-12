@@ -45,13 +45,15 @@ class StaffExpenseRequest extends FormRequest
     public function messages()
     {
         return [
-            'staff_id.required'     => 'Please select a staff member.',
-            'staff_id.exists'       => 'Selected staff member does not exist.',
-            'type.required'         => 'Expense type is required.',
-            'amount.required'       => 'Expense amount is required.',
-            'amount.min'            => 'Expense amount must be at least $0.01.',
-            'expense_date.required' => 'Expense date is required.',
-            'status.required'       => 'Status is required.',
+            'staff_id.required'     => __('staff_expense.validation.staff_id_required'),
+            'staff_id.exists'       => __('staff_expense.validation.staff_id_exists'),
+            'type.required'         => __('staff_expense.validation.type_required'),
+            'amount.required'       => __('staff_expense.validation.amount_required'),
+            'amount.numeric'        => __('staff_expense.validation.amount_numeric'),
+            'amount.min'            => __('staff_expense.validation.amount_min'),
+            'expense_date.required' => __('staff_expense.validation.expense_date_required'),
+            'status.required'       => __('staff_expense.validation.status_required'),
+            'description.max'       => __('staff_expense.validation.description_max'),
         ];
     }
 }

@@ -3,37 +3,37 @@
         <div class="table-wrapper">
             <div class="table-header">
                 <div class="row table-row-5">
-                    <span>Nº</span>
+                    <span>{{ __('global.table.no') }}</span>
                 </div>
                 <div class="row table-row-10 textLeft">
-                    <span>Product</span>
+                    <span>{{ __('stock_transfer.table.product') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Categories</span>
+                    <span>{{ __('stock_transfer.table.category') }}</span>
                 </div>
                 <div class="row table-row-5">
-                    <span>UOM</span>
+                    <span>{{ __('stock_transfer.table.uom') }}</span>
                 </div>
                 <div class="row table-row-5">
-                    <span>Qty</span>
+                    <span>{{ __('stock_transfer.table.qty') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Date</span>
+                    <span>{{ __('stock_transfer.table.date') }}</span>
                 </div>
                 <div class="row table-row-15">
-                    <span>Remark</span>
+                    <span>{{ __('stock_transfer.table.remark') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Shop</span>
+                    <span>{{ __('stock_transfer.table.from_shop') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>To</span>
+                    <span>{{ __('stock_transfer.table.to_shop') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Requested By</span>
+                    <span>{{ __('stock_transfer.table.requested_by') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Status</span>
+                    <span>{{ __('stock_transfer.table.status') }}</span>
                 </div>
             </div>
             <div class="table-body">
@@ -79,7 +79,7 @@
                             @endif
                         </div>
                         <div class="row table-row-10">
-                            <span>{!! isset($item->status) && $item->status == 1 ?  "Confirmed" : '--' !!}</span>
+                            <span>{!! isset($item->status) && $item->status == 1 ? __('stock_transfer.status.confirmed') : '--' !!}</span>
                         </div>
                         
                     </div>
@@ -91,12 +91,12 @@
         </div>
     @else
         @component('admin::components.empty', [
-            'name' => __('Stock transfer is empty'),
-            'msg' => __('You can create a new stock transfer by clicking the button below.'),
+            'name' => __('stock_transfer.empty.title'),
+            'msg' => __('stock_transfer.empty.description'),
             'permission' => 'stock-transfer-create',
             'url' => route('admin-stock-transfer-create'),
-            'button' => __('Create New Stock transfer'),
-            ])
+            'button' => __('stock_transfer.button.create'),
+        ])
         @endcomponent
     @endif
 </div>

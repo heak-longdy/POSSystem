@@ -44,7 +44,7 @@ class StockTransferRequest extends FormRequest
             }
 
             if ((int) $this->input('shop_id') === (int) $this->input('to_shop_id')) {
-                $validator->errors()->add('to_shop_id', 'To shop must be different from from shop');
+                $validator->errors()->add('to_shop_id', __('stock_transfer.validation.to_shop_different'));
                 return;
             }
 
@@ -62,7 +62,7 @@ class StockTransferRequest extends FormRequest
             }
 
             if ($availableStock < (int) $this->input('qty')) {
-                $validator->errors()->add('qty', 'Qty is limited or out of stock');
+                $validator->errors()->add('qty', __('stock_transfer.validation.qty_limited'));
             }
         });
     }
@@ -70,16 +70,16 @@ class StockTransferRequest extends FormRequest
     public function messages()
     {
         return [
-            'shop_id.required' => 'From shop is required',
-            'shop_id.exists' => 'From shop is invalid',
-            'to_shop_id.required' => 'To shop is required',
-            'to_shop_id.exists' => 'To shop is invalid',
-            'product_id.required' => 'Product is required',
-            'product_id.exists' => 'Product is invalid',
-            'qty.required' => 'Qty is required',
-            'qty.integer' => 'Qty format invalid',
-            'qty.min' => 'Qty must be at least 1',
-            'remark.max' => 'Remark must not exceed 1000 characters.',
+            'shop_id.required'    => __('stock_transfer.validation.from_shop_required'),
+            'shop_id.exists'      => __('stock_transfer.validation.from_shop_invalid'),
+            'to_shop_id.required' => __('stock_transfer.validation.to_shop_required'),
+            'to_shop_id.exists'   => __('stock_transfer.validation.to_shop_invalid'),
+            'product_id.required' => __('stock_transfer.validation.product_required'),
+            'product_id.exists'   => __('stock_transfer.validation.product_invalid'),
+            'qty.required'        => __('stock_transfer.validation.qty_required'),
+            'qty.integer'         => __('stock_transfer.validation.qty_integer'),
+            'qty.min'             => __('stock_transfer.validation.qty_min'),
+            'remark.max'          => __('stock_transfer.validation.remark_max'),
         ];
     }
 }

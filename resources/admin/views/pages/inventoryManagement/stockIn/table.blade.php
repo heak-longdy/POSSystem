@@ -3,34 +3,34 @@
         <div class="table-wrapper">
             <div class="table-header">
                 <div class="row table-row-5">
-                    <span>Nº</span>
+                    <span>{{ __('global.table.no') }}</span>
                 </div>
                 <div class="row table-row-15 textLeft">
-                    <span>Product</span>
+                    <span>{{ __('stock_in.table.product') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Shop</span>
+                    <span>{{ __('stock_in.table.shop') }}</span>
                 </div>
                 <div class="row table-row-15">
-                    <span>Categories</span>
+                    <span>{{ __('stock_in.table.category') }}</span>
                 </div>
                 <div class="row table-row-5">
-                    <span>UOM</span>
+                    <span>{{ __('stock_in.table.uom') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Quantities</span>
+                    <span>{{ __('stock_in.table.qty') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Date</span>
+                    <span>{{ __('stock_in.table.date') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Remark</span>
+                    <span>{{ __('stock_in.table.remark') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Requested By</span>
+                    <span>{{ __('stock_in.table.requested_by') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Status</span>
+                    <span>{{ __('stock_in.table.status') }}</span>
                 </div>
             </div>
             <div class="table-body">
@@ -72,7 +72,7 @@
                             @endif
                         </div>
                         <div class="row table-row-10">
-                            <span>{!! isset($item->status) && $item->status == 1 ? 'Confirmed' : '--' !!}</span>
+                            <span>{!! isset($item->status) && $item->status == 1 ? __('stock_in.status.confirmed') : '--' !!}</span>
                         </div>
 
                     </div>
@@ -84,11 +84,11 @@
         </div>
     @else
         @component('admin::components.empty', [
-            'name' => __('Stock in is empty'),
-            'msg' => __('You can create a new stock in by clicking the button below.'),
+            'name' => __('stock_in.empty.title'),
+            'msg' => __('stock_in.empty.description'),
             'permission' => 'stock-in-create',
             'url' => route('admin-stock-in-create'),
-            'button' => __('Create New Stock in'),
+            'button' => __('stock_in.button.create'),
         ])
         @endcomponent
     @endif

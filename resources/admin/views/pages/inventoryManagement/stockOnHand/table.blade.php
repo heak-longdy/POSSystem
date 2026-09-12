@@ -3,28 +3,28 @@
         <div class="table-wrapper">
             <div class="table-header">
                 <div class="row table-row-5">
-                    <span>Nº</span>
+                    <span>{{ __('global.table.no') }}</span>
                 </div>
                 <div class="row table-row-20 textLeft">
-                    <span>Product</span>
+                    <span>{{ __('stock_on_hand.table.product') }}</span>
                 </div>
                 <div class="row table-row-15">
-                    <span>Categories</span>
+                    <span>{{ __('stock_on_hand.table.category') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>UOM</span>
+                    <span>{{ __('stock_on_hand.table.uom') }}</span>
                 </div>
                 <div class="row table-row-15">
-                    <span>Current Stock</span>
+                    <span>{{ __('stock_on_hand.table.current_stock') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Date</span>
+                    <span>{{ __('stock_on_hand.table.date') }}</span>
                 </div>
                 <div class="row table-row-15">
-                    <span>Shop</span>
+                    <span>{{ __('stock_on_hand.table.shop') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Requested By</span>
+                    <span>{{ __('stock_on_hand.table.requested_by') }}</span>
                 </div>
             </div>
             <div class="table-body">
@@ -69,7 +69,8 @@
         </div>
     @else
         @component('admin::components.empty', [
-            'name' => __('Stock on hand is empty'),
+            'name' => __('stock_on_hand.empty.title'),
+            'msg' => __('stock_on_hand.empty.description'),
             ])
         @endcomponent
     @endif

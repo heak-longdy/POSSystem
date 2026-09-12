@@ -7,7 +7,7 @@
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}"></i>
-                    {{ request('id') ? 'Update Staff Expense' : 'Record Staff Expense' }}
+                    {{ request('id') ? __('staff_expense.form.title.update') : __('staff_expense.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
@@ -16,9 +16,9 @@
                 {{-- Staff Member & Expense Type --}}
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Staff Member <span>*</span></label>
+                        <label>{{ __('staff_expense.form.staff') }} <span>*</span></label>
                         <select name="staff_id" id="staff_id" class="select2">
-                            <option value="">-- Select Staff Member --</option>
+                            <option value="">{{ __('staff_expense.form.select_staff') }}</option>
                             @foreach ($staffList as $staff)
                                 <option value="{{ $staff->id }}" {!! (request('id') && $data?->staff_id == $staff->id) || old('staff_id') == $staff->id ? 'selected' : '' !!}>
                                     {{ $staff->name }} {{ $staff->phone_number ? '('.$staff->phone_number.')' : '' }}
@@ -31,9 +31,9 @@
                     </div>
 
                     <div class="form-row">
-                        <label>Expense Type <span>*</span></label>
+                        <label>{{ __('staff_expense.form.type') }} <span>*</span></label>
                         <select name="type" id="type" class="select2">
-                            <option value="">-- Select Expense Type --</option>
+                            <option value="">{{ __('staff_expense.form.select_type') }}</option>
                             @foreach ($types as $type)
                                 @php
                                     $typeVal = is_object($type) ? $type->value : $type;
@@ -54,9 +54,9 @@
                 {{-- Shop / Branch & Expense Date --}}
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Shop / Branch</label>
+                        <label>{{ __('staff_expense.form.shop') }}</label>
                         <select name="shop_id" id="shop_id" class="select2">
-                            <option value="">-- All Shops / General --</option>
+                            <option value="">{{ __('staff_expense.form.all_shops') }}</option>
                             @foreach ($shops as $shop)
                                 <option value="{{ $shop->id }}" {!! (request('id') && $data?->shop_id == $shop->id) || old('shop_id') == $shop->id ? 'selected' : '' !!}>
                                     {{ $shop->name }}
@@ -69,8 +69,8 @@
                     </div>
 
                     <div class="form-row iconInput">
-                        <label>Expense Date <span>*</span></label>
-                        <input type="text" name="expense_date" id="expense_date" value="{!! request('id') ? ($data?->expense_date?->format('Y-m-d') ?? $data?->expense_date) : (old('expense_date') ?? date('Y-m-d')) !!}" placeholder="YYYY-MM-DD" autocomplete="off">
+                        <label>{{ __('staff_expense.form.expense_date') }} <span>*</span></label>
+                        <input type="text" name="expense_date" id="expense_date" value="{!! request('id') ? ($data?->expense_date?->format('Y-m-d') ?? $data?->expense_date) : (old('expense_date') ?? date('Y-m-d')) !!}" placeholder="{{ __('staff_expense.form.placeholder_date') }}" autocomplete="off">
                         <i class='bx bx-calendar'></i>
                         @error('expense_date')
                             <label class="error">{{ $message }}</label>
@@ -81,8 +81,8 @@
                 {{-- Amount ($) & Status --}}
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Amount ($) <span>*</span></label>
-                        <input type="number" step="0.01" min="0.01" name="amount" value="{!! request('id') ? $data?->amount : (old('amount') ?? '') !!}" placeholder="0.00">
+                        <label>{{ __('staff_expense.form.amount') }} <span>*</span></label>
+                        <input type="number" step="0.01" min="0.01" name="amount" value="{!! request('id') ? $data?->amount : (old('amount') ?? '') !!}" placeholder="{{ __('staff_expense.form.placeholder_amount') }}">
                         <i class='bx bx-dollar'></i>
                         @error('amount')
                             <label class="error">{{ $message }}</label>
@@ -93,7 +93,7 @@
                         <label>@lang('global.form.status.label') <span>*</span></label>
                         <select name="status" id="status">
                             @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data?->status == $key) || old('status', 1) == $key ? 'selected' : '' !!}>{{ $item }}</option>
+                                <option value="{{ $key }}" {!! (request('id') && $data?->status == $key) || old('status', 1) == $key ? 'selected' : '' !!}>{{ $key == 1 ? __('global.form.status.active') : __('global.form.status.disable') }}</option>
                             @endforeach
                         </select>
                         @error('status')
@@ -105,8 +105,8 @@
                 {{-- Description / Remarks --}}
                 <div class="row-1">
                     <div class="form-row">
-                        <label>Description / Remarks</label>
-                        <textarea name="description" rows="3" placeholder="Enter notes or explanation for this expense ...">{!! request('id') ? $data?->description : old('description') !!}</textarea>
+                        <label>{{ __('staff_expense.form.description') }}</label>
+                        <textarea name="description" rows="3" placeholder="{{ __('staff_expense.form.placeholder_description') }}">{!! request('id') ? $data?->description : old('description') !!}</textarea>
                         @error('description')
                             <label class="error">{{ $message }}</label>
                         @enderror
@@ -117,15 +117,17 @@
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ request('id') ? __('global.button.update') : __('global.button.submit') }}</span>
                     </button>
-                    <button type="submit" name="save_opt" value="save_new" color="success">
-                        <i data-feather="save"></i>
-                        <span>Save & New</span>
-                    </button>
+                    @if (!request('id'))
+                        <button type="submit" name="save_opt" value="save_new" color="success">
+                            <i data-feather="save"></i>
+                            <span>{{ __('global.button.save_new') }}</span>
+                        </button>
+                    @endif
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>

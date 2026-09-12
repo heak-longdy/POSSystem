@@ -32,11 +32,11 @@ class UOMRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => "Name is required",
-            'name.max' => "Name must not exceed 50 characters.",
-            'status.required' => "Status is required",
-            'status.max' => "Status must not exceed 1 characters.",
-            'status.numeric'   => "Status format invalid"
+            'name.required'    => __('uom.validation.name_required'),
+            'name.max'         => __('uom.validation.name_max'),
+            'status.required'  => __('uom.validation.status_required'),
+            'status.max'       => __('uom.validation.status_max'),
+            'status.numeric'   => __('uom.validation.status_numeric')
         ];
     }
 }

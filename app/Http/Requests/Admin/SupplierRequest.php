@@ -32,11 +32,11 @@ class SupplierRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => "Name is required",
-            'name.max' => "Name must not exceed 50 characters.",
-            'status.required' => "Status is required",
-            'status.max' => "Status must not exceed 1 characters.",
-            'status.numeric'   => "Status format invalid"
+            'name.required'    => __('supplier.validation.name_required'),
+            'name.max'         => __('supplier.validation.name_max'),
+            'status.required'  => __('supplier.validation.status_required'),
+            'status.max'       => __('supplier.validation.status_max'),
+            'status.numeric'   => __('supplier.validation.status_numeric')
         ];
     }
 }

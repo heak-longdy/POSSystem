@@ -3,37 +3,37 @@
         <div class="table-wrapper">
             <div class="table-header">
                 <div class="row table-row-5">
-                    <span>Nº</span>
+                    <span>{{ __('global.table.no') }}</span>
                 </div>
                 <div class="row table-row-10 textLeft">
-                    <span>Product</span>
+                    <span>{{ __('stock_out.table.product') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Categories</span>
+                    <span>{{ __('stock_out.table.category') }}</span>
                 </div>
                 <div class="row table-row-5">
-                    <span>UOM</span>
+                    <span>{{ __('stock_out.table.uom') }}</span>
                 </div>
                 <div class="row table-row-5">
-                    <span>Qty</span>
+                    <span>{{ __('stock_out.table.qty') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Date</span>
+                    <span>{{ __('stock_out.table.date') }}</span>
                 </div>
                 <div class="row table-row-15">
-                    <span>Remark</span>
+                    <span>{{ __('stock_out.table.remark') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Shop</span>
+                    <span>{{ __('stock_out.table.shop') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>To</span>
+                    <span>{{ __('stock_out.table.to') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Requested By</span>
+                    <span>{{ __('stock_out.table.requested_by') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Status</span>
+                    <span>{{ __('stock_out.table.status') }}</span>
                 </div>
             </div>
             <div class="table-body">
@@ -69,7 +69,7 @@
                             <span>{!! isset($item->shop->name) ? $item->shop->name : '--' !!}</span>
                         </div>
                         <div class="row table-row-10">
-                            <span>{!! isset($item->data_to->name) && $item->data_to->name ? $item->data_to->name : '--' !!}</span>
+                            <span>{!! isset($item->destination_title) && $item->destination_title ? $item->destination_title : (isset($item->data_to->name) ? $item->data_to->name : '--') !!}</span>
                         </div>
                         <div class="row table-row-10">
                             @if ($item->request_by_type == 'admin')
@@ -79,7 +79,7 @@
                             @endif
                         </div>
                         <div class="row table-row-10">
-                            <span>{!! isset($item->status) && $item->status == 1 ? 'Confirmed' : '--' !!}</span>
+                            <span>{!! isset($item->status) && $item->status == 1 ? __('stock_out.status.confirmed') : '--' !!}</span>
                         </div>
 
                     </div>
@@ -91,11 +91,11 @@
         </div>
     @else
         @component('admin::components.empty', [
-            'name' => __('Stock out is empty'),
-            'msg' => __('You can create a new stock out by clicking the button below.'),
+            'name' => __('stock_out.empty.title'),
+            'msg' => __('stock_out.empty.description'),
             'permission' => 'stock-out-create',
             'url' => route('admin-stock-out-create'),
-            'button' => __('Create New Stock out'),
+            'button' => __('stock_out.button.create'),
         ])
         @endcomponent
     @endif

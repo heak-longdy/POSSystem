@@ -11,6 +11,11 @@ return [
         'submit' => 'Submit',
         'cancel' => 'Cancel',
     ],
+    'selected' => 'Selected',
+    'select_all' => 'Select All',
+    'all' => 'All',
+    'search_modules' => 'Search modules...',
+    'no_actions' => 'No actions defined',
     'module' => [
         'dashboard' => 'Dashboard',
         'about' => 'About',
@@ -55,6 +60,24 @@ return [
         'video' => 'Video',
         'category-blog' => 'Category Blog',
         'car-history' => 'Car History',
+        'inventory' => 'Inventory Management',
+        'stock_in' => 'Stock In',
+        'stock_out' => 'Stock Out',
+        'stock_transfer' => 'Stock Transfer',
+        'stock_on_hand' => 'Stock On Hand',
+        'stock_movement' => 'Stock Movement',
+        'report_transaction' => 'Report Transaction',
+        'order_transaction' => 'Order Transaction',
+        'report_sales' => 'Report Sales',
+        'sales_report' => 'Sales Report',
+        'report_inventory' => 'Report Inventory Movement',
+        'inventory_movement' => 'Inventory Movement Report',
+        'staff_expense' => 'Staff Expense',
+        'report_staff_expense' => 'Staff Expense Report',
+        'staff_expense_report' => 'Staff Expense Report',
+        'staff' => 'Staff Management',
+        'supplier' => 'Supplier',
+        'uom' => 'UOM',
     ],
     'permission' => [
         'dashboard-view' => 'View',
@@ -84,6 +107,16 @@ return [
         'category-create' => 'Create',
         'category-update' => 'Update',
         'category-delete' => 'Delete',
+        // supplier
+        'supplier-view' => 'View',
+        'supplier-create' => 'Create',
+        'supplier-update' => 'Update',
+        'supplier-delete' => 'Delete',
+        // uom
+        'uom-view' => 'View',
+        'uom-create' => 'Create',
+        'uom-update' => 'Update',
+        'uom-delete' => 'Delete',
         // paymentMethod
         'payment-method-view' => 'View',
         'payment-method-create' => 'Create',
@@ -256,6 +289,62 @@ return [
         'car-history-update' => 'Update',
         'car-history-delete' => 'Delete',
 
+        // stock-in
+        'stock-in-view' => 'View',
+        'stock-in-create' => 'Create',
+        'stock-in-update' => 'Update',
+        'stock-in-delete' => 'Delete',
 
+        // stock-out
+        'stock-out-view' => 'View',
+        'stock-out-create' => 'Create',
+        'stock-out-update' => 'Update',
+        'stock-out-delete' => 'Delete',
+
+        // stock-transfer
+        'stock-transfer-view' => 'View',
+        'stock-transfer-create' => 'Create',
+        'stock-transfer-update' => 'Update',
+        'stock-transfer-delete' => 'Delete',
+
+        // stock-on-hand
+        'stock-on-hand-view' => 'View',
+        'stock-on-hand-excel' => 'Excel',
+
+        // stock-movement
+        'stock-movement-view' => 'View',
+        'stock-movement-excel' => 'Excel',
+
+        // report-transaction
+        'report-transaction-view' => 'View',
+        'report-transaction-excel' => 'Export Excel',
+
+        // report-sales
+        'report-sales-view' => 'View',
+        'report-sales-excel' => 'Export Excel',
+
+        // report-inventory
+        'report-inventory-view' => 'View',
+        'report-inventory-excel' => 'Export Excel',
+
+        // staff-expense
+        'staff-expense-view' => 'View',
+        'staff-expense-create' => 'Create',
+        'staff-expense-update' => 'Update',
+        'staff-expense-delete' => 'Delete',
+        'staff-expense-restore' => 'Restore',
+        'staff-expense-force-delete' => 'Force Delete',
+
+        // report-staff-expense
+        'report-staff-expense-view' => 'View',
+        'report-staff-expense-excel' => 'Export Excel',
+
+        // staff
+        'staff-view' => 'View',
+        'staff-create' => 'Create',
+        'staff-update' => 'Update',
+        'staff-delete' => 'Delete',
+        'staff-restore' => 'Restore',
+        'staff-force-delete' => 'Force Delete',
     ],
 ];

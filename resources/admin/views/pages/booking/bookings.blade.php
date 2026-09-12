@@ -1,7 +1,7 @@
 @extends('admin::shared.layout')
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('booking.title')])
-    <div class="content-wrapper" id="app" x-data="xIndex">
+    <div class="content-wrapper booking-listing-wrapper" id="app" x-data="xIndex">
         @php
             $bookingTabQuery = request()->except(['page', 'payment_status']);
             $bookingTabUrl = function ($tabStatus) use ($bookingTabQuery) {

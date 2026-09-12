@@ -17,10 +17,10 @@ enum ExpenseType: string
     public function label(): string
     {
         return match($this) {
-            self::SALARY    => 'Salary',
-            self::BONUS     => 'Bonus',
-            self::DEDUCTION => 'Deduction',
-            self::OTHER     => 'Other Expense',
+            self::SALARY    => __('staff_expense.type.salary'),
+            self::BONUS     => __('staff_expense.type.bonus'),
+            self::DEDUCTION => __('staff_expense.type.deduction'),
+            self::OTHER     => __('staff_expense.type.other'),
         };
     }
 

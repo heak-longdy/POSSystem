@@ -11,7 +11,7 @@
                     @lang('permission.title') &mdash; {{ $user->name }}
                     @if($user->role)
                         <span class="badge-role" style="font-size: 13px; font-weight: normal; margin-left: 8px; background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: 12px;">
-                            {{ ucfirst(str_replace('_', ' ', $user->role)) }}
+                            {{ __('user.roles.' . $user->role) !== 'user.roles.' . $user->role ? __('user.roles.' . $user->role) : ucfirst(str_replace('_', ' ', $user->role)) }}
                         </span>
                     @endif
                 </h3>
@@ -35,10 +35,10 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="font-size: 13px; color: #64748b;">
-                            Status: <span style="font-weight: 600; color: {{ $user->status == 1 ? '#16a34a' : '#dc2626' }};">{{ $user->status == 1 ? 'Active' : 'Disabled' }}</span>
+                            {{ __('global.table.status') }}: <span style="font-weight: 600; color: {{ $user->status == 1 ? '#16a34a' : '#dc2626' }};">{{ $user->status == 1 ? __('user.form.status.active') : __('user.form.status.disable') }}</span>
                         </div>
                         <div style="font-size: 13px; color: #475569; background: #fff; padding: 6px 14px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                            Selected: <strong style="color: #2563eb;" x-text="selectedCount"></strong> / <span x-text="totalCount"></span>
+                            {{ __('permission.selected') }}: <strong style="color: #2563eb;" x-text="selectedCount"></strong> / <span x-text="totalCount"></span>
                         </div>
                     </div>
                 </div>
@@ -52,11 +52,11 @@
                             </div>
                             <div style="display: flex; align-items: center; gap: 16px;">
                                 <div style="position: relative;">
-                                    <input type="text" x-model="search" placeholder="Search modules..." style="padding: 6px 12px 6px 32px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; width: 200px;">
+                                    <input type="text" x-model="search" placeholder="{{ __('permission.search_modules') }}" style="padding: 6px 12px 6px 32px; font-size: 13px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; width: 200px;">
                                     <i data-feather="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: #94a3b8;"></i>
                                 </div>
                                 <label class="permissionListCheckall" style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0; user-select: none;">
-                                    <span class="span" style="font-size: 14px; font-weight: 500;">Select All</span>
+                                    <span class="span" style="font-size: 14px; font-weight: 500;">{{ __('permission.select_all') }}</span>
                                     <input type="checkbox" id="chk-permissionSelectAll" class="chk-permissionSelectAll"
                                         :checked="isAllSelected()"
                                         @change="toggleSelectAll($event.target.checked)"
@@ -91,7 +91,7 @@
                                                     <span style="font-weight: 600; font-size: 14px; color: #1e293b;">{{ $modul->name }}</span>
                                                 </div>
                                                 <div class="inputItem" @click.stop="" style="display: flex; align-items: center; gap: 6px;">
-                                                    <span style="font-size: 12px; color: #94a3b8;">All</span>
+                                                    <span style="font-size: 12px; color: #94a3b8;">{{ __('permission.all') }}</span>
                                                     <input type="checkbox"
                                                         id="chk-group-{{ $modul->id }}"
                                                         class="chk-permission-group"
@@ -124,7 +124,7 @@
                                                         </label>
                                                     @endforeach
                                                 @else
-                                                    <div style="font-size: 12px; color: #94a3b8; padding: 6px 0;">No actions defined</div>
+                                                    <div style="font-size: 12px; color: #94a3b8; padding: 6px 0;">{{ __('permission.no_actions') }}</div>
                                                 @endif
                                             </div>
                                         </div>

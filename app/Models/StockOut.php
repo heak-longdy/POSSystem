@@ -73,7 +73,12 @@ class StockOut extends Model
         }
 
         if ($this->type === 'stock_type') {
-            return $this->stockType ? $this->stockType->name : null;
+            if ($this->stockType) {
+                $stockTypeKey = 'stock_out.stock_types.' . $this->stockType->key;
+                $translated = __($stockTypeKey);
+                return $translated !== $stockTypeKey ? $translated : $this->stockType->name;
+            }
+            return null;
         }
 
         return null;
@@ -93,11 +98,11 @@ class StockOut extends Model
     public function getStockStatusTitleAttribute()
     {
         if ((int) $this->status === 1) {
-            return 'Confirmed';
+            return __('stock_out.status.confirmed');
         }
 
         if ((int) $this->status === 2) {
-            return 'Disabled';
+            return __('stock_out.status.disabled');
         }
 
         return '---';

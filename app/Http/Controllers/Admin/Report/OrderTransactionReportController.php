@@ -164,7 +164,7 @@ class OrderTransactionReportController extends Controller
         $formatted = $bookings->map(function ($booking) {
             $items = $booking->bookingDetail->map(function ($detail) {
                 $isService = $detail->type === 'service';
-                $name = $isService ? ($detail->service?->name ?? 'Unknown Service') : ($detail->product?->name ?? 'Unknown Product');
+                $name = $isService ? ($detail->service?->name ?? __('order_transaction.modal.unknown_service')) : ($detail->product?->name ?? __('order_transaction.modal.unknown_product'));
                 return [
                     'id' => $detail->id,
                     'type' => $detail->type ?: ($isService ? 'service' : 'product'),
@@ -183,7 +183,7 @@ class OrderTransactionReportController extends Controller
                 'booking_date_formatted' => $booking->booking_date ? Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---',
                 'shop_name' => $booking->shop?->name ?: '---',
                 'barber_name' => $booking->barber?->name ?: '---',
-                'customer_name' => $booking->customer?->name ?: 'Walk-in Customer',
+                'customer_name' => $booking->customer?->name ?: __('order_transaction.modal.walk_in_customer'),
                 'customer_phone' => $booking->customer?->phone ?: '---',
                 'payment_status' => $booking->payment_status ?: 'Pending',
                 'pay_way' => $booking->pay_way ?: ($booking->payments->first()?->payment_method ?: 'Cash'),
@@ -201,12 +201,29 @@ class OrderTransactionReportController extends Controller
         $totalPaid = $formatted->sum('paid_amount');
         $totalRemaining = $formatted->sum('remaining_amount');
 
+        $isDailyPeriod = (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $period);
+        $periodLabel = '';
+        if ($isDailyPeriod) {
+            $parsedDate = Carbon::parse($period);
+            if (app()->getLocale() === 'km') {
+                $dayKey = strtolower($parsedDate->format('D'));
+                $periodLabel = 'ថ្ងៃ' . __('order_transaction.days.' . $dayKey) . ' ទី' . $parsedDate->format('d') . ' ' . __('order_transaction.months.' . $parsedDate->month) . ' ឆ្នាំ' . $parsedDate->format('Y');
+            } else {
+                $periodLabel = $parsedDate->format('l, d F Y');
+            }
+        } else {
+            $parsedMonth = Carbon::createFromFormat('Y-m', $period);
+            if (app()->getLocale() === 'km') {
+                $periodLabel = __('order_transaction.months.' . $parsedMonth->month) . ' ឆ្នាំ' . $parsedMonth->format('Y');
+            } else {
+                $periodLabel = $parsedMonth->format('F Y');
+            }
+        }
+
         return response()->json([
             'status' => 'success',
             'period' => $period,
-            'period_label' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $period)
-                ? Carbon::parse($period)->format('l, d F Y')
-                : Carbon::createFromFormat('Y-m', $period)->format('F Y'),
+            'period_label' => $periodLabel,
             'count' => $formatted->count(),
             'total_revenue' => $totalRevenue,
             'total_paid' => $totalPaid,

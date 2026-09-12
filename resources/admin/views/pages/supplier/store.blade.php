@@ -7,15 +7,15 @@
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}"></i>
-                    {{ $id ? 'Update Supplier' : 'Create Supplier' }}
+                    {{ $id ? __('supplier.form.title.update') : __('supplier.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
             <div class="form-body">
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Name <span>*</span> </label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="Enter name ...">
+                        <label>{{ __('supplier.form.name.label') }} <span>*</span> </label>
+                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('supplier.form.name.placeholder') }}">
                         <i class='bx bx-font-family'></i>
                         @error('name')
                             <label class="error">{{ $message }}</label>
@@ -24,8 +24,8 @@
                 </div>
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Ordering <span>*</span> </label>
-                        <input type="text" name="ordering" value="{!! request('id') ? $data?->ordering : old('ordering') !!}" placeholder="Enter ordering ...">
+                        <label>{{ __('supplier.form.ordering.label') }} <span>*</span> </label>
+                        <input type="text" name="ordering" value="{!! request('id') ? $data?->ordering : old('ordering') !!}" placeholder="{{ __('supplier.form.ordering.placeholder') }}">
                         <i class='bx bx-font-family'></i>
                         @error('ordering')
                             <label class="error">{{ $message }}</label>
@@ -37,23 +37,28 @@
                         <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
                             @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
+                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>
+                                    {{ $key == 1 ? __('supplier.form.status.active') : __('supplier.form.status.disable') }}
+                                </option>
                             @endforeach
                         </select>
+                        @error('status')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
                     </div>
                 </div>
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ request('id') ? __('global.button.update') : __('global.button.submit') }}</span>
                     </button>
                     <button type="submit" name="save_opt" value="save_new" color="success">
                         <i data-feather="save"></i>
-                        <span>Save & New</span>
+                        <span>{{ __('global.button.save_new') }}</span>
                     </button>
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>

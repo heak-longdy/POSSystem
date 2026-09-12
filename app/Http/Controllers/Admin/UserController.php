@@ -130,10 +130,9 @@ class UserController extends Controller
         try {
             $user = User::find($req->id);
             $user->update($item);
-            $status = "change password success";
-            Session::flash("success", $status);
+            Session::flash("success", __('user.message.change_password_success'));
         } catch (Exception $error) {
-            Session::flash("warning", "change password unsuccess");
+            Session::flash("warning", __('user.message.change_password_error'));
         }
         return redirect()->route("admin-user-list", 1);
     }
@@ -144,7 +143,7 @@ class UserController extends Controller
         $user = User::findOrFail($userId);
 
         if ($user->role === 'super_admin' && (!Auth::check() || Auth::user()->role !== 'super_admin')) {
-            Session::flash('warning', 'Cannot modify super admin permissions.');
+            Session::flash('warning', __('user.message.cannot_modify_super_admin'));
             return redirect()->route('admin-user-list', 1);
         }
 
@@ -170,7 +169,7 @@ class UserController extends Controller
         $user = User::findOrFail($userId);
 
         if ($user->role === 'super_admin' && (!Auth::check() || Auth::user()->role !== 'super_admin')) {
-            Session::flash('warning', 'Cannot modify super admin permissions.');
+            Session::flash('warning', __('user.message.cannot_modify_super_admin'));
             return redirect()->route('admin-user-list', 1);
         }
 
@@ -182,19 +181,19 @@ class UserController extends Controller
             }
             $user->syncPermissions($permissions);
             DB::commit();
-            Session::flash('success', 'Set permission successful!');
+            Session::flash('success', __('user.message.permission_success'));
 
             if ($req->ajax() || $req->wantsJson()) {
                 return response()->json([
                     'error' => false,
-                    'message' => 'Set permission successful!',
+                    'message' => __('user.message.permission_success'),
                 ]);
             }
 
             return redirect()->route('admin-user-list', 1);
         } catch (Exception $error) {
             DB::rollback();
-            Session::flash('warning', 'Failed to update permissions: ' . $error->getMessage());
+            Session::flash('warning', __('user.message.permission_error') . ': ' . $error->getMessage());
             return redirect()->back();
         }
     }

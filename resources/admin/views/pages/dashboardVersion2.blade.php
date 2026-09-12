@@ -14,7 +14,7 @@
                     <form id="FilterForm" action="{!! url()->current() !!}" method="GET">
                         <div class="form-row formRowSelect2">
                             <select name="shop_id" id="shop_id" class="SelectShop" x-init="fetchSelectShop()">
-                                <option value="">Select shop...</option>
+                                <option value="">@lang('dashboard.filter.select_shop')</option>
                             </select>
                         </div>
                         <div class="form-row">
@@ -41,7 +41,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>All Booking</span>
+                                    <span>@lang('dashboard.list.all_booking')</span>
                                     <h3>{!! number_format($booking->totalBookingAll, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Products</span>
+                                    <span>@lang('dashboard.list.products')</span>
                                     <h3>{!! number_format($booking->totalProductBooking, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -57,7 +57,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Services</span>
+                                    <span>@lang('dashboard.list.services')</span>
                                     <h3>{!! number_format($booking->totalServiceBooking, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -65,7 +65,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Top Up Request</span>
+                                    <span>@lang('dashboard.list.top_up_request')</span>
                                     <h3>{!! number_format($total_top_up, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -73,7 +73,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Pay Liabilities</span>
+                                    <span>@lang('dashboard.list.pay_liabilities')</span>
                                     <h3>{!! number_format($booking->totalPayLiabilities, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -81,7 +81,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Customers</span>
+                                    <span>@lang('dashboard.list.customers')</span>
                                     <h3>{{ $customer }}</h3>
                                 </div>
                             </div>
@@ -89,7 +89,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Commission Expenses</span>
+                                    <span>@lang('dashboard.list.commission_expenses')</span>
                                     <h3>{!! number_format($booking->totalCommissionExpenses, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -97,7 +97,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Company’s Income</span>
+                                    <span>@lang('dashboard.list.company_income')</span>
                                     <h3>{!! number_format($booking->totalCompanyIncome, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -105,7 +105,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Promotion Expenses</span>
+                                    <span>@lang('dashboard.list.promotion_expenses')</span>
                                     <h3>{!! number_format($booking->totalPromotionExpenses, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -116,7 +116,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Pending Payment</span>
+                                    <span>@lang('dashboard.list.pending_payment')</span>
                                     <h3>{!! number_format($booking->totalPendingPayment, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -140,10 +140,9 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>Shops & Brands</span>
+                                    <span>@lang('dashboard.list.shops_and_brands')</span>
                                     <div class="div">
-                                        <span>Shop: {{ $shopData }} & Brands: {{ $brand }} & Employees:
-                                            {{ $barber }}</span>
+                                        <span>{{ __('dashboard.list.shop_brand_employee', ['shop' => $shopData, 'brand' => $brand, 'employee' => $barber]) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -154,17 +153,17 @@
                 <div class="charts">
 
                     <div class="charts-card">
-                        <p class="chart-title">Number of customer by day vs. day</p>
+                        <p class="chart-title">@lang('dashboard.list.customer_by_day')</p>
                         <div id="bar-chart"></div>
                     </div>
 
                     <div class="charts-card">
-                        <p class="chart-title">Total price, Total commission, Total Promotion and Company 's Income</p>
+                        <p class="chart-title">@lang('dashboard.list.totals_and_income')</p>
                         <div id="area-chart"></div>
                     </div>
 
                     <div class="charts-card" style="width: calc(100% - 25px) !important;margin-right: 0;">
-                        <p class="chart-title">Booking by Time</p>
+                        <p class="chart-title">@lang('dashboard.list.booking_by_time')</p>
                         <div id="chart">
                         </div>
                     </div>

@@ -10,14 +10,14 @@
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin: 18px 0 20px 0;
+            gap: 14px;
+            margin: 0 0 14px 0;
         }
 
         .kpi-card {
             background: #ffffff;
             border-radius: 12px;
-            padding: 16px 18px;
+            padding: 12px 16px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
             border: 1px solid #edf2f7;
             display: flex;
@@ -83,17 +83,17 @@
         .report-filter-panel {
             background: #ffffff;
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 14px 18px;
             border: 1px solid #edf2f7;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .filter-header-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
             gap: 10px;
         }
@@ -242,11 +242,11 @@
             border: 1px solid #edf2f7;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
             overflow: hidden;
-            margin-bottom: 30px;
+            margin-bottom: 16px;
         }
 
         .table-custom-header {
-            padding: 14px 20px;
+            padding: 12px 18px;
             background: #f8fafc;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
@@ -484,10 +484,10 @@
         }
     </style>
 
+    @include('admin::shared.header', ['header_name' => __('order_transaction.title')])
     <div class="content-wrapper order-report-wrapper" id="orderTransactionReportApp" x-data="xOrderTransactionReport">
-        <!-- Main Header -->
+        <!-- Tab Bar Header -->
         <div class="header box-shadow-bottom">
-            @include('admin::shared.header', ['header_name' => 'Order Transaction Report'])
             <div class="header-tab">
                 <div class="header-tab-wrapper">
                     <div class="menu-row">
@@ -498,49 +498,49 @@
                             <a href="{{ route('admin-report-order-transaction-daily', $currentParams) }}"
                                 class="{{ $viewMode === 'daily' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-event'></i>
-                                {!! \App\Support\Language::translatedValue(['en' => 'Daily Order Transactions', 'km' => 'ប្រតិបត្តិការបញ្ជាទិញប្រចាំថ្ងៃ']) !!}
+                                {{ __('order_transaction.tab.daily') }}
                             </a>
                             <a href="{{ route('admin-report-order-transaction-monthly', $currentParams) }}"
                                 class="{{ $viewMode === 'monthly' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-alt'></i>
-                                {!! \App\Support\Language::translatedValue(['en' => 'Monthly Order Transactions', 'km' => 'ប្រតិបត្តិការបញ្ជាទិញប្រចាំខែ']) !!}
+                                {{ __('order_transaction.tab.monthly') }}
                             </a>
                         </div>
                     </div>
                 </div>
                 <div class="header-action-button">
-                    <button type="button" @click="exportExcel()" class="btn-excel-export">
+                    <button type="button" @click="exportExcel()" class="btn-excel-export" :disabled="exportLoading">
                         <i class='bx bx-download'></i>
-                        <span>Export Excel</span>
+                        <span x-text="exportLoading ? '{{ __('order_transaction.excel.exporting') }}' : '{{ __('order_transaction.button.export_excel') }}'">{{ __('order_transaction.button.export_excel') }}</span>
                     </button>
                     <button type="button" s-click-link="{!! url()->current() !!}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
-                        <span>Reload</span>
+                        <span>{{ __('order_transaction.button.reload') }}</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="content-body" style="padding: 20px;">
+        <div class="content-body" style="padding: 14px 20px 24px 20px;">
             <!-- Filter Panel -->
             <div class="report-filter-panel">
                 <form id="orderFilterForm" method="GET" action="{{ url()->current() }}">
                     @if ($viewMode === 'daily')
                         <div class="filter-header-row">
                             <div class="preset-badge-group">
-                                <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">Quick Presets:</span>
+                                <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">{{ __('order_transaction.presets.title') }}</span>
                                 <a href="{{ route('admin-report-order-transaction-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'today'])) }}"
-                                    class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">Today</a>
+                                    class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">{{ __('order_transaction.presets.today') }}</a>
                                 <a href="{{ route('admin-report-order-transaction-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'yesterday'])) }}"
-                                    class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">Yesterday</a>
+                                    class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">{{ __('order_transaction.presets.yesterday') }}</a>
                                 <a href="{{ route('admin-report-order-transaction-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '7days'])) }}"
-                                    class="preset-btn {{ request('preset') === '7days' ? 'active' : '' }}">Last 7 Days</a>
+                                    class="preset-btn {{ request('preset') === '7days' ? 'active' : '' }}">{{ __('order_transaction.presets.last_7_days') }}</a>
                                 <a href="{{ route('admin-report-order-transaction-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '30days'])) }}"
-                                    class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">Last 30 Days</a>
+                                    class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">{{ __('order_transaction.presets.last_30_days') }}</a>
                                 <a href="{{ route('admin-report-order-transaction-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'last_month'])) }}"
-                                    class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">Last Month</a>
+                                    class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">{{ __('order_transaction.presets.last_month') }}</a>
                             </div>
                         </div>
                     @endif
@@ -548,18 +548,18 @@
                     <div class="filter-form-grid">
                         @if ($viewMode === 'daily')
                             <div class="filter-field-wrap">
-                                <label for="from_date">From Date</label>
+                                <label for="from_date">{{ __('order_transaction.filter.from_date') }}</label>
                                 <input type="text" name="from_date" id="from_date" class="filter-input datepicker-input"
-                                    value="{{ $from_date }}" autocomplete="off" placeholder="YYYY-MM-DD">
+                                    value="{{ $from_date }}" autocomplete="off" placeholder="{{ __('order_transaction.filter.placeholder_date') }}">
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="to_date">To Date</label>
+                                <label for="to_date">{{ __('order_transaction.filter.to_date') }}</label>
                                 <input type="text" name="to_date" id="to_date" class="filter-input datepicker-input"
-                                    value="{{ $to_date }}" autocomplete="off" placeholder="YYYY-MM-DD">
+                                    value="{{ $to_date }}" autocomplete="off" placeholder="{{ __('order_transaction.filter.placeholder_date') }}">
                             </div>
                         @else
                             <div class="filter-field-wrap">
-                                <label for="year">Year</label>
+                                <label for="year">{{ __('order_transaction.filter.year') }}</label>
                                 <select name="year" id="year" class="filter-select">
                                     @foreach ($availableYears as $yr)
                                         <option value="{{ $yr }}" {{ (int) $selectedYear === (int) $yr ? 'selected' : '' }}>{{ $yr }}</option>
@@ -567,21 +567,21 @@
                                 </select>
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="from_month">From Month</label>
+                                <label for="from_month">{{ __('order_transaction.filter.from_month') }}</label>
                                 <select name="from_month" id="from_month" class="filter-select">
                                     @for ($m = 1; $m <= 12; $m++)
                                         <option value="{{ $m }}" {{ (int) $from_month === $m ? 'selected' : '' }}>
-                                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                                            {{ __('order_transaction.months.' . $m) }}
                                         </option>
                                     @endfor
                                 </select>
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="to_month">To Month</label>
+                                <label for="to_month">{{ __('order_transaction.filter.to_month') }}</label>
                                 <select name="to_month" id="to_month" class="filter-select">
                                     @for ($m = 1; $m <= 12; $m++)
                                         <option value="{{ $m }}" {{ (int) $to_month === $m ? 'selected' : '' }}>
-                                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                                            {{ __('order_transaction.months.' . $m) }}
                                         </option>
                                     @endfor
                                 </select>
@@ -589,9 +589,9 @@
                         @endif
 
                         <div class="filter-field-wrap">
-                            <label for="shop_id">Shop / Branch</label>
+                            <label for="shop_id">{{ __('order_transaction.filter.shop') }}</label>
                             <select name="shop_id" id="shop_id" class="filter-select">
-                                <option value="">All Shops</option>
+                                <option value="">{{ __('order_transaction.filter.all_shops') }}</option>
                                 @foreach ($shops as $shop)
                                     <option value="{{ $shop->id }}" {{ request('shop_id') == $shop->id ? 'selected' : '' }}>
                                         {{ $shop->name }}
@@ -601,9 +601,9 @@
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="barber_id">Staff / Barber</label>
+                            <label for="barber_id">{{ __('order_transaction.filter.staff') }}</label>
                             <select name="barber_id" id="barber_id" class="filter-select">
-                                <option value="">All Staff</option>
+                                <option value="">{{ __('order_transaction.filter.all_staff') }}</option>
                                 @foreach ($barbers as $barber)
                                     <option value="{{ $barber->id }}" {{ request('barber_id') == $barber->id ? 'selected' : '' }}>
                                         {{ $barber->name }}
@@ -613,51 +613,58 @@
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="payment_status">Payment Status</label>
+                            <label for="payment_status">{{ __('order_transaction.filter.payment_status') }}</label>
                             <select name="payment_status" id="payment_status" class="filter-select">
-                                <option value="">Active (Exclude Cancel)</option>
-                                <option value="all" {{ request('payment_status') === 'all' ? 'selected' : '' }}>All Statuses</option>
-                                <option value="Paid" {{ request('payment_status') === 'Paid' ? 'selected' : '' }}>Fully Paid</option>
-                                <option value="Partial" {{ request('payment_status') === 'Partial' ? 'selected' : '' }}>Partial Paid</option>
-                                <option value="Pending" {{ request('payment_status') === 'Pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="Cancel" {{ request('payment_status') === 'Cancel' ? 'selected' : '' }}>Canceled</option>
+                                <option value="">{{ __('order_transaction.filter.status_active_exclude_cancel') }}</option>
+                                <option value="all" {{ request('payment_status') === 'all' ? 'selected' : '' }}>{{ __('order_transaction.filter.status_all') }}</option>
+                                <option value="Paid" {{ request('payment_status') === 'Paid' ? 'selected' : '' }}>{{ __('order_transaction.filter.status_paid') }}</option>
+                                <option value="Partial" {{ request('payment_status') === 'Partial' ? 'selected' : '' }}>{{ __('order_transaction.filter.status_partial') }}</option>
+                                <option value="Pending" {{ request('payment_status') === 'Pending' ? 'selected' : '' }}>{{ __('order_transaction.filter.status_pending') }}</option>
+                                <option value="Cancel" {{ request('payment_status') === 'Cancel' ? 'selected' : '' }}>{{ __('order_transaction.filter.status_cancel') }}</option>
                             </select>
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="pay_way">Payment Method</label>
+                            <label for="pay_way">{{ __('order_transaction.filter.payment_method') }}</label>
                             <select name="pay_way" id="pay_way" class="filter-select">
-                                <option value="">All Methods</option>
+                                <option value="">{{ __('order_transaction.filter.all_methods') }}</option>
                                 @foreach ($paymentMethods as $pm)
-                                    <option value="{{ $pm }}" {{ request('pay_way') === $pm ? 'selected' : '' }}>{{ $pm }}</option>
+                                    @php
+                                        $pmKey = strtolower(str_replace(' ', '_', $pm));
+                                        $pmLabel = __('order_transaction.payment_methods.' . $pmKey);
+                                        if ($pmLabel === 'order_transaction.payment_methods.' . $pmKey) {
+                                            $pmLabel = $pm;
+                                        }
+                                    @endphp
+                                    <option value="{{ $pm }}" {{ request('pay_way') === $pm ? 'selected' : '' }}>{{ $pmLabel }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="item_type">Item Type</label>
+                            <label for="item_type">{{ __('order_transaction.filter.item_type') }}</label>
                             <select name="item_type" id="item_type" class="filter-select">
-                                <option value="">All Items</option>
-                                <option value="product" {{ request('item_type') === 'product' ? 'selected' : '' }}>Products Only</option>
-                                <option value="service" {{ request('item_type') === 'service' ? 'selected' : '' }}>Services Only</option>
+                                <option value="">{{ __('order_transaction.filter.all_items') }}</option>
+                                <option value="product" {{ request('item_type') === 'product' ? 'selected' : '' }}>{{ __('order_transaction.filter.products_only') }}</option>
+                                <option value="service" {{ request('item_type') === 'service' ? 'selected' : '' }}>{{ __('order_transaction.filter.services_only') }}</option>
                             </select>
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="search">Keyword Search</label>
+                            <label for="search">{{ __('order_transaction.filter.keyword_search') }}</label>
                             <input type="text" name="search" id="search" class="filter-input"
-                                value="{{ request('search') }}" placeholder="Invoice #, Customer, Phone...">
+                                value="{{ request('search') }}" placeholder="{{ __('order_transaction.filter.placeholder_search') }}">
                         </div>
 
                         <div class="filter-actions-wrap">
                             <button type="submit" class="btn-filter-search">
                                 <i class='bx bx-search'></i>
-                                <span>Filter</span>
+                                <span>{{ __('order_transaction.button.filter') }}</span>
                             </button>
                             <a href="{{ route($viewMode === 'daily' ? 'admin-report-order-transaction-daily' : 'admin-report-order-transaction-monthly') }}"
                                 class="btn-filter-reset">
                                 <i class='bx bx-reset'></i>
-                                <span>Reset</span>
+                                <span>{{ __('order_transaction.button.reset') }}</span>
                             </a>
                         </div>
                     </div>
@@ -672,9 +679,9 @@
                         <i class='bx bx-dollar-circle'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Total Net Sales</div>
+                        <div class="kpi-title">{{ __('order_transaction.kpi.total_net_sales') }}</div>
                         <div class="kpi-value text-primary">${{ number_format($summary['total_net_sales'], 2) }}</div>
-                        <div class="kpi-sub">Gross: ${{ number_format($summary['total_gross_sales'], 2) }} | Disc: -${{ number_format($summary['total_discount'], 2) }}</div>
+                        <div class="kpi-sub">{{ __('order_transaction.kpi.gross') }}: ${{ number_format($summary['total_gross_sales'], 2) }} | {{ __('order_transaction.kpi.disc') }}: -${{ number_format($summary['total_discount'], 2) }}</div>
                     </div>
                 </div>
 
@@ -684,9 +691,9 @@
                         <i class='bx bx-receipt'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Total Orders</div>
+                        <div class="kpi-title">{{ __('order_transaction.kpi.total_orders') }}</div>
                         <div class="kpi-value">{{ number_format($summary['total_invoices']) }}</div>
-                        <div class="kpi-sub">{{ number_format($summary['total_items_sold']) }} items sold (Avg: ${{ number_format($summary['avg_invoice_value'], 2) }}/ord)</div>
+                        <div class="kpi-sub">{{ number_format($summary['total_items_sold']) }} {{ __('order_transaction.kpi.items_sold') }} ({{ __('order_transaction.kpi.avg') }}: ${{ number_format($summary['avg_invoice_value'], 2) }}{{ __('order_transaction.kpi.per_order') }})</div>
                     </div>
                 </div>
 
@@ -696,9 +703,9 @@
                         <i class='bx bx-check-shield'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Total Amount Paid</div>
+                        <div class="kpi-title">{{ __('order_transaction.kpi.total_amount_paid') }}</div>
                         <div class="kpi-value text-success">${{ number_format($summary['total_paid'], 2) }}</div>
-                        <div class="kpi-sub">{{ $summary['paid_count'] }} fully paid • {{ $summary['partial_count'] }} partial</div>
+                        <div class="kpi-sub">{{ $summary['paid_count'] }} {{ __('order_transaction.kpi.fully_paid') }} • {{ $summary['partial_count'] }} {{ __('order_transaction.kpi.partial') }}</div>
                     </div>
                 </div>
 
@@ -708,9 +715,9 @@
                         <i class='bx bx-time'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Total Outstanding</div>
+                        <div class="kpi-title">{{ __('order_transaction.kpi.total_outstanding') }}</div>
                         <div class="kpi-value text-danger">${{ number_format($summary['total_remaining'], 2) }}</div>
-                        <div class="kpi-sub">{{ $summary['pending_count'] }} pending payment orders</div>
+                        <div class="kpi-sub">{{ $summary['pending_count'] }} {{ __('order_transaction.kpi.pending_orders') }}</div>
                     </div>
                 </div>
 
@@ -720,11 +727,11 @@
                         <i class='bx bx-pie-chart-alt-2'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Revenue Split</div>
+                        <div class="kpi-title">{{ __('order_transaction.kpi.revenue_split') }}</div>
                         <div class="kpi-value" style="font-size: 16px;">
-                            P: ${{ number_format($summary['product_sales'], 2) }} <span style="font-weight: normal; font-size: 12px; color: #94a3b8;">/</span> S: ${{ number_format($summary['service_sales'], 2) }}
+                            {{ __('order_transaction.kpi.product_prefix') }}: ${{ number_format($summary['product_sales'], 2) }} <span style="font-weight: normal; font-size: 12px; color: #94a3b8;">/</span> {{ __('order_transaction.kpi.service_prefix') }}: ${{ number_format($summary['service_sales'], 2) }}
                         </div>
-                        <div class="kpi-sub">{{ $summary['total_product_qty'] }} products • {{ $summary['total_service_qty'] }} services</div>
+                        <div class="kpi-sub">{{ $summary['total_product_qty'] }} {{ __('order_transaction.kpi.products') }} • {{ $summary['total_service_qty'] }} {{ __('order_transaction.kpi.services') }}</div>
                     </div>
                 </div>
             </div>
@@ -734,9 +741,9 @@
                 <div class="table-custom-header">
                     <h4>
                         <i class='bx {{ $viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt' }}'></i>
-                        {{ $viewMode === 'daily' ? 'Daily Order Transactions Breakdown' : 'Monthly Order Transactions Breakdown' }}
+                        {{ $viewMode === 'daily' ? __('order_transaction.table.daily_breakdown') : __('order_transaction.table.monthly_breakdown') }}
                         <span style="font-size: 12px; font-weight: normal; color: #64748b;">
-                            ({{ $rows->count() }} {{ $viewMode === 'daily' ? 'days' : 'months' }} recorded)
+                            ({{ $rows->count() }} {{ $viewMode === 'daily' ? __('order_transaction.table.days_recorded') : __('order_transaction.table.months_recorded') }})
                         </span>
                     </h4>
                 </div>
@@ -747,18 +754,18 @@
                         <table class="order-data-table" id="orderTransactionTable">
                             <thead>
                                 <tr>
-                                    <th class="text-center" style="width: 45px;">Nº</th>
-                                    <th>Date</th>
-                                    <th class="text-center">Orders</th>
-                                    <th class="text-center">Items Sold</th>
-                                    <th class="text-right">Gross Sales</th>
-                                    <th class="text-right">Discount</th>
-                                    <th class="text-right">Net Sales</th>
-                                    <th class="text-right">Paid Amount</th>
-                                    <th class="text-right">Remaining</th>
-                                    <th>Pay Status</th>
-                                    <th>Payment Methods</th>
-                                    <th class="text-center" style="width: 110px;">Actions</th>
+                                    <th class="text-center" style="width: 45px;">{{ __('order_transaction.table.no') }}</th>
+                                    <th>{{ __('order_transaction.table.date') }}</th>
+                                    <th class="text-center">{{ __('order_transaction.table.orders') }}</th>
+                                    <th class="text-center">{{ __('order_transaction.table.items_sold') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.gross_sales') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.discount') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.net_sales') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.paid_amount') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.remaining') }}</th>
+                                    <th>{{ __('order_transaction.table.pay_status') }}</th>
+                                    <th>{{ __('order_transaction.table.payment_methods') }}</th>
+                                    <th class="text-center" style="width: 110px;">{{ __('order_transaction.table.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -767,9 +774,10 @@
                                         <td class="text-center">{{ $row->index }}</td>
                                         <td>
                                              <strong style="color: #1e293b;">{{ $row->date }}</strong>
-                                             <small style="color: #64748b; margin-left: 4px;">({{ $row->day_name }})</small>
+                                             @php $dKey = strtolower($row->day_name); @endphp
+                                             <small style="color: #64748b; margin-left: 4px;">({{ __('order_transaction.days.' . $dKey) }})</small>
                                              @if ($row->is_today)
-                                                 <span class="status-badge today" style="margin-left: 4px;">Today</span>
+                                                 <span class="status-badge today" style="margin-left: 4px;">{{ __('order_transaction.badge.today') }}</span>
                                              @endif
                                         </td>
                                         <td class="text-center font-weight-bold">{{ $row->invoices_count }}</td>
@@ -789,25 +797,32 @@
                                         </td>
                                         <td>
                                             @if ($row->paid_count > 0)
-                                                <span class="status-badge paid">{{ $row->paid_count }} Paid</span>
+                                                <span class="status-badge paid">{{ $row->paid_count }} {{ __('order_transaction.status.paid') }}</span>
                                             @endif
                                             @if ($row->partial_count > 0)
-                                                <span class="status-badge partial">{{ $row->partial_count }} Partial</span>
+                                                <span class="status-badge partial">{{ $row->partial_count }} {{ __('order_transaction.status.partial') }}</span>
                                             @endif
                                             @if ($row->pending_count > 0)
-                                                <span class="status-badge pending">{{ $row->pending_count }} Pending</span>
+                                                <span class="status-badge pending">{{ $row->pending_count }} {{ __('order_transaction.status.pending') }}</span>
                                             @endif
                                         </td>
                                         <td>
                                             @foreach ($row->payment_methods as $method => $count)
-                                                <span class="method-tag">{{ $method }}: {{ $count }}</span>
+                                                @php
+                                                    $pmKey = strtolower(str_replace(' ', '_', $method));
+                                                    $pmLabel = __('order_transaction.payment_methods.' . $pmKey);
+                                                    if ($pmLabel === 'order_transaction.payment_methods.' . $pmKey) {
+                                                        $pmLabel = $method;
+                                                    }
+                                                @endphp
+                                                <span class="method-tag">{{ $pmLabel }}: {{ $count }}</span>
                                             @endforeach
                                         </td>
                                         <td class="text-center">
                                             <button type="button" class="btn-drilldown"
                                                 @click="openPeriodDetails('{{ $row->date }}')">
                                                 <i class='bx bx-detail'></i>
-                                                <span>Orders</span>
+                                                <span>{{ __('order_transaction.button.orders') }}</span>
                                             </button>
                                         </td>
                                     </tr>
@@ -815,7 +830,7 @@
                                     <tr>
                                         <td colspan="12" class="empty-placeholder">
                                             <i class='bx bx-calendar-x'></i>
-                                            <p>No order transactions found for the selected period and filters.</p>
+                                            <p>{{ __('order_transaction.empty.daily_description') }}</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -823,7 +838,7 @@
                             @if ($rows->count() > 0)
                                 <tfoot>
                                     <tr>
-                                        <td colspan="2">Total Summary</td>
+                                        <td colspan="2">{{ __('order_transaction.table.total_summary') }}</td>
                                         <td class="text-center">{{ number_format($summary['total_invoices']) }}</td>
                                         <td class="text-center">{{ number_format($summary['total_items_sold']) }}</td>
                                         <td class="text-right">${{ number_format($summary['total_gross_sales'], 2) }}</td>
@@ -841,20 +856,20 @@
                         <table class="order-data-table" id="orderTransactionTable">
                             <thead>
                                 <tr>
-                                    <th class="text-center" style="width: 45px;">Nº</th>
-                                    <th>Month</th>
-                                    <th class="text-center">Active Days</th>
-                                    <th class="text-center">Orders</th>
-                                    <th class="text-center">Items Sold</th>
-                                    <th class="text-right">Gross Sales</th>
-                                    <th class="text-right">Discount</th>
-                                    <th class="text-right">Net Sales</th>
-                                    <th class="text-right">Paid Amount</th>
-                                    <th class="text-right">Remaining</th>
-                                    <th class="text-right">Avg Order</th>
-                                    <th>Top Method</th>
-                                    <th>Top Shop</th>
-                                    <th class="text-center" style="width: 140px;">Actions</th>
+                                    <th class="text-center" style="width: 45px;">{{ __('order_transaction.table.no') }}</th>
+                                    <th>{{ __('order_transaction.table.month') }}</th>
+                                    <th class="text-center">{{ __('order_transaction.table.active_days') }}</th>
+                                    <th class="text-center">{{ __('order_transaction.table.orders') }}</th>
+                                    <th class="text-center">{{ __('order_transaction.table.items_sold') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.gross_sales') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.discount') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.net_sales') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.paid_amount') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.remaining') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.avg_order') }}</th>
+                                    <th>{{ __('order_transaction.table.top_method') }}</th>
+                                    <th>{{ __('order_transaction.table.top_shop') }}</th>
+                                    <th class="text-center" style="width: 140px;">{{ __('order_transaction.table.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -862,9 +877,13 @@
                                     <tr>
                                         <td class="text-center">{{ $row->index }}</td>
                                         <td>
-                                            <strong style="color: #1e293b; font-size: 14px;">{{ $row->month_name }}</strong>
+                                            @php
+                                                $cMonthNum = (int) \Carbon\Carbon::createFromFormat('Y-m', $row->month_key)->month;
+                                                $cYearNum = \Carbon\Carbon::createFromFormat('Y-m', $row->month_key)->year;
+                                            @endphp
+                                            <strong style="color: #1e293b; font-size: 14px;">{{ __('order_transaction.months.' . $cMonthNum) }} {{ $cYearNum }}</strong>
                                         </td>
-                                        <td class="text-center">{{ $row->active_days }} days</td>
+                                        <td class="text-center">{{ $row->active_days }} {{ __('order_transaction.table.days') }}</td>
                                         <td class="text-center font-weight-bold">{{ $row->invoices_count }}</td>
                                         <td class="text-center">{{ $row->items_qty }}</td>
                                         <td class="text-right">${{ number_format($row->gross_sales, 2) }}</td>
@@ -882,7 +901,14 @@
                                         </td>
                                         <td class="text-right">${{ number_format($row->avg_ticket, 2) }}</td>
                                         <td>
-                                            <span class="method-tag">{{ $row->top_pay_method }}</span>
+                                            @php
+                                                $topMKey = strtolower(str_replace(' ', '_', $row->top_pay_method));
+                                                $topMLabel = __('order_transaction.payment_methods.' . $topMKey);
+                                                if ($topMLabel === 'order_transaction.payment_methods.' . $topMKey) {
+                                                    $topMLabel = $row->top_pay_method;
+                                                }
+                                            @endphp
+                                            <span class="method-tag">{{ $topMLabel }}</span>
                                         </td>
                                         <td>
                                             <small style="color: #475569;">{{ $row->top_shop_name }}</small>
@@ -890,11 +916,12 @@
                                         <td class="text-center">
                                             <div style="display: inline-flex; gap: 4px;">
                                                 <a href="{{ route('admin-report-order-transaction-daily', ['from_date' => Carbon\Carbon::createFromFormat('Y-m', $row->month_key)->startOfMonth()->format('Y-m-d'), 'to_date' => Carbon\Carbon::createFromFormat('Y-m', $row->month_key)->endOfMonth()->format('Y-m-d')]) }}"
-                                                    class="btn-drilldown" title="View Daily Transactions for this Month">
-                                                    <i class='bx bx-calendar'></i> Daily
+                                                    class="btn-drilldown" title="{{ __('order_transaction.button.view_daily_tooltip') }}">
+                                                    <i class='bx bx-calendar'></i> {{ __('order_transaction.button.daily') }}
                                                 </a>
                                                 <button type="button" class="btn-drilldown"
-                                                    @click="openPeriodDetails('{{ $row->month_key }}')">
+                                                    @click="openPeriodDetails('{{ $row->month_key }}')"
+                                                    title="{{ __('order_transaction.button.view_orders_tooltip') }}">
                                                     <i class='bx bx-detail'></i>
                                                 </button>
                                             </div>
@@ -904,7 +931,7 @@
                                     <tr>
                                         <td colspan="14" class="empty-placeholder">
                                             <i class='bx bx-calendar-x'></i>
-                                            <p>No monthly order transactions found for the selected year and filters.</p>
+                                            <p>{{ __('order_transaction.empty.monthly_description') }}</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -912,7 +939,7 @@
                             @if ($rows->count() > 0)
                                 <tfoot>
                                     <tr>
-                                        <td colspan="3">Total Summary</td>
+                                        <td colspan="3">{{ __('order_transaction.table.total_summary') }}</td>
                                         <td class="text-center">{{ number_format($summary['total_invoices']) }}</td>
                                         <td class="text-center">{{ number_format($summary['total_items_sold']) }}</td>
                                         <td class="text-right">${{ number_format($summary['total_gross_sales'], 2) }}</td>
@@ -937,7 +964,7 @@
                     <div class="report-modal-header">
                         <h3>
                             <i class='bx bx-receipt text-primary'></i>
-                            <span>Orders for <span x-text="periodData?.period_label || periodData?.period"></span></span>
+                            <span>{{ __('order_transaction.modal.orders_for') }} <span x-text="periodData?.period_label || periodData?.period"></span></span>
                         </h3>
                         <button type="button" class="btn-close-report-modal" @click="closePeriodDetails()">&times;</button>
                     </div>
@@ -946,7 +973,7 @@
                         <template x-if="modalLoading">
                             <div style="text-align: center; padding: 40px;">
                                 <i class='bx bx-loader-alt bx-spin' style="font-size: 36px; color: #2563eb;"></i>
-                                <p style="margin-top: 10px; color: #64748b;">Loading order details...</p>
+                                <p style="margin-top: 10px; color: #64748b;">{{ __('order_transaction.modal.loading') }}</p>
                             </div>
                         </template>
 
@@ -955,19 +982,19 @@
                                 <!-- Summary Chips -->
                                 <div class="modal-period-summary">
                                     <div class="modal-summary-box">
-                                        <span>Total Orders</span>
+                                        <span>{{ __('order_transaction.modal.total_orders') }}</span>
                                         <strong x-text="periodData.count"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Total Net Revenue</span>
+                                        <span>{{ __('order_transaction.modal.total_net_revenue') }}</span>
                                         <strong class="text-primary" x-text="'$' + Number(periodData.total_revenue || 0).toFixed(2)"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Total Paid</span>
+                                        <span>{{ __('order_transaction.modal.total_paid') }}</span>
                                         <strong class="text-success" x-text="'$' + Number(periodData.total_paid || 0).toFixed(2)"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Total Outstanding</span>
+                                        <span>{{ __('order_transaction.modal.total_outstanding') }}</span>
                                         <strong class="text-danger" x-text="'$' + Number(periodData.total_remaining || 0).toFixed(2)"></strong>
                                     </div>
                                 </div>
@@ -977,16 +1004,16 @@
                                     <table class="order-data-table">
                                         <thead>
                                             <tr>
-                                                <th>Invoice #</th>
-                                                <th>Date & Time</th>
-                                                <th>Customer</th>
-                                                <th>Shop / Staff</th>
-                                                <th>Items (Products / Services)</th>
-                                                <th>Pay Status</th>
-                                                <th>Method</th>
-                                                <th class="text-right">Total ($)</th>
-                                                <th class="text-right">Paid ($)</th>
-                                                <th class="text-right">Remaining</th>
+                                                <th>{{ __('order_transaction.modal.table.invoice_no') }}</th>
+                                                <th>{{ __('order_transaction.modal.table.date_time') }}</th>
+                                                <th>{{ __('order_transaction.modal.table.customer') }}</th>
+                                                <th>{{ __('order_transaction.modal.table.shop_staff') }}</th>
+                                                <th>{{ __('order_transaction.modal.table.items') }}</th>
+                                                <th>{{ __('order_transaction.modal.table.pay_status') }}</th>
+                                                <th>{{ __('order_transaction.modal.table.method') }}</th>
+                                                <th class="text-right">{{ __('order_transaction.modal.table.total') }}</th>
+                                                <th class="text-right">{{ __('order_transaction.modal.table.paid') }}</th>
+                                                <th class="text-right">{{ __('order_transaction.modal.table.remaining') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1016,10 +1043,10 @@
                                                     </td>
                                                     <td>
                                                         <span :class="'status-badge ' + (inv.payment_status || 'pending').toLowerCase()"
-                                                            x-text="inv.payment_status"></span>
+                                                            x-text="getLocalizedStatus(inv.payment_status)"></span>
                                                     </td>
                                                     <td>
-                                                        <span class="method-tag" x-text="inv.pay_way || 'Cash'"></span>
+                                                        <span class="method-tag" x-text="getLocalizedMethod(inv.pay_way)"></span>
                                                     </td>
                                                     <td class="text-right font-weight-bold" x-text="'$' + Number(inv.total_price || 0).toFixed(2)"></td>
                                                     <td class="text-right text-success" x-text="'$' + Number(inv.paid_amount || 0).toFixed(2)"></td>
@@ -1058,6 +1085,29 @@
                 periodData: null,
                 exportLoading: false,
 
+                getLocalizedStatus(status) {
+                    const s = (status || '').toLowerCase();
+                    const statusMap = {
+                        'paid': '{{ __('order_transaction.status.paid') }}',
+                        'partial': '{{ __('order_transaction.status.partial') }}',
+                        'pending': '{{ __('order_transaction.status.pending') }}',
+                        'cancel': '{{ __('order_transaction.status.cancel') }}',
+                    };
+                    return statusMap[s] || status || 'Pending';
+                },
+
+                getLocalizedMethod(method) {
+                    const m = (method || 'Cash').toLowerCase().replace(/\s+/g, '_');
+                    const methodMap = {
+                        'cash': '{{ __('order_transaction.payment_methods.cash') }}',
+                        'aba_pay': 'ABA PAY',
+                        'khqr': 'KHQR',
+                        'credit_card': '{{ __('order_transaction.payment_methods.credit_card') }}',
+                        'bank_transfer': '{{ __('order_transaction.payment_methods.bank_transfer') }}',
+                    };
+                    return methodMap[m] || method || 'Cash';
+                },
+
                 async openPeriodDetails(period) {
                     this.showDetailModal = true;
                     this.modalLoading = true;
@@ -1069,7 +1119,7 @@
                         this.periodData = response.data;
                     } catch (err) {
                         console.error('Failed to load period details:', err);
-                        alert('Could not load period order details. Please try again.');
+                        alert('{{ __('order_transaction.modal.error_load') }}');
                         this.showDetailModal = false;
                     } finally {
                         this.modalLoading = false;
@@ -1091,24 +1141,24 @@
                         const reportData = response.data;
 
                         const workbook = new ExcelJS.Workbook();
-                        const sheetName = this.viewMode === 'monthly' ? 'Monthly Order Report' : 'Daily Order Report';
+                        const sheetName = this.viewMode === 'monthly' ? '{{ __('order_transaction.excel.sheet_monthly') }}' : '{{ __('order_transaction.excel.sheet_daily') }}';
                         const worksheet = workbook.addWorksheet(sheetName);
 
                         if (this.viewMode === 'daily') {
                             worksheet.columns = [
-                                { header: 'Nº', key: 'index', width: 8 },
-                                { header: 'Date', key: 'date', width: 16 },
-                                { header: 'Day', key: 'day_name', width: 10 },
-                                { header: 'Orders Count', key: 'invoices_count', width: 16 },
-                                { header: 'Items Sold', key: 'items_qty', width: 14 },
-                                { header: 'Gross Sales ($)', key: 'gross_sales', width: 16 },
-                                { header: 'Discount ($)', key: 'discount', width: 14 },
-                                { header: 'Net Sales ($)', key: 'net_sales', width: 16 },
-                                { header: 'Paid Amount ($)', key: 'paid_amount', width: 16 },
-                                { header: 'Remaining Balance ($)', key: 'remaining_amount', width: 22 },
-                                { header: 'Fully Paid Count', key: 'paid_count', width: 16 },
-                                { header: 'Partial Count', key: 'partial_count', width: 14 },
-                                { header: 'Pending Count', key: 'pending_count', width: 14 },
+                                { header: '{{ __('order_transaction.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('order_transaction.excel.date') }}', key: 'date', width: 16 },
+                                { header: '{{ __('order_transaction.excel.day') }}', key: 'day_name', width: 10 },
+                                { header: '{{ __('order_transaction.excel.orders_count') }}', key: 'invoices_count', width: 16 },
+                                { header: '{{ __('order_transaction.excel.items_sold') }}', key: 'items_qty', width: 14 },
+                                { header: '{{ __('order_transaction.excel.gross_sales') }}', key: 'gross_sales', width: 16 },
+                                { header: '{{ __('order_transaction.excel.discount') }}', key: 'discount', width: 14 },
+                                { header: '{{ __('order_transaction.excel.net_sales') }}', key: 'net_sales', width: 16 },
+                                { header: '{{ __('order_transaction.excel.paid_amount') }}', key: 'paid_amount', width: 16 },
+                                { header: '{{ __('order_transaction.excel.remaining_balance') }}', key: 'remaining_amount', width: 22 },
+                                { header: '{{ __('order_transaction.excel.fully_paid_count') }}', key: 'paid_count', width: 16 },
+                                { header: '{{ __('order_transaction.excel.partial_count') }}', key: 'partial_count', width: 14 },
+                                { header: '{{ __('order_transaction.excel.pending_count') }}', key: 'pending_count', width: 14 },
                             ];
 
                             reportData.rows.forEach((r) => {
@@ -1130,19 +1180,19 @@
                             });
                         } else {
                             worksheet.columns = [
-                                { header: 'Nº', key: 'index', width: 8 },
-                                { header: 'Month', key: 'month_name', width: 18 },
-                                { header: 'Active Days', key: 'active_days', width: 14 },
-                                { header: 'Orders Count', key: 'invoices_count', width: 16 },
-                                { header: 'Items Sold', key: 'items_qty', width: 14 },
-                                { header: 'Gross Sales ($)', key: 'gross_sales', width: 16 },
-                                { header: 'Discount ($)', key: 'discount', width: 14 },
-                                { header: 'Net Sales ($)', key: 'net_sales', width: 16 },
-                                { header: 'Paid Amount ($)', key: 'paid_amount', width: 16 },
-                                { header: 'Remaining Balance ($)', key: 'remaining_amount', width: 22 },
-                                { header: 'Avg Order Value ($)', key: 'avg_ticket', width: 18 },
-                                { header: 'Top Payment Method', key: 'top_pay_method', width: 20 },
-                                { header: 'Top Shop', key: 'top_shop_name', width: 22 },
+                                { header: '{{ __('order_transaction.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('order_transaction.excel.month') }}', key: 'month_name', width: 18 },
+                                { header: '{{ __('order_transaction.excel.active_days') }}', key: 'active_days', width: 14 },
+                                { header: '{{ __('order_transaction.excel.orders_count') }}', key: 'invoices_count', width: 16 },
+                                { header: '{{ __('order_transaction.excel.items_sold') }}', key: 'items_qty', width: 14 },
+                                { header: '{{ __('order_transaction.excel.gross_sales') }}', key: 'gross_sales', width: 16 },
+                                { header: '{{ __('order_transaction.excel.discount') }}', key: 'discount', width: 14 },
+                                { header: '{{ __('order_transaction.excel.net_sales') }}', key: 'net_sales', width: 16 },
+                                { header: '{{ __('order_transaction.excel.paid_amount') }}', key: 'paid_amount', width: 16 },
+                                { header: '{{ __('order_transaction.excel.remaining_balance') }}', key: 'remaining_amount', width: 22 },
+                                { header: '{{ __('order_transaction.excel.avg_order_value') }}', key: 'avg_ticket', width: 18 },
+                                { header: '{{ __('order_transaction.excel.top_payment_method') }}', key: 'top_pay_method', width: 20 },
+                                { header: '{{ __('order_transaction.excel.top_shop') }}', key: 'top_shop_name', width: 22 },
                             ];
 
                             reportData.rows.forEach((r) => {
@@ -1175,11 +1225,11 @@
                         const blob = new Blob([buffer], {
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         });
-                        const filename = (this.viewMode === 'monthly' ? 'Monthly_Order_Report_' : 'Daily_Order_Report_') + moment().format('YYYY_MM_DD_HHmmss');
+                        const filename = (this.viewMode === 'monthly' ? '{{ __('order_transaction.excel.file_monthly_prefix') }}' : '{{ __('order_transaction.excel.file_daily_prefix') }}') + moment().format('YYYY_MM_DD_HHmmss');
                         saveAs(blob, filename);
                     } catch (err) {
                         console.error('Export failed:', err);
-                        alert('Excel export failed. Please try again.');
+                        alert('{{ __('order_transaction.excel.export_failed') }}');
                     } finally {
                         this.exportLoading = false;
                     }

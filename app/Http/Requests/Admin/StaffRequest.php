@@ -42,11 +42,11 @@ class StaffRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required'      => 'Staff name is required',
-            'name.max'           => 'Staff name must not exceed 255 characters',
-            'position_id.exists' => 'Selected position is invalid',
-            'email.email'        => 'Email address must be a valid email format',
-            'status.required'    => 'Status is required',
+            'name.required'      => __('staff.validation.name_required'),
+            'name.max'           => __('staff.validation.name_max'),
+            'position_id.exists' => __('staff.validation.position_exists'),
+            'email.email'        => __('staff.validation.email_format'),
+            'status.required'    => __('staff.validation.status_required'),
         ];
     }
 }

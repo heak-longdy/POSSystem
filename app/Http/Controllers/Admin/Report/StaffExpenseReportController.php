@@ -159,7 +159,12 @@ class StaffExpenseReportController extends Controller
         $formatted = $expenses->map(function ($item) {
             $typeEnum = $item->type instanceof ExpenseType ? $item->type : ExpenseType::tryFrom((string) $item->type);
             $typeValue = $typeEnum ? $typeEnum->value : (string) $item->type;
-            $typeLabel = $typeEnum ? $typeEnum->label() : ($item->type ?: 'Other Expense');
+            $typeLabel = match($typeValue) {
+                ExpenseType::SALARY->value    => __('staff_expense_report.types.salary'),
+                ExpenseType::BONUS->value     => __('staff_expense_report.types.bonus'),
+                ExpenseType::DEDUCTION->value => __('staff_expense_report.types.deduction'),
+                default                       => __('staff_expense_report.types.other'),
+            };
             $badgeClass = $typeEnum ? $typeEnum->badgeClass() : 'badge bg-secondary';
             $isDeduction = $typeEnum ? $typeEnum->isDeduction() : ($typeValue === 'Deduction');
 
@@ -168,12 +173,12 @@ class StaffExpenseReportController extends Controller
                 'expense_date'         => $item->expense_date ? (is_object($item->expense_date) ? $item->expense_date->format('Y-m-d') : Carbon::parse($item->expense_date)->format('Y-m-d')) : '---',
                 'expense_date_formatted' => $item->expense_date ? Carbon::parse($item->expense_date)->format('d M Y') : '---',
                 'staff_id'             => $item->staff_id,
-                'staff_name'           => $item->staff?->name ?: 'Unknown Staff',
+                'staff_name'           => $item->staff?->name ?: __('staff_expense_report.table.unknown_staff'),
                 'staff_phone'          => $item->staff?->phone_number ?: '---',
                 'staff_image'          => $item->staff?->image_url ?: null,
                 'position_name'        => $item->staff?->position?->name ?: 'Staff',
                 'shop_id'              => $item->shop_id,
-                'shop_name'            => $item->shop?->name ?: 'All Shops / HQ',
+                'shop_name'            => $item->shop?->name ?: __('staff_expense_report.filter.all_shops'),
                 'type'                 => $typeValue,
                 'type_label'           => $typeLabel,
                 'badge_class'          => $badgeClass,
@@ -181,9 +186,9 @@ class StaffExpenseReportController extends Controller
                 'amount'               => (float) ($item->amount ?? 0),
                 'amount_formatted'     => ($isDeduction ? '-$' : '+$') . number_format((float) ($item->amount ?? 0), 2),
                 'description'          => $item->description ?: '---',
-                'created_by_name'      => $item->createdBy?->name ?: 'System',
+                'created_by_name'      => $item->createdBy?->name ?: __('staff_expense_report.table.system'),
                 'status'               => (int) ($item->status ?? 1),
-                'status_label'         => ((int) ($item->status ?? 1) === 1) ? 'Active' : 'Disabled',
+                'status_label'         => ((int) ($item->status ?? 1) === 1) ? __('staff_expense_report.status.active') : __('staff_expense_report.status.disabled'),
             ];
         });
 
@@ -194,12 +199,29 @@ class StaffExpenseReportController extends Controller
         $grossTotal     = $salaryTotal + $bonusTotal + $otherTotal;
         $netTotal       = $grossTotal - $deductionTotal;
 
+        $isDailyPeriod = (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $period);
+        $periodLabel = '';
+        if ($isDailyPeriod) {
+            $parsedDate = Carbon::parse($period);
+            if (app()->getLocale() === 'km') {
+                $dayKey = strtolower($parsedDate->format('D'));
+                $periodLabel = 'ថ្ងៃ' . __('staff_expense_report.days.' . $dayKey) . ' ទី' . $parsedDate->format('d') . ' ' . __('staff_expense_report.months.' . $parsedDate->month) . ' ឆ្នាំ' . $parsedDate->format('Y');
+            } else {
+                $periodLabel = $parsedDate->format('l, d F Y');
+            }
+        } else {
+            $parsedMonth = Carbon::createFromFormat('Y-m', $period);
+            if (app()->getLocale() === 'km') {
+                $periodLabel = __('staff_expense_report.months.' . $parsedMonth->month) . ' ឆ្នាំ' . $parsedMonth->format('Y');
+            } else {
+                $periodLabel = $parsedMonth->format('F Y');
+            }
+        }
+
         return response()->json([
             'status'          => 'success',
             'period'          => $period,
-            'period_label'    => preg_match('/^\d{4}-\d{2}-\d{2}$/', $period)
-                ? Carbon::parse($period)->format('l, d F Y')
-                : Carbon::createFromFormat('Y-m', $period)->format('F Y'),
+            'period_label'    => $periodLabel,
             'count'           => $formatted->count(),
             'salary_total'    => $salaryTotal,
             'bonus_total'     => $bonusTotal,
@@ -341,7 +363,7 @@ class StaffExpenseReportController extends Controller
             $topStaffAmount = $staffCounts[$topStaffId];
         }
 
-        $topStaffName = $topStaffId ? Staff::find($topStaffId)?->name : 'N/A';
+        $topStaffName = $topStaffId ? Staff::find($topStaffId)?->name : __('staff_expense_report.table.na');
         $avgTransaction = $totalTransactions > 0 ? ($netTotal / $totalTransactions) : 0.0;
 
         return [
@@ -431,17 +453,21 @@ class StaffExpenseReportController extends Controller
             }
 
             // Top shop
-            $topShop = 'All Shops';
+            $topShop = __('staff_expense_report.filter.all_shops');
             if (!empty($shopCounts)) {
                 arsort($shopCounts);
                 $topShop = array_key_first($shopCounts);
             }
 
+            $dayKey = strtolower($cDate->format('D'));
+            $dayName = __('staff_expense_report.days.' . $dayKey);
+
             $rows[] = (object) [
                 'index'              => $index++,
                 'date'               => $dateKey,
                 'date_formatted'     => $cDate->format('d M Y'),
-                'day_name'           => $cDate->format('D'),
+                'day_key'            => $dayKey,
+                'day_name'           => $dayName,
                 'is_today'           => $cDate->isToday(),
                 'is_weekend'         => $cDate->isWeekend(),
                 'transactions_count' => $transactionsCount,
@@ -538,16 +564,20 @@ class StaffExpenseReportController extends Controller
             }
 
             // Top shop
-            $topShop = 'All Shops';
+            $topShop = __('staff_expense_report.filter.all_shops');
             if (!empty($shopCounts)) {
                 arsort($shopCounts);
                 $topShop = array_key_first($shopCounts);
             }
 
+            $monthName = app()->getLocale() === 'km'
+                ? (__('staff_expense_report.months.' . (int) $cMonth->month) . ' ' . $cMonth->year)
+                : $cMonth->format('F Y');
+
             $rows[] = (object) [
                 'index'              => $index++,
                 'month_key'          => $monthKey,
-                'month_name'         => $cMonth->format('F Y'),
+                'month_name'         => $monthName,
                 'short_month'        => $cMonth->format('M Y'),
                 'year'               => $cMonth->format('Y'),
                 'active_days'        => $activeDaysCount,

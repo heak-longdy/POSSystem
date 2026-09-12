@@ -1,6 +1,6 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Stock Movement Management'])
+    @include('admin::shared.header', ['header_name' => __('stock_movement.title')])
     <div class="content-wrapper" x-data="xStockMovement">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
@@ -11,20 +11,20 @@
             'showTabs' => false,
             'showCreate' => false,
             'exportAction' => auth()->user()->can('stock-movement-excel') ? 'excel()' : null,
-            'exportLabel' => 'Excel',
+            'exportLabel' => __('stock_movement.button.excel'),
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
-                ['field' => 'product_title', 'title' => 'Product', 'class' => 'text left', 'colVal' => 14],
-                ['field' => 'category_title', 'title' => 'Category', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'uom_title', 'title' => 'UOM', 'class' => '', 'colVal' => 7],
-                ['field' => 'qty', 'title' => 'Qty', 'class' => '', 'colVal' => 8],
-                ['field' => 'stock_status_title', 'title' => 'Status', 'class' => '', 'colVal' => 10],
-                ['field' => 'from_title', 'title' => 'From', 'class' => 'text left', 'colVal' => 11],
-                ['field' => 'to_title', 'title' => 'To', 'class' => 'text left', 'colVal' => 11],
-                ['field' => 'created_date', 'title' => 'Date', 'class' => '', 'colVal' => 11],
-                ['field' => 'request_by_title', 'title' => 'Requested By', 'class' => 'text left', 'colVal' => 8],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
+                ['field' => 'product_title', 'title' => __('stock_movement.table.product'), 'class' => 'text left', 'colVal' => 14],
+                ['field' => 'category_title', 'title' => __('stock_movement.table.category'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'uom_title', 'title' => __('stock_movement.table.uom'), 'class' => '', 'colVal' => 7],
+                ['field' => 'qty', 'title' => __('stock_movement.table.qty'), 'class' => '', 'colVal' => 8],
+                ['field' => 'stock_status_title', 'title' => __('stock_movement.table.status'), 'class' => '', 'colVal' => 10],
+                ['field' => 'from_title', 'title' => __('stock_movement.table.from'), 'class' => 'text left', 'colVal' => 11],
+                ['field' => 'to_title', 'title' => __('stock_movement.table.to'), 'class' => 'text left', 'colVal' => 11],
+                ['field' => 'created_date', 'title' => __('stock_movement.table.date'), 'class' => '', 'colVal' => 11],
+                ['field' => 'request_by_title', 'title' => __('stock_movement.table.requested_by'), 'class' => 'text left', 'colVal' => 8],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -34,7 +34,7 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'view', 'title' => 'View', 'icon' => 'visibility', 'type' => 'link'],
+                                ['url' => 'view', 'title' => __('global.action.view'), 'icon' => 'visibility', 'type' => 'link'],
                             ],
                         ],
                     ],
@@ -46,7 +46,7 @@
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
                     <span id="spinner"></span>
-                    <label>Export excel ...</label>
+                    <label>{{ __('stock_movement.export_excel') }}</label>
                 </div>
             </div>
         </template>
@@ -112,7 +112,7 @@
                 },
                 fetchSelectShop() {
                     $(`#shop_id`).select2({
-                        placeholder: `Select Shop`,
+                        placeholder: @json(__('stock_movement.filter.select_shop')),
                         ajax: {
                             url: '{{ route('admin-select-stock-shop') }}',
                             dataType: 'json',
@@ -213,10 +213,10 @@
                     };
 
                     // Create workbook and worksheet
-                    const worksheet = workbook.addWorksheet("Inventory Management Report");
+                    const worksheet = workbook.addWorksheet(@json(__('stock_movement.excel.sheet_name')));
 
                     // Add Row Title and formatting
-                    const titleTopRow = worksheet.addRow(["Inventory Management Report"]);
+                    const titleTopRow = worksheet.addRow([@json(__('stock_movement.excel.title'))]);
                     titleTopRow.font = style_font_header;
                     titleTopRow.alignment = align_center;
                     worksheet.mergeCells("A1:" + lastColumn + 1);
@@ -224,16 +224,16 @@
                     worksheet.addRow([]);
                     // Add Header Row
                     const header = [
-                        "ID",
-                        "Date",
-                        "Shop",
-                        "Product",
-                        "Categories",
-                        "Quantities",
-                        "Price",
-                        "Requested By",
-                        "Stock Type",
-                        "Send To",
+                        @json(__('stock_movement.excel.id')),
+                        @json(__('stock_movement.excel.date')),
+                        @json(__('stock_movement.excel.shop')),
+                        @json(__('stock_movement.excel.product')),
+                        @json(__('stock_movement.excel.categories')),
+                        @json(__('stock_movement.excel.quantities')),
+                        @json(__('stock_movement.excel.price')),
+                        @json(__('stock_movement.excel.requested_by')),
+                        @json(__('stock_movement.excel.stock_type')),
+                        @json(__('stock_movement.excel.send_to')),
                     ];
 
                     const headerRow = worksheet.addRow(header);
@@ -273,7 +273,7 @@
                             item?.product?.price ? item.product.price : 0,
                             item.request_by_type == "admin" ? item?.user?.username :
                             item?.barber?.name,
-                            item?.status,
+                            item?.stock_status_title ? item?.stock_status_title : item?.status,
                             item.type == "shop" && item.status == "stock_in" ? item
                             ?.shop?.name : item?.data_to?.name,
                         ]);
@@ -335,7 +335,7 @@
                     const footerRowTotal = worksheet.addRow([]);
 
                     // Generate Excel File with given name
-                    const titleExportName = "Inventory Management Report Date_" + this.dateFormatEn(
+                    const titleExportName = @json(__('stock_movement.excel.file_prefix')) + this.dateFormatEn(
                         moment(),
                         'DD_MM_YYYY_H:mm:ss');
                     workbook.xlsx.writeBuffer().then(function(data) {

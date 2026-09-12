@@ -7,15 +7,15 @@
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}"></i>
-                    {{ $id ? 'Update UOM' : 'Create UOM' }}
+                    {{ $id ? __('uom.form.title.update') : __('uom.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
             <div class="form-body">
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Name <span>*</span> </label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="Enter name ...">
+                        <label>{{ __('uom.form.name.label') }} <span>*</span> </label>
+                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('uom.form.name.placeholder') }}">
                         <i class='bx bx-font-family'></i>
                         @error('name')
                             <label class="error">{{ $message }}</label>
@@ -27,23 +27,28 @@
                         <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
                             @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
+                                <option value="{{ $key }}" {!! (request('id') && $data?->status == $key) || old('status') == $key ? 'selected' : '' !!}>
+                                    {{ $key == 1 ? __('uom.form.status.active') : __('uom.form.status.disable') }}
+                                </option>
                             @endforeach
                         </select>
+                        @error('status')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
                     </div>
                 </div>
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ request('id') ? __('global.button.update') : __('global.button.submit') }}</span>
                     </button>
                     <button type="submit" name="save_opt" value="save_new" color="success">
                         <i data-feather="save"></i>
-                        <span>Save & New</span>
+                        <span>{{ __('global.button.save_new') }}</span>
                     </button>
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>

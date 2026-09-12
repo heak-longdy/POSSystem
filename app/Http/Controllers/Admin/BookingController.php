@@ -1149,7 +1149,7 @@ class BookingController extends Controller
             $qty = (int) ($detail->qty ?: 1);
 
             return "<span>- {$name} ({$qty})</span>";
-        })->implode('<br>');
+        })->implode('');
     }
 
     private function paymentStatusBadge(Booking $booking)

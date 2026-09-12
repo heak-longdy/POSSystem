@@ -19,6 +19,7 @@ return [
     'destroy'                => 'Destroy',
     'cancel'                 => 'Cancel',
     'confirm'                => 'Confirm',
+    'ordering'               => 'Ordering',
 
     // Table headers
     'table' => [
@@ -28,6 +29,7 @@ return [
         'phone'              => 'Phone Number',
         'email'              => 'Email',
         'address'            => 'Address',
+        'position'           => 'Position',
         'category'           => 'Category',
         'uom'                => 'UOM',
         'cost'               => 'Cost',
@@ -42,6 +44,22 @@ return [
         'date'               => 'Date',
         'product'            => 'Product',
         'description'        => 'Description',
+        'supplier'           => 'Supplier',
+        'shop'               => 'Shop',
+        'qty'                => 'Qty',
+        'remark'             => 'Remark',
+        'requested_by'       => 'Requested By',
+        'current_stock'      => 'Current Stock',
+        'to'                 => 'To',
+        'stock_type'         => 'Stock Type',
+        'from_shop'          => 'From Shop',
+        'to_shop'            => 'To Shop',
+        'from'               => 'From',
+        'stock_in'           => 'Stock In',
+        'stock_out'          => 'Stock Out',
+        'stock_transfer'     => 'Stock Transfer',
+        'stock_movement'     => 'Stock Movement',
+        'ordering'           => 'Ordering',
     ],
 
     // Actions
@@ -108,6 +126,10 @@ return [
         'all'                => 'All',
         'all_status'         => 'All Status',
         'role'               => 'Select Role',
+        'select_shop'        => 'Select Shop',
+        'date'               => 'Date',
+        'from_date'          => 'From date',
+        'to_date'            => 'To date',
     ],
 
     // Dialogs & Confirmations
@@ -240,6 +262,10 @@ return [
         'name'                   => [
             'label'              => 'Name',
             'placeholder'        => 'Enter name...',
+        ],
+        'ordering'               => [
+            'label'              => 'Ordering',
+            'placeholder'        => 'Enter ordering...',
         ],
         'phone'                  => [
             'label'              => 'Phone Number',

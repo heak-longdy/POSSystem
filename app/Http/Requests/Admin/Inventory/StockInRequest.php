@@ -37,16 +37,16 @@ class StockInRequest extends FormRequest
     public function messages()
     {
         return [
-            'supplier_id.required' => 'Supplier is required',
-            'supplier_id.exists' => 'Supplier is invalid',
-            'shop_id.required' => 'Shop is required',
-            'shop_id.exists' => 'Shop is invalid',
-            'product_id.required' => 'Product is required',
-            'product_id.exists' => 'Product is invalid',
-            'qty.required' => 'Qty is required',
-            'qty.integer' => 'Qty format invalid',
-            'qty.min' => 'Qty must be at least 1',
-            'remark.max' => 'Remark must not exceed 1000 characters.',
+            'supplier_id.required' => __('stock_in.validation.supplier_required'),
+            'supplier_id.exists'   => __('stock_in.validation.supplier_invalid'),
+            'shop_id.required'     => __('stock_in.validation.shop_required'),
+            'shop_id.exists'       => __('stock_in.validation.shop_invalid'),
+            'product_id.required'  => __('stock_in.validation.product_required'),
+            'product_id.exists'    => __('stock_in.validation.product_invalid'),
+            'qty.required'         => __('stock_in.validation.qty_required'),
+            'qty.integer'          => __('stock_in.validation.qty_integer'),
+            'qty.min'              => __('stock_in.validation.qty_min'),
+            'remark.max'           => __('stock_in.validation.remark_max'),
         ];
     }
 }

@@ -20,10 +20,17 @@ return [
         'all' => 'All',
     ],
     'button' => [
-        'create' => 'Create New',
+        'create' => 'Create Category',
+        'create_new' => 'Create New',
         'import' => 'Import Categories',
         'reload' => 'Refresh',
         'search' => 'Search',
+    ],
+    'table' => [
+        'no' => 'Nº',
+        'name' => 'Name',
+        'status' => 'Status',
+        'action' => 'Action',
     ],
     'empty' => [
         'title' => ':name is empty',
@@ -49,18 +56,20 @@ return [
             'placeholder' => 'Enter picture',
         ],
         'name' => [
+            'label' => 'Name',
+            'placeholder' => 'Enter name ...',
             'en' => [
                 'label' => 'Title English',
-                'placeholder' => 'Enter title English'
+                'placeholder' => 'Enter title English',
             ],
             'km' => [
                 'label' => 'Title Khmer',
-                'placeholder' => 'Enter title Khmer'
+                'placeholder' => 'Enter title Khmer',
             ],
             'zh' => [
                 'label' => 'Title Chinese',
-                'placeholder' => 'Enter title Chinese'
-            ]
+                'placeholder' => 'Enter title Chinese',
+            ],
         ],
         'ordering' => [
             'label' => 'Ordering',
@@ -72,7 +81,18 @@ return [
         ],
         'type' => [
             'label' => 'Type',
-            'placeholder' => 'Please select type'
-        ]
+            'placeholder' => 'Please select type',
+        ],
+    ],
+    'validation' => [
+        'name_required' => 'Name is required',
+        'name_max' => 'Name must not exceed 50 characters.',
+        'status_required' => 'Status is required',
+        'status_max' => 'Status must not exceed 1 characters.',
+        'status_numeric' => 'Status format invalid',
+    ],
+    'dialog' => [
+        'confirm_delete' => 'Are you sure you want to delete this category?',
+        'confirm_action' => 'Are you sure want to :action ?',
     ],
 ];

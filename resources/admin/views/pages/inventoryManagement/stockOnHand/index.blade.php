@@ -1,6 +1,6 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Stock On Hand Management'])
+    @include('admin::shared.header', ['header_name' => __('stock_on_hand.title')])
     <div class="content-wrapper" x-data="xStockOnHand">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
@@ -11,18 +11,18 @@
             'showTabs' => false,
             'showCreate' => false,
             'exportAction' => auth()->user()->can('stock-on-hand-excel') ? 'excel()' : null,
-            'exportLabel' => 'Excel',
+            'exportLabel' => __('stock_on_hand.button.excel'),
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
-                ['field' => 'product_title', 'title' => 'Product', 'class' => 'text left', 'colVal' => 18],
-                ['field' => 'category_title', 'title' => 'Category', 'class' => 'text left', 'colVal' => 12],
-                ['field' => 'uom_title', 'title' => 'UOM', 'class' => '', 'colVal' => 8],
-                ['field' => 'current_stock', 'title' => 'Current Stock', 'class' => '', 'colVal' => 12],
-                ['field' => 'created_date', 'title' => 'Date', 'class' => '', 'colVal' => 14],
-                ['field' => 'shop_title', 'title' => 'Shop', 'class' => 'text left', 'colVal' => 14],
-                ['field' => 'request_by_title', 'title' => 'Requested By', 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
+                ['field' => 'product_title', 'title' => __('stock_on_hand.table.product'), 'class' => 'text left', 'colVal' => 18],
+                ['field' => 'category_title', 'title' => __('stock_on_hand.table.category'), 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'uom_title', 'title' => __('stock_on_hand.table.uom'), 'class' => '', 'colVal' => 8],
+                ['field' => 'current_stock', 'title' => __('stock_on_hand.table.current_stock'), 'class' => '', 'colVal' => 12],
+                ['field' => 'created_date', 'title' => __('stock_on_hand.table.date'), 'class' => '', 'colVal' => 14],
+                ['field' => 'shop_title', 'title' => __('stock_on_hand.table.shop'), 'class' => 'text left', 'colVal' => 14],
+                ['field' => 'request_by_title', 'title' => __('stock_on_hand.table.requested_by'), 'class' => 'text left', 'colVal' => 12],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -32,7 +32,7 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'view', 'title' => 'View', 'icon' => 'visibility', 'type' => 'link'],
+                                ['url' => 'view', 'title' => __('global.action.view'), 'icon' => 'visibility', 'type' => 'link'],
                             ],
                         ],
                     ],
@@ -44,7 +44,7 @@
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
                     <span id="spinner"></span>
-                    <label>Export excel ...</label>
+                    <label>{{ __('stock_on_hand.export_excel') }}</label>
                 </div>
             </div>
         </template>
@@ -90,7 +90,7 @@
                 },
                 fetchSelectShop() {
                     $(`#shop_id`).select2({
-                        placeholder: `Select Shop`,
+                        placeholder: @json(__('stock_on_hand.filter.select_shop')),
                         ajax: {
                             url: '{{ route('admin-select-stock-shop') }}',
                             dataType: 'json',
@@ -191,10 +191,10 @@
                     };
 
                     // Create workbook and worksheet
-                    const worksheet = workbook.addWorksheet("Stock On Hand Report");
+                    const worksheet = workbook.addWorksheet(@json(__('stock_on_hand.excel.sheet_name')));
 
                     // Add Row Title and formatting
-                    const titleTopRow = worksheet.addRow(["Stock On Hand Report"]);
+                    const titleTopRow = worksheet.addRow([@json(__('stock_on_hand.excel.title'))]);
                     titleTopRow.font = style_font_header;
                     titleTopRow.alignment = align_center;
                     worksheet.mergeCells("A1:" + lastColumn + 1);
@@ -202,14 +202,14 @@
                     worksheet.addRow([]);
                     // Add Header Row
                     const header = [
-                        "ID",
-                        "Product",
-                        "Categories",
-                        "UOM",
-                        "Current Stock",
-                        "Date",
-                        "Shop",
-                        "Requested By",
+                        @json(__('stock_on_hand.excel.id')),
+                        @json(__('stock_on_hand.excel.product')),
+                        @json(__('stock_on_hand.excel.categories')),
+                        @json(__('stock_on_hand.excel.uom')),
+                        @json(__('stock_on_hand.excel.current_stock')),
+                        @json(__('stock_on_hand.excel.date')),
+                        @json(__('stock_on_hand.excel.shop')),
+                        @json(__('stock_on_hand.excel.requested_by')),
                     ];
 
                     const headerRow = worksheet.addRow(header);
@@ -293,7 +293,7 @@
                     const footerRowTotal = worksheet.addRow([]);
 
                     // Generate Excel File with given name
-                    const titleExportName = "Stock On Hand Report Date_" + this
+                    const titleExportName = @json(__('stock_on_hand.excel.file_prefix')) + this
                         .dateFormatEn(moment(),
                             'DD_MM_YYYY_H:mm:ss');
                     workbook.xlsx.writeBuffer().then(function(data) {
@@ -355,10 +355,10 @@
                     };
 
                     // Create workbook and worksheet
-                    const worksheet = workbook.addWorksheet("Inventory Management Report");
+                    const worksheet = workbook.addWorksheet(@json(__('stock_on_hand.excel.inventory_report_sheet')));
 
                     // Add Row Title and formatting
-                    const titleTopRow = worksheet.addRow(["Inventory Management Report"]);
+                    const titleTopRow = worksheet.addRow([@json(__('stock_on_hand.excel.inventory_report_title'))]);
                     titleTopRow.font = style_font_header;
                     titleTopRow.alignment = align_center;
                     worksheet.mergeCells("A1:" + lastColumn + 1);
@@ -366,16 +366,16 @@
                     worksheet.addRow([]);
                     // Add Header Row
                     const header = [
-                        "ID",
-                        "Date",
-                        "Shop",
-                        "Product",
-                        "Categories",
-                        "Quantities",
-                        "Price",
-                        "Requested By",
-                        "Stock Type",
-                        "Send To",
+                        @json(__('stock_on_hand.excel.id')),
+                        @json(__('stock_on_hand.excel.date')),
+                        @json(__('stock_on_hand.excel.shop')),
+                        @json(__('stock_on_hand.excel.product')),
+                        @json(__('stock_on_hand.excel.categories')),
+                        @json(__('stock_on_hand.excel.quantities')),
+                        @json(__('stock_on_hand.excel.price')),
+                        @json(__('stock_on_hand.excel.requested_by')),
+                        @json(__('stock_on_hand.excel.stock_type')),
+                        @json(__('stock_on_hand.excel.send_to')),
                     ];
 
                     const headerRow = worksheet.addRow(header);
@@ -478,7 +478,7 @@
                     const footerRowTotal = worksheet.addRow([]);
 
                     // Generate Excel File with given name
-                    const titleExportName = "Inventory Management Stock On Hand Report Date_" + this
+                    const titleExportName = @json(__('stock_on_hand.excel.inventory_export_filename')) + this
                         .dateFormatEn(moment(),
                             'DD_MM_YYYY_H:mm:ss');
                     workbook.xlsx.writeBuffer().then(function(data) {

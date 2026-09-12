@@ -3,7 +3,7 @@
     $id = $id ?? '';
     $data = $data ?? null;
     $readonly = $readonly ?? false;
-    $formTitle = $readonly ? 'View Stock Out' : ($id ? 'Update Stock Out' : 'Create Stock Out');
+    $formTitle = $readonly ? __('stock_out.form.title.view') : ($id ? __('stock_out.form.title.update') : __('stock_out.form.title.create'));
     $selectedType = old('to_id', $data->to_id ?? $stockTypes->first()?->key);
 @endphp
 @section('layout')
@@ -21,10 +21,10 @@
             <div class="form-body">
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Shop<span>*</span></label>
+                        <label>{{ __('stock_out.form.shop') }}<span>*</span></label>
                         <div class="select2Group">
                             <select name="shop_id" id="shop_id" class="SelectShop" {!! $readonly ? 'disabled' : '' !!}>
-                                <option value="">Select Shop</option>
+                                <option value="">{{ __('stock_out.form.select_shop') }}</option>
                                 @if (isset($selectedShop) && $selectedShop)
                                     <option value="{{ $selectedShop->id }}" selected>{{ $selectedShop->name }}</option>
                                 @endif
@@ -35,10 +35,10 @@
                         @enderror
                     </div>
                     <div class="form-row">
-                        <label>Product<span>*</span></label>
+                        <label>{{ __('stock_out.form.product') }}<span>*</span></label>
                         <div class="select2Group">
                             <select name="product_id" id="product_id" class="SelectProduct" {!! $readonly ? 'disabled' : '' !!}>
-                                <option value="">Select Product</option>
+                                <option value="">{{ __('stock_out.form.select_product') }}</option>
                                 @if (isset($selectedProduct) && $selectedProduct)
                                     <option value="{{ $selectedProduct->id }}" selected>{{ $selectedProduct->name }}</option>
                                 @endif
@@ -51,13 +51,13 @@
                 </div>
                 <div class="row-2">
                     <div class="form-row iconInput">
-                        <label>Current Stock</label>
+                        <label>{{ __('stock_out.form.current_stock') }}</label>
                         <input type="text" id="current_stock" value="{{ $currentStock ?? 0 }}" readonly>
                         <i class='bx bx-package'></i>
                     </div>
                     <div class="form-row iconInput">
-                        <label>Qty<span>*</span></label>
-                        <input type="number" name="qty" min="1" value="{{ old('qty', $data->qty ?? '') }}" placeholder="Enter qty ..." {!! $readonly ? 'readonly' : '' !!}>
+                        <label>{{ __('stock_out.form.qty') }}<span>*</span></label>
+                        <input type="number" name="qty" min="1" value="{{ old('qty', $data->qty ?? '') }}" placeholder="{{ __('stock_out.form.placeholder_qty') }}" {!! $readonly ? 'readonly' : '' !!}>
                         <i class='bx bx-minus-circle'></i>
                         @error('qty')
                             <label class="error">{{ $message }}</label>
@@ -66,12 +66,16 @@
                 </div>
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Stock Type<span>*</span></label>
+                        <label>{{ __('stock_out.form.stock_type') }}<span>*</span></label>
                         <select name="to_id" id="to_id" {!! $readonly ? 'disabled' : '' !!}>
-                            <option value="">Select Stock Type</option>
+                            <option value="">{{ __('stock_out.form.select_stock_type') }}</option>
                             @foreach ($stockTypes as $stockType)
+                                @php
+                                    $stockTypeName = __('stock_out.stock_types.' . $stockType->key);
+                                    $stockTypeDisplay = $stockTypeName !== 'stock_out.stock_types.' . $stockType->key ? $stockTypeName : $stockType->name;
+                                @endphp
                                 <option value="{{ $stockType->key }}" {!! (string) $selectedType === (string) $stockType->key ? 'selected' : '' !!}>
-                                    {{ $stockType->name }}
+                                    {{ $stockTypeDisplay }}
                                 </option>
                             @endforeach
                         </select>
@@ -80,15 +84,15 @@
                         @enderror
                     </div>
                     <div class="form-row iconInput">
-                        <label>Status</label>
-                        <input type="text" value="{{ $data->stock_status_title ?? 'Confirmed' }}" readonly>
+                        <label>{{ __('stock_out.form.status') }}</label>
+                        <input type="text" value="{{ $data ? $data->stock_status_title : __('stock_out.status.confirmed') }}" readonly>
                         <i class='bx bx-check-circle'></i>
                     </div>
                 </div>
                 <div class="row">
                     <div class="form-row iconInput">
-                        <label>Remark</label>
-                        <input type="text" name="remark" value="{{ old('remark', $data->remark ?? '') }}" placeholder="Enter remark ..." {!! $readonly ? 'readonly' : '' !!}>
+                        <label>{{ __('stock_out.form.remark') }}</label>
+                        <input type="text" name="remark" value="{{ old('remark', $data->remark ?? '') }}" placeholder="{{ __('stock_out.form.placeholder_remark') }}" {!! $readonly ? 'readonly' : '' !!}>
                         <i class='bx bx-note'></i>
                         @error('remark')
                             <label class="error">{{ $message }}</label>
@@ -100,24 +104,24 @@
                         @if ($id && !$data->trashed())
                             <button color="primary" type="button" s-click-link="{!! route('admin-' . $routeName . '-edit', $id) !!}">
                                 <i data-feather="edit"></i>
-                                <span>Edit</span>
+                                <span>{{ __('global.action.edit') }}</span>
                             </button>
                         @endif
                     @else
                         <button type="submit" color="primary">
                             <i data-feather="save"></i>
-                            <span>Submit</span>
+                            <span>{{ __('global.button.submit') }}</span>
                         </button>
                         @if (!$id)
                             <button type="submit" name="save_opt" value="save_new" color="success">
                                 <i data-feather="save"></i>
-                                <span>Save & New</span>
+                                <span>{{ __('global.button.save_new') }}</span>
                             </button>
                         @endif
                     @endif
                     <button color="danger" type="button" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>
@@ -134,7 +138,7 @@
                 init() {
                     this.initShop();
                     this.initProduct();
-                    $('#to_id').select2();
+                    $('#to_id').select2({ placeholder: @json(__('stock_out.form.select_stock_type')) });
 
                     if (this.isReadonly) {
                         return;
@@ -148,7 +152,7 @@
                 },
                 initShop() {
                     $('#shop_id').select2({
-                        placeholder: 'Select Shop',
+                        placeholder: @json(__('stock_out.form.select_shop')),
                         ajax: this.isReadonly ? null : {
                             url: '{{ route('admin-select-stock-shop') }}',
                             dataType: 'json',
@@ -166,7 +170,7 @@
                 },
                 initProduct() {
                     $('#product_id').select2({
-                        placeholder: 'Select Product',
+                        placeholder: @json(__('stock_out.form.select_product')),
                         ajax: this.isReadonly ? null : {
                             url: '{{ route('admin-select-shop-product') }}',
                             dataType: 'json',

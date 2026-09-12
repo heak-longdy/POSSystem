@@ -1,9 +1,118 @@
 <?php
 
 return [
+    'title' => 'Dashboard',
     'dashboard' => 'Dashboard',
     'welcome' => 'Welcome to One Play Admin!',
+    'welcome_back' => 'Welcome back :name!',
+    'welcome_user' => 'Welcome back Mathew Anderson!',
+    'welcome_illustration' => 'Welcome Illustration',
     'description' => 'Browse our fully designed UI toolkit! Browse our prebuilt app pages, components, and utilites, and be sure to look at our full documentation!',
+
+    // Quick Metrics / Cards
+    'todays_sales' => "Today's Sales",
+    'performance' => 'Performance',
+    'expense' => 'Expense',
+    'sales' => 'Sales',
+    'profit' => 'Profit',
+    'growth' => 'Growth',
+    'monthly_earnings' => 'Monthly Earnings',
+    'earnings' => 'Earnings',
+
+    // Revenue & Sales Overview
+    'revenue_updates' => 'Revenue Updates',
+    'overview_of_profit' => 'Overview of Profit',
+    'footware' => 'Footware',
+    'fashionware' => 'Fashionware',
+    'sales_overview' => 'Sales Overview',
+    'every_month' => 'Every month',
+
+    // Weekly & Yearly Stats
+    'weekly_stats' => 'Weekly Stats',
+    'average_sales' => 'Average sales',
+    'top_sales' => 'Top Sales',
+    'best_seller' => 'Best Seller',
+    'most_commented' => 'Most Commented',
+    'yearly_sales' => 'Yearly Sales',
+    'total_sales' => 'Total Sales',
+    'salary' => 'Salary',
+
+    // Payment Gateways
+    'payment_gateways' => 'Payment Gateways',
+    'platform_for_income' => 'Platform For Income',
+    'paypal' => 'Paypal',
+    'big_brands' => 'Big Brands',
+    'wallet' => 'Wallet',
+    'bill_payment' => 'Bill payment',
+    'credit_card' => 'Credit Card',
+    'money_reversed' => 'Money reversed',
+    'refund' => 'Refund',
+    'view_all_transactions' => 'View all transactions',
+
+    // Recent Transactions
+    'recent_transactions' => 'Recent Transactions',
+    'payment_received_from' => 'Payment received from :name of :amount',
+    'new_sale_recorded' => 'New sale recorded',
+    'payment_made_to' => 'Payment was made of :amount to :name',
+    'new_arrival_recorded' => 'New arrival recorded',
+    'payment_done' => 'Payment Done',
+
+    // Product Performance
+    'product_performance' => 'Product Performance',
+    'table' => [
+        'product' => 'Product',
+        'progress' => 'Progress',
+        'priority' => 'Priority',
+        'budget' => 'Budget',
+        'chart' => 'Chart',
+    ],
+    'products' => [
+        'gaming_console' => 'Gaming Console',
+        'leather_purse' => 'Leather Purse',
+        'red_velvate_dress' => 'Red Velvate Dress',
+        'headphone_boat' => 'Headphone Boat',
+        'electronics' => 'Electronics',
+        'fashion' => 'Fashion',
+        'womens_fashion' => "Women's Fashion",
+    ],
+    'priority' => [
+        'low' => 'Low',
+        'medium' => 'Medium',
+        'high' => 'High',
+        'very_high' => 'Very High',
+    ],
+
+    // Months
+    'months' => [
+        'january' => 'January',
+        'february' => 'February',
+        'march' => 'March',
+        'april' => 'April',
+        'may' => 'May',
+        'june' => 'June',
+        'july' => 'July',
+        'august' => 'August',
+        'september' => 'September',
+        'october' => 'October',
+        'november' => 'November',
+        'december' => 'December',
+    ],
+    'months_short' => [
+        'jan' => 'Jan',
+        'feb' => 'Feb',
+        'mar' => 'Mar',
+        'apr' => 'Apr',
+        'may' => 'May',
+        'june' => 'June',
+        'july' => 'July',
+        'aug' => 'Aug',
+        'sept' => 'Sept',
+        'oct' => 'Oct',
+        'nov' => 'Nov',
+        'dec' => 'Dec',
+    ],
+
+    // Legacy / Stats List
     'list' => [
         'total_member' => 'Total Member',
         'total_user' => 'Total User',
@@ -14,12 +123,28 @@ return [
         'total_confirm' => 'Total Confirm',
         'total_cancel' => 'Total Cancel',
         'total_complete' => 'Total Complete',
+        'all_booking' => 'All Booking',
+        'products' => 'Products',
+        'services' => 'Services',
+        'top_up_request' => 'Top Up Request',
+        'pay_liabilities' => 'Pay Liabilities',
+        'customers' => 'Customers',
+        'commission_expenses' => 'Commission Expenses',
+        'company_income' => "Company's Income",
+        'promotion_expenses' => 'Promotion Expenses',
+        'pending_payment' => 'Pending Payment',
+        'shops_and_brands' => 'Shops & Brands',
+        'shop_brand_employee' => 'Shop: :shop & Brands: :brand & Employees: :employee',
+        'customer_by_day' => 'Number of customer by day vs. day',
+        'totals_and_income' => "Total price, Total commission, Total Promotion and Company 's Income",
+        'booking_by_time' => 'Booking by Time',
     ],
     'filter' => [
         'search' => 'Search...',
         'from_date' => 'From Date',
         'to_date' => 'To Date',
         'all' => 'All',
+        'select_shop' => 'Select shop...',
     ],
     'view_detail' => 'View Detail',
 ];

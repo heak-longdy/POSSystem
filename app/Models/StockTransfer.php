@@ -82,11 +82,11 @@ class StockTransfer extends Model
     public function getStockStatusTitleAttribute()
     {
         if ((int) $this->status === 1) {
-            return 'Confirmed';
+            return __('stock_transfer.status.confirmed');
         }
 
         if ((int) $this->status === 2) {
-            return 'Disabled';
+            return __('stock_transfer.status.disabled');
         }
 
         return '---';

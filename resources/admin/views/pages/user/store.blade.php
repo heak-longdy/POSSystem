@@ -7,15 +7,15 @@
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-user-list', 1) !!}"></i>
-                    {{ request('id') ? 'Update User' : 'Create User' }}
+                    {{ request('id') ? __('user.form.title.update') : __('user.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
             <div class="form-body">
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Name <span>*</span> </label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="Enter name ...">
+                        <label>{{ __('user.form.name.label') }} <span>*</span> </label>
+                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('user.form.name.placeholder') }}">
                         @error('name')
                             <label class="error">{{ $message }}</label>
                         @enderror
@@ -27,7 +27,7 @@
                             @foreach (config('dummy.user.role') as $key => $roleName)
                                 @if ($key != 'super_admin' || (auth()->check() && auth()->user()->role === 'super_admin'))
                                     <option value="{{ $key }}" {!! (request('id') && $data?->role == $key) || old('role') == $key ? 'selected' : '' !!}>
-                                        {{ ucfirst(str_replace('_', ' ', $roleName)) }}
+                                        {{ __('user.roles.' . $key) !== 'user.roles.' . $key ? __('user.roles.' . $key) : ucfirst(str_replace('_', ' ', $roleName)) }}
                                     </option>
                                 @endif
                             @endforeach
@@ -39,8 +39,8 @@
                 </div>
                 <div class="row-3">
                     <div class="form-row">
-                        <label>Email <span>*</span> </label>
-                        <input type="text" name="email" value="{!! request('id') ? $data?->email : old('email') !!}" placeholder="Enter email ...">
+                        <label>{{ __('user.form.email.label') }} <span>*</span> </label>
+                        <input type="text" name="email" value="{!! request('id') ? $data?->email : old('email') !!}" placeholder="{{ __('user.form.email.placeholder') }}">
                         @error('email')
                             <label class="error">{{ $message }}</label>
                         @enderror
@@ -49,7 +49,9 @@
                         <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
                             @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>{{ $item }}</option>
+                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>
+                                    {{ $key == 1 ? __('user.form.status.active') : __('user.form.status.disable') }}
+                                </option>
                             @endforeach
                         </select>
                         @error('status')
@@ -91,7 +93,7 @@
                 @endif
                 <div class="row-2">
                     <div class="form-row">
-                        <label>Image</label>
+                        <label>{{ __('user.form.profile.label') }}</label>
                         <div class="form-select-photo image" @click="selectImage(event)">
                             <div class="select-photo" :class='{ active: image }'>
                                 <div class="icon">
@@ -116,15 +118,15 @@
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ request('id') ? __('global.button.update') : __('global.button.submit') }}</span>
                     </button>
                     <button type="submit" name="save_opt" value="save_new" color="success">
                         <i data-feather="save"></i>
-                        <span>Save & New</span>
+                        <span>{{ __('global.button.save_new') }}</span>
                     </button>
                     <button color="danger" type="button" s-click-link="{!! route('admin-user-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>

@@ -22,7 +22,7 @@
                     </div>
                     <div class="form-row">
                         <label>@lang('user.form.password_confirmation.label')<span>*</span> </label>
-                        <input type="password" name="confirm_password" placeholder="@lang('user.form.password_confirmation.label')">
+                        <input type="password" name="confirm_password" placeholder="@lang('user.form.password_confirmation.placeholder')">
                         @error('confirm_password')
                             <label class="error">{{ $message }}</label>
                         @enderror
@@ -31,11 +31,11 @@
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>Submit</span>
+                        <span>{{ __('global.button.submit') }}</span>
                     </button>
-                    <button color="danger" type="button" s-click-link="{!! route('admin-partner-list', 1) !!}">
+                    <button color="danger" type="button" s-click-link="{!! route('admin-user-list', 1) !!}">
                         <i data-feather="x"></i>
-                        <span>Cancel</span>
+                        <span>{{ __('global.button.cancel') }}</span>
                     </button>
                 </div>
             </div>

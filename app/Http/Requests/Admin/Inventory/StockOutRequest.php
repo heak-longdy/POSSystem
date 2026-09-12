@@ -57,7 +57,7 @@ class StockOutRequest extends FormRequest
             }
 
             if ($availableStock < (int) $this->input('qty')) {
-                $validator->errors()->add('qty', 'Qty is limited or out of stock');
+                $validator->errors()->add('qty', __('stock_out.validation.qty_limited'));
             }
         });
     }
@@ -65,16 +65,16 @@ class StockOutRequest extends FormRequest
     public function messages()
     {
         return [
-            'shop_id.required' => 'Shop is required',
-            'shop_id.exists' => 'Shop is invalid',
-            'product_id.required' => 'Product is required',
-            'product_id.exists' => 'Product is invalid',
-            'to_id.required' => 'Stock type is required',
-            'to_id.exists' => 'Stock type is invalid',
-            'qty.required' => 'Qty is required',
-            'qty.integer' => 'Qty format invalid',
-            'qty.min' => 'Qty must be at least 1',
-            'remark.max' => 'Remark must not exceed 1000 characters.',
+            'shop_id.required'    => __('stock_out.validation.shop_required'),
+            'shop_id.exists'      => __('stock_out.validation.shop_invalid'),
+            'product_id.required' => __('stock_out.validation.product_required'),
+            'product_id.exists'   => __('stock_out.validation.product_invalid'),
+            'to_id.required'      => __('stock_out.validation.to_required'),
+            'to_id.exists'        => __('stock_out.validation.to_invalid'),
+            'qty.required'        => __('stock_out.validation.qty_required'),
+            'qty.integer'         => __('stock_out.validation.qty_integer'),
+            'qty.min'             => __('stock_out.validation.qty_min'),
+            'remark.max'          => __('stock_out.validation.remark_max'),
         ];
     }
 }

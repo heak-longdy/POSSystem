@@ -32,11 +32,11 @@ class ResetPasswordRequest extends FormRequest
     public function messages()
     {
         return [
-            'password.required' => "Password is required",
-            'password.same' => "Password not match confirm password",
-            'password.min' => "Password min 6 character",
-            'confirm_password.required' => "Confirm password is required",
-            'confirm_password.min' => "Confirm password min 6 character",
+            'password.required' => __('user.validation.password_required'),
+            'password.same' => __('user.validation.password_same'),
+            'password.min' => __('user.validation.password_min'),
+            'confirm_password.required' => __('user.validation.confirm_password_required'),
+            'confirm_password.min' => __('user.validation.confirm_password_min'),
         ];
     }
 }

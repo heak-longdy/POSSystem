@@ -8,7 +8,7 @@
         });
 
         $('.SelectShop').select2({
-            placeholder: 'Select Shop',
+            placeholder: @json(__('stock_in.select_shop')),
             ajax: {
                 url: '{{ route('admin-select-stock-shop') }}',
                 dataType: 'json',
@@ -40,9 +40,11 @@
         Alpine.data('xIndex', () => ({
             init() {},
             verifyDialog(data, typeAction, btn) {
+                const confirmTemplate = `{{ __('global.dialog.confirm_action', ['action' => '__ACTION__']) }}`;
+                const confirmMsg = confirmTemplate.replace('__ACTION__', btn);
                 this.$store.confirmDialog.open({
                     data: {
-                        message: `Are you sure want to ${btn} ?`,
+                        message: confirmMsg,
                         btnClose: `{{ __('action_button.cancel') }}`,
                         btnSave: btn,
                         item: data,

@@ -19,6 +19,7 @@ return [
     'destroy'                => 'លុបជាអចិន្ត្រៃយ៍',
     'cancel'                 => 'បោះបង់',
     'confirm'                => 'បញ្ជាក់',
+    'ordering'               => 'លំដាប់',
 
     // Table headers
     'table' => [
@@ -28,6 +29,7 @@ return [
         'phone'              => 'លេខទូរស័ព្ទ',
         'email'              => 'អ៊ីមែល',
         'address'            => 'អាសយដ្ឋាន',
+        'position'           => 'តួនាទី',
         'category'           => 'ប្រភេទ',
         'uom'                => 'ខ្នាត',
         'cost'               => 'តម្លៃដើម',
@@ -42,6 +44,22 @@ return [
         'date'               => 'កាលបរិច្ឆេទ',
         'product'            => 'ផលិតផល',
         'description'        => 'ការពិពណ៌នា',
+        'supplier'           => 'អ្នកផ្គត់ផ្គង់',
+        'shop'               => 'ហាង',
+        'qty'                => 'បរិមាណ',
+        'remark'             => 'ចំណាំ',
+        'requested_by'       => 'ស្នើសុំដោយ',
+        'current_stock'      => 'ស្តុកបច្ចុប្បន្ន',
+        'to'                 => 'ទៅកាន់',
+        'stock_type'         => 'ប្រភេទស្តុក',
+        'from_shop'          => 'ពីហាង',
+        'to_shop'            => 'ទៅហាង',
+        'from'               => 'ពី',
+        'stock_in'           => 'ការបញ្ចូលស្តុក',
+        'stock_out'          => 'ការដកស្តុក',
+        'stock_transfer'     => 'ការផ្ទេរស្តុក',
+        'stock_movement'     => 'ការផ្លាស់ប្ដូរស្តុក',
+        'ordering'           => 'លំដាប់',
     ],
 
     // Actions
@@ -108,6 +126,10 @@ return [
         'all'                => 'ទាំងអស់',
         'all_status'         => 'ស្ថានភាពទាំងអស់',
         'role'               => 'ជ្រើសរើសតួនាទី',
+        'select_shop'        => 'ជ្រើសរើសហាង',
+        'date'               => 'កាលបរិច្ឆេទ',
+        'from_date'          => 'ពីកាលបរិច្ឆេទ',
+        'to_date'            => 'ដល់កាលបរិច្ឆេទ',
     ],
 
     // Dialogs & Confirmations
@@ -236,6 +258,10 @@ return [
         'name'                   => [
             'label'              => 'ឈ្មោះ',
             'placeholder'        => 'បញ្ចូលឈ្មោះ...',
+        ],
+        'ordering'               => [
+            'label'              => 'លំដាប់',
+            'placeholder'        => 'បញ្ចូលលំដាប់...',
         ],
         'phone'                  => [
             'label'              => 'លេខទូរស័ព្ទ',

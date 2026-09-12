@@ -173,20 +173,20 @@ class InventoryMovementReportController extends Controller
             $isStockIn = ($item->status === 'stock_in');
             $isInternalOut = ($item->status === 'stock_out') && !$isSales;
 
-            $movementLabel = 'Stock Movement';
+            $movementLabel = __('inventory_movement.movement_badge.movement');
             $badgeClass = 'primary';
 
             if ($isStockIn) {
-                $movementLabel = 'Stock In';
+                $movementLabel = __('inventory_movement.movement_badge.stock_in');
                 $badgeClass = 'success';
             } elseif ($isSales) {
-                $movementLabel = 'POS Sale';
+                $movementLabel = __('inventory_movement.movement_badge.pos_sale');
                 $badgeClass = 'primary';
             } elseif ($isTransfer) {
-                $movementLabel = 'Stock Transfer';
+                $movementLabel = __('inventory_movement.movement_badge.stock_transfer');
                 $badgeClass = 'purple';
             } elseif ($isInternalOut) {
-                $movementLabel = 'Stock Out';
+                $movementLabel = __('inventory_movement.movement_badge.stock_out');
                 $badgeClass = 'danger';
             }
 
@@ -195,11 +195,11 @@ class InventoryMovementReportController extends Controller
             $toTitle = $item->to_title;
             if (!$toTitle) {
                 if ($isSales) {
-                    $toTitle = 'Customer Order';
+                    $toTitle = __('inventory_movement.modal.customer_order');
                 } elseif ($isStockIn) {
-                    $toTitle = $item->shop?->name ?: 'Warehouse / Shop';
+                    $toTitle = $item->shop?->name ?: __('inventory_movement.modal.warehouse_shop');
                 } elseif ($item->type === 'stock_type') {
-                    $toTitle = 'Adjustment / Internal';
+                    $toTitle = __('inventory_movement.modal.adjustment_internal');
                 } else {
                     $toTitle = '---';
                 }
@@ -213,7 +213,7 @@ class InventoryMovementReportController extends Controller
                 } elseif ($item->barber) {
                     $requesterName = $item->barber->name;
                 } else {
-                    $requesterName = 'System';
+                    $requesterName = __('inventory_movement.modal.system');
                 }
             }
 
@@ -249,12 +249,29 @@ class InventoryMovementReportController extends Controller
         $totalTransfer = $formatted->where('movement_type', 'transfer')->sum('qty');
         $netMovement = $totalIn - $totalOut;
 
+        $isDailyPeriod = (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $period);
+        $periodLabel = '';
+        if ($isDailyPeriod) {
+            $parsedDate = Carbon::parse($period);
+            if (app()->getLocale() === 'km') {
+                $dayKey = strtolower($parsedDate->format('D'));
+                $periodLabel = 'ថ្ងៃ' . __('inventory_movement.days.' . $dayKey) . ' ទី' . $parsedDate->format('d') . ' ' . __('inventory_movement.months.' . $parsedDate->month) . ' ឆ្នាំ' . $parsedDate->format('Y');
+            } else {
+                $periodLabel = $parsedDate->format('l, d F Y');
+            }
+        } else {
+            $parsedDate = Carbon::createFromFormat('Y-m', $period);
+            if (app()->getLocale() === 'km') {
+                $periodLabel = __('inventory_movement.months.' . $parsedDate->month) . ' ឆ្នាំ' . $parsedDate->format('Y');
+            } else {
+                $periodLabel = $parsedDate->format('F Y');
+            }
+        }
+
         return response()->json([
             'status' => 'success',
             'period' => $period,
-            'period_label' => preg_match('/^\d{4}-\d{2}-\d{2}$/', $period)
-                ? Carbon::parse($period)->format('l, d F Y')
-                : Carbon::createFromFormat('Y-m', $period)->format('F Y'),
+            'period_label' => $periodLabel,
             'count' => $formatted->count(),
             'total_in' => $totalIn,
             'total_out' => $totalOut,
@@ -767,12 +784,12 @@ class InventoryMovementReportController extends Controller
             'stockTypes' => StockType::orderBy('name')->get(['id', 'key', 'name']),
             'staffUsers' => User::orderBy('name')->get(['id', 'name', 'phone']),
             'movementTypes' => [
-                'all' => 'All Movement Types',
-                'stock_in' => 'Stock In (Inflow)',
-                'stock_out' => 'Stock Out (All Outflows)',
-                'sales' => 'POS Sales Out',
-                'internal_out' => 'Internal / Wastage / Adjustment Out',
-                'stock_transfer' => 'Stock Transfer (Branch-to-Branch)',
+                'all' => __('inventory_movement.filter.movement_types.all'),
+                'stock_in' => __('inventory_movement.filter.movement_types.stock_in'),
+                'stock_out' => __('inventory_movement.filter.movement_types.stock_out'),
+                'sales' => __('inventory_movement.filter.movement_types.sales'),
+                'internal_out' => __('inventory_movement.filter.movement_types.internal_out'),
+                'stock_transfer' => __('inventory_movement.filter.movement_types.stock_transfer'),
             ],
         ];
     }

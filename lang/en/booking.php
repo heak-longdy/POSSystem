@@ -101,6 +101,8 @@ return [
         'create' => 'Create Booking',
         'excel' => 'Excel',
         'add_to_cart' => 'Add to cart',
+        'added_to_cart' => 'Added to Cart',
+        'in_cart' => 'in Cart',
         'add_more' => 'Add more',
         'reset_order' => 'Reset Order',
         'confirm_booking' => 'Confirm Booking',

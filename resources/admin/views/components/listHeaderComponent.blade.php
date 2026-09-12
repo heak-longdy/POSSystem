@@ -42,7 +42,7 @@
                     @include($filterView, $filterData ?? [])
                 @else
                     @if ($filterStatus)
-                        <div class="form-row w80 custom-select">
+                        <div class="form-row custom-select">
                             <select name="payment_status">
                                 <option value="">{{ __('global.filter.all_status') }}</option>
                                 <option value="Pending" {!! request('payment_status') == 'Pending' ? 'selected' : '' !!}> Pending</option>

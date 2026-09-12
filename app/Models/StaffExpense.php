@@ -112,7 +112,7 @@ class StaffExpense extends Model
 
     public function getShopNameAttribute()
     {
-        return $this->shop ? $this->shop->name : 'All Shops';
+        return $this->shop ? $this->shop->name : __('staff_expense.all_shops');
     }
 
     public function getTypeBadgeAttribute()

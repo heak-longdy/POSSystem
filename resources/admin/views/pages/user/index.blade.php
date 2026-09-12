@@ -1,26 +1,26 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'User Management'])
+    @include('admin::shared.header', ['header_name' => __('user.title')])
     <div class="content-wrapper" id="app" x-data="xIndex">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
-            'createName' => 'Create User',
+            'createName' => __('user.button.create'),
             'filterStatus' => true,
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
+                ['field' => 'index', 'title' => __('user.table.no'), 'class' => '', 'colVal' => 5],
                 [
                     'field' => 'image_url',
-                    'title' => 'Profile',
+                    'title' => __('user.table.profile'),
                     'class' => 'text left',
                     'colVal' => 6,
                     'rowClass' => 'thumbnailIcon',
                 ],
-                ['field' => 'name', 'title' => 'Name', 'class' => 'text left', 'colVal' => 34],
-                ['field' => 'email', 'title' => 'Email', 'class' => 'text left', 'colVal' => 30],
-                ['field' => 'language_preference_label', 'title' => 'Language', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'created_date', 'title' => 'Post Date', 'class' => '', 'colVal' => 10],
+                ['field' => 'name', 'title' => __('user.table.name'), 'class' => 'text left', 'colVal' => 34],
+                ['field' => 'email', 'title' => __('user.table.email'), 'class' => 'text left', 'colVal' => 30],
+                ['field' => 'language_preference_label', 'title' => __('user.table.language'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'created_date', 'title' => __('user.table.post_date'), 'class' => '', 'colVal' => 10],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -30,7 +30,7 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
+                                ['url' => 'edit', 'title' => __('action_button.edit'), 'icon' => 'edit', 'type' => 'link'],
                                 [
                                     'url' => 'permission',
                                     'title' => __('action_button.permission'),
@@ -39,13 +39,13 @@
                                 ],
                                 [
                                     'url' => 'change-password',
-                                    'title' => 'Change Password',
+                                    'title' => __('action_button.change_password'),
                                     'icon' => 'password',
                                     'type' => 'link',
                                 ],
                                 [
                                     'url' => 'delete',
-                                    'title' => 'Delete',
+                                    'title' => __('action_button.delete'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -56,7 +56,7 @@
                             'action' => [
                                 [
                                     'url' => 'status',
-                                    'title' => 'Disable',
+                                    'title' => __('action_button.disable'),
                                     'icon' => 'hide_source',
                                     'class' => 'text-danger',
                                 ],
@@ -64,19 +64,19 @@
                         ],
                         [
                             'key' => 'enable',
-                            'action' => [['url' => 'status', 'title' => 'Enable', 'icon' => 'refresh']],
+                            'action' => [['url' => 'status', 'title' => __('action_button.enable'), 'icon' => 'refresh']],
                         ],
                         [
                             'key' => 'trash',
                             'action' => [
                                 [
                                     'url' => 'restore',
-                                    'title' => 'Restore',
+                                    'title' => __('action_button.restore'),
                                     'icon' => 'settings_backup_restore',
                                 ],
                                 [
                                     'url' => 'destroy',
-                                    'title' => 'Destroy',
+                                    'title' => __('action_button.destroy'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -130,10 +130,11 @@
                     });
                 },
                 verifyDialog(data, typeAction, btn) {
-                    console.log(btn, 'btn');
+                    const confirmTemplate = `{{ __('global.dialog.confirm_action', ['action' => '__ACTION__']) }}`;
+                    const confirmMsg = confirmTemplate.replace('__ACTION__', btn);
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to ${btn} ?`,
+                            message: confirmMsg,
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: btn,
                             item: data,

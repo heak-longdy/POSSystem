@@ -75,11 +75,11 @@ class StockIn extends Model
     public function getStockStatusTitleAttribute()
     {
         if ((int) $this->status === 1) {
-            return 'Confirmed';
+            return __('stock_in.status.confirmed');
         }
 
         if ((int) $this->status === 2) {
-            return 'Disabled';
+            return __('stock_in.status.disabled');
         }
 
         return '---';

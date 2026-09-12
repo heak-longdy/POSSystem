@@ -69,6 +69,16 @@ class StockHistory extends Model
     }
     public function getStockStatusTitleAttribute()
     {
+        if ($this->status === 'stock_in') {
+            return __('stock_movement.status.stock_in');
+        }
+        if ($this->status === 'stock_out') {
+            return __('stock_movement.status.stock_out');
+        }
+        if ($this->status === 'stock_transfer') {
+            return __('stock_movement.status.stock_transfer');
+        }
+
         return ucwords(str_replace('_', ' ', (string) $this->status));
     }
     public function getFromTitleAttribute()

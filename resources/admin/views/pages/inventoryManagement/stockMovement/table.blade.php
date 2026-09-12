@@ -3,37 +3,37 @@
         <div class="table-wrapper">
             <div class="table-header">
                 <div class="row table-row-10">
-                    <span>Nº</span>
+                    <span>{{ __('global.table.no') }}</span>
                 </div>
                 <div class="row table-row-10 textLeft">
-                    <span>Product</span>
+                    <span>{{ __('stock_movement.table.product') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Categories</span>
+                    <span>{{ __('stock_movement.table.category') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>UOM</span>
+                    <span>{{ __('stock_movement.table.uom') }}</span>
                 </div>
                 {{-- <div class="row table-row-10">
-                    <span>Current Stock</span>
+                    <span>{{ __('stock_movement.table.current_stock') }}</span>
                 </div> --}}
                 <div class="row table-row-10">
-                    <span>Quantities</span>
+                    <span>{{ __('stock_movement.table.qty') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Status</span>
+                    <span>{{ __('stock_movement.table.status') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>From</span>
+                    <span>{{ __('stock_movement.table.from') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>To</span>
+                    <span>{{ __('stock_movement.table.to') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Date</span>
+                    <span>{{ __('stock_movement.table.date') }}</span>
                 </div>
                 <div class="row table-row-10">
-                    <span>Requested By</span>
+                    <span>{{ __('stock_movement.table.requested_by') }}</span>
                 </div>
             </div>
             <div class="table-body">
@@ -60,7 +60,7 @@
                             <span>{!! $item->qty !!}</span>
                         </div>
                         <div class="row table-row-10">
-                            <span>{!! $item->status !!}</span>
+                            <span>{!! $item->stock_status_title ?? $item->status !!}</span>
                         </div>
                         <div class="row table-row-10">
                             @if ($item->type == 'shop' && $item->status == 'stock_in')
@@ -97,7 +97,8 @@
         </div>
     @else
         @component('admin::components.empty', [
-            'name' => __('Stock movement is empty'),
+            'name' => __('stock_movement.empty.title'),
+            'msg' => __('stock_movement.empty.description'),
         ])
         @endcomponent
     @endif

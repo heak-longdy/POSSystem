@@ -10,14 +10,14 @@
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 16px;
-            margin: 18px 0 20px 0;
+            gap: 14px;
+            margin: 0 0 14px 0;
         }
 
         .kpi-card {
             background: #ffffff;
             border-radius: 12px;
-            padding: 16px 18px;
+            padding: 12px 16px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
             border: 1px solid #edf2f7;
             display: flex;
@@ -84,17 +84,17 @@
         .report-filter-panel {
             background: #ffffff;
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 14px 18px;
             border: 1px solid #edf2f7;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .filter-header-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
             gap: 10px;
         }
@@ -220,17 +220,17 @@
         .report-chart-card {
             background: #ffffff;
             border-radius: 12px;
-            padding: 20px;
+            padding: 16px 18px;
             border: 1px solid #edf2f7;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .chart-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
+            margin-bottom: 10px;
         }
 
         .chart-title {
@@ -244,7 +244,7 @@
 
         .chart-container {
             position: relative;
-            height: 280px;
+            height: 220px;
             width: 100%;
         }
 
@@ -255,11 +255,11 @@
             border: 1px solid #edf2f7;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
             overflow: hidden;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .table-header-bar {
-            padding: 16px 20px;
+            padding: 12px 18px;
             border-bottom: 1px solid #edf2f7;
             display: flex;
             align-items: center;
@@ -487,10 +487,10 @@
         }
     </style>
 
+    @include('admin::shared.header', ['header_name' => __('staff_expense_report.title')])
     <div class="content-wrapper staff-expense-report-wrapper" id="staffExpenseReportApp" x-data="xStaffExpenseReport">
-        <!-- Main Header -->
+        <!-- Tab Bar Header -->
         <div class="header box-shadow-bottom">
-            @include('admin::shared.header', ['header_name' => 'Staff Expense Report'])
             <div class="header-tab">
                 <div class="header-tab-wrapper">
                     <div class="menu-row">
@@ -501,12 +501,12 @@
                             <a href="{{ route('admin-report-staff-expense-daily', $currentParams) }}"
                                 class="{{ $viewMode === 'daily' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-event'></i>
-                                {!! \App\Support\Language::translatedValue(['en' => 'Daily Expense Report', 'km' => 'របាយការណ៍ចំណាយប្រចាំថ្ងៃ']) !!}
+                                {{ __('staff_expense_report.tab.daily') }}
                             </a>
                             <a href="{{ route('admin-report-staff-expense-monthly', $currentParams) }}"
                                 class="{{ $viewMode === 'monthly' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-alt'></i>
-                                {!! \App\Support\Language::translatedValue(['en' => 'Monthly Expense Report', 'km' => 'របាយការណ៍ចំណាយប្រចាំខែ']) !!}
+                                {{ __('staff_expense_report.tab.monthly') }}
                             </a>
                         </div>
                     </div>
@@ -514,38 +514,38 @@
                 <div class="header-action-button">
                     <button type="button" @click="exportExcel()" class="btn-excel-export" :disabled="exportLoading">
                         <i class='bx bx-download'></i>
-                        <span x-text="exportLoading ? 'Exporting...' : 'Export Excel'">Export Excel</span>
+                        <span x-text="exportLoading ? '{{ __('staff_expense_report.excel.exporting') }}' : '{{ __('staff_expense_report.button.export_excel') }}'">{{ __('staff_expense_report.button.export_excel') }}</span>
                     </button>
                     <button type="button" s-click-link="{!! url()->current() !!}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
-                        <span>Reload</span>
+                        <span>{{ __('staff_expense_report.button.reload') }}</span>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="content-body" style="padding: 20px;">
+        <div class="content-body" style="padding: 14px 20px 24px 20px;">
             <!-- Filter Panel -->
             <div class="report-filter-panel">
                 <form id="expenseFilterForm" method="GET" action="{{ url()->current() }}">
                     @if ($viewMode === 'daily')
                         <div class="filter-header-row">
                             <div class="preset-badge-group">
-                                <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">Quick Presets:</span>
+                                <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">{{ __('staff_expense_report.presets.title') }}</span>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'today'])) }}"
-                                    class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">Today</a>
+                                    class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">{{ __('staff_expense_report.presets.today') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'yesterday'])) }}"
-                                    class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">Yesterday</a>
+                                    class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">{{ __('staff_expense_report.presets.yesterday') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '7days'])) }}"
-                                    class="preset-btn {{ request('preset') === '7days' ? 'active' : '' }}">Last 7 Days</a>
+                                    class="preset-btn {{ request('preset') === '7days' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_7_days') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '30days'])) }}"
-                                    class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">Last 30 Days</a>
+                                    class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_30_days') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'this_month'])) }}"
-                                    class="preset-btn {{ request('preset') === 'this_month' || (!request('preset') && !request('from_date')) ? 'active' : '' }}">This Month</a>
+                                    class="preset-btn {{ request('preset') === 'this_month' || (!request('preset') && !request('from_date')) ? 'active' : '' }}">{{ __('staff_expense_report.presets.this_month') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'last_month'])) }}"
-                                    class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">Last Month</a>
+                                    class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_month') }}</a>
                             </div>
                         </div>
                     @endif
@@ -553,18 +553,18 @@
                     <div class="filter-form-grid">
                         @if ($viewMode === 'daily')
                             <div class="filter-field-wrap">
-                                <label for="from_date">From Date</label>
+                                <label for="from_date">{{ __('staff_expense_report.filter.from_date') }}</label>
                                 <input type="text" name="from_date" id="from_date" class="filter-input datepicker-input"
-                                    value="{{ $from_date }}" autocomplete="off" placeholder="YYYY-MM-DD">
+                                    value="{{ $from_date }}" autocomplete="off" placeholder="{{ __('staff_expense_report.filter.placeholder_date') }}">
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="to_date">To Date</label>
+                                <label for="to_date">{{ __('staff_expense_report.filter.to_date') }}</label>
                                 <input type="text" name="to_date" id="to_date" class="filter-input datepicker-input"
-                                    value="{{ $to_date }}" autocomplete="off" placeholder="YYYY-MM-DD">
+                                    value="{{ $to_date }}" autocomplete="off" placeholder="{{ __('staff_expense_report.filter.placeholder_date') }}">
                             </div>
                         @else
                             <div class="filter-field-wrap">
-                                <label for="year">Year</label>
+                                <label for="year">{{ __('staff_expense_report.filter.year') }}</label>
                                 <select name="year" id="year" class="filter-select">
                                     @foreach ($availableYears as $yr)
                                         <option value="{{ $yr }}" {{ (int) $selectedYear === (int) $yr ? 'selected' : '' }}>{{ $yr }}</option>
@@ -572,21 +572,21 @@
                                 </select>
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="from_month">From Month</label>
+                                <label for="from_month">{{ __('staff_expense_report.filter.from_month') }}</label>
                                 <select name="from_month" id="from_month" class="filter-select">
                                     @for ($m = 1; $m <= 12; $m++)
                                         <option value="{{ $m }}" {{ (int) $from_month === $m ? 'selected' : '' }}>
-                                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                                            {{ __('staff_expense_report.months.' . $m) }}
                                         </option>
                                     @endfor
                                 </select>
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="to_month">To Month</label>
+                                <label for="to_month">{{ __('staff_expense_report.filter.to_month') }}</label>
                                 <select name="to_month" id="to_month" class="filter-select">
                                     @for ($m = 1; $m <= 12; $m++)
                                         <option value="{{ $m }}" {{ (int) $to_month === $m ? 'selected' : '' }}>
-                                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                                            {{ __('staff_expense_report.months.' . $m) }}
                                         </option>
                                     @endfor
                                 </select>
@@ -594,9 +594,9 @@
                         @endif
 
                         <div class="filter-field-wrap">
-                            <label for="staff_id">Staff Member</label>
+                            <label for="staff_id">{{ __('staff_expense_report.filter.staff') }}</label>
                             <select name="staff_id" id="staff_id" class="filter-select">
-                                <option value="">All Staff Members</option>
+                                <option value="">{{ __('staff_expense_report.filter.all_staff') }}</option>
                                 @foreach ($staffList as $staff)
                                     <option value="{{ $staff->id }}" {{ (string) ($filters['staff_id'] ?? '') === (string) $staff->id ? 'selected' : '' }}>
                                         {{ $staff->name }} {{ $staff->phone_number ? '(' . $staff->phone_number . ')' : '' }}
@@ -606,9 +606,9 @@
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="shop_id">Shop / Branch</label>
+                            <label for="shop_id">{{ __('staff_expense_report.filter.shop') }}</label>
                             <select name="shop_id" id="shop_id" class="filter-select">
-                                <option value="">All Shops / HQ</option>
+                                <option value="">{{ __('staff_expense_report.filter.all_shops') }}</option>
                                 @foreach ($shops as $shop)
                                     <option value="{{ $shop->id }}" {{ (string) ($filters['shop_id'] ?? '') === (string) $shop->id ? 'selected' : '' }}>
                                         {{ $shop->name }}
@@ -618,32 +618,32 @@
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="type">Expense Type</label>
+                            <label for="type">{{ __('staff_expense_report.filter.expense_type') }}</label>
                             <select name="type" id="type" class="filter-select">
-                                <option value="all">All Expense Types</option>
+                                <option value="all">{{ __('staff_expense_report.filter.all_types') }}</option>
                                 @foreach ($expenseTypes as $typeOption)
                                     <option value="{{ $typeOption->value }}" {{ ($filters['type'] ?? '') === $typeOption->value ? 'selected' : '' }}>
-                                        {{ $typeOption->label() }}
+                                        {{ __('staff_expense_report.types.' . strtolower($typeOption->value)) }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="search">Keyword Search</label>
+                            <label for="search">{{ __('staff_expense_report.filter.keyword_search') }}</label>
                             <input type="text" name="search" id="search" class="filter-input"
-                                value="{{ $filters['search'] ?? '' }}" placeholder="Staff name, remark, amount...">
+                                value="{{ $filters['search'] ?? '' }}" placeholder="{{ __('staff_expense_report.filter.placeholder_search') }}">
                         </div>
 
                         <div class="filter-actions-wrap">
                             <button type="submit" class="btn-filter-search">
                                 <i class='bx bx-filter-alt'></i>
-                                <span>Filter</span>
+                                <span>{{ __('staff_expense_report.button.filter') }}</span>
                             </button>
                             <a href="{{ $viewMode === 'daily' ? route('admin-report-staff-expense-daily') : route('admin-report-staff-expense-monthly') }}"
-                                class="btn-filter-reset" title="Reset Filters">
+                                class="btn-filter-reset" title="{{ __('staff_expense_report.button.reset_tooltip') }}">
                                 <i class='bx bx-reset'></i>
-                                <span>Reset</span>
+                                <span>{{ __('staff_expense_report.button.reset') }}</span>
                             </a>
                         </div>
                     </div>
@@ -658,9 +658,9 @@
                         <i class='bx bx-wallet'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Net Total Expense</div>
+                        <div class="kpi-title">{{ __('staff_expense_report.kpi.net_total_expense') }}</div>
                         <div class="kpi-value text-primary">${{ number_format($summary['net_total'], 2) }}</div>
-                        <div class="kpi-sub">Gross Additions - Deductions</div>
+                        <div class="kpi-sub">{{ __('staff_expense_report.kpi.net_sub') }}</div>
                     </div>
                 </div>
 
@@ -670,9 +670,9 @@
                         <i class='bx bx-layer-plus'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Gross Additions</div>
+                        <div class="kpi-title">{{ __('staff_expense_report.kpi.gross_additions') }}</div>
                         <div class="kpi-value">${{ number_format($summary['gross_total'], 2) }}</div>
-                        <div class="kpi-sub">Salary + Bonus + Other</div>
+                        <div class="kpi-sub">{{ __('staff_expense_report.kpi.gross_sub') }}</div>
                     </div>
                 </div>
 
@@ -682,9 +682,9 @@
                         <i class='bx bx-user-check'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Total Salary</div>
+                        <div class="kpi-title">{{ __('staff_expense_report.kpi.total_salary') }}</div>
                         <div class="kpi-value">${{ number_format($summary['salary_total'], 2) }}</div>
-                        <div class="kpi-sub">{{ $summary['type_counts']['Salary'] ?? 0 }} Salary Records</div>
+                        <div class="kpi-sub">{{ $summary['type_counts']['Salary'] ?? 0 }} {{ __('staff_expense_report.kpi.salary_records') }}</div>
                     </div>
                 </div>
 
@@ -694,9 +694,9 @@
                         <i class='bx bx-gift'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Total Bonus</div>
+                        <div class="kpi-title">{{ __('staff_expense_report.kpi.total_bonus') }}</div>
                         <div class="kpi-value text-success">${{ number_format($summary['bonus_total'], 2) }}</div>
-                        <div class="kpi-sub">{{ $summary['type_counts']['Bonus'] ?? 0 }} Bonus Records</div>
+                        <div class="kpi-sub">{{ $summary['type_counts']['Bonus'] ?? 0 }} {{ __('staff_expense_report.kpi.bonus_records') }}</div>
                     </div>
                 </div>
 
@@ -706,9 +706,9 @@
                         <i class='bx bx-minus-circle'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Total Deductions</div>
+                        <div class="kpi-title">{{ __('staff_expense_report.kpi.total_deductions') }}</div>
                         <div class="kpi-value text-danger">-${{ number_format($summary['deduction_total'], 2) }}</div>
-                        <div class="kpi-sub">{{ $summary['type_counts']['Deduction'] ?? 0 }} Deduction Records</div>
+                        <div class="kpi-sub">{{ $summary['type_counts']['Deduction'] ?? 0 }} {{ __('staff_expense_report.kpi.deduction_records') }}</div>
                     </div>
                 </div>
 
@@ -718,9 +718,9 @@
                         <i class='bx bx-group'></i>
                     </div>
                     <div class="kpi-info">
-                        <div class="kpi-title">Transactions & Staff</div>
+                        <div class="kpi-title">{{ __('staff_expense_report.kpi.transactions_staff') }}</div>
                         <div class="kpi-value">{{ number_format($summary['total_transactions']) }}</div>
-                        <div class="kpi-sub">{{ $summary['distinct_staff_count'] }} Active Staff Members</div>
+                        <div class="kpi-sub">{{ $summary['distinct_staff_count'] }} {{ __('staff_expense_report.kpi.active_staff_members') }}</div>
                     </div>
                 </div>
             </div>
@@ -730,7 +730,7 @@
                 <div class="chart-header">
                     <div class="chart-title">
                         <i class='bx bx-line-chart' style="color: #2563eb; font-size: 18px;"></i>
-                        <span>Staff Expense Trend & Category Breakdown ({{ $viewMode === 'daily' ? 'Daily' : 'Monthly' }})</span>
+                        <span>{{ $viewMode === 'daily' ? __('staff_expense_report.chart.daily_trend') : __('staff_expense_report.chart.monthly_trend') }}</span>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -743,8 +743,8 @@
                 <div class="table-header-bar">
                     <div class="table-title">
                         <i class='bx bx-table' style="color: #64748b;"></i>
-                        <span>{{ $viewMode === 'daily' ? 'Daily Aggregated Expense Breakdown' : 'Monthly Aggregated Expense Breakdown' }}</span>
-                        <span class="table-count-badge">{{ $rows->count() }} Periods</span>
+                        <span>{{ $viewMode === 'daily' ? __('staff_expense_report.table.daily_breakdown') : __('staff_expense_report.table.monthly_breakdown') }}</span>
+                        <span class="table-count-badge">{{ $rows->count() }} {{ $viewMode === 'daily' ? __('staff_expense_report.table.days') : __('staff_expense_report.table.months') }}</span>
                     </div>
                 </div>
 
@@ -753,34 +753,34 @@
                         <thead>
                             @if ($viewMode === 'daily')
                                 <tr>
-                                    <th style="width: 50px; text-align: center;">Nº</th>
-                                    <th>Date</th>
-                                    <th>Day</th>
-                                    <th style="text-align: center;">Records</th>
-                                    <th style="text-align: right;">Salary ($)</th>
-                                    <th style="text-align: right;">Bonus ($)</th>
-                                    <th style="text-align: right;">Deductions ($)</th>
-                                    <th style="text-align: right;">Other ($)</th>
-                                    <th style="text-align: right;">Gross Total ($)</th>
-                                    <th style="text-align: right;">Net Expense ($)</th>
-                                    <th>Top Staff / Branch</th>
-                                    <th style="text-align: center; width: 110px;">Action</th>
+                                    <th style="width: 50px; text-align: center;">{{ __('staff_expense_report.table.no') }}</th>
+                                    <th>{{ __('staff_expense_report.table.date') }}</th>
+                                    <th>{{ __('staff_expense_report.table.day') }}</th>
+                                    <th style="text-align: center;">{{ __('staff_expense_report.table.records') }}</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.salary') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.bonus') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.deductions') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.other') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.gross_total') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.net_expense') }} ($)</th>
+                                    <th>{{ __('staff_expense_report.table.top_staff_branch') }}</th>
+                                    <th style="text-align: center; width: 110px;">{{ __('staff_expense_report.table.action') }}</th>
                                 </tr>
                             @else
                                 <tr>
-                                    <th style="width: 50px; text-align: center;">Nº</th>
-                                    <th>Month</th>
-                                    <th style="text-align: center;">Active Days</th>
-                                    <th style="text-align: center;">Records</th>
-                                    <th style="text-align: right;">Salary ($)</th>
-                                    <th style="text-align: right;">Bonus ($)</th>
-                                    <th style="text-align: right;">Deductions ($)</th>
-                                    <th style="text-align: right;">Other ($)</th>
-                                    <th style="text-align: right;">Gross Total ($)</th>
-                                    <th style="text-align: right;">Net Expense ($)</th>
-                                    <th style="text-align: right;">Avg Daily ($)</th>
-                                    <th>Top Staff</th>
-                                    <th style="text-align: center; width: 110px;">Action</th>
+                                    <th style="width: 50px; text-align: center;">{{ __('staff_expense_report.table.no') }}</th>
+                                    <th>{{ __('staff_expense_report.table.month') }}</th>
+                                    <th style="text-align: center;">{{ __('staff_expense_report.table.active_days') }}</th>
+                                    <th style="text-align: center;">{{ __('staff_expense_report.table.records') }}</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.salary') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.bonus') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.deductions') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.other') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.gross_total') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.net_expense') }} ($)</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.avg_daily') }} ($)</th>
+                                    <th>{{ __('staff_expense_report.table.top_staff') }}</th>
+                                    <th style="text-align: center; width: 110px;">{{ __('staff_expense_report.table.action') }}</th>
                                 </tr>
                             @endif
                         </thead>
@@ -792,7 +792,7 @@
                                         <td>
                                             <strong style="color: #0f172a;">{{ $row->date_formatted }}</strong>
                                             @if ($row->is_today)
-                                                <span class="badge bg-success" style="font-size: 10px; margin-left: 4px;">Today</span>
+                                                <span class="badge bg-success" style="font-size: 10px; margin-left: 4px;">{{ __('staff_expense_report.badge.today') }}</span>
                                             @endif
                                         </td>
                                         <td>
@@ -816,7 +816,7 @@
                                         <td style="text-align: center;">
                                             <button type="button" class="btn-view-details" @click="openPeriodDetails('{{ $row->date }}')">
                                                 <i class='bx bx-show'></i>
-                                                <span>Details</span>
+                                                <span>{{ __('staff_expense_report.button.details') }}</span>
                                             </button>
                                         </td>
                                     </tr>
@@ -824,10 +824,14 @@
                                     <tr>
                                         <td style="text-align: center; color: #94a3b8;">{{ $row->index }}</td>
                                         <td>
-                                            <strong style="color: #0f172a;">{{ $row->month_name }}</strong>
+                                            @php
+                                                $cMonthNum = (int) \Carbon\Carbon::createFromFormat('Y-m', $row->month_key)->month;
+                                                $cYearNum = \Carbon\Carbon::createFromFormat('Y-m', $row->month_key)->year;
+                                            @endphp
+                                            <strong style="color: #0f172a;">{{ __('staff_expense_report.months.' . $cMonthNum) }} {{ $cYearNum }}</strong>
                                         </td>
                                         <td style="text-align: center;">
-                                            <span style="font-weight: 600; color: #475569;">{{ $row->active_days }} days</span>
+                                            <span style="font-weight: 600; color: #475569;">{{ $row->active_days }} {{ __('staff_expense_report.table.days') }}</span>
                                         </td>
                                         <td style="text-align: center;">
                                             <span class="table-count-badge">{{ $row->transactions_count }}</span>
@@ -846,7 +850,7 @@
                                         <td style="text-align: center;">
                                             <button type="button" class="btn-view-details" @click="openPeriodDetails('{{ $row->month_key }}')">
                                                 <i class='bx bx-show'></i>
-                                                <span>Details</span>
+                                                <span>{{ __('staff_expense_report.button.details') }}</span>
                                             </button>
                                         </td>
                                     </tr>
@@ -855,8 +859,8 @@
                                 <tr>
                                     <td colspan="{{ $viewMode === 'daily' ? 12 : 13 }}" class="empty-placeholder">
                                         <i class='bx bx-receipt'></i>
-                                        <h4>No Expense Records Found</h4>
-                                        <p>No staff expense entries match the selected filters and date range.</p>
+                                        <h4>{{ __('staff_expense_report.empty.title') }}</h4>
+                                        <p>{{ __('staff_expense_report.empty.description') }}</p>
                                     </td>
                                 </tr>
                             @endforelse
@@ -865,7 +869,7 @@
                             <tfoot>
                                 @if ($viewMode === 'daily')
                                     <tr>
-                                        <td colspan="3" style="text-align: right; text-transform: uppercase;">Grand Total:</td>
+                                        <td colspan="3" style="text-align: right; text-transform: uppercase;">{{ __('staff_expense_report.table.grand_total') }}:</td>
                                         <td style="text-align: center;"><span class="table-count-badge">{{ number_format($summary['total_transactions']) }}</span></td>
                                         <td style="text-align: right;" class="currency-pos">${{ number_format($summary['salary_total'], 2) }}</td>
                                         <td style="text-align: right;" class="currency-pos">${{ number_format($summary['bonus_total'], 2) }}</td>
@@ -877,7 +881,7 @@
                                     </tr>
                                 @else
                                     <tr>
-                                        <td colspan="3" style="text-align: right; text-transform: uppercase;">Grand Total:</td>
+                                        <td colspan="3" style="text-align: right; text-transform: uppercase;">{{ __('staff_expense_report.table.grand_total') }}:</td>
                                         <td style="text-align: center;"><span class="table-count-badge">{{ number_format($summary['total_transactions']) }}</span></td>
                                         <td style="text-align: right;" class="currency-pos">${{ number_format($summary['salary_total'], 2) }}</td>
                                         <td style="text-align: right;" class="currency-pos">${{ number_format($summary['bonus_total'], 2) }}</td>
@@ -902,8 +906,8 @@
                     <div class="modal-header">
                         <div class="modal-title">
                             <i class='bx bx-list-check' style="color: #2563eb;"></i>
-                            <span>Period Expenses: </span>
-                            <span style="color: #2563eb;" x-text="periodData ? periodData.period_label : 'Loading...'"></span>
+                            <span>{{ __('staff_expense_report.modal.period_expenses') }}: </span>
+                            <span style="color: #2563eb;" x-text="periodData ? periodData.period_label : '{{ __('staff_expense_report.modal.loading') }}'"></span>
                         </div>
                         <button type="button" class="modal-close-btn" @click="closePeriodDetails()">&times;</button>
                     </div>
@@ -913,7 +917,7 @@
                         <template x-if="modalLoading">
                             <div class="empty-placeholder">
                                 <i class='bx bx-loader-alt bx-spin' style="font-size: 40px; color: #2563eb;"></i>
-                                <p style="margin-top: 10px; font-weight: 500;">Loading expense records...</p>
+                                <p style="margin-top: 10px; font-weight: 500;">{{ __('staff_expense_report.modal.loading') }}</p>
                             </div>
                         </template>
 
@@ -923,27 +927,27 @@
                                 <!-- Period Summary Cards -->
                                 <div class="modal-period-summary">
                                     <div class="modal-summary-box">
-                                        <span>Net Expense</span>
+                                        <span>{{ __('staff_expense_report.modal.net_expense') }}</span>
                                         <strong style="color: #2563eb;" x-text="'$' + Number(periodData.net_total || 0).toFixed(2)"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Salary</span>
+                                        <span>{{ __('staff_expense_report.modal.salary') }}</span>
                                         <strong style="color: #059669;" x-text="'$' + Number(periodData.salary_total || 0).toFixed(2)"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Bonus</span>
+                                        <span>{{ __('staff_expense_report.modal.bonus') }}</span>
                                         <strong style="color: #059669;" x-text="'$' + Number(periodData.bonus_total || 0).toFixed(2)"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Deductions</span>
+                                        <span>{{ __('staff_expense_report.modal.deductions') }}</span>
                                         <strong style="color: #dc2626;" x-text="'-$' + Number(periodData.deduction_total || 0).toFixed(2)"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Other Expense</span>
+                                        <span>{{ __('staff_expense_report.modal.other_expense') }}</span>
                                         <strong style="color: #475569;" x-text="'$' + Number(periodData.other_total || 0).toFixed(2)"></strong>
                                     </div>
                                     <div class="modal-summary-box">
-                                        <span>Total Records</span>
+                                        <span>{{ __('staff_expense_report.modal.total_records') }}</span>
                                         <strong x-text="periodData.count"></strong>
                                     </div>
                                 </div>
@@ -951,10 +955,10 @@
                                 <!-- Quick Search inside Modal -->
                                 <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
                                     <input type="text" x-model="modalSearch" class="filter-input"
-                                        placeholder="Search staff, position, type, description..."
+                                        placeholder="{{ __('staff_expense_report.modal.search_placeholder') }}"
                                         style="max-width: 320px; height: 34px; font-size: 12px;">
                                     <span style="font-size: 12px; color: #64748b;"
-                                        x-text="'Showing ' + filteredModalExpenses.length + ' of ' + periodData.count + ' transactions'"></span>
+                                        x-text="'{{ __('staff_expense_report.modal.showing') }} ' + filteredModalExpenses.length + ' {{ __('staff_expense_report.modal.of') }} ' + periodData.count + ' {{ __('staff_expense_report.modal.transactions') }}'"></span>
                                 </div>
 
                                 <!-- Itemized Expense Table -->
@@ -962,14 +966,14 @@
                                     <table class="expense-data-table">
                                         <thead>
                                             <tr>
-                                                <th style="width: 45px; text-align: center;">ID</th>
-                                                <th>Date</th>
-                                                <th>Staff Member</th>
-                                                <th>Shop / HQ</th>
-                                                <th style="text-align: center;">Type</th>
-                                                <th style="text-align: right;">Amount</th>
-                                                <th>Description / Remarks</th>
-                                                <th>Created By</th>
+                                                <th style="width: 45px; text-align: center;">{{ __('staff_expense_report.modal.table.id') }}</th>
+                                                <th>{{ __('staff_expense_report.modal.table.date') }}</th>
+                                                <th>{{ __('staff_expense_report.modal.table.staff') }}</th>
+                                                <th>{{ __('staff_expense_report.modal.table.shop') }}</th>
+                                                <th style="text-align: center;">{{ __('staff_expense_report.modal.table.type') }}</th>
+                                                <th style="text-align: right;">{{ __('staff_expense_report.modal.table.amount') }}</th>
+                                                <th>{{ __('staff_expense_report.modal.table.description') }}</th>
+                                                <th>{{ __('staff_expense_report.modal.table.created_by') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1003,7 +1007,7 @@
                                             <template x-if="filteredModalExpenses.length === 0">
                                                 <tr>
                                                     <td colspan="8" class="empty-placeholder" style="padding: 24px;">
-                                                        <p>No transactions matching search query.</p>
+                                                        <p>{{ __('staff_expense_report.modal.no_matching') }}</p>
                                                     </td>
                                                 </tr>
                                             </template>
@@ -1072,7 +1076,7 @@
                         this.periodData = response.data;
                     } catch (err) {
                         console.error('Failed to load period expenses:', err);
-                        alert('Could not load period expense transactions. Please try again.');
+                        alert('{{ __('staff_expense_report.modal.load_error') }}');
                         this.showDetailModal = false;
                     } finally {
                         this.modalLoading = false;
@@ -1094,23 +1098,23 @@
                         const reportData = response.data;
 
                         const workbook = new ExcelJS.Workbook();
-                        const sheetName = this.viewMode === 'monthly' ? 'Monthly Staff Expense Report' : 'Daily Staff Expense Report';
+                        const sheetName = this.viewMode === 'monthly' ? '{{ __('staff_expense_report.excel.sheet_monthly') }}' : '{{ __('staff_expense_report.excel.sheet_daily') }}';
                         const worksheet = workbook.addWorksheet(sheetName);
 
                         if (this.viewMode === 'daily') {
                             worksheet.columns = [
-                                { header: 'Nº', key: 'index', width: 8 },
-                                { header: 'Date', key: 'date', width: 16 },
-                                { header: 'Day', key: 'day_name', width: 10 },
-                                { header: 'Records Count', key: 'transactions_count', width: 16 },
-                                { header: 'Salary ($)', key: 'salary_total', width: 16 },
-                                { header: 'Bonus ($)', key: 'bonus_total', width: 16 },
-                                { header: 'Deductions ($)', key: 'deduction_total', width: 16 },
-                                { header: 'Other ($)', key: 'other_total', width: 16 },
-                                { header: 'Gross Additions ($)', key: 'gross_total', width: 18 },
-                                { header: 'Net Expense ($)', key: 'net_total', width: 18 },
-                                { header: 'Top Staff', key: 'top_staff', width: 26 },
-                                { header: 'Top Branch', key: 'top_shop', width: 20 },
+                                { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('staff_expense_report.excel.date') }}', key: 'date', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.day') }}', key: 'day_name', width: 10 },
+                                { header: '{{ __('staff_expense_report.excel.records_count') }}', key: 'transactions_count', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.salary') }} ($)', key: 'salary_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.bonus') }} ($)', key: 'bonus_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.deductions') }} ($)', key: 'deduction_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.other') }} ($)', key: 'other_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.gross_total') }} ($)', key: 'gross_total', width: 18 },
+                                { header: '{{ __('staff_expense_report.excel.net_expense') }} ($)', key: 'net_total', width: 18 },
+                                { header: '{{ __('staff_expense_report.excel.top_staff') }}', key: 'top_staff', width: 26 },
+                                { header: '{{ __('staff_expense_report.excel.top_branch') }}', key: 'top_shop', width: 20 },
                             ];
 
                             reportData.rows.forEach((r) => {
@@ -1131,19 +1135,19 @@
                             });
                         } else {
                             worksheet.columns = [
-                                { header: 'Nº', key: 'index', width: 8 },
-                                { header: 'Month', key: 'month_name', width: 18 },
-                                { header: 'Active Days', key: 'active_days', width: 14 },
-                                { header: 'Records Count', key: 'transactions_count', width: 16 },
-                                { header: 'Salary ($)', key: 'salary_total', width: 16 },
-                                { header: 'Bonus ($)', key: 'bonus_total', width: 16 },
-                                { header: 'Deductions ($)', key: 'deduction_total', width: 16 },
-                                { header: 'Other ($)', key: 'other_total', width: 16 },
-                                { header: 'Gross Additions ($)', key: 'gross_total', width: 18 },
-                                { header: 'Net Expense ($)', key: 'net_total', width: 18 },
-                                { header: 'Avg Daily Expense ($)', key: 'avg_daily_expense', width: 20 },
-                                { header: 'Top Staff', key: 'top_staff', width: 26 },
-                                { header: 'Top Branch', key: 'top_shop', width: 20 },
+                                { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('staff_expense_report.excel.month') }}', key: 'month_name', width: 18 },
+                                { header: '{{ __('staff_expense_report.excel.active_days') }}', key: 'active_days', width: 14 },
+                                { header: '{{ __('staff_expense_report.excel.records_count') }}', key: 'transactions_count', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.salary') }} ($)', key: 'salary_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.bonus') }} ($)', key: 'bonus_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.deductions') }} ($)', key: 'deduction_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.other') }} ($)', key: 'other_total', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.gross_total') }} ($)', key: 'gross_total', width: 18 },
+                                { header: '{{ __('staff_expense_report.excel.net_expense') }} ($)', key: 'net_total', width: 18 },
+                                { header: '{{ __('staff_expense_report.excel.avg_daily') }} ($)', key: 'avg_daily_expense', width: 20 },
+                                { header: '{{ __('staff_expense_report.excel.top_staff') }}', key: 'top_staff', width: 26 },
+                                { header: '{{ __('staff_expense_report.excel.top_branch') }}', key: 'top_shop', width: 20 },
                             ];
 
                             reportData.rows.forEach((r) => {
@@ -1176,11 +1180,11 @@
                         const blob = new Blob([buffer], {
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         });
-                        const filename = (this.viewMode === 'monthly' ? 'Monthly_Staff_Expense_Report_' : 'Daily_Staff_Expense_Report_') + moment().format('YYYY_MM_DD_HHmmss');
+                        const filename = (this.viewMode === 'monthly' ? '{{ __('staff_expense_report.excel.file_monthly_prefix') }}' : '{{ __('staff_expense_report.excel.file_daily_prefix') }}') + moment().format('YYYY_MM_DD_HHmmss');
                         saveAs(blob, filename);
                     } catch (err) {
                         console.error('Export failed:', err);
-                        alert('Excel export failed. Please try again.');
+                        alert('{{ __('staff_expense_report.excel.export_failed') }}');
                     } finally {
                         this.exportLoading = false;
                     }
@@ -1224,7 +1228,7 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Salary ($)',
+                            label: '{{ __('staff_expense_report.chart.salary') }} ($)',
                             data: salaryData,
                             backgroundColor: 'rgba(20, 184, 166, 0.7)',
                             borderColor: '#0d9488',
@@ -1232,7 +1236,7 @@
                             borderRadius: 4,
                         },
                         {
-                            label: 'Bonus ($)',
+                            label: '{{ __('staff_expense_report.chart.bonus') }} ($)',
                             data: bonusData,
                             backgroundColor: 'rgba(16, 185, 129, 0.7)',
                             borderColor: '#10b981',
@@ -1240,7 +1244,7 @@
                             borderRadius: 4,
                         },
                         {
-                            label: 'Other ($)',
+                            label: '{{ __('staff_expense_report.chart.other') }} ($)',
                             data: otherData,
                             backgroundColor: 'rgba(100, 116, 139, 0.7)',
                             borderColor: '#64748b',
@@ -1248,7 +1252,7 @@
                             borderRadius: 4,
                         },
                         {
-                            label: 'Deductions ($)',
+                            label: '{{ __('staff_expense_report.chart.deductions') }} ($)',
                             data: deductionData,
                             backgroundColor: 'rgba(239, 68, 68, 0.7)',
                             borderColor: '#ef4444',
@@ -1256,7 +1260,7 @@
                             borderRadius: 4,
                         },
                         {
-                            label: 'Net Expense ($)',
+                            label: '{{ __('staff_expense_report.chart.net_expense') }} ($)',
                             data: netData,
                             type: 'line',
                             borderColor: '#2563eb',

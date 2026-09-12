@@ -237,7 +237,7 @@ return [
         'type'  => 'dropdown-multiple',
         'label' => [
             'en' => 'Inventory Management',
-            'km' => 'ការកំណត់ និងកម្មវិធី',
+            'km' => 'ការគ្រប់គ្រងស្តុក',
         ],
         'listMenu' => [
             [
@@ -259,7 +259,7 @@ return [
                 'permission' => ['stock-out-view'],
                 'name' => [
                     'en' => 'Stock Out',
-                    'km' => 'ការបញ្ចូលស្តុក',
+                    'km' => 'ការដកស្តុក',
                 ],
                 'icon' => 'bx-universal-access',
                 'dropDown' => 'disable',
@@ -271,7 +271,7 @@ return [
                 'permission' => ['stock-transfer-view'],
                 'name' => [
                     'en' => 'Stock Transfer',
-                    'km' => 'ការផ្លាស់ប្ដូរស្តុក',
+                    'km' => 'ការផ្ទេរស្តុក',
                 ],
                 'icon' => 'bxl-redux',
                 'dropDown' => 'disable',
@@ -536,7 +536,7 @@ return [
                         'permission' => 'uom-view',
                         'name' => [
                             'en' => 'Unit of Measure',
-                            'km' => 'Unit of Measure',
+                            'km' => 'ខ្នាត',
                         ],
                         'icon' => 'bx-ruler',
                     ]

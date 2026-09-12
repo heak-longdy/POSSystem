@@ -115,11 +115,11 @@ class StockOutController extends Controller
                     $this->stockTransaction->applyStockOut($stockOut);
                 }
 
-                $message = 'Update success.';
+                $message = __('stock_out.message.update_success');
             } else {
                 $stockOut = StockOut::create($this->payload($req));
                 $this->stockTransaction->applyStockOut($stockOut);
-                $message = 'Create success.';
+                $message = __('stock_out.message.create_success');
             }
 
             DB::commit();
@@ -135,7 +135,7 @@ class StockOutController extends Controller
             throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
-            Session::flash('warning', $id ? 'Update unsuccess!' : 'Create unsuccess!');
+            Session::flash('warning', $id ? __('stock_out.message.update_failed') : __('stock_out.message.create_failed'));
 
             return redirect()->back()->withInput();
         }
@@ -159,7 +159,7 @@ class StockOutController extends Controller
             }
 
             DB::commit();
-            Session::flash('success', (int) $status === 2 ? 'Disable successful!' : 'Enable successful!');
+            Session::flash('success', (int) $status === 2 ? __('stock_out.message.disable_success') : __('stock_out.message.enable_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -167,7 +167,7 @@ class StockOutController extends Controller
             return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
-            Session::flash('warning', 'Status unsuccess!');
+            Session::flash('warning', __('stock_out.message.status_failed'));
 
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }
@@ -185,7 +185,7 @@ class StockOutController extends Controller
             $stockOut->delete();
 
             DB::commit();
-            Session::flash('success', 'Delete success!');
+            Session::flash('success', __('stock_out.message.delete_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -193,7 +193,7 @@ class StockOutController extends Controller
             return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
-            Session::flash('warning', 'Delete unsuccess!');
+            Session::flash('warning', __('stock_out.message.delete_failed'));
 
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }
@@ -211,7 +211,7 @@ class StockOutController extends Controller
             }
 
             DB::commit();
-            Session::flash('success', 'Restore success!');
+            Session::flash('success', __('stock_out.message.restore_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -219,7 +219,7 @@ class StockOutController extends Controller
             return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
-            Session::flash('warning', 'Restore unsuccess!');
+            Session::flash('warning', __('stock_out.message.restore_failed'));
 
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }
@@ -238,7 +238,7 @@ class StockOutController extends Controller
             $stockOut->forceDelete();
 
             DB::commit();
-            Session::flash('success', 'Delete success!');
+            Session::flash('success', __('stock_out.message.destroy_success'));
 
             return response()->json(['message' => 'success', 'status' => 200]);
         } catch (ValidationException $e) {
@@ -246,7 +246,7 @@ class StockOutController extends Controller
             return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
-            Session::flash('warning', 'Delete unsuccess!');
+            Session::flash('warning', __('stock_out.message.destroy_failed'));
 
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }

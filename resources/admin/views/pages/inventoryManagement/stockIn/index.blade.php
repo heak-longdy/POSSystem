@@ -1,10 +1,10 @@
 @extends('admin::shared.layout')
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Stock In Management'])
+    @include('admin::shared.header', ['header_name' => __('stock_in.title')])
     <div class="content-wrapper" id="app" x-data="xIndex">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
-            'createName' => 'Create Stock In',
+            'createName' => __('stock_in.button.create'),
             'createPermission' => 'stock-in-create',
             'filterStatus' => false,
             // 'filterView' => 'admin::pages.inventoryManagement.partials.stock-filter',
@@ -14,16 +14,16 @@
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
-                ['field' => 'product_title', 'title' => 'Product', 'class' => 'text left', 'colVal' => 16],
-                ['field' => 'shop_title', 'title' => 'Shop', 'class' => 'text left', 'colVal' => 12],
-                ['field' => 'supplier_title', 'title' => 'Supplier', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'category_title', 'title' => 'Category', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'uom_title', 'title' => 'UOM', 'class' => '', 'colVal' => 5],
-                ['field' => 'qty', 'title' => 'Qty', 'class' => '', 'colVal' => 7],
-                ['field' => 'created_date', 'title' => 'Date', 'class' => '', 'colVal' => 12],
-                ['field' => 'request_by_title', 'title' => 'Requested By', 'class' => 'text left', 'colVal' => 8],
-                ['field' => 'stock_status_title', 'title' => 'Status', 'class' => '', 'colVal' => 10],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
+                ['field' => 'product_title', 'title' => __('stock_in.table.product'), 'class' => 'text left', 'colVal' => 16],
+                ['field' => 'shop_title', 'title' => __('stock_in.table.shop'), 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'supplier_title', 'title' => __('stock_in.table.supplier'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'category_title', 'title' => __('stock_in.table.category'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'uom_title', 'title' => __('stock_in.table.uom'), 'class' => '', 'colVal' => 5],
+                ['field' => 'qty', 'title' => __('stock_in.table.qty'), 'class' => '', 'colVal' => 7],
+                ['field' => 'created_date', 'title' => __('stock_in.table.date'), 'class' => '', 'colVal' => 12],
+                ['field' => 'request_by_title', 'title' => __('stock_in.table.requested_by'), 'class' => 'text left', 'colVal' => 8],
+                ['field' => 'stock_status_title', 'title' => __('stock_in.table.status'), 'class' => '', 'colVal' => 10],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -33,24 +33,24 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'view', 'title' => 'View', 'icon' => 'visibility', 'type' => 'link'],
-                                ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
-                                ['url' => 'delete', 'title' => 'Delete', 'icon' => 'Delete', 'class' => 'text-danger'],
+                                ['url' => 'view', 'title' => __('global.action.view'), 'icon' => 'visibility', 'type' => 'link'],
+                                ['url' => 'edit', 'title' => __('global.action.edit'), 'icon' => 'edit', 'type' => 'link'],
+                                ['url' => 'delete', 'title' => __('global.action.delete'), 'icon' => 'Delete', 'class' => 'text-danger'],
                             ],
                         ],
                         [
                             'key' => 'disable',
-                            'action' => [['url' => 'status', 'title' => 'Disable', 'icon' => 'hide_source', 'class' => 'text-danger']],
+                            'action' => [['url' => 'status', 'title' => __('global.action.disable'), 'icon' => 'hide_source', 'class' => 'text-danger']],
                         ],
                         [
                             'key' => 'enable',
-                            'action' => [['url' => 'status', 'title' => 'Enable', 'icon' => 'refresh']],
+                            'action' => [['url' => 'status', 'title' => __('global.action.enable'), 'icon' => 'refresh']],
                         ],
                         [
                             'key' => 'trash',
                             'action' => [
-                                ['url' => 'restore', 'title' => 'Restore', 'icon' => 'settings_backup_restore'],
-                                ['url' => 'destroy', 'title' => 'Destroy', 'icon' => 'Delete', 'class' => 'text-danger'],
+                                ['url' => 'restore', 'title' => __('global.action.restore'), 'icon' => 'settings_backup_restore'],
+                                ['url' => 'destroy', 'title' => __('global.action.destroy'), 'icon' => 'Delete', 'class' => 'text-danger'],
                             ],
                         ],
                     ],
