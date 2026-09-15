@@ -24,7 +24,7 @@ class RemainingAmountController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:booking-view', ['only' => ['index', 'getPaymentDetails', 'report']]);
+        $this->middleware('permission:booking-view', ['only' => ['index', 'getPaymentDetails', 'report', 'show']]);
         $this->middleware('permission:booking-update', ['only' => ['addPayment', 'updatePayment', 'sendPaymentReminder']]);
         $this->middleware('permission:booking-delete', ['only' => ['deletePayment']]);
     }
@@ -103,6 +103,36 @@ class RemainingAmountController extends Controller
             'firstMonthDay' => $dates['from'],
             'lastMonthDay' => $dates['to'],
         ]);
+    }
+
+    public function show($id = null)
+    {
+        if (!$id) {
+            return redirect()->route('admin-' . $this->routeName . '-list', 'all');
+        }
+
+        $booking = Booking::withTrashed()->with([
+            'customer',
+            'shop',
+            'barber',
+            'bookingDetail' => function ($detail) {
+                $detail->withTrashed()->with(['service', 'product']);
+            },
+            'payments.createdBy',
+        ])->find($id);
+
+        if (!$booking) {
+            Session::flash('warning', __('booking.message.not_found'));
+            return redirect()->route('admin-' . $this->routeName . '-list', 'all');
+        }
+
+        $data['booking'] = $booking;
+        $data['routeName'] = $this->routeName;
+        $data['canEdit'] = $booking->payment_status === 'Pending' && !$booking->trashed();
+        $data['canAddPayment'] = $booking->payment_status !== 'Cancel' && !$booking->trashed() && (float) $booking->remaining_amount > 0;
+        $data['canCancel'] = $booking->payment_status === 'Pending' && !$booking->trashed() && (float) ($booking->paid_amount ?? 0) <= 0;
+
+        return view($this->layout . 'detail', $data);
     }
 
     public function getPaymentDetails($id)
@@ -491,6 +521,7 @@ class RemainingAmountController extends Controller
             $item->booking_date_title = $item->booking_date
                 ? Carbon::parse($item->booking_date)->format('Y-m-d H:i')
                 : '---';
+            $item->can_add_payment = ($item->payment_status !== 'Cancel' && (float) ($item->remaining_amount ?? 0) > 0);
         }
     }
 
@@ -513,7 +544,7 @@ class RemainingAmountController extends Controller
             $qty = (int) ($detail->qty ?: 1);
 
             return "<span>- {$name} ({$qty})</span>";
-        })->implode('<br>');
+        })->implode('');
     }
 
     private function paymentStatusBadge(Booking $booking)

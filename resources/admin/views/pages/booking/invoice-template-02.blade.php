@@ -15,8 +15,8 @@
     $driverName = $booking->barber?->name ?: ($booking->payments->first()?->createdBy?->name ?: 'សាខាអ្នកដឹក');
 
     $details = $booking->bookingDetail ?: collect();
-    $minRows = 6;
-    $emptyRowsCount = max(0, $minRows - $details->count());
+    $minRows = 3;
+    $emptyRowsCount = max(0, min(3, $minRows - $details->count()));
 @endphp
 
 <div class="pos-slip-sheet" id="posSlipPrintArea">
@@ -24,13 +24,22 @@
     <div class="slip-top-row">
         <div class="slip-top-left"></div>
         <div class="slip-top-center">
-            <h1 class="slip-title-khmer">បង្កាន់ដៃ</h1>
+            <h1 class="slip-title-khmer">{{ __('booking.invoice.slip_title') }}</h1>
         </div>
         <div class="slip-top-right">
-            <div class="slip-meta-text">{{ $bDate->format('n/j/y') }} {{ $bDate->format('g:iA') }} <span class="draft-tag">(DRAFT)</span> OEB</div>
-            <div class="slip-meta-item"><span class="lbl">Inv. No.</span> <strong class="val">{{ $invoiceNo }}</strong></div>
-            <div class="slip-meta-item"><span class="lbl">ថ្ងៃចេញ</span> <span class="val">{{ $bDate->format('d/m/Y') }}</span></div>
-            <div class="slip-meta-item"><span class="lbl">ថ្ងៃដឹក</span> <span class="val">{{ $deliveryDate->format('d/m/Y') }}</span></div>
+            <div class="slip-meta-text">{{ $bDate->format('n/j/y') }} {{ $bDate->format('g:iA') }} <span class="draft-tag">{{ __('booking.invoice.slip_draft') }}</span></div>
+            <div class="slip-meta-item">
+                <span class="lbl">{{ __('booking.invoice.slip_inv_no') }}</span> 
+                <strong class="val">{{ $invoiceNo }}</strong>
+            </div>
+            <div class="slip-meta-item">
+                <span class="lbl">{{ __('booking.invoice.slip_issue_date') }}</span> 
+                <span class="val">{{ $bDate->format('d/m/Y') }}</span>
+            </div>
+            <div class="slip-meta-item">
+                <span class="lbl">{{ __('booking.invoice.slip_delivery_date') }}</span> 
+                <span class="val">{{ $deliveryDate->format('d/m/Y') }}</span>
+            </div>
         </div>
     </div>
 
@@ -39,15 +48,15 @@
         <!-- Customer Info -->
         <div class="slip-info-col col-cust">
             <div class="info-row">
-                <span class="info-lbl">ឈ្មោះ:</span>
+                <span class="info-lbl">{{ __('booking.invoice.slip_cust_name') }}</span>
                 <span class="info-val"><span class="cust-code">{{ $customerCode }}</span> {{ $cName }}</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">អា/ដ្ឋាន</span>
+                <span class="info-lbl">{{ __('booking.invoice.slip_cust_address') }}</span>
                 <span class="info-val">{{ $cAddress }}</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">Tel :</span>
+                <span class="info-lbl">{{ __('booking.invoice.tel') }}</span>
                 <span class="info-val">{{ $cPhone }}</span>
             </div>
         </div>
@@ -55,15 +64,15 @@
         <!-- Depot / Shop Info -->
         <div class="slip-info-col col-depot">
             <div class="info-row">
-                <span class="info-lbl">ឈ្មោះដេប៉ូ</span>
+                <span class="info-lbl">{{ __('booking.invoice.slip_depot_name') }}</span>
                 <strong class="info-val">{{ $shopName }}</strong>
             </div>
             <div class="info-row">
-                <span class="info-lbl">អា/ដ្ឋាន</span>
+                <span class="info-lbl">{{ __('booking.invoice.slip_depot_address') }}</span>
                 <span class="info-val">{{ $shopAddress }}</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">Tel :</span>
+                <span class="info-lbl">{{ __('booking.invoice.tel') }}</span>
                 <span class="info-val">{{ $shopPhone }}</span>
             </div>
         </div>
@@ -71,7 +80,7 @@
         <!-- District & Delivery Branch Info -->
         <div class="slip-info-col col-dist">
             <div class="info-row">
-                <span class="info-lbl">ស្រុករាជធានី</span>
+                <span class="info-lbl">{{ __('booking.invoice.slip_district') }}</span>
                 <span class="info-val">{{ $shopCity }}</span>
             </div>
             <div class="info-row spacer-row">
@@ -79,7 +88,7 @@
                 <span class="info-val">&nbsp;</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">សាខាអ្នកដឹក</span>
+                <span class="info-lbl">{{ __('booking.invoice.slip_delivery_branch') }}</span>
                 <span class="info-val">{{ $driverName }}</span>
             </div>
         </div>
@@ -89,35 +98,41 @@
     <table class="slip-grid-table">
         <thead>
             <tr>
-                <th rowspan="2" class="th-no">No</th>
-                <th rowspan="2" class="th-code">លេខកូដ</th>
-                <th rowspan="2" class="th-desc">ឈ្មោះផលិតផល</th>
-                <th rowspan="2" class="th-uom">ខ្នាត</th>
-                <th colspan="2" class="th-qty-group">បរិមាណ</th>
-                <th colspan="2" class="th-qty-group">បរិមាណដឹក</th>
-                <th rowspan="2" class="th-price">ថ្លៃដើម($)</th>
+                <th rowspan="2" class="th-no">{{ __('booking.invoice.slip_col_no') }}</th>
+                <th rowspan="2" class="th-code">{{ __('booking.invoice.slip_col_code') }}</th>
+                <th rowspan="2" class="th-desc">{{ __('booking.invoice.slip_col_desc') }}</th>
+                <th rowspan="2" class="th-uom">{{ __('booking.invoice.slip_col_uom') }}</th>
+                <th colspan="2" class="th-qty-group">{{ __('booking.invoice.slip_col_qty') }}</th>
+                <th colspan="2" class="th-qty-group">{{ __('booking.invoice.slip_col_deliv_qty') }}</th>
+                <th rowspan="2" class="th-price">{{ __('booking.invoice.slip_col_cost') }}</th>
                 <th rowspan="2" class="th-disc">
-                    តម្លៃបញ្ចុះ($)<br>
-                    <span class="th-subtext">កញ្ចប់បន្ថែម($)</span>
+                    {{ __('booking.invoice.slip_col_discount') }}<br>
+                    <span class="th-subtext">{{ __('booking.invoice.slip_col_promo') }}</span>
                 </th>
                 <th rowspan="2" class="th-net">
-                    គិតគិតថ្លៃ<br>
-                    <span class="th-subtext">កេស កប</span>
+                    {{ __('booking.invoice.slip_col_net_price') }}<br>
+                    <span class="th-subtext">{{ __('booking.invoice.slip_col_net_sub') }}</span>
                 </th>
-                <th rowspan="2" class="th-total">តម្លៃសរុប($)</th>
+                <th rowspan="2" class="th-total">{{ __('booking.invoice.slip_col_total') }}</th>
             </tr>
             <tr class="th-sub-row">
-                <th class="th-sub-col">កេស</th>
-                <th class="th-sub-col">កប</th>
-                <th class="th-sub-col">កេស</th>
-                <th class="th-sub-col">កប</th>
+                <th class="th-sub-col">{{ __('booking.invoice.slip_col_case') }}</th>
+                <th class="th-sub-col">{{ __('booking.invoice.slip_col_can') }}</th>
+                <th class="th-sub-col">{{ __('booking.invoice.slip_col_case') }}</th>
+                <th class="th-sub-col">{{ __('booking.invoice.slip_col_can') }}</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($details as $index => $detail)
                 @php
                     $isService = $detail->type === 'service';
-                    $itemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
+                    $rawItemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
+                    if (is_string($rawItemName) && str_starts_with(trim($rawItemName), '{')) {
+                        $decoded = json_decode($rawItemName, true);
+                        $itemName = $decoded[app()->getLocale()] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
+                    } else {
+                        $itemName = $rawItemName;
+                    }
                     $itemCode = $detail->product?->code ?: ($detail->product?->barcode ?: sprintf('%04d', $detail->item_id ?: ($index + 101)));
                     $uomName = $detail->product?->uom?->name ?: '12';
                     $unitPrice = (float) ($detail->price ?? 0);
@@ -144,7 +159,7 @@
                 <tr class="slip-row">
                     <td class="td-no">1</td>
                     <td class="td-code">3801</td>
-                    <td class="td-desc">កូកាកូឡាដប ១២x២៥០ml</td>
+                    <td class="td-desc">{{ __('booking.invoice.sample_coca_12') }}</td>
                     <td class="td-uom">12</td>
                     <td class="td-cases">35</td>
                     <td class="td-cans">0</td>
@@ -180,11 +195,11 @@
     <!-- Bottom Table Extension & Summary -->
     <div class="slip-table-bottom-bar">
         <div class="slip-bottom-left">
-            <span class="slip-free-goods-note">(*) : ផលិតផលមិនគិតថ្លៃ</span>
+            <span class="slip-free-goods-note">{{ __('booking.invoice.slip_free_goods') }}</span>
         </div>
         <div class="slip-bottom-right">
             <div class="slip-total-pay-box">
-                <span class="pay-lbl">ចំនួនទឹកប្រាក់ត្រូវបង់ ($)</span>
+                <span class="pay-lbl">{{ __('booking.invoice.slip_total_pay') }}</span>
                 <strong class="pay-val">{{ number_format((float) ($booking->total_price ?? 0), 2) }}</strong>
             </div>
         </div>
@@ -193,17 +208,17 @@
     <!-- Dual Signatures Section -->
     <div class="slip-signatures-section">
         <div class="slip-sig-col">
-            <div class="sig-title">ហត្ថលេខាអ្នកដឹក</div>
+            <div class="sig-title">{{ __('booking.invoice.slip_driver_signature') }}</div>
             <div class="sig-underline"></div>
         </div>
         <div class="slip-sig-col">
-            <div class="sig-title">ហត្ថលេខាអ្នកតំណាង</div>
+            <div class="sig-title">{{ __('booking.invoice.slip_customer_signature') }}</div>
             <div class="sig-underline"></div>
         </div>
     </div>
 
     <!-- Footer Disclaimer Note -->
     <div class="slip-footer-disclaimer">
-        សម្គាល់: រាល់ការខូចខាតទំនិញនិងបញ្ហាសេវាផ្សេងៗដែលមានបញ្ហា បុគ្គលិកនៅទីនោះត្រូវរាយការណ៍ជូនក្រុមហ៊ុនឱ្យបានឆាប់រហ័ស តាមរយៈលេខទូរស័ព្ទខាងលើ។
+        {{ __('booking.invoice.slip_disclaimer') }}
     </div>
 </div>

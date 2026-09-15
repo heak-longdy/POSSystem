@@ -1,23 +1,23 @@
 @extends('admin::shared.layout')
 
 @section('title')
-    | {{ __('booking.detail.title') }} #{{ $booking->invoice_number ?: $booking->id }}
+    | {{ __('remaining_amount.detail.title') }} #{{ $booking->invoice_number ?: $booking->id }}
 @stop
 
 @section('layout')
-    @include('admin::shared.header', ['header_name' => __('booking.detail.title')])
+    @include('admin::shared.header', ['header_name' => __('remaining_amount.detail.title')])
 
     <div class="content-wrapper booking-detail-wrapper" id="bookingDetailApp" x-data="xBookingDetail()" :class="'printing-' + activePrintTemplate" x-cloak>
         <div class="content-body" id="bookingDetailContentBody">
             <div class="booking-detail-page-wrapper">
                 <!-- Top Navigation / Breadcrumb -->
                 <nav class="detail-breadcrumb">
-                    <a href="{{ route('admin-booking-list', 'Pending') }}" class="breadcrumb-link">
-                        <i data-feather="calendar"></i>
-                        <span>{{ __('booking.title') }}</span>
+                    <a href="{{ route('admin-remaining-amount-list', 'all') }}" class="breadcrumb-link">
+                        <i data-feather="dollar-sign"></i>
+                        <span>{{ __('remaining_amount.title') }}</span>
                     </a>
                     <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-current">{{ __('booking.detail.title') }}</span>
+                    <span class="breadcrumb-current">{{ __('remaining_amount.detail.title') }}</span>
                     <span class="breadcrumb-sep">/</span>
                     <span class="breadcrumb-invoice">#{{ $booking->invoice_number ?: $booking->id }}</span>
                 </nav>
@@ -102,9 +102,9 @@
                             </button>
                         @endif
 
-                        <a href="{{ route('admin-booking-list', $booking->payment_status ?: 'Pending') }}" class="btn btn-system btn-system-outline btn-system-neutral">
+                        <a href="{{ route('admin-remaining-amount-list', 'all') }}" class="btn btn-system btn-system-outline btn-system-neutral">
                             <i data-feather="arrow-left"></i>
-                            <span>{{ __('booking.detail.back_to_list') }}</span>
+                            <span>{{ __('remaining_amount.detail.back_to_list') }}</span>
                         </a>
                     </div>
                 </header>
@@ -294,7 +294,7 @@
                                                         @can('booking-delete')
                                                             <button type="button"
                                                                 class="btn-action-delete"
-                                                                title="{{ __('booking.action.delete_payment') }}"
+                                                                title="{{ __('remaining_amount.action.delete_payment') }}"
                                                                 @click="deletePaymentRecord({{ $pay->id }}, '{{ number_format((float)$pay->amount, 2) }}', '{{ $method }}')">
                                                                 <i data-feather="trash-2"></i>
                                                             </button>
@@ -2213,7 +2213,7 @@
                     }
 
                     this.paymentSubmitting = true;
-                    const url = '{{ route('admin-booking-add-payment', $booking->id) }}';
+                    const url = '{{ route('admin-remaining-amount-add-payment', $booking->id) }}';
 
                     try {
                         const response = await Axios.post(url, {
@@ -2281,7 +2281,7 @@
                     });
                 },
                 deletePaymentRecord(paymentId, amount, method) {
-                    const template = @json(__('booking.payment.confirm.delete_payment_record'));
+                    const template = @json(__('remaining_amount.confirm.delete_payment_record'));
                     const plainMessage = template
                         .replace(':amount', '$' + amount)
                         .replace(':method', method)
@@ -2291,26 +2291,26 @@
                         return;
                     }
 
-                    const url = `{{ url('admin/booking/delete-payment') }}/${paymentId}`;
+                    const url = `{{ url('admin/remaining-amount/delete-payment') }}/${paymentId}`;
                     Axios.delete(url, {
                         data: { _token: '{{ csrf_token() }}' }
                     }).then((res) => {
                         if (res.data && (res.data.message === 'success' || res.status === 200)) {
                             if (window.toastr) {
-                                toastr.success(@json(__('booking.payment.message.payment_deleted_success')));
+                                toastr.success(@json(__('remaining_amount.message.payment_deleted_success')));
                             } else {
-                                alert(@json(__('booking.payment.message.payment_deleted_success')));
+                                alert(@json(__('remaining_amount.message.payment_deleted_success')));
                             }
                             setTimeout(() => {
                                 window.location.reload();
                             }, 400);
                         } else {
-                            alert(res.data?.error || @json(__('booking.payment.message.error_delete_payment')));
+                            alert(res.data?.error || @json(__('remaining_amount.message.error_delete_payment')));
                         }
                     }).catch((err) => {
                         const message = err.response?.data?.error ||
                             Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-                            @json(__('booking.payment.message.error_delete_payment'));
+                            @json(__('remaining_amount.message.error_delete_payment'));
                         alert(message);
                     });
                 }

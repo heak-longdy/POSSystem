@@ -13,11 +13,18 @@ return [
     ],
 
     'action' => [
+        'view_detail' => 'View Detail',
+        'add_payment' => 'Add Payment',
         'manage_payment' => 'Manage Payment',
         'payment_history' => 'Payment History',
         'send_reminder' => 'Send Reminder',
         'edit_payment' => 'Edit Payment',
         'delete_payment' => 'Delete Payment',
+    ],
+
+    'detail' => [
+        'title' => 'Remaining Amount Detail',
+        'back_to_list' => 'Back to List',
     ],
 
     'ledger' => [
@@ -68,6 +75,7 @@ return [
     'message' => [
         'reminder_sent_success' => 'Payment reminder sent successfully.',
         'reminder_sent_booking' => 'Payment reminder sent successfully for booking :invoice.',
+        'payment_deleted_success' => 'Payment deleted successfully.',
         'error_record_payment' => 'Unable to record payment.',
         'error_update_payment' => 'Unable to update payment.',
         'error_delete_payment' => 'Unable to delete payment.',

@@ -13,11 +13,18 @@ return [
     ],
 
     'action' => [
+        'view_detail' => 'មើលព័ត៌មានលម្អិត',
+        'add_payment' => 'បន្ថែមការបង់ប្រាក់',
         'manage_payment' => 'គ្រប់គ្រងការទូទាត់',
         'payment_history' => 'ប្រវត្តិនៃការទូទាត់',
         'send_reminder' => 'ផ្ញើសាររំលឹក',
         'edit_payment' => 'កែប្រែការទូទាត់',
         'delete_payment' => 'លុបការទូទាត់',
+    ],
+
+    'detail' => [
+        'title' => 'ព័ត៌មានលម្អិតទឹកប្រាក់នៅសល់',
+        'back_to_list' => 'ត្រឡប់ទៅបញ្ជី',
     ],
 
     'ledger' => [
@@ -68,6 +75,7 @@ return [
     'message' => [
         'reminder_sent_success' => 'បានផ្ញើសាររំលឹកការទូទាត់ដោយជោគជ័យ។',
         'reminder_sent_booking' => 'បានផ្ញើសាររំលឹកការទូទាត់ដោយជោគជ័យសម្រាប់ការកក់ :invoice។',
+        'payment_deleted_success' => 'ការទូទាត់ត្រូវបានលុបដោយជោគជ័យ។',
         'error_record_payment' => 'មិនអាចកត់ត្រាការទូទាត់បានទេ។',
         'error_update_payment' => 'មិនអាចកែប្រែការទូទាត់បានទេ។',
         'error_delete_payment' => 'មិនអាចលុបការទូទាត់បានទេ។',

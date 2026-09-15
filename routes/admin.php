@@ -282,6 +282,7 @@ Route::middleware(['AdminGuard'])
         ], function () {
             Route::get('list/{status?}', [RemainingAmountController::class, 'index'])->name('list');
             Route::get('create', [RemainingAmountController::class, 'index'])->name('create');
+            Route::get('detail/{id}', [RemainingAmountController::class, 'show'])->name('detail');
             Route::get('payment-details/{id}', [RemainingAmountController::class, 'getPaymentDetails'])->name('payment-details');
             Route::post('add-payment/{id}', [RemainingAmountController::class, 'addPayment'])->name('add-payment');
             Route::put('update-payment/{paymentId}', [RemainingAmountController::class, 'updatePayment'])->name('update-payment');

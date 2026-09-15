@@ -1,7 +1,7 @@
 @extends('admin::shared.layout')
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('remaining_amount.title')])
-    <div class="content-wrapper" id="app" x-data="xRemainingAmount">
+    <div class="content-wrapper booking-listing-wrapper" id="app" x-data="xRemainingAmount">
         @php
             $tabQuery = request()->except(['page', 'payment_status']);
             $tabUrl = function ($tabStatus) use ($tabQuery) {
@@ -76,6 +76,21 @@
                             'key' => 'active',
                             'action' => [
                                 [
+                                    'url' => 'detail',
+                                    'title' => __('remaining_amount.action.view_detail'),
+                                    'icon' => 'visibility',
+                                    'type' => 'link',
+                                ],
+                                [
+                                    'url' => 'add-payment',
+                                    'title' => __('remaining_amount.action.add_payment'),
+                                    'icon' => 'add_circle',
+                                    'type' => 'click',
+                                    'handler' => 'openAddPaymentModal',
+                                    'class' => 'text-success font-weight-bold',
+                                    'visible' => ['can_add_payment' => true],
+                                ],
+                                [
                                     'url' => 'payment',
                                     'title' => __('remaining_amount.action.manage_payment'),
                                     'icon' => 'payments',
@@ -127,6 +142,93 @@
             ],
         ])
         @endcomponent
+
+        <!-- Dedicated Add Payment Modal (Similar to Booking Detail) -->
+        <div class="modal-backdrop-custom" x-show="showAddPaymentModal" x-transition.opacity style="display: none;">
+            <div class="modal-dialog-custom" @click.away="if (!addPaymentSubmitting) closeAddPaymentModal()">
+                <div class="modal-header-custom">
+                    <div class="modal-title-wrap">
+                        <i data-feather="plus-circle" class="text-success"></i>
+                        <div>
+                            <h3>{{ __('booking.detail.add_payment') }}</h3>
+                            <div class="modal-subtitle-text"
+                                x-text="`${addPaymentBooking?.invoice_number || addPaymentBooking?.invoice_title || ''} • ${addPaymentBooking?.customer_name || (addPaymentBooking?.customer ? (addPaymentBooking.customer.name || addPaymentBooking.customer.phone) : '') || @json(__('booking.walk_in_customer'))}`">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close-modal" :disabled="addPaymentSubmitting" @click="closeAddPaymentModal()">
+                        &times;
+                    </button>
+                </div>
+
+                <form @submit.prevent="submitAddPayment()">
+                    <div class="modal-body-custom">
+                        <div class="remaining-info-box">
+                            <span class="info-label">{{ __('remaining_amount.ledger.remaining_balance') }}</span>
+                            <strong class="info-val text-danger" x-text="formatCurrency(addPaymentBooking?.remaining_amount)"></strong>
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('booking.amount') }} ($) <span class="text-danger">*</span></label>
+                            <div class="input-action-wrap">
+                                <input type="number" step="0.01" min="0.01" :max="addPaymentBooking?.remaining_amount"
+                                    class="modal-input" x-model="addPaymentForm.amount" required placeholder="0.00">
+                                <button type="button" class="btn-fill-max" @click="addPaymentForm.amount = Number(addPaymentBooking?.remaining_amount || 0)">
+                                    {{ __('booking.button.full_balance') }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('booking.detail.method') }}</label>
+                            <div class="payment-method-selector">
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'Cash' ? 'is-active' : ''">
+                                    <input type="radio" value="Cash" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="dollar-sign"></i>
+                                    <span>{{ __('booking.payment.cash') }}</span>
+                                </label>
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'ABA' ? 'is-active' : ''">
+                                    <input type="radio" value="ABA" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="credit-card"></i>
+                                    <span>{{ __('booking.payment.aba') }}</span>
+                                </label>
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'Card' ? 'is-active' : ''">
+                                    <input type="radio" value="Card" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="server"></i>
+                                    <span>{{ __('booking.payment.card') }}</span>
+                                </label>
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'QR' ? 'is-active' : ''">
+                                    <input type="radio" value="QR" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="maximize"></i>
+                                    <span>{{ __('booking.payment.qr') }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('booking.table.pay_date') }}</label>
+                            <input type="datetime-local" class="modal-input" x-model="addPaymentForm.payment_date">
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('booking.note') }}</label>
+                            <textarea class="modal-textarea" rows="3" x-model="addPaymentForm.note"
+                                placeholder="{{ __('booking.placeholder.note') }}"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-custom">
+                        <button type="button" class="btn btn-system btn-system-outline btn-system-neutral" :disabled="addPaymentSubmitting" @click="closeAddPaymentModal()">
+                            <span>{{ __('booking.button.close') }}</span>
+                        </button>
+                        <button type="submit" class="btn btn-create bg-success btn-system btn-system-success" :disabled="addPaymentSubmitting">
+                            <span x-show="!addPaymentSubmitting">{{ __('booking.detail.add_payment') }}</span>
+                            <span x-show="addPaymentSubmitting" style="display: none;">{{ __('booking.button.processing_payment') }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <!-- Standalone Payment & Payment History Modal -->
         <template x-if="showPaymentModal">
@@ -204,14 +306,30 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="modal-form-group">
+                                    <div class="modal-form-group" style="grid-column: span 2;">
                                         <label>{{ __('remaining_amount.form.payment_method') }}</label>
-                                        <select x-model="paymentForm.payment_method" class="modal-select">
-                                            <option value="Cash">{{ __('booking.payment.cash') }}</option>
-                                            <option value="ABA">{{ __('booking.payment.aba') }}</option>
-                                            <option value="Card">{{ __('booking.payment.card') }}</option>
-                                            <option value="QR">{{ __('booking.payment.qr') }}</option>
-                                        </select>
+                                        <div class="payment-method-selector">
+                                            <label class="method-option" :class="paymentForm.payment_method === 'Cash' ? 'is-active' : ''">
+                                                <input type="radio" value="Cash" x-model="paymentForm.payment_method">
+                                                <i data-feather="dollar-sign"></i>
+                                                <span>{{ __('booking.payment.cash') }}</span>
+                                            </label>
+                                            <label class="method-option" :class="paymentForm.payment_method === 'ABA' ? 'is-active' : ''">
+                                                <input type="radio" value="ABA" x-model="paymentForm.payment_method">
+                                                <i data-feather="credit-card"></i>
+                                                <span>{{ __('booking.payment.aba') }}</span>
+                                            </label>
+                                            <label class="method-option" :class="paymentForm.payment_method === 'Card' ? 'is-active' : ''">
+                                                <input type="radio" value="Card" x-model="paymentForm.payment_method">
+                                                <i data-feather="server"></i>
+                                                <span>{{ __('booking.payment.card') }}</span>
+                                            </label>
+                                            <label class="method-option" :class="paymentForm.payment_method === 'QR' ? 'is-active' : ''">
+                                                <input type="radio" value="QR" x-model="paymentForm.payment_method">
+                                                <i data-feather="maximize"></i>
+                                                <span>{{ __('booking.payment.qr') }}</span>
+                                            </label>
+                                        </div>
                                     </div>
                                     <div class="modal-form-group" style="grid-column: span 2;">
                                         <label>{{ __('remaining_amount.form.payment_date_time') }}</label>
@@ -346,6 +464,241 @@
         </template>
     </div>
 
+    <style>
+        .modal-backdrop-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-dialog-custom {
+            background: #ffffff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: modalFadeInCustom 0.2s ease-out;
+        }
+        @keyframes modalFadeInCustom {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header-custom {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .modal-title-wrap svg,
+        .modal-title-wrap i {
+            width: 22px;
+            height: 22px;
+            color: #00b74a;
+        }
+        .modal-title-wrap h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .modal-subtitle-text {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            line-height: 1;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .btn-close-modal:hover {
+            color: #334155;
+        }
+        .modal-body-custom {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .remaining-info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remaining-info-box .info-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+        }
+        .remaining-info-box .info-val {
+            font-size: 16px;
+            font-weight: 700;
+            color: #dc2626;
+        }
+        .form-group-modal {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group-modal label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin: 0;
+        }
+        .modal-input, .modal-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .modal-input:focus, .modal-textarea:focus {
+            border-color: #3C91E6;
+            box-shadow: 0 0 0 3px rgba(60, 145, 230, 0.15);
+        }
+        .input-action-wrap {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-fill-max {
+            background: #ffffff;
+            border: 1px solid rgba(152, 152, 152, 0.25);
+            border-radius: 20px;
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333333;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .btn-fill-max:hover {
+            background: #f5f5f5;
+            color: #111111;
+        }
+        .payment-method-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .method-option {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.15s;
+            margin: 0;
+            background: #ffffff;
+        }
+        .method-option input {
+            display: none;
+        }
+        .method-option svg {
+            width: 16px;
+            height: 16px;
+        }
+        .method-option.is-active {
+            border-color: #00c753 !important;
+            background: #ecfdf5 !important;
+            color: #00c753 !important;
+        }
+        .modal-footer-custom {
+            padding: 16px 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f8fafc;
+        }
+        .btn-system {
+            height: 40px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            grid-gap: 7px !important;
+            gap: 7px !important;
+            padding: 0 16px !important;
+            border-radius: 20px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            text-transform: none !important;
+            border: unset !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+            transition: all 0.2s ease !important;
+            line-height: 1 !important;
+        }
+        .btn-system svg {
+            width: 18px !important;
+            height: 18px !important;
+            stroke-width: 2 !important;
+            line-height: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        .btn-system span {
+            font-size: 13px !important;
+            line-height: normal !important;
+        }
+        .btn-system-success {
+            background-color: #00b74a !important;
+            color: #ffffff !important;
+            border: unset !important;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.1) !important;
+        }
+        .btn-system-success:hover:not(:disabled) {
+            background-color: #009e40 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 6px rgba(0, 183, 74, 0.3) !important;
+        }
+        .btn-system-outline,
+        .btn-system-neutral {
+            background-color: #ffffff !important;
+            color: #333333 !important;
+            border: 1px solid rgba(152, 152, 152, 0.25) !important;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.05) !important;
+        }
+        .btn-system-outline:hover:not(:disabled),
+        .btn-system-neutral:hover:not(:disabled) {
+            background-color: #f5f5f5 !important;
+            border-color: rgba(152, 152, 152, 0.45) !important;
+            color: #111111 !important;
+        }
+    </style>
 @stop
 
 @section('script')
@@ -381,11 +734,20 @@
             Alpine.data('xRemainingAmount', () => ({
                 exportLoading: false,
                 showPaymentModal: false,
+                showAddPaymentModal: false,
                 activeModalTab: 'pay',
                 activeBooking: null,
+                addPaymentBooking: null,
                 paymentSubmitting: false,
+                addPaymentSubmitting: false,
                 reminderLoading: false,
                 editingPaymentId: null,
+                addPaymentForm: {
+                    amount: null,
+                    payment_method: 'Cash',
+                    payment_date: moment().format('YYYY-MM-DDTHH:mm'),
+                    note: '',
+                },
                 paymentForm: {
                     amount: null,
                     payment_method: 'Cash',
@@ -475,6 +837,93 @@
                     };
                     return map[method] || method || 'Cash';
                 },
+                openAddPaymentModal(item) {
+                    this.addPaymentBooking = item;
+                    this.showAddPaymentModal = true;
+                    this.addPaymentSubmitting = false;
+                    const initialAmount = (item && Number(item.remaining_amount) > 0)
+                        ? Number(item.remaining_amount)
+                        : null;
+                    this.addPaymentForm = {
+                        amount: initialAmount,
+                        payment_method: 'Cash',
+                        payment_date: moment().format('YYYY-MM-DDTHH:mm'),
+                        note: '',
+                    };
+
+                    this.$nextTick(() => {
+                        if (window.feather) {
+                            feather.replace();
+                        }
+                    });
+
+                    if (item?.id) {
+                        Axios.get(`{{ url('admin/remaining-amount/payment-details') }}/${item.id}`)
+                            .then((res) => {
+                                if (res.data) {
+                                    this.addPaymentBooking = res.data;
+                                    if (!this.addPaymentForm.amount && res.data.remaining_amount) {
+                                        this.addPaymentForm.amount = Number(res.data.remaining_amount);
+                                    }
+                                }
+                            })
+                            .catch((err) => {
+                                console.error('Error fetching booking details for Add Payment:', err);
+                            });
+                    }
+                },
+                closeAddPaymentModal() {
+                    this.showAddPaymentModal = false;
+                    this.addPaymentBooking = null;
+                    this.addPaymentSubmitting = false;
+                },
+                async submitAddPayment() {
+                    if (this.addPaymentSubmitting || !this.addPaymentBooking?.id) return;
+                    if (!this.addPaymentForm.amount || Number(this.addPaymentForm.amount) <= 0) {
+                        alert(@json(__('booking.validation.payment_amount_required') ?: 'Please enter a valid payment amount.'));
+                        return;
+                    }
+                    if (Number(this.addPaymentForm.amount) > Number(this.addPaymentBooking.remaining_amount || 0)) {
+                        alert(@json(__('booking.validation.payment_amount_exceeds') ?: 'Payment amount exceeds available balance.'));
+                        return;
+                    }
+
+                    this.addPaymentSubmitting = true;
+                    const url = `{{ url('admin/remaining-amount/add-payment') }}/${this.addPaymentBooking.id}`;
+
+                    try {
+                        const response = await Axios.post(url, {
+                            _token: '{{ csrf_token() }}',
+                            amount: this.addPaymentForm.amount,
+                            payment_method: this.addPaymentForm.payment_method,
+                            payment_date: this.addPaymentForm.payment_date,
+                            note: this.addPaymentForm.note,
+                        });
+
+                        if (response.data && (response.data.message === 'success' || response.status === 200)) {
+                            if (window.toastr) {
+                                toastr.success(@json(__('booking.message.payment_status_success')));
+                            } else if (window.iziToast) {
+                                iziToast.success({
+                                    title: 'Success',
+                                    message: @json(__('booking.message.payment_status_success')),
+                                    position: 'topRight'
+                                });
+                            }
+                            this.closeAddPaymentModal();
+                            reloadData(`{{ url()->full() }}`);
+                        } else {
+                            alert(response.data?.error || @json(__('remaining_amount.message.error_record_payment')));
+                            this.addPaymentSubmitting = false;
+                        }
+                    } catch (error) {
+                        this.addPaymentSubmitting = false;
+                        const errorMsg = error.response?.data?.error ||
+                            Object.values(error.response?.data?.errors || {})?.[0]?.[0] ||
+                            @json(__('remaining_amount.message.error_record_payment'));
+                        alert(errorMsg);
+                    }
+                },
                 openPaymentModal(item) {
                     this.activeBooking = item;
                     this.showPaymentModal = true;
@@ -486,6 +935,12 @@
                         payment_date: moment().format('YYYY-MM-DDTHH:mm'),
                         note: '',
                     };
+
+                    this.$nextTick(() => {
+                        if (window.feather) {
+                            feather.replace();
+                        }
+                    });
 
                     Axios.get(`{{ url('admin/remaining-amount/payment-details') }}/${item.id}`)
                         .then((res) => {

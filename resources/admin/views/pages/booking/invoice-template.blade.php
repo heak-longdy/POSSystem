@@ -1,4 +1,6 @@
 @php
+    $isKm = app()->getLocale() === 'km';
+
     $shopName = $booking->shop?->name ?: 'រ៉ុង ស៊ុយ ហ័រ ( ផែ ស៊ុយហ័រ )';
     $shopSub = $booking->shop?->nick_name ?: ($booking->shop?->name ? '' : 'phe suy horh');
     $shopPhone = $booking->shop?->phone ?: '092 98 99 28 / 096 088 6666 367';
@@ -14,9 +16,9 @@
 
     $paymentStatus = $booking->payment_status ?: 'Pending';
     $buyerStatusNote = match ($paymentStatus) {
-        'Paid' => '(បានទូទាត់)',
-        'Partial' => '(ទូទាត់ខ្លះ)',
-        default => '(មិនទាន់ទូទាត់)',
+        'Paid' => __('booking.invoice.status_paid'),
+        'Partial' => __('booking.invoice.status_partial'),
+        default => __('booking.invoice.status_unpaid'),
     };
 
     $details = $booking->bookingDetail ?: collect();
@@ -43,17 +45,21 @@
                     <div class="inv-shop-subtitle-en">{{ $shopSub }}</div>
                 @endif
                 <div class="inv-shop-phone">
-                    <span class="phone-label">THE :</span> {{ $shopPhone }}
+                    <span class="phone-label">{{ __('booking.invoice.tel') }}</span> {{ $shopPhone }}
                 </div>
             </div>
         </div>
 
         <!-- Right: Official Invoice Title -->
         <div class="inv-official-title-box">
-            <div class="inv-copy-notice">វិក្កយបត្រ ( ចម្លង ឬ ដើម )</div>
+            <div class="inv-copy-notice">{{ __('booking.invoice.invoice_copy_original') }}</div>
             <div class="inv-main-heading">
-                <span class="khmer-title">វិក្កយបត្រ</span>
-                <span class="en-title">INVOICE</span>
+                @if ($isKm)
+                    <span class="khmer-title">វិក្កយបត្រ</span>
+                    <span class="en-title">INVOICE</span>
+                @else
+                    <span class="en-title">INVOICE</span>
+                @endif
             </div>
         </div>
     </div>
@@ -62,31 +68,35 @@
     <div class="inv-metadata-row">
         <div class="inv-meta-left">
             <div class="inv-meta-item">
-                <span class="meta-label">លក់ជូន:</span>
+                <span class="meta-label">{{ __('booking.invoice.customer') }}</span>
                 <strong class="meta-value">{{ $cName }}</strong>
                 @if ($cPhone && $cPhone !== '---')
                     <span class="meta-phone">({{ $cPhone }})</span>
                 @endif
             </div>
             <div class="inv-meta-item meta-address-line">
-                <span class="meta-label">អាសយដ្ឋាន:</span>
+                <span class="meta-label">{{ __('booking.invoice.address') }}</span>
                 <span class="meta-value">{{ $cAddress }}</span>
             </div>
         </div>
 
         <div class="inv-meta-right">
             <div class="inv-meta-item">
-                <span class="meta-label">ID No:</span>
+                <span class="meta-label">{{ __('booking.invoice.invoice_no') }}</span>
                 <strong class="meta-value inv-number">{{ $invoiceNo }}</strong>
             </div>
             <div class="inv-meta-item">
-                <span class="meta-label">ត្រូវជូន</span>
+                <span class="meta-label">{{ __('booking.invoice.date') }}</span>
                 <span class="meta-value">
-                    ថ្ងៃទី{{ $bDate->format('d') }}ខែ{{ $bDate->format('m') }}ឆ្នាំ {{ $bDate->format('Y') }}
+                    @if ($isKm)
+                        ថ្ងៃទី{{ $bDate->format('d') }}ខែ{{ $bDate->format('m') }}ឆ្នាំ {{ $bDate->format('Y') }}
+                    @else
+                        {{ $bDate->format('d/m/Y') }}
+                    @endif
                 </span>
             </div>
             <div class="inv-meta-item">
-                <span class="meta-label">កុំព្យូទ័រ:</span>
+                <span class="meta-label">{{ __('booking.invoice.operator') }}</span>
                 <span class="meta-value">{{ $cashierName }}</span>
             </div>
         </div>
@@ -96,18 +106,24 @@
     <table class="inv-grid-table">
         <thead>
             <tr>
-                <th class="col-num">ល.រ</th>
-                <th class="col-desc">បរិយាយ</th>
-                <th class="col-qty">ចំនួន</th>
-                <th class="col-price">តម្លៃរាយ</th>
-                <th class="col-total">តម្លៃសរុប</th>
+                <th class="col-num">{{ __('booking.invoice.col_no') }}</th>
+                <th class="col-desc">{{ __('booking.invoice.col_desc') }}</th>
+                <th class="col-qty">{{ __('booking.invoice.col_qty') }}</th>
+                <th class="col-price">{{ __('booking.invoice.col_price') }}</th>
+                <th class="col-total">{{ __('booking.invoice.col_total') }}</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($details as $index => $detail)
                 @php
                     $isService = $detail->type === 'service';
-                    $itemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
+                    $rawItemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
+                    if (is_string($rawItemName) && str_starts_with(trim($rawItemName), '{')) {
+                        $decoded = json_decode($rawItemName, true);
+                        $itemName = $decoded[app()->getLocale()] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
+                    } else {
+                        $itemName = $rawItemName;
+                    }
                     $unitPrice = (float) ($detail->price ?? 0);
                     $qty = (int) ($detail->qty ?: 1);
                     $disc = (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0));
@@ -126,7 +142,7 @@
                 <tr class="inv-item-row">
                     <td class="cell-num">1</td>
                     <td class="cell-desc">
-                        <span class="item-name">កូកា ដប 380ml</span>
+                        <span class="item-name">{{ __('booking.invoice.sample_coca') }}</span>
                     </td>
                     <td class="cell-qty">50</td>
                     <td class="cell-price">2.26</td>
@@ -152,39 +168,39 @@
                     <div class="inv-signatures-wrap">
                         <div class="inv-signature-col buyer-sig">
                             <div class="sig-header">
-                                <span class="sig-title">អ្នកទិញ/Buyer</span>
+                                <span class="sig-title">{{ __('booking.invoice.buyer_title') }}</span>
                                 <span class="sig-status-tag">{{ $buyerStatusNote }}</span>
                             </div>
                             <div class="sig-space"></div>
-                            <div class="sig-action-label">ស្នាមមេដៃ</div>
+                            <div class="sig-action-label">{{ __('booking.invoice.thumbprint') }}</div>
                         </div>
 
                         <div class="inv-signature-col seller-sig">
                             <div class="sig-header">
-                                <span class="sig-title">អ្នកលក់/Seller</span>
+                                <span class="sig-title">{{ __('booking.invoice.seller_title') }}</span>
                             </div>
                             <div class="sig-space"></div>
-                            <div class="sig-action-label">ហត្ថលេខា</div>
+                            <div class="sig-action-label">{{ __('booking.invoice.signature') }}</div>
                         </div>
                     </div>
                 </td>
-                <td class="inv-foot-calc-label">នៅខ្វះមុន</td>
+                <td class="inv-foot-calc-label">{{ __('booking.invoice.prev_balance') }}</td>
                 <td class="inv-foot-calc-value">0.00</td>
             </tr>
             <tr>
-                <td class="inv-foot-calc-label font-bold">សរុប</td>
+                <td class="inv-foot-calc-label font-bold">{{ __('booking.invoice.subtotal') }}</td>
                 <td class="inv-foot-calc-value font-bold">
                     {{ number_format((float) ($booking->total_price ?? 0), 2) }}
                 </td>
             </tr>
             <tr>
-                <td class="inv-foot-calc-label">អោយ</td>
+                <td class="inv-foot-calc-label">{{ __('booking.invoice.paid') }}</td>
                 <td class="inv-foot-calc-value">
                     {{ (float) ($booking->paid_amount ?? 0) > 0 ? number_format((float) $booking->paid_amount, 2) : '' }}
                 </td>
             </tr>
             <tr>
-                <td class="inv-foot-calc-label">នៅខ្វះ</td>
+                <td class="inv-foot-calc-label">{{ __('booking.invoice.balance_due') }}</td>
                 <td class="inv-foot-calc-value">
                     {{ (float) ($booking->remaining_amount ?? 0) > 0 ? number_format((float) $booking->remaining_amount, 2) : '0.00' }}
                 </td>
