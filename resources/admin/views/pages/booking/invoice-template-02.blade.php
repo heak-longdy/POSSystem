@@ -11,7 +11,9 @@
 
     $invoiceNo = $booking->invoice_number ?: sprintf('%05d', $booking->id);
     $bDate = $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date) : now();
-    $deliveryDate = $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->addDays(2) : now()->addDays(2);
+    $deliveryDate = $booking->delivery_date
+        ? \Carbon\Carbon::parse($booking->delivery_date)
+        : ($booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->addDays(2) : now()->addDays(2));
     $driverName = $booking->barber?->name ?: ($booking->payments->first()?->createdBy?->name ?: 'សាខាអ្នកដឹក');
 
     $details = $booking->bookingDetail ?: collect();

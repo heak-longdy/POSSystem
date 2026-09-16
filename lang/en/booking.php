@@ -138,6 +138,7 @@ return [
         'status' => 'Status',
         'created_at' => 'Created At',
         'appointment_time' => 'Appointment Time',
+        'delivery_date' => 'Delivery Date',
         'phone' => 'Phone',
         'email' => 'Email',
         'address' => 'Address',
@@ -260,6 +261,7 @@ return [
         'barber' => 'Barber',
         'select_barber' => 'Select barber',
         'booking_date' => 'Booking Date',
+        'delivery_date' => 'Delivery Date',
     ],
 
     'placeholder' => [

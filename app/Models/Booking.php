@@ -19,6 +19,7 @@ class Booking extends Model
         'shop_id',
         'barber_id',
         'booking_date',
+        'delivery_date',
         'payment_status',
         'payment_date',
         'invoice_number',
@@ -33,6 +34,7 @@ class Booking extends Model
         'total_commission' => 'double',
         'paid_amount' => 'double',
         'booking_date' => 'datetime',
+        'delivery_date' => 'datetime',
         'payment_date' => 'datetime',
     ];
 

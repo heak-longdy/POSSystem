@@ -326,6 +326,14 @@
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
+                            <div class="form-group form-group--full">
+                                <label><i data-feather="truck"></i> {{ __('booking.form.delivery_date') }}</label>
+                                <input type="text" id="delivery_date" x-model="formData.delivery_date"
+                                    :disabled="!canEditBookingItems()" autocomplete="off" class="sidebar-date-input">
+                                <template x-for="item in dataError?.delivery_date">
+                                    <span class="error" x-text="item">Error</span>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1804,6 +1812,7 @@
                     customer_id: null,
                     disable: false,
                     booking_date: moment().format('YYYY-MM-DD'),
+                    delivery_date: moment().add(2, 'days').format('YYYY-MM-DD'),
                     pay_way: 'Cash',
                     partial_payment_amount: null,
                 },
@@ -1865,6 +1874,11 @@
                     this.formData.booking_date = booking?.booking_date
                         ? moment(booking.booking_date).format('YYYY-MM-DD')
                         : moment().format('YYYY-MM-DD');
+                    this.formData.delivery_date = booking?.delivery_date
+                        ? moment(booking.delivery_date).format('YYYY-MM-DD')
+                        : (booking?.booking_date
+                            ? moment(booking.booking_date).add(2, 'days').format('YYYY-MM-DD')
+                            : moment().add(2, 'days').format('YYYY-MM-DD'));
                     this.formData.pay_way = booking?.pay_way || 'Cash';
                     this.dataCart = [];
 
@@ -1907,6 +1921,16 @@
                         yearRange: "-10:+10",
                         onSelect(selectedDate) {
                             vm.formData.booking_date = selectedDate;
+                        }
+                    });
+                    $("#delivery_date").datepicker({
+                        dateFormat: 'yy-mm-dd',
+                        changeYear: true,
+                        changeMonth: true,
+                        gotoCurrent: true,
+                        yearRange: "-10:+10",
+                        onSelect(selectedDate) {
+                            vm.formData.delivery_date = selectedDate;
                         }
                     });
                 },

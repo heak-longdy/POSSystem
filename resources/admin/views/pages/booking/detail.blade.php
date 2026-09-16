@@ -409,6 +409,10 @@
                                     <span class="val">{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---' }}</span>
                                 </div>
                                 <div class="appointment-info-row">
+                                    <span class="label"><i data-feather="truck"></i> {{ __('booking.detail.delivery_date') }}:</span>
+                                    <span class="val font-weight-bold">{{ $booking->delivery_date ? \Carbon\Carbon::parse($booking->delivery_date)->format('d M Y') : ($booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->addDays(2)->format('d M Y') : '---') }}</span>
+                                </div>
+                                <div class="appointment-info-row">
                                     <span class="label"><i data-feather="plus-square"></i> {{ __('booking.detail.created_at') }}:</span>
                                     <span class="val">{{ $booking->created_at ? \Carbon\Carbon::parse($booking->created_at)->format('d M Y, h:i A') : '---' }}</span>
                                 </div>

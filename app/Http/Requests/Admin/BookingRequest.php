@@ -40,6 +40,7 @@ class BookingRequest extends FormRequest
                 Rule::exists('customers', 'id')->where('status', 1),
             ],
             'booking_date' => 'required|date',
+            'delivery_date' => 'nullable|date',
             'dataCarts' => 'required|json',
             'partial_payment_amount' => 'nullable|numeric|min:0',
         ];

@@ -820,6 +820,7 @@ class BookingController extends Controller
                 'paid_amount' => 0,
                 'remaining_amount' => 0,
                 'payment_status' => 'Pending',
+                'delivery_date' => null,
             ];
         }
 
@@ -849,6 +850,7 @@ class BookingController extends Controller
             'shop_id' => $req->shop_id,
             'barber_id' => $req->barber_id,
             'booking_date' => $req->booking_date,
+            'delivery_date' => $req->delivery_date ?: null,
             'total_price' => $req->subTotal ?? 0,
             'total_discount' => $req->total_discount ?? 0,
             'total_commission' => $req->commissionTotal ?? 0,

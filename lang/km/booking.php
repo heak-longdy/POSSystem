@@ -138,6 +138,7 @@ return [
         'status' => 'ស្ថានភាព',
         'created_at' => 'កាលបរិច្ឆេទទទួលការកក់',
         'appointment_time' => 'ពេលវេលាណាត់ជួប',
+        'delivery_date' => 'ថ្ងៃដឹកជញ្ជូន',
         'phone' => 'លេខទូរស័ព្ទ',
         'email' => 'អ៊ីមែល',
         'address' => 'អាសយដ្ឋាន',
@@ -260,6 +261,7 @@ return [
         'barber' => 'ជាងកាត់សក់',
         'select_barber' => 'ជ្រើសរើសជាងកាត់សក់',
         'booking_date' => 'កាលបរិច្ឆេទកក់',
+        'delivery_date' => 'ថ្ងៃដឹកជញ្ជូន',
     ],
 
     'placeholder' => [
