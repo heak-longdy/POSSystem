@@ -5970,9 +5970,11 @@ span.error {
     .booking-pos-workspace {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 400px;
-        height: fit-content;
+        align-items: start;
+        height: auto;
+        min-height: 100%;
         background: #f8fafc;
-        overflow: hidden;
+        overflow: visible;
         width: calc(100% - 140px);
         margin: 0 70px;
         button:not(.text-gray-400):not(.fancybox-button){
@@ -5988,8 +5990,10 @@ span.error {
         flex-direction: column;
         gap: 16px;
         padding: 16px 20px;
-        overflow-y: auto;
-        height: 100%;
+        overflow: visible;
+        height: fit-content;
+        align-self: start;
+        transition: top 0.2s ease;
     }
 
     .booking-pos-recent-section {
@@ -6393,7 +6397,8 @@ span.error {
 
     .booking-pos-catalog-body {
         flex: 1;
-        overflow-y: auto;
+        overflow: visible;
+        height: auto;
         padding-right: 4px;
         padding-top: 5px;
     }
@@ -6663,11 +6668,24 @@ span.error {
         width: 400px;
         flex-shrink: 0;
         background: #ffffff;
-        border-left: 1px solid #e2e8f0;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
         display: flex;
         flex-direction: column;
-        height: 100%;
-        overflow: hidden;
+        height: fit-content;
+        overflow: visible;
+        align-self: start;
+        transition: top 0.2s ease;
+    }
+
+    .booking-pos-main-col.is-sticky-column,
+    .booking-pos-sidebar.is-sticky-column {
+        position: -webkit-sticky;
+        position: sticky;
+        top: var(--sticky-top, 16px);
+        align-self: start;
+        z-index: 10;
     }
 
     .booking-pos-sidebar-top {
