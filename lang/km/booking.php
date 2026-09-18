@@ -25,6 +25,7 @@ return [
     'payment_progress' => 'វឌ្ឍនភាពការទូទាត់',
     'paid' => 'បានបង់',
     'remaining' => 'នៅសល់',
+    'pay_full' => 'ទូទាត់ទាំងអស់',
     'status_label' => 'ស្ថានភាព',
     'record_payment' => 'កត់ត្រាការទូទាត់',
     'recording' => 'កំពុងកត់ត្រា...',

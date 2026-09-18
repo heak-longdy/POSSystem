@@ -25,6 +25,7 @@ return [
     'payment_progress' => 'Payment Progress',
     'paid' => 'Paid',
     'remaining' => 'Remaining',
+    'pay_full' => 'Pay Full',
     'status_label' => 'Status',
     'record_payment' => 'Record Payment',
     'recording' => 'Recording...',

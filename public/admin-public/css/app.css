@@ -45368,7 +45368,7 @@ span.error {
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart,
 .booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart {
-  background: transparent;
+  background: none !important;
   border: 0;
   color: #ef4444;
   font-size: 12px;
@@ -46230,35 +46230,101 @@ span.error {
 .form-admin.booking-order-ui .booking-payment-form--record,
 .booking-dashboard.booking-order-ui .booking-payment-form--record,
 .booking-order-ui .booking-payment-form--record {
-  background: #ffffff;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 14px;
-  margin-top: 12px;
+  padding: 13px 14px 14px 14px;
+  margin-top: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-header,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-header,
+.booking-order-ui .booking-payment-form--record .booking-payment-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-title,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-title,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-title {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13.5px;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
   padding: 0;
   border: none;
 }
-.form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-title svg,
-.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-title svg,
-.booking-order-ui .booking-payment-form--record .booking-payment-form-title svg {
-  width: 16px;
-  height: 16px;
-  color: #2563eb;
+.form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon,
+.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon svg,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon svg,
+.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon svg {
+  width: 14px;
+  height: 14px;
+  color: #059669;
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn,
+.booking-order-ui .booking-payment-form--record .booking-pay-full-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  color: #059669;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn svg,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn svg,
+.booking-order-ui .booking-payment-form--record .booking-pay-full-btn svg {
+  width: 11px;
+  height: 11px;
+  color: #059669;
+  flex-shrink: 0;
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn strong,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn strong,
+.booking-order-ui .booking-payment-form--record .booking-pay-full-btn strong {
+  font-weight: 800;
+  color: #047857;
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:hover,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:hover,
+.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:hover {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+  color: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(5, 150, 105, 0.15);
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:active,
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:active,
+.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:active {
+  transform: translateY(0);
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-grid,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-grid,
@@ -46289,8 +46355,8 @@ span.error {
   display: flex;
   align-items: stretch;
   width: 100%;
-  height: 36px;
-  min-height: 36px;
+  height: 38px;
+  min-height: 38px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
@@ -46300,8 +46366,8 @@ span.error {
 .form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group:focus-within,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group:focus-within,
 .booking-order-ui .booking-payment-form--record .booking-input-prefix-group:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.16);
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group .input-addon-prefix,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group .input-addon-prefix,
@@ -46312,7 +46378,7 @@ span.error {
   padding: 0 10px;
   font-size: 13px;
   font-weight: 700;
-  color: #64748b;
+  color: #059669;
   background: #f8fafc;
   border: none;
   border-right: 1px solid #e2e8f0;
@@ -46335,8 +46401,8 @@ span.error {
   border: none;
   outline: none;
   padding: 0 10px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: #0f172a;
   background: transparent;
   border-radius: 0;
@@ -46355,8 +46421,8 @@ span.error {
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-note-input,
 .booking-order-ui .booking-payment-form--record .booking-note-input {
   width: 100%;
-  height: 36px;
-  min-height: 36px;
+  height: 38px;
+  min-height: 38px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0 10px;
@@ -46369,36 +46435,36 @@ span.error {
 .form-admin.booking-order-ui .booking-payment-form--record .booking-note-input:focus,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-note-input:focus,
 .booking-order-ui .booking-payment-form--record .booking-note-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.16);
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record,
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record {
   width: 100%;
-  height: 38px;
-  min-height: 38px;
-  background: #2563eb;
-  border: 1px solid #1d4ed8;
-  border-radius: 8px;
+  height: 48px !important;
+  min-height: 40px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: 1px solid #059669;
+  border-radius: 30px !important;
   color: #ffffff !important;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
   transition: all 0.15s ease;
-  padding: 0 12px;
+  padding: 0 14px;
   margin-top: 2px;
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record span,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record span,
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record span {
   color: #ffffff !important;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 700;
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record svg,
@@ -46407,19 +46473,26 @@ span.error {
   width: 15px;
   height: 15px;
   color: #ffffff;
+  stroke-width: 2.5;
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:hover:not(:disabled),
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:hover:not(:disabled) {
-  background: #1d4ed8;
-  border-color: #1e40af;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border-color: #047857;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+}
+.form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:active:not(:disabled),
+.booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:active:not(:disabled),
+.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
 }
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:disabled,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:disabled,
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -46430,7 +46503,7 @@ span.error {
   margin-top: 14px;
   height: 48px;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 30px !important;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   border: 0;
   color: #ffffff !important;
@@ -46443,6 +46516,8 @@ span.error {
   gap: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: calc(100% - 25px) !important;
+  margin: 0 auto;
 }
 .form-admin.booking-order-ui .booking-pos-submit-btn span,
 .booking-dashboard.booking-order-ui .booking-pos-submit-btn span,

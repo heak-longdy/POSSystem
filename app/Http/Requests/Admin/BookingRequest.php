@@ -43,6 +43,7 @@ class BookingRequest extends FormRequest
             'delivery_date' => 'nullable|date',
             'dataCarts' => 'required|json',
             'partial_payment_amount' => 'nullable|numeric|min:0',
+            'partial_payment_note' => 'nullable|string|max:500',
         ];
     }
     public function messages()

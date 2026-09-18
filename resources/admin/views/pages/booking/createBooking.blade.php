@@ -898,31 +898,83 @@
 
                     /* Record Payment Card */
                     .booking-payment-form--record {
-                        background: #ffffff !important;
+                        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
                         border: 1px solid #e2e8f0 !important;
                         border-radius: 12px !important;
-                        padding: 14px !important;
-                        margin-top: 12px !important;
+                        padding: 13px 14px 14px 14px !important;
+                        margin-top: 14px !important;
                         display: flex !important;
                         flex-direction: column !important;
                         gap: 12px !important;
-                        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+                        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05) !important;
+                    }
+                    .booking-payment-form-header {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        gap: 8px !important;
                     }
                     .booking-payment-form-title {
                         display: flex !important;
                         align-items: center !important;
-                        gap: 6px !important;
-                        font-size: 13.5px !important;
+                        gap: 8px !important;
+                        font-size: 13px !important;
                         font-weight: 700 !important;
                         color: #0f172a !important;
                         margin: 0 !important;
                         padding: 0 !important;
                         border: none !important;
                     }
-                    .booking-payment-form-title svg {
-                        width: 16px !important;
-                        height: 16px !important;
-                        color: #2563eb !important;
+                    .booking-payment-title-icon {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        width: 24px !important;
+                        height: 24px !important;
+                        background: #ecfdf5 !important;
+                        border: 1px solid #a7f3d0 !important;
+                        border-radius: 6px !important;
+                        flex-shrink: 0 !important;
+                    }
+                    .booking-payment-title-icon svg {
+                        width: 14px !important;
+                        height: 14px !important;
+                        color: #059669 !important;
+                    }
+                    .booking-pay-full-btn {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        gap: 4px !important;
+                        padding: 4px 9px !important;
+                        background: #ecfdf5 !important;
+                        border: 1px solid #a7f3d0 !important;
+                        border-radius: 6px !important;
+                        color: #059669 !important;
+                        font-size: 11px !important;
+                        font-weight: 600 !important;
+                        cursor: pointer !important;
+                        line-height: 1 !important;
+                        transition: all 0.15s ease !important;
+                    }
+                    .booking-pay-full-btn svg {
+                        width: 11px !important;
+                        height: 11px !important;
+                        color: #059669 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    .booking-pay-full-btn strong {
+                        font-weight: 800 !important;
+                        color: #047857 !important;
+                    }
+                    .booking-pay-full-btn:hover {
+                        background: #d1fae5 !important;
+                        border-color: #6ee7b7 !important;
+                        color: #047857 !important;
+                        transform: translateY(-1px) !important;
+                        box-shadow: 0 2px 5px rgba(5, 150, 105, 0.15) !important;
+                    }
+                    .booking-pay-full-btn:active {
+                        transform: translateY(0) !important;
                     }
                     .booking-payment-form-grid {
                         display: grid !important;
@@ -945,8 +997,8 @@
                         display: flex !important;
                         align-items: stretch !important;
                         width: 100% !important;
-                        height: 36px !important;
-                        min-height: 36px !important;
+                        height: 38px !important;
+                        min-height: 38px !important;
                         border: 1px solid #cbd5e1 !important;
                         border-radius: 8px !important;
                         background: #ffffff !important;
@@ -954,8 +1006,8 @@
                         transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
                     }
                     .booking-payment-form--record .booking-input-prefix-group:focus-within {
-                        border-color: #2563eb !important;
-                        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+                        border-color: #10b981 !important;
+                        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.16) !important;
                     }
                     .booking-payment-form--record .booking-input-prefix-group .input-addon-prefix {
                         display: inline-flex !important;
@@ -964,7 +1016,7 @@
                         padding: 0 10px !important;
                         font-size: 13px !important;
                         font-weight: 700 !important;
-                        color: #64748b !important;
+                        color: #059669 !important;
                         background: #f8fafc !important;
                         border: none !important;
                         border-right: 1px solid #e2e8f0 !important;
@@ -982,8 +1034,8 @@
                         border: none !important;
                         outline: none !important;
                         padding: 0 10px !important;
-                        font-size: 13px !important;
-                        font-weight: 600 !important;
+                        font-size: 13.5px !important;
+                        font-weight: 700 !important;
                         color: #0f172a !important;
                         background: transparent !important;
                         border-radius: 0 !important;
@@ -997,8 +1049,8 @@
                     }
                     .booking-payment-form--record .booking-note-input {
                         width: 100% !important;
-                        height: 36px !important;
-                        min-height: 36px !important;
+                        height: 38px !important;
+                        min-height: 38px !important;
                         border: 1px solid #cbd5e1 !important;
                         border-radius: 8px !important;
                         padding: 0 10px !important;
@@ -1009,49 +1061,54 @@
                         transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
                     }
                     .booking-payment-form--record .booking-note-input:focus {
-                        border-color: #2563eb !important;
-                        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+                        border-color: #10b981 !important;
+                        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.16) !important;
                     }
 
                     /* Record Payment Button */
                     .booking-pos-pay-btn--record {
                         width: 100% !important;
-                        height: 38px !important;
-                        min-height: 38px !important;
-                        background: #2563eb !important;
-                        border: 1px solid #1d4ed8 !important;
+                        height: 40px !important;
+                        min-height: 40px !important;
+                        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+                        border: 1px solid #059669 !important;
                         border-radius: 8px !important;
                         color: #ffffff !important;
-                        font-size: 13px !important;
+                        font-size: 13.5px !important;
                         font-weight: 700 !important;
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;
-                        gap: 6px !important;
+                        gap: 7px !important;
                         cursor: pointer !important;
-                        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2) !important;
+                        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25) !important;
                         transition: all 0.15s ease !important;
-                        padding: 0 12px !important;
+                        padding: 0 14px !important;
                         margin-top: 2px !important;
                     }
                     .booking-pos-pay-btn--record span {
                         color: #ffffff !important;
-                        font-size: 13px !important;
+                        font-size: 13.5px !important;
                         font-weight: 700 !important;
                     }
                     .booking-pos-pay-btn--record svg {
                         width: 15px !important;
                         height: 15px !important;
                         color: #ffffff !important;
+                        stroke-width: 2.5 !important;
                     }
                     .booking-pos-pay-btn--record:hover:not(:disabled) {
-                        background: #1d4ed8 !important;
-                        border-color: #1e40af !important;
+                        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+                        border-color: #047857 !important;
                         transform: translateY(-1px) !important;
-                        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
+                        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35) !important;
+                    }
+                    .booking-pos-pay-btn--record:active:not(:disabled) {
+                        transform: translateY(0) !important;
+                        box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2) !important;
                     }
                     .booking-pos-pay-btn--record:disabled {
-                        opacity: 0.6 !important;
+                        opacity: 0.55 !important;
                         cursor: not-allowed !important;
                         transform: none !important;
                         box-shadow: none !important;
@@ -1711,10 +1768,42 @@
 
                     <!-- New Booking Partial Payment -->
                     <template x-if="!bookingId">
-                        <div class="partial-payment-input-wrap">
-                            <label><i data-feather="dollar-sign"></i> {{ __('booking.initial_partial_payment') }}</label>
-                            <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
-                                :max="subTotal" placeholder="{{ __('booking.placeholder.partial_payment') }}" autocomplete="off">
+                        <div class="booking-payment-form booking-payment-form--record">
+                            <div class="booking-payment-form-header">
+                                <div class="booking-payment-form-title">
+                                    <span class="booking-payment-title-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                    </span>
+                                    <span>{{ __('booking.initial_partial_payment') }}</span>
+                                </div>
+                                <button type="button" class="booking-pay-full-btn"
+                                    @click="formData.partial_payment_amount = Number(amountPaid || 0)"
+                                    :title="'Fill ' + formatCurrency(amountPaid)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                    <span>{{ __('booking.pay_full') }} (<span x-text="formatCurrency(amountPaid)"></span>)</span>
+                                </button>
+                            </div>
+                            <div class="booking-payment-form-grid">
+                                <div class="form-group">
+                                    <label>{{ __('booking.amount') }}</label>
+                                    <div class="booking-input-prefix-group">
+                                        <span class="input-addon-prefix">$</span>
+                                        <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
+                                            :max="subTotal" placeholder="0.00" autocomplete="off">
+                                    </div>
+                                    <template x-for="item in dataError?.partial_payment_amount">
+                                        <div class="msgError"><p x-text="item"></p></div>
+                                    </template>
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('booking.note') }}</label>
+                                    <input type="text" x-model="formData.partial_payment_note" class="booking-note-input"
+                                        placeholder="{{ __('booking.placeholder.note') }}" maxlength="500" autocomplete="off">
+                                    <template x-for="item in dataError?.partial_payment_note">
+                                        <div class="msgError"><p x-text="item"></p></div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </template>
 
@@ -1753,33 +1842,41 @@
                     <!-- Record Payment Form (Edit mode) -->
                     <template x-if="canRecordPayment()">
                         <div class="booking-payment-form booking-payment-form--record">
-                            <div class="booking-payment-form-title">
-                                <i data-feather="plus-circle"></i>
-                                <span>{{ __('booking.record_payment') }}</span>
+                            <div class="booking-payment-form-header">
+                                <div class="booking-payment-form-title">
+                                    <span class="booking-payment-title-icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                    </span>
+                                    <span>{{ __('booking.record_payment') }}</span>
+                                </div>
+                                <button type="button" class="booking-pay-full-btn"
+                                    @click="formData.partial_payment_amount = Number(remainingAmount || amountPaid || 0)"
+                                    :title="'Fill ' + formatCurrency(remainingAmount || amountPaid)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                    <span>{{ __('booking.pay_full') }} (<span x-text="formatCurrency(remainingAmount || amountPaid)"></span>)</span>
+                                </button>
                             </div>
                             <div class="booking-payment-form-grid">
                                 <div class="form-group">
                                     <label>{{ __('booking.amount') }}</label>
                                     <div class="booking-input-prefix-group">
                                         <span class="input-addon-prefix">$</span>
-                                        <input type="number" min="0.01" step="0.01" x-model="paymentAmount"
-                                            :max="remainingAmount" placeholder="0.00" autocomplete="off">
+                                        <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
+                                            :max="remainingAmount || subTotal" placeholder="0.00" autocomplete="off">
                                     </div>
+                                    <template x-for="item in dataError?.partial_payment_amount">
+                                        <div class="msgError"><p x-text="item"></p></div>
+                                    </template>
                                 </div>
                                 <div class="form-group">
                                     <label>{{ __('booking.note') }}</label>
-                                    <input type="text" x-model="paymentNote" class="booking-note-input"
+                                    <input type="text" x-model="formData.partial_payment_note" class="booking-note-input"
                                         placeholder="{{ __('booking.placeholder.note') }}" maxlength="500" autocomplete="off">
+                                    <template x-for="item in dataError?.partial_payment_note">
+                                        <div class="msgError"><p x-text="item"></p></div>
+                                    </template>
                                 </div>
                             </div>
-                            <button type="button" class="booking-pos-pay-btn booking-pos-pay-btn--record" :disabled="paymentLoading"
-                                @click="submitPayment()">
-                                <span class="booking-spinner" x-show="paymentLoading">
-                                    <span id="spinner"></span>
-                                </span>
-                                <i data-feather="check-circle" x-show="!paymentLoading"></i>
-                                <span x-text="paymentLoading ? lblRecording : lblRecordPayment"></span>
-                            </button>
                         </div>
                     </template>
 
@@ -1815,6 +1912,7 @@
                     delivery_date: moment().add(2, 'days').format('YYYY-MM-DD'),
                     pay_way: 'Cash',
                     partial_payment_amount: null,
+                    partial_payment_note: '',
                 },
                 btnSubmit: @json($bookingActionLabel),
                 confirmMessage: @json($bookingConfirmMessage),
@@ -1897,6 +1995,11 @@
                         payment_status: booking?.payment_status || 'Pending',
                         payments: booking?.payments || [],
                     });
+                    const initialPayment = (booking?.payments && booking.payments.length > 0) ? booking.payments[0] : null;
+                    if (initialPayment) {
+                        this.formData.partial_payment_amount = Number(initialPayment.amount || 0) || null;
+                        this.formData.partial_payment_note = initialPayment.note || '';
+                    }
                     if (details.length > 0) {
                         details.forEach((detail) => {
                             this.dataCart.push(this.mapDetailToCart(detail));
@@ -2878,10 +2981,14 @@
                     }
 
                     const partialPayment = Number(this.formData.partial_payment_amount || 0);
+                    const maxAllowedPayment = this.bookingId ? Number(this.remainingAmount || this.subTotal || 0) : Number(this.subTotal || 0);
                     if (partialPayment < 0) {
                         errors.partial_payment_amount = [@json(__('booking.validation.partial_min'))];
-                    } else if (partialPayment > Number(this.subTotal || 0)) {
+                    } else if (partialPayment > maxAllowedPayment) {
                         errors.partial_payment_amount = [@json(__('booking.validation.partial_max'))];
+                    }
+                    if (this.formData.partial_payment_note && this.formData.partial_payment_note.length > 500) {
+                        errors.partial_payment_note = ['Note cannot exceed 500 characters.'];
                     }
 
                     return errors;

@@ -251,7 +251,8 @@ class BookingController extends Controller
                 $booking,
                 (float) ($req->partial_payment_amount ?? 0),
                 $req->pay_way,
-                $req->booking_date
+                $req->booking_date,
+                $req->partial_payment_note
             );
 
             DB::commit();
@@ -777,9 +778,15 @@ class BookingController extends Controller
         ];
     }
 
-    private function recordInitialPayment(Booking $booking, float $amount, ?string $paymentMethod = null, ?string $paymentDate = null): void
+    private function recordInitialPayment(Booking $booking, float $amount, ?string $paymentMethod = null, ?string $paymentDate = null, ?string $note = null): void
     {
+        $existingPayment = BookingPayment::where('booking_id', $booking->id)->orderBy('id', 'asc')->first();
+
         if ($amount <= 0) {
+            if ($existingPayment && $booking->payments()->count() === 1 && $booking->payment_status === 'Pending') {
+                $existingPayment->delete();
+                $this->syncBookingPaymentState($booking);
+            }
             return;
         }
 
@@ -789,16 +796,22 @@ class BookingController extends Controller
             ]);
         }
 
-        BookingPayment::create([
+        $paymentData = [
             'booking_id' => $booking->id,
             'amount' => $amount,
             'payment_method' => $paymentMethod ?: ($booking->pay_way ?: 'Cash'),
             'payment_date' => $paymentDate
                 ? Carbon::parse($paymentDate)->format('Y-m-d H:i:s')
                 : ($booking->booking_date ? Carbon::parse($booking->booking_date)->format('Y-m-d H:i:s') : Carbon::now()->format('Y-m-d H:i:s')),
-            'note' => 'Initial partial payment.',
+            'note' => filled($note) ? trim($note) : 'Initial partial payment.',
             'created_by' => Auth::id(),
-        ]);
+        ];
+
+        if ($existingPayment && $booking->payments()->count() === 1) {
+            $existingPayment->update($paymentData);
+        } else {
+            BookingPayment::create($paymentData);
+        }
 
         $this->syncBookingPaymentState($booking);
     }
