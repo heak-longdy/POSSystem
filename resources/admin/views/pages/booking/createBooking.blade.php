@@ -46,7 +46,7 @@
                                 };
                                 $recentCustomer = $recentBooking->customer?->name
                                     ?: ($recentBooking->customer?->phone ?: __('booking.walk_in_customer'));
-                                $customerInitials = strtoupper(substr($recentCustomer, 0, 2));
+                                $customerInitials = mb_strtoupper(mb_substr($recentCustomer, 0, 2, 'UTF-8'), 'UTF-8');
                                 $recentDate = $recentBooking->booking_date
                                     ? \Carbon\Carbon::parse($recentBooking->booking_date)->format('d M Y, h:i a')
                                     : '---';
@@ -1470,7 +1470,7 @@
                     .booking-pos-product-card .booking-pos-add-btn--full {
                         width: 100% !important;
                         height: 36px !important;
-                        border-radius: 8px !important;
+                        border-radius: 30px !important;
                         border: 1px solid #1d4ed8 !important;
                         background: #2563eb !important;
                         color: #ffffff !important;
@@ -1533,7 +1533,7 @@
                         width: 100% !important;
                         height: 36px !important;
                         border: 1px solid #bfdbfe !important;
-                        border-radius: 8px !important;
+                        border-radius: 30px !important;
                         background: #eff6ff !important;
                         padding: 2px !important;
                         box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05) !important;
@@ -1544,7 +1544,7 @@
                         min-width: 32px !important;
                         border: none !important;
                         background: #ffffff !important;
-                        border-radius: 6px !important;
+                        border-radius: 30px !important;
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;

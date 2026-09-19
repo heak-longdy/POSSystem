@@ -259,6 +259,9 @@ class BookingController extends Controller
             Session::flash('success', $bookingId ? __('booking.message.update_success') : __('booking.message.create_success'));
 
             $savedBooking = $booking->fresh();
+            if ($savedBooking->shop_id) {
+                session(['last_booking_shop_id' => $savedBooking->shop_id]);
+            }
 
             return response()->json([
                 'message' => 'success',
@@ -818,10 +821,17 @@ class BookingController extends Controller
 
     private function formData(Booking $booking = null)
     {
-        $shopId = old('shop_id', $booking?->shop_id ?: request('shop_id'));
-        $shop = $shopId
-            ? Shop::find($shopId)
-            : Shop::where('status', 1)->orderBy('id', 'asc')->first();
+        $shopId = old('shop_id', $booking?->shop_id ?: (request('shop_id') ?: session('last_booking_shop_id')));
+        $shop = $shopId ? Shop::find($shopId) : null;
+
+        if (!$shop) {
+            $latestShopId = Booking::latest('id')->value('shop_id');
+            $shop = $latestShopId ? Shop::find($latestShopId) : null;
+        }
+
+        if (!$shop) {
+            $shop = Shop::where('status', 1)->orderBy('id', 'asc')->first();
+        }
 
         if (!$booking) {
             $booking = (object) [
@@ -842,9 +852,17 @@ class BookingController extends Controller
             ->when($shop?->id, function ($query) use ($shop) {
                 $query->where('shop_id', $shop->id);
             })
-            ->latest('booking_date')
+            ->latest('id')
             ->take(3)
             ->get();
+
+        if ($recentBookings->isEmpty()) {
+            $recentBookings = Booking::with(['customer', 'barber'])
+                ->withCount('bookingDetail')
+                ->latest('id')
+                ->take(3)
+                ->get();
+        }
 
         return [
             'id' => $booking->id ?? '',

@@ -30408,9 +30408,16 @@ body.dark {
   font-family: DMSans;
   src: url(/fonts/DMSans-Regular.ttf?067ebd7ed3c947d82dc4d0fd06d7f067);
 }
+@font-face {
+  font-family: CocomatPro;
+  src: url(/fonts/CocomatPro.ttf?b4abb11a0fce23805471c9b8a0ef938c);
+}
+@font-face {
+  font-family: NotoSansKhmer;
+  src: url(/fonts/NotoSansKhmer.ttf?480e99b61617a59f1dba944f456cd488);
+}
 *:not(.material-icons):not(.material-symbols-outlined):not(mat-icon):not(.bx) {
-  font-family: DMSans, Battambang, Roboto, sans-serif !important;
-  font-weight: 400;
+  font-family: DMSans, NotoSansKhmer, Roboto, sans-serif !important;
 }
 
 button:not(.text-gray-400):not(.fancybox-button) {
@@ -45053,7 +45060,7 @@ span.error {
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full {
   width: 100%;
   height: 36px;
-  border-radius: 8px;
+  border-radius: 30px;
   border: 1px solid #1d4ed8;
   background: #2563eb;
   color: #ffffff !important;
@@ -45127,7 +45134,7 @@ span.error {
   width: 100%;
   height: 36px;
   border: 1px solid #bfdbfe;
-  border-radius: 8px;
+  border-radius: 30px;
   background: #eff6ff;
   padding: 2px;
   box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05);
