@@ -33,10 +33,20 @@ class SalesReportController extends Controller
     }
 
     /**
+     * Resolve view grouping mode (Default: ungrouped)
+     */
+    private function resolveGrouping(Request $req)
+    {
+        $grouping = $req->get('grouping', 'ungrouped');
+        return in_array($grouping, ['grouped', 'ungrouped']) ? $grouping : 'ungrouped';
+    }
+
+    /**
      * Daily Sales Report View
      */
     public function daily(Request $req)
     {
+        $grouping = $this->resolveGrouping($req);
         $dates = $this->resolveDailyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'daily');
 
@@ -45,19 +55,27 @@ class SalesReportController extends Controller
         // Overall summary statistics for filtered date range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
 
-        // Daily aggregated breakdown
-        $dailyRows = $this->aggregateDailySales(clone $baseQuery);
+        $rows = null;
+        $ungroupedRows = null;
+
+        if ($grouping === 'grouped') {
+            $rows = $this->aggregateDailySales(clone $baseQuery);
+        } else {
+            $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
+        }
 
         $filterOptions = $this->getFilterOptions();
 
         return view($this->layout . 'index', [
             'viewMode' => 'daily',
+            'grouping' => $grouping,
             'routeName' => $this->routeName,
             'from_date' => $dates['from'],
             'to_date' => $dates['to'],
             'filters' => $appliedFilters,
             'summary' => $summary,
-            'rows' => $dailyRows,
+            'rows' => $rows,
+            'ungroupedRows' => $ungroupedRows,
             'shops' => $filterOptions['shops'],
             'barbers' => $filterOptions['barbers'],
             'paymentMethods' => $filterOptions['paymentMethods'],
@@ -70,6 +88,7 @@ class SalesReportController extends Controller
      */
     public function monthly(Request $req)
     {
+        $grouping = $this->resolveGrouping($req);
         $monthRange = $this->resolveMonthlyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'monthly');
 
@@ -78,13 +97,20 @@ class SalesReportController extends Controller
         // Overall summary statistics for filtered monthly range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
 
-        // Monthly aggregated breakdown
-        $monthlyRows = $this->aggregateMonthlySales(clone $baseQuery);
+        $rows = null;
+        $ungroupedRows = null;
+
+        if ($grouping === 'grouped') {
+            $rows = $this->aggregateMonthlySales(clone $baseQuery);
+        } else {
+            $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
+        }
 
         $filterOptions = $this->getFilterOptions();
 
         return view($this->layout . 'index', [
             'viewMode' => 'monthly',
+            'grouping' => $grouping,
             'routeName' => $this->routeName,
             'selectedYear' => $monthRange['year'],
             'from_month' => $monthRange['from_month'],
@@ -93,7 +119,8 @@ class SalesReportController extends Controller
             'to_date' => $monthRange['to'],
             'filters' => $appliedFilters,
             'summary' => $summary,
-            'rows' => $monthlyRows,
+            'rows' => $rows,
+            'ungroupedRows' => $ungroupedRows,
             'shops' => $filterOptions['shops'],
             'barbers' => $filterOptions['barbers'],
             'paymentMethods' => $filterOptions['paymentMethods'],
@@ -108,22 +135,28 @@ class SalesReportController extends Controller
     public function report(Request $req)
     {
         $mode = $req->get('view_mode', 'daily');
+        $grouping = $this->resolveGrouping($req);
 
         if ($mode === 'monthly') {
             $monthRange = $this->resolveMonthlyDateRange($req);
             $baseQuery = $this->buildFilteredBookingQuery($req, $monthRange['from'], $monthRange['to']);
             $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
-            $rows = $this->aggregateMonthlySales(clone $baseQuery);
+            $rows = ($grouping === 'ungrouped')
+                ? $this->getUngroupedAll(clone $baseQuery)
+                : $this->aggregateMonthlySales(clone $baseQuery);
         } else {
             $dates = $this->resolveDailyDateRange($req);
             $baseQuery = $this->buildFilteredBookingQuery($req, $dates['from'], $dates['to']);
             $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
-            $rows = $this->aggregateDailySales(clone $baseQuery);
+            $rows = ($grouping === 'ungrouped')
+                ? $this->getUngroupedAll(clone $baseQuery)
+                : $this->aggregateDailySales(clone $baseQuery);
         }
 
         return response()->json([
             'status' => 'success',
             'view_mode' => $mode,
+            'grouping' => $grouping,
             'summary' => $summary,
             'rows' => $rows,
         ]);
@@ -162,39 +195,7 @@ class SalesReportController extends Controller
             ->get();
 
         $formatted = $bookings->map(function ($booking) {
-            $items = $booking->bookingDetail->map(function ($detail) {
-                $isService = $detail->type === 'service';
-                $name = $isService ? ($detail->service?->name ?? __('sales_report.modal.unknown_service')) : ($detail->product?->name ?? __('sales_report.modal.unknown_product'));
-                return [
-                    'id' => $detail->id,
-                    'type' => $detail->type ?: ($isService ? 'service' : 'product'),
-                    'name' => $name,
-                    'qty' => (int) ($detail->qty ?: 1),
-                    'price' => (float) ($detail->price ?? 0),
-                    'discount' => (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0)),
-                    'total' => (float) (($detail->price ?? 0) * ($detail->qty ?: 1)),
-                ];
-            });
-
-            return [
-                'id' => $booking->id,
-                'invoice_number' => $booking->invoice_number ?: ('#' . $booking->id),
-                'booking_date' => $booking->booking_date ? Carbon::parse($booking->booking_date)->format('Y-m-d H:i') : '---',
-                'booking_date_formatted' => $booking->booking_date ? Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---',
-                'shop_name' => $booking->shop?->name ?: '---',
-                'barber_name' => $booking->barber?->name ?: '---',
-                'customer_name' => $booking->customer?->name ?: __('sales_report.modal.walk_in_customer'),
-                'customer_phone' => $booking->customer?->phone ?: '---',
-                'payment_status' => $booking->payment_status ?: 'Pending',
-                'pay_way' => $booking->pay_way ?: ($booking->payments->first()?->payment_method ?: 'Cash'),
-                'total_price' => (float) ($booking->total_price ?? 0),
-                'total_discount' => (float) ($booking->total_discount ?? 0),
-                'paid_amount' => (float) ($booking->paid_amount ?? 0),
-                'remaining_amount' => (float) ($booking->remaining_amount ?? 0),
-                'items' => $items,
-                'items_count' => $items->sum('qty'),
-                'remark' => $booking->remark,
-            ];
+            return (array) $this->formatBookingRecord($booking);
         });
 
         $totalRevenue = $formatted->sum('total_price');
@@ -230,6 +231,104 @@ class SalesReportController extends Controller
             'total_remaining' => $totalRemaining,
             'bookings' => $formatted,
         ]);
+    }
+
+    /**
+     * Format a booking model into a standardized object for views and reports
+     */
+    private function formatBookingRecord($booking)
+    {
+        $items = $booking->bookingDetail->map(function ($detail) {
+            $isService = $detail->type === 'service';
+            $name = $isService ? ($detail->service?->name ?? __('sales_report.modal.unknown_service')) : ($detail->product?->name ?? __('sales_report.modal.unknown_product'));
+            return [
+                'id' => $detail->id,
+                'type' => $detail->type ?: ($isService ? 'service' : 'product'),
+                'name' => $name,
+                'qty' => (int) ($detail->qty ?: 1),
+                'price' => (float) ($detail->price ?? 0),
+                'discount' => (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0)),
+                'total' => (float) (($detail->price ?? 0) * ($detail->qty ?: 1)),
+            ];
+        });
+
+        $totalPrice = (float) ($booking->total_price ?? 0);
+        $totalDiscount = (float) ($booking->total_discount ?? 0);
+        $grossSales = $totalPrice + $totalDiscount;
+        $paidAmount = (float) ($booking->paid_amount ?? 0);
+        $remainingAmount = (float) ($booking->remaining_amount ?? 0);
+
+        return (object) [
+            'id' => $booking->id,
+            'invoice_number' => $booking->invoice_number ?: ('#' . $booking->id),
+            'booking_date' => $booking->booking_date ? Carbon::parse($booking->booking_date)->format('Y-m-d H:i') : '---',
+            'booking_date_formatted' => $booking->booking_date ? Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---',
+            'shop_name' => $booking->shop?->name ?: '---',
+            'barber_name' => $booking->barber?->name ?: '---',
+            'customer_name' => $booking->customer?->name ?: __('sales_report.modal.walk_in_customer'),
+            'customer_phone' => $booking->customer?->phone ?: '---',
+            'payment_status' => $booking->payment_status ?: 'Pending',
+            'pay_way' => $booking->pay_way ?: ($booking->payments->first()?->payment_method ?: 'Cash'),
+            'total_price' => $totalPrice,
+            'total_discount' => $totalDiscount,
+            'gross_sales' => $grossSales,
+            'paid_amount' => $paidAmount,
+            'remaining_amount' => $remainingAmount,
+            'items' => $items,
+            'items_count' => $items->sum('qty'),
+            'remark' => $booking->remark,
+        ];
+    }
+
+    /**
+     * Get paginated ungrouped bookings formatted for table listing
+     */
+    private function getUngroupedPaginated($query, Request $req)
+    {
+        $paginated = (clone $query)
+            ->with([
+                'shop:id,name,phone,address',
+                'barber:id,name,phone',
+                'customer:id,name,phone',
+                'bookingDetail' => function ($detail) {
+                    $detail->withTrashed()->with(['service:id,name', 'product:id,name']);
+                },
+                'payments:id,booking_id,amount,payment_method,payment_date',
+            ])
+            ->orderBy('booking_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(50)
+            ->appends($req->query());
+
+        $paginated->getCollection()->transform(function ($booking) {
+            return $this->formatBookingRecord($booking);
+        });
+
+        return $paginated;
+    }
+
+    /**
+     * Get all ungrouped bookings for export / JSON
+     */
+    private function getUngroupedAll($query)
+    {
+        $bookings = (clone $query)
+            ->with([
+                'shop:id,name,phone,address',
+                'barber:id,name,phone',
+                'customer:id,name,phone',
+                'bookingDetail' => function ($detail) {
+                    $detail->withTrashed()->with(['service:id,name', 'product:id,name']);
+                },
+                'payments:id,booking_id,amount,payment_method,payment_date',
+            ])
+            ->orderBy('booking_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return $bookings->map(function ($booking) {
+            return $this->formatBookingRecord($booking);
+        });
     }
 
     /**

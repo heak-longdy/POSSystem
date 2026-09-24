@@ -314,18 +314,16 @@ class BookingController extends Controller
 
             if ($booking->payment_status !== 'Paid') {
                 $remaining = (float) $booking->remaining_amount;
-                if ($remaining <= 0) {
-                    throw ValidationException::withMessages([
-                        'amount' => 'Booking does not have a remaining balance.',
+                if ($remaining > 0) {
+                    BookingPayment::create([
+                        'booking_id' => $booking->id,
+                        'amount' => $remaining,
+                        'payment_method' => $req->payment_method ?: ($booking->pay_way ?: 'Cash'),
+                        'payment_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'note' => $req->note ?: ($booking->payment_status === 'Partial' ? 'Paid remaining balance.' : 'Paid in full.'),
+                        'created_by' => Auth::id(),
                     ]);
                 }
-
-                BookingPayment::create([
-                    'booking_id' => $booking->id,
-                    'amount' => $remaining,
-                    'note' => 'Paid remaining balance.',
-                    'created_by' => Auth::id(),
-                ]);
             }
 
             $booking = $this->syncBookingPaymentState($booking);
@@ -718,7 +716,7 @@ class BookingController extends Controller
         $totalPaid = BookingPayment::where('booking_id', $booking->id)->sum('amount');
         $totalPrice = (float) ($booking->total_price ?? 0);
 
-        if ((float) $totalPaid <= 0) {
+        if ((float) $totalPaid <= 0 && $totalPrice > 0) {
             $paymentStatus = 'Pending';
             $paymentDate = null;
         } elseif ((float) $totalPaid >= $totalPrice) {

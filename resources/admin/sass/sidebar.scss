@@ -51,6 +51,7 @@ li {
     border-right    : 1px solid rgb(229, 234, 239);
     border-right    : 0;
     color           : #fff;
+    z-index: 9999;
 
     ul {
         margin-bottom: 0;
@@ -171,6 +172,7 @@ li {
     font-size              : 24px;
     display                : flex;
     align-items            : center;
+    cursor                 : pointer;
     height                 : $heightHeaderSidebar;
     min-height             : $heightHeaderSidebar;
     // height: $rightHeightHeader;
@@ -294,6 +296,7 @@ li {
     margin                   : 4px 0;
     white-space              : nowrap;
     overflow                 : hidden;
+    cursor                   : pointer;
 
 }
 

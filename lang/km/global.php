@@ -96,6 +96,7 @@ return [
         'reset'              => 'កំណត់ឡើងវិញ',
         'createPosition'     => 'បង្កើតតួនាទី',
         'createSlide'        => 'បង្កើតស្លាយ',
+        'excel'              => 'Excel',
     ],
 
     // Tabs

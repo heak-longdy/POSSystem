@@ -1,6 +1,6 @@
 <!-- SIDEBAR -->
 <div class="SDHeader" x-data="XSDHeader">
-    <a href="#" class="brand" @click="infoProfile()">
+    <a class="brand" @click="infoProfile()" role="button" tabindex="0">
         {{-- <i class='bx bxl-squarespace icon'></i> --}}
         {{-- <i class='bx bxl-product-hunt icon bx-tada'></i> --}}
         <i class='bx bxl-stripe icon iconLogo bx-tada-hover bx-tada'></i>
@@ -12,7 +12,7 @@
 </div>
 <ul class="side-menu">
     <li class="li">
-        <a href="{{ route('admin-dashboard') }}" class="overView {{ routeActive('admin/dashboard') ? 'active' : '' }}">
+        <a data-url="{{ route('admin-dashboard') }}" role="link" tabindex="0" class="overView {{ routeActive('admin/dashboard') ? 'active' : '' }}">
             <div class="div">
                 {{-- <i class='bx bxl-stack-overflow icon'></i> --}}
                 {{-- <i class='bx bxs-dashboard icon'></i> --}}
@@ -32,7 +32,8 @@
                 <div class="navSidber">
                     @foreach (($item['listMenu'] ?? $item['list-menu'] ?? []) as $keyListMenu => $itemListMenu)
                         <li class="">
-                            <a href="{!! isset($itemListMenu['path']) ? url($itemListMenu['path']) : '#' !!}"
+                            <a @if(!isset($itemListMenu['children']) || !$itemListMenu['children']) data-url="{!! isset($itemListMenu['path']) ? url($itemListMenu['path']) : '' !!}" @endif
+                                role="link" tabindex="0"
                                 class="{{ routeActive($itemListMenu['active']) ? 'active' : '' }}">
                                 {{-- <i class='bx bxs-inbox '></i> --}}
                                 {{-- <i class='bx bx-menu-alt-right icon'></i> --}}
@@ -55,7 +56,7 @@
                                 <ul class="side-dropdown {{ routeActive($itemListMenu['active']) ? 'show' : '' }}">
                                     @foreach ($itemListMenu['children'] as $child)
                                         <li>
-                                            <a href="{!! url($child['path']) !!}"
+                                            <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
                                                 class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                                 <i
                                                     class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
@@ -74,7 +75,7 @@
                 <li class="divider" data-text="{{ \App\Support\Language::translatedValue($item['label']) }}"></li>
                 <div class="navSidber">
                     <li class="">
-                        <a href="#" class="{{ routeActive($item['active']) ? 'active' : '' }}">
+                        <a role="button" tabindex="0" class="{{ routeActive($item['active']) ? 'active' : '' }}">
                             {{-- <i class='bx bxs-inbox '></i> --}}
                             {{-- <i class='bx bx-menu-alt-right icon'></i> --}}
                             {{-- <i class='bx bx-menu icon'></i> --}}
@@ -90,7 +91,7 @@
                         <ul class="side-dropdown {{ routeActive($item['active']) ? 'show' : '' }}">
                             @foreach ($item['children'] as $child)
                                 <li>
-                                    <a href="{!! url($child['path']) !!}"
+                                    <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
                                         class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                         <i
                                             class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
@@ -104,7 +105,7 @@
             </div>
         @else
             <li class="li">
-                <a href="{!! url($item['path']) !!}" class="{{ routeActive($item['active']) ? 'active' : '' }}">
+                <a data-url="{!! url($item['path']) !!}" role="link" tabindex="0" class="{{ routeActive($item['active']) ? 'active' : '' }}">
                     <i class='bx {{ isset($item['icon']) && $item['icon'] ? $item['icon'] : 'bxs-wrench' }} icon'></i>
                     {!! Str::limit(\App\Support\Language::translatedValue($item['name']), 25, ' ...') !!}
                 </a>

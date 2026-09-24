@@ -256,6 +256,51 @@
             gap: 10px;
         }
 
+        .view-grouping-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-grouping-toggle .toggle-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .toggle-pill-group {
+            display: inline-flex;
+            background: #e2e8f0;
+            padding: 3px;
+            border-radius: 8px;
+            gap: 2px;
+        }
+
+        .toggle-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .toggle-pill:hover {
+            color: #1e293b;
+            background: rgba(255, 255, 255, 0.65);
+        }
+
+        .toggle-pill.active {
+            background: #ffffff;
+            color: #2563eb;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
         .table-custom-header h4 {
             margin: 0;
             font-size: 15px;
@@ -341,24 +386,26 @@
         }
 
         .btn-drilldown {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            color: #2563eb;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 5px 10px;
-            border-radius: 6px;
+            background: #f8fafc !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #2563eb !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            padding: 5px 10px !important;
+            border-radius: 6px !important;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
+            display: inline-flex !important;
+            align-items: center !important;
+            min-width: unset !important;
             gap: 4px;
             transition: all 0.15s ease;
+            line-height: 0 !important;
         }
 
         .btn-drilldown:hover {
-            background: #2563eb;
-            color: #ffffff;
-            border-color: #2563eb;
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #2563eb !important;
         }
 
         /* Detail Modal */
@@ -415,16 +462,17 @@
         }
 
         .btn-close-report-modal {
-            background: transparent;
-            border: none;
-            font-size: 24px;
-            line-height: 1;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 0 4px;
+            background: transparent !important;
+            border: none !important;
+            font-size: 24px !important;
+            line-height: 1 !important;
+            color: #94a3b8 !important;
+            cursor: pointer !important;
+            padding: 0 4px !important;
+            min-width: unset !important;
         }
 
-        .btn-close-report-modal:hover { color: #1e293b; }
+        .btn-close-report-modal:hover { color: #1e293b !important; }
 
         .report-modal-body {
             padding: 18px 22px;
@@ -466,9 +514,17 @@
             background: #f1f5f9;
             color: #334155;
             font-size: 11px;
+            font-weight: 500;
             padding: 2px 7px;
             border-radius: 4px;
             margin: 2px 3px 2px 0;
+            border: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .invoice-item-chip b {
+            color: #2563eb;
+            font-weight: 700;
         }
 
         .empty-placeholder {
@@ -510,7 +566,7 @@
                 </div>
                 <div class="header-action-button">
                     <button type="button" @click="exportExcel()" class="btn-excel-export" :disabled="exportLoading">
-                        <i class='bx bx-download'></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M252.31-180Q222-180 201-201q-21-21-21-51.31v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46q0 4.62 3.85 8.46 3.84 3.85 8.46 3.85h455.38q4.62 0 8.46-3.85 3.85-3.84 3.85-8.46v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46Q780-222 759-201q-21 21-51.31 21H252.31ZM450-664.46l-76.92 76.92q-8.93 8.92-21.19 8.81-12.27-.12-21.58-9.43-8.69-9.3-9-21.07-.31-11.77 9-21.08l124.38-124.38q5.62-5.62 11.85-7.92 6.23-2.31 13.46-2.31t13.46 2.31q6.23 2.3 11.85 7.92l124.38 124.38q8.92 8.92 8.81 20.89-.12 11.96-8.81 21.26-9.31 9.31-21.38 9.62-12.08.31-21.39-9L510-664.46v306q0 12.77-8.62 21.38-8.61 8.62-21.38 8.62t-21.38-8.62q-8.62-8.61-8.62-21.38v-306Z"/></svg>
                         <span x-text="exportLoading ? '{{ __('order_transaction.excel.exporting') }}' : '{{ __('order_transaction.button.export_excel') }}'">{{ __('order_transaction.button.export_excel') }}</span>
                     </button>
                     <button type="button" s-click-link="{!! url()->current() !!}">
@@ -740,16 +796,170 @@
             <div class="report-table-card">
                 <div class="table-custom-header">
                     <h4>
-                        <i class='bx {{ $viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt' }}'></i>
-                        {{ $viewMode === 'daily' ? __('order_transaction.table.daily_breakdown') : __('order_transaction.table.monthly_breakdown') }}
-                        <span style="font-size: 12px; font-weight: normal; color: #64748b;">
-                            ({{ $rows->count() }} {{ $viewMode === 'daily' ? __('order_transaction.table.days_recorded') : __('order_transaction.table.months_recorded') }})
-                        </span>
+                        <i class='bx {{ $grouping === 'grouped' ? ($viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt') : 'bx-receipt' }}'></i>
+                        @if ($grouping === 'grouped')
+                            {{ $viewMode === 'daily' ? __('order_transaction.table.daily_breakdown') : __('order_transaction.table.monthly_breakdown') }}
+                            <span style="font-size: 12px; font-weight: normal; color: #64748b;">
+                                ({{ $rows ? $rows->count() : 0 }} {{ $viewMode === 'daily' ? __('order_transaction.table.days_recorded') : __('order_transaction.table.months_recorded') }})
+                            </span>
+                        @else
+                            {{ __('order_transaction.table.individual_orders') }}
+                            <span style="font-size: 12px; font-weight: normal; color: #64748b;">
+                                ({{ $ungroupedRows ? $ungroupedRows->total() : 0 }} {{ __('order_transaction.table.orders_recorded') }})
+                            </span>
+                        @endif
                     </h4>
+
+                    <!-- View Grouping Toggle Controls -->
+                    <div class="view-grouping-toggle">
+                        <span class="toggle-label">{{ __('order_transaction.toggle.view_as') }}:</span>
+                        <div class="toggle-pill-group">
+                            <a href="{{ route(request()->route()?->getName() ?: ($viewMode === 'daily' ? 'admin-report-order-transaction-daily' : 'admin-report-order-transaction-monthly'), array_merge(request()->query(), ['grouping' => 'ungrouped', 'page' => 1])) }}"
+                                class="toggle-pill {{ $grouping === 'ungrouped' ? 'active' : '' }}"
+                                title="{{ __('order_transaction.toggle.ungrouped_tooltip') }}">
+                                <i class='bx bx-list-ul'></i>
+                                <span>{{ __('order_transaction.toggle.ungrouped') }}</span>
+                            </a>
+                            <a href="{{ route(request()->route()?->getName() ?: ($viewMode === 'daily' ? 'admin-report-order-transaction-daily' : 'admin-report-order-transaction-monthly'), array_merge(request()->query(), ['grouping' => 'grouped', 'page' => 1])) }}"
+                                class="toggle-pill {{ $grouping === 'grouped' ? 'active' : '' }}"
+                                title="{{ $viewMode === 'daily' ? __('order_transaction.toggle.grouped_tooltip') : __('order_transaction.toggle.grouped_month_tooltip') }}">
+                                <i class='bx {{ $viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt' }}'></i>
+                                <span>{{ $viewMode === 'daily' ? __('order_transaction.toggle.grouped_by_date') : __('order_transaction.toggle.grouped_by_month') }}</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="table-responsive-custom">
-                    @if ($viewMode === 'daily')
+                    @if ($grouping === 'ungrouped')
+                        <!-- UNGROUPED TABLE (INDIVIDUAL ORDERS) -->
+                        <table class="order-data-table" id="orderTransactionTable">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 45px;">{{ __('order_transaction.table.no') }}</th>
+                                    <th>{{ __('order_transaction.table.invoice_no') }}</th>
+                                    <th>{{ __('order_transaction.table.date') }}</th>
+                                    <th>{{ __('order_transaction.table.customer') }}</th>
+                                    <th>{{ __('order_transaction.table.shop_staff') }}</th>
+                                    <th>{{ __('order_transaction.table.services_products') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.gross_sales') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.discount') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.net_sales') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.paid_amount') }}</th>
+                                    <th class="text-right">{{ __('order_transaction.table.remaining') }}</th>
+                                    <th>{{ __('order_transaction.table.pay_status') }}</th>
+                                    <th>{{ __('order_transaction.table.payment_methods') }}</th>
+                                    <th class="text-center" style="width: 90px;">{{ __('order_transaction.table.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($ungroupedRows as $row)
+                                    @php
+                                        $rowIndex = ($ungroupedRows->currentPage() - 1) * $ungroupedRows->perPage() + $loop->iteration;
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center">{{ $rowIndex }}</td>
+                                        <td>
+                                            <strong style="color: #2563eb; font-weight: 700;">{{ $row->invoice_number }}</strong>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; color: #1e293b; white-space: nowrap;">{{ $row->booking_date_formatted }}</div>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; color: #1e293b;">{{ $row->customer_name }}</div>
+                                            @if ($row->customer_phone && $row->customer_phone !== '---')
+                                                <small class="text-muted">{{ $row->customer_phone }}</small>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 500; color: #334155;">{{ $row->shop_name }}</div>
+                                            <small class="text-muted"><i class='bx bx-user'></i> {{ $row->barber_name }}</small>
+                                        </td>
+                                        <td style="max-width: 260px;">
+                                            @foreach ($row->items as $item)
+                                                <span class="invoice-item-chip" title="{{ $item['name'] }}: ${{ number_format($item['price'], 2) }}">
+                                                    {{ $item['name'] }} <b>(x{{ $item['qty'] }})</b>
+                                                </span>
+                                            @endforeach
+                                        </td>
+                                        <td class="text-right">${{ number_format($row->gross_sales, 2) }}</td>
+                                        <td class="text-right text-muted">
+                                            {{ $row->total_discount > 0 ? '-$' . number_format($row->total_discount, 2) : '$0.00' }}
+                                        </td>
+                                        <td class="text-right" style="font-weight: 700; color: #2563eb;">
+                                            ${{ number_format($row->total_price, 2) }}
+                                        </td>
+                                        <td class="text-right text-success font-weight-bold">
+                                            ${{ number_format($row->paid_amount, 2) }}
+                                        </td>
+                                        <td class="text-right {{ $row->remaining_amount > 0 ? 'text-danger font-weight-bold' : 'text-muted' }}">
+                                            ${{ number_format($row->remaining_amount, 2) }}
+                                        </td>
+                                        <td>
+                                            @php
+                                                $stClass = strtolower($row->payment_status ?: 'pending');
+                                                $stLabel = __('order_transaction.status.' . $stClass);
+                                                if ($stLabel === 'order_transaction.status.' . $stClass) {
+                                                    $stLabel = $row->payment_status;
+                                                }
+                                            @endphp
+                                            <span class="status-badge {{ $stClass }}">{{ $stLabel }}</span>
+                                        </td>
+                                        <td>
+                                            @php
+                                                $mKey = strtolower(str_replace(' ', '_', $row->pay_way ?: 'Cash'));
+                                                $mLabel = __('order_transaction.payment_methods.' . $mKey);
+                                                if ($mLabel === 'order_transaction.payment_methods.' . $mKey) {
+                                                    $mLabel = $row->pay_way ?: 'Cash';
+                                                }
+                                            @endphp
+                                            <span class="method-tag">{{ $mLabel }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div style="display: inline-flex; gap: 4px; justify-content: center;">
+                                                <button type="button" class="btn-drilldown"
+                                                    @click="openSingleInvoice({{ json_encode($row) }})"
+                                                    title="{{ __('order_transaction.modal.orders_for') }} {{ $row->invoice_number }}">
+                                                    <i class='bx bx-detail'></i>
+                                                </button>
+                                                <a href="{{ route('admin-booking-detail', $row->id) }}"
+                                                    class="btn-drilldown" target="_blank"
+                                                    title="{{ __('order_transaction.button.view_booking_detail') }}">
+                                                    <i class='bx bx-link-external'></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="14" class="empty-placeholder">
+                                            <i class='bx bx-receipt'></i>
+                                            <p>{{ __('order_transaction.empty.ungrouped_description') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if ($ungroupedRows && $ungroupedRows->count() > 0)
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="6">{{ __('order_transaction.table.total_summary') }}</td>
+                                        <td class="text-right">${{ number_format($summary['total_gross_sales'], 2) }}</td>
+                                        <td class="text-right text-muted">-${{ number_format($summary['total_discount'], 2) }}</td>
+                                        <td class="text-right text-primary">${{ number_format($summary['total_net_sales'], 2) }}</td>
+                                        <td class="text-right text-success">${{ number_format($summary['total_paid'], 2) }}</td>
+                                        <td class="text-right text-danger">${{ number_format($summary['total_remaining'], 2) }}</td>
+                                        <td colspan="3"></td>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+
+                        @if ($ungroupedRows && $ungroupedRows->hasPages())
+                            <div class="paginationLayout2" style="padding: 12px 18px; border-top: 1px solid #e2e8f0; background: #fafbfc;">
+                                @include('admin::components.pagination', ['paginate' => $ungroupedRows])
+                            </div>
+                        @endif
+                    @elseif ($viewMode === 'daily')
                         <!-- DAILY TABLE -->
                         <table class="order-data-table" id="orderTransactionTable">
                             <thead>
@@ -835,7 +1045,7 @@
                                     </tr>
                                 @endforelse
                             </tbody>
-                            @if ($rows->count() > 0)
+                            @if ($rows && $rows->count() > 0)
                                 <tfoot>
                                     <tr>
                                         <td colspan="2">{{ __('order_transaction.table.total_summary') }}</td>
@@ -936,7 +1146,7 @@
                                     </tr>
                                 @endforelse
                             </tbody>
-                            @if ($rows->count() > 0)
+                            @if ($rows && $rows->count() > 0)
                                 <tfoot>
                                     <tr>
                                         <td colspan="3">{{ __('order_transaction.table.total_summary') }}</td>
@@ -1080,6 +1290,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('xOrderTransactionReport', () => ({
                 viewMode: '{{ $viewMode }}',
+                grouping: '{{ $grouping }}',
                 showDetailModal: false,
                 modalLoading: false,
                 periodData: null,
@@ -1106,6 +1317,20 @@
                         'bank_transfer': '{{ __('order_transaction.payment_methods.bank_transfer') }}',
                     };
                     return methodMap[m] || method || 'Cash';
+                },
+
+                openSingleInvoice(inv) {
+                    this.periodData = {
+                        period: inv.invoice_number,
+                        period_label: inv.invoice_number + ' (' + inv.booking_date_formatted + ')',
+                        count: 1,
+                        total_revenue: inv.total_price,
+                        total_paid: inv.paid_amount,
+                        total_remaining: inv.remaining_amount,
+                        bookings: [inv]
+                    };
+                    this.modalLoading = false;
+                    this.showDetailModal = true;
                 },
 
                 async openPeriodDetails(period) {
@@ -1136,15 +1361,65 @@
                     try {
                         const currentParams = new URLSearchParams(window.location.search);
                         currentParams.set('view_mode', this.viewMode);
+                        currentParams.set('grouping', this.grouping);
 
                         const response = await Axios.get(`{{ route('admin-report-order-transaction-report') }}?` + currentParams.toString());
                         const reportData = response.data;
 
                         const workbook = new ExcelJS.Workbook();
-                        const sheetName = this.viewMode === 'monthly' ? '{{ __('order_transaction.excel.sheet_monthly') }}' : '{{ __('order_transaction.excel.sheet_daily') }}';
+                        let sheetName = '';
+                        if (this.grouping === 'ungrouped') {
+                            sheetName = '{{ __('order_transaction.excel.sheet_ungrouped') }}';
+                        } else if (this.viewMode === 'monthly') {
+                            sheetName = '{{ __('order_transaction.excel.sheet_monthly') }}';
+                        } else {
+                            sheetName = '{{ __('order_transaction.excel.sheet_daily') }}';
+                        }
                         const worksheet = workbook.addWorksheet(sheetName);
 
-                        if (this.viewMode === 'daily') {
+                        if (this.grouping === 'ungrouped') {
+                            worksheet.columns = [
+                                { header: '{{ __('order_transaction.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('order_transaction.excel.invoice_number') }}', key: 'invoice_number', width: 20 },
+                                { header: '{{ __('order_transaction.excel.date_time') }}', key: 'date_time', width: 22 },
+                                { header: '{{ __('order_transaction.excel.customer_name') }}', key: 'customer_name', width: 20 },
+                                { header: '{{ __('order_transaction.excel.customer_phone') }}', key: 'customer_phone', width: 16 },
+                                { header: '{{ __('order_transaction.excel.shop') }}', key: 'shop_name', width: 20 },
+                                { header: '{{ __('order_transaction.excel.staff') }}', key: 'barber_name', width: 18 },
+                                { header: '{{ __('order_transaction.excel.items') }}', key: 'items', width: 32 },
+                                { header: '{{ __('order_transaction.excel.gross_sales') }}', key: 'gross_sales', width: 16 },
+                                { header: '{{ __('order_transaction.excel.discount') }}', key: 'discount', width: 14 },
+                                { header: '{{ __('order_transaction.excel.net_sales') }}', key: 'net_sales', width: 16 },
+                                { header: '{{ __('order_transaction.excel.paid_amount') }}', key: 'paid_amount', width: 16 },
+                                { header: '{{ __('order_transaction.excel.remaining_balance') }}', key: 'remaining_amount', width: 22 },
+                                { header: '{{ __('order_transaction.excel.payment_status') }}', key: 'payment_status', width: 16 },
+                                { header: '{{ __('order_transaction.excel.payment_method') }}', key: 'payment_method', width: 18 },
+                            ];
+
+                            reportData.rows.forEach((r, idx) => {
+                                const itemChips = Array.isArray(r.items)
+                                    ? r.items.map(i => i.name + ' (x' + i.qty + ')').join(', ')
+                                    : '';
+
+                                worksheet.addRow({
+                                    index: idx + 1,
+                                    invoice_number: r.invoice_number,
+                                    date_time: r.booking_date_formatted || r.booking_date,
+                                    customer_name: r.customer_name,
+                                    customer_phone: r.customer_phone,
+                                    shop_name: r.shop_name,
+                                    barber_name: r.barber_name,
+                                    items: itemChips,
+                                    gross_sales: Number(r.gross_sales || 0),
+                                    discount: Number(r.total_discount || 0),
+                                    net_sales: Number(r.total_price || 0),
+                                    paid_amount: Number(r.paid_amount || 0),
+                                    remaining_amount: Number(r.remaining_amount || 0),
+                                    payment_status: this.getLocalizedStatus(r.payment_status),
+                                    payment_method: this.getLocalizedMethod(r.pay_way),
+                                });
+                            });
+                        } else if (this.viewMode === 'daily') {
                             worksheet.columns = [
                                 { header: '{{ __('order_transaction.excel.no') }}', key: 'index', width: 8 },
                                 { header: '{{ __('order_transaction.excel.date') }}', key: 'date', width: 16 },
@@ -1225,7 +1500,13 @@
                         const blob = new Blob([buffer], {
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         });
-                        const filename = (this.viewMode === 'monthly' ? '{{ __('order_transaction.excel.file_monthly_prefix') }}' : '{{ __('order_transaction.excel.file_daily_prefix') }}') + moment().format('YYYY_MM_DD_HHmmss');
+                        let filePrefix = '{{ __('order_transaction.excel.file_daily_prefix') }}';
+                        if (this.grouping === 'ungrouped') {
+                            filePrefix = '{{ __('order_transaction.excel.file_ungrouped_prefix') }}';
+                        } else if (this.viewMode === 'monthly') {
+                            filePrefix = '{{ __('order_transaction.excel.file_monthly_prefix') }}';
+                        }
+                        const filename = filePrefix + moment().format('YYYY_MM_DD_HHmmss');
                         saveAs(blob, filename);
                     } catch (err) {
                         console.error('Export failed:', err);

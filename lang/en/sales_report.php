@@ -46,6 +46,18 @@ return [
         'placeholder_date' => 'YYYY-MM-DD',
     ],
 
+    'toggle' => [
+        'view_as' => 'View As',
+        'grouped' => 'Grouped',
+        'grouped_by_date' => 'Grouped by Date',
+        'grouped_by_month' => 'Grouped by Month',
+        'ungrouped' => 'Ungrouped',
+        'ungrouped_invoices' => 'Ungrouped (Invoices)',
+        'grouped_tooltip' => 'View sales records grouped by date',
+        'grouped_month_tooltip' => 'View sales records grouped by month',
+        'ungrouped_tooltip' => 'View all individual sales invoices',
+    ],
+
     'button' => [
         'export_excel' => 'Export Excel',
         'reload' => 'Reload',
@@ -55,6 +67,7 @@ return [
         'daily' => 'Daily',
         'view_daily_tooltip' => 'View Daily Sales for this Month',
         'view_invoices_tooltip' => 'View Invoices Breakdown',
+        'view_booking_detail' => 'View Full Booking Details',
     ],
 
     'kpi' => [
@@ -102,6 +115,13 @@ return [
         'days_recorded' => 'days recorded',
         'months_recorded' => 'months recorded',
         'total_summary' => 'Total Summary',
+        'individual_invoices' => 'Individual Sales Invoices',
+        'invoices_recorded' => 'invoices recorded',
+        'invoice_no' => 'Invoice #',
+        'customer' => 'Customer',
+        'shop_staff' => 'Shop / Staff',
+        'services_products' => 'Services & Products',
+        'total' => 'Total',
     ],
 
     'status' => [
@@ -126,6 +146,7 @@ return [
     'empty' => [
         'daily_description' => 'No sales records found for the selected period and filters.',
         'monthly_description' => 'No monthly sales records found for the selected year and filters.',
+        'ungrouped_description' => 'No individual sales invoices found for the selected period and filters.',
     ],
 
     'modal' => [
@@ -156,8 +177,10 @@ return [
     'excel' => [
         'sheet_daily' => 'Daily Sales Report',
         'sheet_monthly' => 'Monthly Sales Report',
+        'sheet_ungrouped' => 'Sales Invoices Report',
         'file_daily_prefix' => 'Daily_Sales_Report_',
         'file_monthly_prefix' => 'Monthly_Sales_Report_',
+        'file_ungrouped_prefix' => 'Sales_Invoices_Report_',
         'export_failed' => 'Excel export failed. Please try again.',
         'exporting' => 'Exporting...',
         'no' => 'Nº',
@@ -178,6 +201,15 @@ return [
         'avg_order_value' => 'Avg Order Value ($)',
         'top_payment_method' => 'Top Payment Method',
         'top_shop' => 'Top Shop',
+        'invoice_number' => 'Invoice #',
+        'date_time' => 'Date & Time',
+        'customer_name' => 'Customer Name',
+        'customer_phone' => 'Customer Phone',
+        'shop' => 'Shop / Branch',
+        'staff' => 'Staff / Barber',
+        'items' => 'Items (Services & Products)',
+        'payment_status' => 'Payment Status',
+        'payment_method' => 'Payment Method',
     ],
 
     'months' => [

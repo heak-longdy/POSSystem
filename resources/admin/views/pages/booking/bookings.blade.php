@@ -57,8 +57,7 @@
                 ],
             ],
             'exportAction' => 'excel()',
-            'exportLabel' => __('booking.button.excel'),
-            'exportClass' => 'btnExcel',
+            'exportLabel' => __('global.button.excel'),
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
@@ -94,6 +93,15 @@
                                     'icon' => 'edit',
                                     'type' => 'link',
                                     'visible' => ['payment_status' => 'Pending'],
+                                ],
+                                [
+                                    'url' => 'paid',
+                                    'title' => __('booking.action.paid'),
+                                    'icon' => 'check_circle',
+                                    'type' => 'click',
+                                    'handler' => 'markAsPaid',
+                                    'class' => 'text-success',
+                                    'visible' => ['payment_status' => ['Pending', 'Partial']],
                                 ],
                                 [
                                     'url' => 'edit',
@@ -273,6 +281,37 @@
                         }
                     });
                 },
+                markAsPaid(item) {
+                    const confirmTemplate = "{{ __('booking.confirm.mark_as_paid', ['invoice' => '__INVOICE__']) }}";
+                    let message = confirmTemplate.replace('__INVOICE__', '<b>' + (item?.invoice_title || '') + '</b>');
+                    if (item?.payment_status === 'Partial' && item?.remaining_amount_title) {
+                        message += `<br><small style="color:#10b981;font-weight:600;display:block;margin-top:6px;">{{ __('booking.table.remaining') }}: ${item.remaining_amount_title}</small>`;
+                    }
+                    this.$store.confirmDialog.open({
+                        data: {
+                            message: message,
+                            btnClose: `{{ __('global.cancel') }}`,
+                            btnSave: '{{ __('booking.action.paid') }}',
+                            item: item,
+                            url: `{{ url('admin/booking/update-payment-status') }}/${item.id}`,
+                            postData: {
+                                payment_status: 'Paid',
+                            },
+                            typeAction: 'paid',
+                            digPosition: "posTop",
+                            class: "deleteDialog",
+                            icon: 'bx bx-check-circle',
+                            iconStyle: 'font-size: 55px; margin-bottom: 15px; border: 1px solid rgba(16, 185, 129, 0.8); color: rgb(16 185 129); border-radius: 50%; padding: 4px;',
+                            btnSaveClass: 'bg-success',
+                            width: "20rem"
+                        },
+                        afterClosed: (result) => {
+                            if (result) {
+                                reloadData(`{{ url()->full() }}`);
+                            }
+                        }
+                    });
+                },
                 cancelBooking(item) {
                     const rejectTemplate = "{{ __('booking.confirm.reject', ['invoice' => '__INVOICE__']) }}";
                     this.$store.confirmDialog.open({
@@ -281,30 +320,16 @@
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: '{{ __('booking.action.reject_booking') }}',
                             item: item,
-                            typeAction: 'manual',
+                            url: `{{ url('admin/booking/cancel') }}/${item.id}`,
+                            typeAction: 'cancel',
                             digPosition: "posTop",
                             class: "deleteDialog",
                             width: "18rem"
                         },
                         afterClosed: (result) => {
-                            if (!result) {
-                                return;
+                            if (result) {
+                                reloadData(`{{ url()->full() }}`);
                             }
-
-                            const url = `{{ url('admin/booking/cancel') }}/${item.id}`;
-
-                            Axios.post(url, {
-                                _token: '{{ csrf_token() }}',
-                            }).then((res) => {
-                                if (res.data.message === 'success') {
-                                    reloadData(`{{ url()->full() }}`);
-                                }
-                            }).catch((error) => {
-                                const message = error.response?.data?.error ||
-                                    Object.values(error.response?.data?.errors || {})?.[0]?.[0] ||
-                                    'Request failed.';
-                                alert(message);
-                            });
                         }
                     });
                 },

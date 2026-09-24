@@ -53,11 +53,12 @@ nav .profile .profile-link {
     opacity          : 0;
     pointer-events   : none;
     transition       : all .3s ease;
+    z-index          : 99999;
 }
 
 nav .profile .profile-link.show {
     opacity       : 1;
-    pointer-events: visible;
+    pointer-events: auto;
     top           : 100%;
     margin-top    : 10px;
 }
@@ -371,12 +372,18 @@ nav .divider {
     background            : $rightBgHeader;
     padding               : 0 20px;
     // z-index            : 1;
-    // position        : -webkit-sticky;
-    // position        : sticky;
-    // top             : 0;
+    //2
+    position        : -webkit-sticky;
+    position        : sticky;
+    top             : 0;
     // left            : 0;
     transition            : all 0.3s ease;
-    position              : relative;
+    
+    &.main-header-navbar {
+        z-index: 1000 !important;
+    }
+    //1
+    // position              : relative;
     // z-index            : 1;
 
     &.active {

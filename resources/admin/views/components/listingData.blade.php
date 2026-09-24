@@ -61,7 +61,13 @@
                                                                     $visible = true;
                                                                     if (isset($acItem['visible']) && is_array($acItem['visible'])) {
                                                                         foreach ($acItem['visible'] as $field => $value) {
-                                                                            if (data_get($item, $field) != $value) {
+                                                                            $itemVal = data_get($item, $field);
+                                                                            if (is_array($value)) {
+                                                                                if (!in_array($itemVal, $value)) {
+                                                                                    $visible = false;
+                                                                                    break;
+                                                                                }
+                                                                            } elseif ($itemVal != $value) {
                                                                                 $visible = false;
                                                                                 break;
                                                                             }

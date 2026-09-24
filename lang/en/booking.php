@@ -91,6 +91,7 @@ return [
         'restore' => 'Restore',
         'destroy' => 'Destroy',
         'reject_booking' => 'Reject Booking',
+        'paid' => 'Paid',
         'cancel' => 'Cancel',
         'delete_payment' => 'Delete Payment',
         'manage_payment' => 'Manage Payment',
@@ -299,6 +300,7 @@ return [
         'update' => 'Are you sure to update booking?',
         'action' => 'Are you sure want to :action ?',
         'reject' => 'Are you sure want to reject booking :invoice ?',
+        'mark_as_paid' => 'Are you sure want to mark booking :invoice as fully paid?',
         'delete_payment' => 'Delete this payment record?',
     ],
 

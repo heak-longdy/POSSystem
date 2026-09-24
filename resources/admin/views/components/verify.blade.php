@@ -2,8 +2,14 @@
     <div x-data="confirmDialog" class="dialog-form" x-bind:style="{ width: data?.width }"
         style="text-align: center;align-items: center;">
         <div class="dialog-form-header" style="justify-content: center;">
-            <i class='bx bx-question-mark'
-                style="font-size: 55px;margin-bottom: 15px; border: 1px solid rgba(255, 0, 0, 0.8); color:rgb(255 0 0 / 61%); border-radius: 50%;"></i>
+            <template x-if="data?.icon">
+                <i :class="data.icon"
+                    :style="data?.iconStyle || 'font-size: 55px;margin-bottom: 15px; border: 1px solid rgba(16, 185, 129, 0.8); color: rgb(16 185 129); border-radius: 50%; padding: 4px;'"></i>
+            </template>
+            <template x-if="!data?.icon">
+                <i class='bx bx-question-mark'
+                    style="font-size: 55px;margin-bottom: 15px; border: 1px solid rgba(255, 0, 0, 0.8); color:rgb(255 0 0 / 61%); border-radius: 50%;"></i>
+            </template>
         </div>
         <div class="dialog-form-body" style="padding: 15px 30px;">
             <div class="form-row" style="margin-bottom: 10px;">
@@ -23,7 +29,7 @@
             <button type="button" class="close" @click="$store.confirmDialog.close(false)"
                 x-text="data?.btnClose || 'Close'" x-bind:disabled="disabled || loading"
                 style="margin-right: 10px;background: none !important;"></button>
-            <button type="button" @click="onConfirm" x-bind:disabled="disabled || loading" style="border-radius: 25px;">
+            <button type="button" @click="onConfirm" x-bind:disabled="disabled || loading" :class="data?.btnSaveClass || ''" style="border-radius: 25px;">
                 <span class='bx bx-loader-alt spinLoading bx-spin' x-show="loading"
                     style="margin-right: 10px;display: none;"></span>
                 <span x-text="data?.btnSave || 'Save'"></span>
@@ -47,6 +53,10 @@
                 console.log( this.urlRute,' this.urlRute');
             },
             funStatusTrash(cb) {
+                if (this.data?.url) {
+                    cb(this.data.url);
+                    return;
+                }
                 let Status = this.data?.item?.status == 1 ? 2 : 1;
                 const urlDelete = `/admin/${this.data.urlName}/delete/${this.data?.item?.id}`;
                 const urlDestory = `/admin/${this.data.urlName}/destroy/${this.data?.item?.id}`;
@@ -62,7 +72,7 @@
                 } else if (this.typeAction == 'status') {
                     urlRute = urlStatus;
                 }
-                cb(urlRute)
+                cb(urlRute);
             },
             onConfirm() {
                 if (this.typeAction == 'manual') {
@@ -77,16 +87,25 @@
                     setTimeout(async () => {
                         Axios({
                             url: url,
-                            method: 'POST',
+                            method: this.data?.method || 'POST',
                             data: {
-                                ...this.data?.item
+                                _token: '{{ csrf_token() }}',
+                                ...this.data?.item,
+                                ...(this.data?.postData || {})
                             }
                         }).then((res) => {
-                            if (res.data.message == "success") {
+                            if (res.data.message == "success" || res.data.status == 200) {
                                 this.$store.confirmDialog.close(true);
+                            } else {
+                                this.disabled = false;
+                                this.loading = false;
                             }
                         }).catch((e) => {
-                            this.validate = e.response.data.errors;
+                            this.validate = e.response?.data?.errors;
+                            const message = e.response?.data?.error ||
+                                Object.values(e.response?.data?.errors || {})?.[0]?.[0] ||
+                                'Request failed.';
+                            alert(message);
                             this.disabled = false;
                             this.loading = false;
                         }).finally(() => {

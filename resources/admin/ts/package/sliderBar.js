@@ -23,6 +23,41 @@ allDropdown.forEach((item) => {
     });
 });
 
+// SIDEBAR LINK NAVIGATION (Suppresses browser bottom-left URL preview)
+const sidebarLinks = document.querySelectorAll("#sidebar .side-menu a[data-url]");
+sidebarLinks.forEach((link) => {
+    link.addEventListener("click", function (e) {
+        if (!this.parentElement.querySelector(".side-dropdown")) {
+            const url = this.getAttribute("data-url");
+            if (url && url !== "#") {
+                if (e.ctrlKey || e.metaKey) {
+                    window.open(url, "_blank");
+                } else {
+                    window.location.href = url;
+                }
+            }
+        }
+    });
+
+    link.addEventListener("auxclick", function (e) {
+        if (e.button === 1) {
+            const url = this.getAttribute("data-url");
+            if (url && url !== "#") {
+                window.open(url, "_blank");
+            }
+        }
+    });
+});
+
+const allSidebarInteractive = document.querySelectorAll("#sidebar .side-menu a, #sidebar .brand");
+allSidebarInteractive.forEach((el) => {
+    el.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            this.click();
+        }
+    });
+});
+
 // var switchDark = localStorage.getItem("switchDarkMode");
 
 // var switchMode = document.getElementById("switch-mode");
@@ -115,22 +150,25 @@ sidebar.addEventListener("mouseenter", function () {
 
 // PROFILE DROPDOWN
 const profile = document.querySelector("nav .profile");
-const imgProfile = profile.querySelector("img");
-const dropdownProfile = profile.querySelector(".profile-link");
+if (profile && !profile.hasAttribute("x-data") && !profile.closest("[x-data]")) {
+    const imgProfile = profile.querySelector("img");
+    const dropdownProfile = profile.querySelector(".profile-link");
 
-imgProfile.addEventListener("click", function (e) {
-    e.preventDefault();
-    dropdownProfile.classList.toggle("show");
-});
-window.addEventListener("click", function (e) {
-    if (e.target !== imgProfile) {
-        if (e.target !== dropdownProfile) {
-            if (dropdownProfile.classList.contains("show")) {
-                dropdownProfile.classList.remove("show");
+    if (imgProfile && dropdownProfile) {
+        imgProfile.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdownProfile.classList.toggle("show");
+        });
+        window.addEventListener("click", function (e) {
+            if (!e.target.closest(".profile")) {
+                if (dropdownProfile.classList.contains("show")) {
+                    dropdownProfile.classList.remove("show");
+                }
             }
-        }
+        });
     }
-
+}
     // allMenu.forEach((item) => {
     //     const icon = item.querySelector(".icon");
     //     const menuLink = item.querySelector(".menu-link");
@@ -143,7 +181,6 @@ window.addEventListener("click", function (e) {
     //         }
     //     }
     // });
-});
 
 // Notification DROPDOWN
 const notification = document.querySelector(".notificationGp");

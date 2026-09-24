@@ -27,6 +27,40 @@ allDropdown.forEach(function (item) {
     this.classList.toggle("active");
     item.classList.toggle("show");
   });
+}); // SIDEBAR LINK NAVIGATION (Suppresses browser bottom-left URL preview)
+
+var sidebarLinks = document.querySelectorAll("#sidebar .side-menu a[data-url]");
+sidebarLinks.forEach(function (link) {
+  link.addEventListener("click", function (e) {
+    if (!this.parentElement.querySelector(".side-dropdown")) {
+      var url = this.getAttribute("data-url");
+
+      if (url && url !== "#") {
+        if (e.ctrlKey || e.metaKey) {
+          window.open(url, "_blank");
+        } else {
+          window.location.href = url;
+        }
+      }
+    }
+  });
+  link.addEventListener("auxclick", function (e) {
+    if (e.button === 1) {
+      var url = this.getAttribute("data-url");
+
+      if (url && url !== "#") {
+        window.open(url, "_blank");
+      }
+    }
+  });
+});
+var allSidebarInteractive = document.querySelectorAll("#sidebar .side-menu a, #sidebar .brand");
+allSidebarInteractive.forEach(function (el) {
+  el.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      this.click();
+    }
+  });
 }); // var switchDark = localStorage.getItem("switchDarkMode");
 // var switchMode = document.getElementById("switch-mode");
 // if (switchDark == 1) {
@@ -115,32 +149,38 @@ sidebar.addEventListener("mouseenter", function () {
 }); // PROFILE DROPDOWN
 
 var profile = document.querySelector("nav .profile");
-var imgProfile = profile.querySelector("img");
-var dropdownProfile = profile.querySelector(".profile-link");
-imgProfile.addEventListener("click", function (e) {
-  e.preventDefault();
-  dropdownProfile.classList.toggle("show");
-});
-window.addEventListener("click", function (e) {
-  if (e.target !== imgProfile) {
-    if (e.target !== dropdownProfile) {
-      if (dropdownProfile.classList.contains("show")) {
-        dropdownProfile.classList.remove("show");
-      }
-    }
-  } // allMenu.forEach((item) => {
-  //     const icon = item.querySelector(".icon");
-  //     const menuLink = item.querySelector(".menu-link");
-  //     if (e.target !== icon) {
-  //         if (e.target !== menuLink) {
-  //             if (menuLink.classList.contains("show")) {
-  //                 menuLink.classList.remove("show");
-  //             }
-  //         }
-  //     }
-  // });
 
-}); // Notification DROPDOWN
+if (profile && !profile.hasAttribute("x-data") && !profile.closest("[x-data]")) {
+  var imgProfile = profile.querySelector("img");
+  var dropdownProfile = profile.querySelector(".profile-link");
+
+  if (imgProfile && dropdownProfile) {
+    imgProfile.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropdownProfile.classList.toggle("show");
+    });
+    window.addEventListener("click", function (e) {
+      if (!e.target.closest(".profile")) {
+        if (dropdownProfile.classList.contains("show")) {
+          dropdownProfile.classList.remove("show");
+        }
+      }
+    });
+  }
+} // allMenu.forEach((item) => {
+//     const icon = item.querySelector(".icon");
+//     const menuLink = item.querySelector(".menu-link");
+//     if (e.target !== icon) {
+//         if (e.target !== menuLink) {
+//             if (menuLink.classList.contains("show")) {
+//                 menuLink.classList.remove("show");
+//             }
+//         }
+//     }
+// });
+// Notification DROPDOWN
+
 
 var notification = document.querySelector(".notificationGp");
 var eventNotification = notification.querySelector(".notification");
@@ -353,24 +393,53 @@ $(document).ready(function () {
     left: 0,
     behavior: "smooth"
   });
-}); // content
+}); // content scroll-to-top handler
 
-var contentHeader = document.querySelector("#content");
-var contentBody = document.querySelector("#content .content-body");
-var lastScrollTop = 0;
-contentBody === null || contentBody === void 0 ? void 0 : contentBody.addEventListener("scroll", function (e) {
-  var st = window.pageYOffset || contentBody.scrollTop;
+function checkScrollState() {
+  var windowScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+  var contentBody = document.querySelector("#content .content-body");
+  var formAdmin = document.querySelector(".form-admin");
+  var bookingUi = document.querySelector(".booking-order-ui");
+  var currentScroll = Math.max(windowScroll, contentBody ? contentBody.scrollTop : 0, formAdmin ? formAdmin.scrollTop : 0, bookingUi ? bookingUi.scrollTop : 0);
+  var contentHeader = document.querySelector("#content");
+  var scrollBtn = document.getElementById("jsScroll");
 
-  if (st > lastScrollTop) {
-    contentHeader.classList.add("isScrolled");
+  if (currentScroll > 60) {
+    contentHeader === null || contentHeader === void 0 ? void 0 : contentHeader.classList.add("isScrolled");
+    scrollBtn === null || scrollBtn === void 0 ? void 0 : scrollBtn.classList.add("visible");
   } else {
-    contentHeader.classList.remove("isScrolled");
+    contentHeader === null || contentHeader === void 0 ? void 0 : contentHeader.classList.remove("isScrolled");
+    scrollBtn === null || scrollBtn === void 0 ? void 0 : scrollBtn.classList.remove("visible");
   }
-}, false);
+} // Global scroll capture to catch window, .content-body, .form-admin, etc.
+
+
+window.addEventListener("scroll", checkScrollState, true);
 var el = document.getElementById("jsScroll");
 el === null || el === void 0 ? void 0 : el.addEventListener("click", function () {
-  lastScrollTop = 0;
-  contentBody === null || contentBody === void 0 ? void 0 : contentBody.scrollTo({
+  var _document$querySelect, _document$querySelect2, _document$querySelect3;
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+  document.documentElement.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+  document.body.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+  (_document$querySelect = document.querySelector("#content .content-body")) === null || _document$querySelect === void 0 ? void 0 : _document$querySelect.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+  (_document$querySelect2 = document.querySelector(".form-admin")) === null || _document$querySelect2 === void 0 ? void 0 : _document$querySelect2.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+  (_document$querySelect3 = document.querySelector(".booking-order-ui")) === null || _document$querySelect3 === void 0 ? void 0 : _document$querySelect3.scrollTo({
     top: 0,
     behavior: "smooth"
   });

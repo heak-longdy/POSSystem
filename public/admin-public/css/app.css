@@ -30352,7 +30352,7 @@ body {
   margin: 0;
   padding: 0;
   background: var(--grey);
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body.dark {
@@ -30867,6 +30867,9 @@ a.ui-button:active,
   width: calc(100% - 225px);
   left: 225px;
   transition: 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 #content nav::before {
@@ -31326,31 +31329,35 @@ li.completed {
 .container {
   max-width: 100%;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   margin: 0;
   padding: 0;
 }
 .container .container-wrapper {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
+  height: auto;
   display: flex;
   flex-direction: row;
   background: #fff;
 }
 .container .container-wrapper .content {
-  height: 100%;
+  min-height: 100vh;
+  height: auto;
 }
 .container .container-wrapper .content .content-wrapper {
   width: 100%;
-  height: calc(100% - 100px);
   display: flex;
   flex-direction: column;
   position: relative;
 }
 .container .container-wrapper .content .content-wrapper .content-body {
   padding: 0px;
-  height: calc(100% - 50px);
   overflow-y: auto;
+  background: #ffffff;
+  flex: 1;
+  z-index: 5;
 }
 .container .container-wrapper .content .content-wrapper .content-body.has-breadcrumb {
   height: calc(100% - 155px);
@@ -31429,7 +31436,9 @@ li.completed {
 }
 
 .content.isScrolled .scroll {
-  right: 20px;
+  right: 24px;
+  opacity: 1;
+  pointer-events: auto;
 }
 .content.isScrolled .content-wrapper .content-body .paginationLayout {
   width: calc(100% - 37px);
@@ -31472,6 +31481,7 @@ li {
   border-right: 1px solid rgb(229, 234, 239);
   border-right: 0;
   color: #fff;
+  z-index: 9999;
 }
 #sidebar ul {
   margin-bottom: 0;
@@ -31552,6 +31562,7 @@ li {
   font-size: 24px;
   display: flex;
   align-items: center;
+  cursor: pointer;
   height: 70px;
   min-height: 70px;
   font-weight: 700;
@@ -31657,6 +31668,7 @@ li {
   margin: 4px 0;
   white-space: nowrap;
   overflow: hidden;
+  cursor: pointer;
 }
 
 #sidebar .side-menu > li > a:hover {
@@ -31937,11 +31949,12 @@ nav .profile .profile-link {
   opacity: 0;
   pointer-events: none;
   transition: all 0.3s ease;
+  z-index: 99999;
 }
 
 nav .profile .profile-link.show {
   opacity: 1;
-  pointer-events: visible;
+  pointer-events: auto;
   top: 100%;
   margin-top: 10px;
 }
@@ -32238,8 +32251,13 @@ nav .divider {
 .header {
   background: #fff;
   padding: 0 20px;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
   transition: all 0.3s ease;
-  position: relative;
+}
+.header.main-header-navbar {
+  z-index: 1000 !important;
 }
 .header.active {
   box-shadow: 0 3px 3px 0 rgba(181, 181, 181, 0.13);
@@ -39693,14 +39711,6 @@ div button.gm-fullscreen-control {
   background: none;
   color: red !important;
   background: none;
-}
-
-.form-header h3 svg {
-  background: red;
-  border-radius: 50%;
-  color: #fff !important;
-  padding: 5px;
-  cursor: pointer;
 }
 
 .emptyDataLayout {
@@ -48279,15 +48289,28 @@ span.error {
   font-weight: bold;
   text-align: center;
   box-shadow: 0 0 5px 0px #888;
-  transition: 300ms;
+  transition: all 400ms ease;
   display: flex;
   justify-content: center;
+  align-items: center;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+}
+.scroll.visible {
+  right: 24px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: rotate(360deg);
 }
 
 .scroll i {
-  margin-top: 10px;
+  margin-top: 0;
   text-shadow: 0 0 2px #fff;
   font-size: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scroll:hover i {
@@ -48303,15 +48326,17 @@ span.error {
 
 @keyframes rotate {
   from {
-    margin-top: 15px;
+    transform: translateY(3px);
   }
   to {
-    margin-top: 5px;
+    transform: translateY(-3px);
   }
 }
 .visible {
   right: 24px;
-  transition: all 400ms;
+  opacity: 1;
+  pointer-events: auto;
+  transition: all 400ms ease;
   transform: rotate(360deg);
 }
 

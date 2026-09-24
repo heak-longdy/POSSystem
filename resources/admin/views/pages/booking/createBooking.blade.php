@@ -1765,7 +1765,7 @@
                                                 </div>
                                                 <div class="booking-pos-service-qty-pill" x-show="item.product_type !== 'product'">
                                                     <span class="service-qty-label">{{ __('booking.qty') }}:</span>
-                                                    <span class="service-qty-val">1</span>
+                                                    <span class="service-qty-val" x-text="item.product_qty || 1">1</span>
                                                 </div>
 
                                                 <div class="booking-pos-cart-price">

@@ -128,41 +128,57 @@
     } */
     /* From Uiverse.io by Shaidend */
     .InputContainer {
-        height: 40px;
+        height: 38px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: rgb(255, 255, 255);
-        border-radius: 24px;
+        background-color: #ffffff;
+        border-radius: 30px;
         overflow: hidden;
         cursor: pointer;
-        padding-left: 15px;
-        /* box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.075); */
-        /* border: 1px solid rgba(51, 51, 51, 0.2); */
-        border-radius: 10px;
-        /* border: 1px solid rgba(152, 152, 152, 0.2); */
-        box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+        padding-left: 12px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+    }
+    .InputContainer:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
     }
 
     .input {
-        width: 95px;
+        width: 110px;
         height: 100%;
         border: none;
         outline: none;
-        font-size: 0.9em;
-        caret-color: rgb(255, 81, 0);
-        font-size: 15px;
+        caret-color: #3b82f6;
+        font-size: 13.5px;
+        color: #475569;
+        cursor: pointer;
+        background: transparent;
     }
 
     .labelforsearch {
-        cursor: text;
-        padding: 0px 12px;
+        cursor: pointer;
+        padding: 0px 10px;
         display: flex;
         align-items: center;
+        gap: 6px;
+        color: #64748b;
     }
-    .labelforsearch>svg{
-        width: 20px;
-        height: 20px;
+    .labelforsearch>svg {
+        width: 17px;
+        height: 17px;
+    }
+    .header-cmd-badge {
+        font-size: 10.5px;
+        font-weight: 600;
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 1px 5px;
+        line-height: 1.2;
     }
 
     .searchIcon {
@@ -217,6 +233,105 @@
         align-items: center;
         height: 100vh;
     } */
+
+    html,
+    body {
+        overflow-x: clip !important;
+    }
+
+    .container {
+        min-height: 100vh !important;
+        height: auto !important;
+    }
+
+    .container .container-wrapper {
+        min-height: 100vh !important;
+        height: auto !important;
+    }
+
+    #content,
+    .content {
+        min-height: 100vh !important;
+        height: auto !important;
+    }
+
+    .main-header-navbar {
+        position: -webkit-sticky !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+        background: #ffffff !important;
+        /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); */
+    }
+
+    nav .profile {
+        position: relative;
+    }
+
+    nav .profile .profile-link {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        border-radius: 12px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all .25s ease;
+        z-index: 99999 !important;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    nav .profile .profile-link.show {
+        opacity: 1;
+        pointer-events: auto;
+        top: 100%;
+        margin-top: 10px;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        text-align: left;
+    }
+
+    .user-info .avatar {
+        width: 60px !important;
+        height: 60px !important;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: left;
+    }
+
+    .user-details h2 {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+    }
+
+    .user-details .title {
+        font-size: 13px;
+        color: #888;
+        margin: 0 0 2px 0;
+    }
+
+    .user-details .email {
+        font-size: 13px;
+        color: #4A90E2;
+        margin: 0;
+        word-break: break-all;
+    }
 
     .profile-card {
         background-color: #fff;
@@ -307,7 +422,7 @@
         right: 0;
     }
 </style>
-<div class="header {{ isset($customClass) ? $customClass : '' }}" x-data="xHeader">
+<div class="header main-header-navbar {{ isset($customClass) ? $customClass : '' }} nnnn" x-data="xHeader">
     <div class="header-wrapper">
         <div class="left">
             <nav>
@@ -344,15 +459,14 @@
                     {{-- <input type="checkbox" id="switch-mode" hidden>
                 <label for="switch-mode" class="switch-mode"></label> --}}
                     <div style=" display: flex;justify-content: center;align-items: center; grid-gap: 20px;">
-                        <div class="InputContainer">
-                            <input placeholder="Search Menu" id="input" class="input" name="text" type="text"
-                                @click="selectShop()" />
-                            <label class="labelforsearch" for="input">
-                                {{-- <i class='bx bx-command' style="font-size: 20px;color: #666565;"></i> --}}
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 20.247 6-16.5" />
-                                  </svg>
-                                  
+                        <div class="InputContainer" @click="openQuickSearch()" title="Quick Search (⌘K)">
+                            <input placeholder="Search Menu" id="input" class="input" name="text" type="text" readonly
+                                @click="openQuickSearch()" />
+                            <label class="labelforsearch" for="input" @click="openQuickSearch()">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                </svg>
+                                <span class="header-cmd-badge">⌘K</span>
                             </label>
                         </div>
                         <div class="notificationGp" style="position: relative;">
@@ -475,12 +589,15 @@
                     </div> --}}
 
 
-                    <div class="profile" x-data="xHeader">
+                    <div class="profile" x-data="xHeader" @click.outside="open = false">
                         {{-- <img src="{{ asset('admin-public/logo/profile.png') }}" alt="" /> --}}
-                        <img src="{{ Auth::user()?->image_url ?? asset('admin-public/logo/profile.png') }}"
-                            alt=""
-                            onerror="this.onerror=null;this.src='{{ asset('admin-public/logo/profile.png') }}';" />
-                        <ul class="profile-link">
+                        <div class="profile-avatar-btn" @click.stop="toggle()" style="cursor: pointer; display: flex; align-items: center;">
+                            <img src="{{ Auth::user()?->image_url ?? asset('admin-public/logo/profile.png') }}"
+                                alt=""
+                                style="pointer-events: none;"
+                                onerror="this.onerror=null;this.src='{{ asset('admin-public/logo/profile.png') }}';" />
+                        </div>
+                        <ul class="profile-link" :class="{ 'show': open }">
                             <div class="profile-card">
                                 <div class="user-info">
                                     <img class="avatar"
@@ -734,50 +851,12 @@
             });
         },
         selectShop() {
-            console.log('hiiiiiiiii');
-            let dataMenu = @json(config('menu'));
-            var queueSearch = 500;
-            SearchMenu({
-                title: "Quict Search Menu",
-                placeholder: "Search Menu ...",
-                onReady: (callback_data) => {
-                    console.log(dataMenu, 'dataMenu');
-                    callback_data(dataMenu);
-                },
-                onSearch: (value, callback_data) => {
-                    clearTimeout(queueSearch);
-                    queueSearch = setTimeout(() => {
-                        Axios({
-                                url: `#`,
-                                params: {
-                                    search: value
-                                },
-                                method: 'GET'
-                            })
-                            .then(response => {
-                                const data = response?.data?.data.map(
-                                    item => {
-                                        return {
-                                            _id: item.id,
-                                            _title: item?.invoice_number ? item
-                                                .invoice_number : "",
-                                            _image: this.imageLogoSelectOption,
-                                            _description: item?.purchase
-                                                ?.project?.name ?? '',
-                                            ...item,
-                                        }
-                                    });
-                                callback_data(data);
-                            });
-                    }, 500);
-                },
-                afterClose: (res) => {
-                    if (res) {
-                        console.log(res, 'ressss');
-                        this.formSubmitData.invoice_ref_id = res.id;
-                        this.formSubmitData.invoice_number = res.invoice_number;
-                    }
-                }
+            this.openQuickSearch();
+        },
+        openQuickSearch() {
+            window.SearchMenu({
+                title: "Quick Search Menu",
+                placeholder: "Type a command or search... (e.g. Stock, Booking, Sales)"
             });
         },
         editUser(id) {
@@ -785,4 +864,18 @@
             reloadData(url);
         }
     }));
+
+    window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            if (Alpine.store('componentSearchMenu')?.active) {
+                Alpine.store('componentSearchMenu').active = false;
+            } else {
+                window.SearchMenu({
+                    title: "Quick Search Menu",
+                    placeholder: "Type a command or search... (e.g. Stock, Booking, Sales)"
+                });
+            }
+        }
+    });
 </script>

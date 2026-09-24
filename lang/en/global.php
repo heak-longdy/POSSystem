@@ -96,6 +96,7 @@ return [
         'reset'              => 'Reset',
         'createPosition'     => 'Create Position',
         'createSlide'        => 'Create Slide',
+        'excel'              => 'Excel',
     ],
 
     // Tabs

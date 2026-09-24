@@ -130,15 +130,29 @@
     font-weight: bold;
     text-align: center;
     box-shadow: 0 0 5px 0px #888;
-    transition: 300ms;
+    transition: all 400ms ease;
     display: flex;
     justify-content: center;
+    align-items: center;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+
+    &.visible {
+      right: 24px;
+      opacity: 1;
+      pointer-events: auto;
+      transform: rotate(360deg);
+    }
   }
 
   .scroll i {
-    margin-top: 10px;
+    margin-top: 0;
     text-shadow: 0 0 2px #fff;
     font-size: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .scroll:hover i {
@@ -149,12 +163,15 @@
   }
 
   @keyframes rotate {
-    from {margin-top: 15px}
-    to {margin-top: 5px}
+    from {transform: translateY(3px)}
+    to {transform: translateY(-3px)}
   }
 
   .visible {
     right: 24px;
-    transition: all 400ms;
-    transform: rotate(360deg)
+    opacity: 1;
+    pointer-events: auto;
+    transition: all 400ms ease;
+    transform: rotate(360deg);
   }
+

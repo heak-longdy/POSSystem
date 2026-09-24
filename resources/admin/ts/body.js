@@ -14,26 +14,53 @@ $(document).ready(function () {
   });
 });
 
-// content
-const contentHeader = document.querySelector("#content");
-const contentBody = document.querySelector("#content .content-body");
-var lastScrollTop = 0;
-contentBody?.addEventListener(
-  "scroll",
-  (e) => {
-    var st = window.pageYOffset || contentBody.scrollTop;
-    if (st > lastScrollTop) {
-      contentHeader.classList.add("isScrolled");
-    } else {
-      contentHeader.classList.remove("isScrolled");
-    }
-  },
-  false
-);
+// content scroll-to-top handler
+function checkScrollState() {
+  const windowScroll =
+    window.pageYOffset ||
+    document.documentElement.scrollTop ||
+    document.body.scrollTop ||
+    0;
+  const contentBody = document.querySelector("#content .content-body");
+  const formAdmin = document.querySelector(".form-admin");
+  const bookingUi = document.querySelector(".booking-order-ui");
+
+  const currentScroll = Math.max(
+    windowScroll,
+    contentBody ? contentBody.scrollTop : 0,
+    formAdmin ? formAdmin.scrollTop : 0,
+    bookingUi ? bookingUi.scrollTop : 0
+  );
+
+  const contentHeader = document.querySelector("#content");
+  const scrollBtn = document.getElementById("jsScroll");
+
+  if (currentScroll > 60) {
+    contentHeader?.classList.add("isScrolled");
+    scrollBtn?.classList.add("visible");
+  } else {
+    contentHeader?.classList.remove("isScrolled");
+    scrollBtn?.classList.remove("visible");
+  }
+}
+
+// Global scroll capture to catch window, .content-body, .form-admin, etc.
+window.addEventListener("scroll", checkScrollState, true);
+
 var el = document.getElementById("jsScroll");
 el?.addEventListener("click", function () {
-  lastScrollTop = 0;
-  contentBody?.scrollTo({
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
+  document.body.scrollTo({ top: 0, behavior: "smooth" });
+  document.querySelector("#content .content-body")?.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+  document.querySelector(".form-admin")?.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+  document.querySelector(".booking-order-ui")?.scrollTo({
     top: 0,
     behavior: "smooth",
   });

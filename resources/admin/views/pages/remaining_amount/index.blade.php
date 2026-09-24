@@ -51,8 +51,7 @@
                 ],
             ],
             'exportAction' => 'excel()',
-            'exportLabel' => __('remaining_amount.excel_report'),
-            'exportClass' => 'btnExcel',
+            'exportLabel' => __('global.button.excel'),
             'data' => $data,
             'status' => $status,
             'tbHeader' => [

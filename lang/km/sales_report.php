@@ -46,6 +46,18 @@ return [
         'placeholder_date' => 'YYYY-MM-DD',
     ],
 
+    'toggle' => [
+        'view_as' => 'ទម្រង់បង្ហាញ',
+        'grouped' => 'ដាក់ជាក្រុម',
+        'grouped_by_date' => 'តាមកាលបរិច្ឆេទ',
+        'grouped_by_month' => 'តាមខែ',
+        'ungrouped' => 'រាយលម្អិត',
+        'ungrouped_invoices' => 'រាយលម្អិត (វិក្កយបត្រ)',
+        'grouped_tooltip' => 'មើលទិន្នន័យលក់ដែលបានដាក់ជាក្រុមកាលបរិច្ឆេទ',
+        'grouped_month_tooltip' => 'មើលទិន្នន័យលក់ដែលបានដាក់ជាក្រុមតាមខែ',
+        'ungrouped_tooltip' => 'មើលវិក្កយបត្រលក់រាយនីមួយៗ',
+    ],
+
     'button' => [
         'export_excel' => 'នាំចេញ Excel',
         'reload' => 'ផ្ទុកឡើងវិញ',
@@ -55,6 +67,7 @@ return [
         'daily' => 'ប្រចាំថ្ងៃ',
         'view_daily_tooltip' => 'មើលការលក់ប្រចាំថ្ងៃសម្រាប់ខែនេះ',
         'view_invoices_tooltip' => 'មើលការវិភាគវិក្កយបត្រ',
+        'view_booking_detail' => 'មើលព័ត៌មានលម្អិតពេញលេញនៃការកក់',
     ],
 
     'kpi' => [
@@ -102,6 +115,13 @@ return [
         'days_recorded' => 'ថ្ងៃបានកត់ត្រា',
         'months_recorded' => 'ខែបានកត់ត្រា',
         'total_summary' => 'សរុបរួម',
+        'individual_invoices' => 'បញ្ជីវិក្កយបត្រលក់លម្អិត',
+        'invoices_recorded' => 'វិក្កយបត្របានកត់ត្រា',
+        'invoice_no' => 'លេខវិក្កយបត្រ',
+        'customer' => 'អតិថិជន',
+        'shop_staff' => 'ហាង / បុគ្គលិក',
+        'services_products' => 'សេវាកម្ម & ផលិតផល',
+        'total' => 'សរុប',
     ],
 
     'status' => [
@@ -126,6 +146,7 @@ return [
     'empty' => [
         'daily_description' => 'រកមិនឃើញទិន្នន័យការលក់សម្រាប់រយៈពេល និងតម្រងដែលបានជ្រើសរើសទេ។',
         'monthly_description' => 'រកមិនឃើញទិន្នន័យការលក់ប្រចាំខែសម្រាប់ឆ្នាំ និងតម្រងដែលបានជ្រើសរើសទេ។',
+        'ungrouped_description' => 'រកមិនឃើញវិក្កយបត្រការលក់សម្រាប់រយៈពេល និងតម្រងដែលបានជ្រើសរើសទេ។',
     ],
 
     'modal' => [
@@ -156,8 +177,10 @@ return [
     'excel' => [
         'sheet_daily' => 'របាយការណ៍ការលក់ប្រចាំថ្ងៃ',
         'sheet_monthly' => 'របាយការណ៍ការលក់ប្រចាំខែ',
+        'sheet_ungrouped' => 'របាយការណ៍វិក្កយបត្រការលក់',
         'file_daily_prefix' => 'របាយការណ៍ការលក់ប្រចាំថ្ងៃ_',
         'file_monthly_prefix' => 'របាយការណ៍ការលក់ប្រចាំខែ_',
+        'file_ungrouped_prefix' => 'របាយការណ៍វិក្កយបត្រការលក់_',
         'export_failed' => 'ការនាំចេញ Excel មិនជោគជ័យទេ។ សូមព្យាយាមម្តងទៀត។',
         'exporting' => 'កំពុងនាំចេញ...',
         'no' => 'ល.រ',
@@ -178,6 +201,15 @@ return [
         'avg_order_value' => 'តម្លៃបញ្ជាទិញជាមធ្យម ($)',
         'top_payment_method' => 'វិធីសាស្ត្រទូទាត់ចម្បង',
         'top_shop' => 'ហាងចម្បង',
+        'invoice_number' => 'លេខវិក្កយបត្រ',
+        'date_time' => 'កាលបរិច្ឆេទ & ម៉ោង',
+        'customer_name' => 'ឈ្មោះអតិថិជន',
+        'customer_phone' => 'លេខទូរស័ព្ទ',
+        'shop' => 'ហាង / សាខា',
+        'staff' => 'បុគ្គលិក / ជាង',
+        'items' => 'មុខទំនិញ (សេវាកម្ម & ផលិតផល)',
+        'payment_status' => 'ស្ថានភាពទូទាត់',
+        'payment_method' => 'វិធីសាស្ត្រទូទាត់',
     ],
 
     'months' => [
