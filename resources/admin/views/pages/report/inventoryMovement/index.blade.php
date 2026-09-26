@@ -268,6 +268,51 @@
             gap: 10px;
         }
 
+        .view-grouping-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-grouping-toggle .toggle-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .toggle-pill-group {
+            display: inline-flex;
+            background: #e2e8f0;
+            padding: 3px;
+            border-radius: 8px;
+            gap: 2px;
+        }
+
+        .toggle-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .toggle-pill:hover {
+            color: #1e293b;
+            background: rgba(255, 255, 255, 0.65);
+        }
+
+        .toggle-pill.active {
+            background: #ffffff;
+            color: #2563eb;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
         .table-title {
             font-size: 15px;
             font-weight: 700;
@@ -547,21 +592,22 @@
             <!-- Filter Panel -->
             <div class="report-filter-panel">
                 <form id="inventoryFilterForm" method="GET" action="{{ url()->current() }}">
+                    <input type="hidden" name="grouping" value="{{ $grouping }}">
                     @if ($viewMode === 'daily')
                         <div class="filter-header-row">
                             <div class="preset-badge-group">
                                 <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">{{ __('inventory_movement.presets.title') }}</span>
-                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'today'])) }}"
+                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'today', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">{{ __('inventory_movement.presets.today') }}</a>
-                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'yesterday'])) }}"
+                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'yesterday', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">{{ __('inventory_movement.presets.yesterday') }}</a>
-                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '7days'])) }}"
+                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '7days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '7days' ? 'active' : '' }}">{{ __('inventory_movement.presets.last_7_days') }}</a>
-                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '30days'])) }}"
+                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '30days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">{{ __('inventory_movement.presets.last_30_days') }}</a>
-                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'this_month'])) }}"
+                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'this_month', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'this_month' || (!request('preset') && !request('from_date')) ? 'active' : '' }}">{{ __('inventory_movement.presets.this_month') }}</a>
-                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'last_month'])) }}"
+                                <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'last_month', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">{{ __('inventory_movement.presets.last_month') }}</a>
                             </div>
                         </div>
@@ -680,7 +726,7 @@
                                 <i class='bx bx-search'></i>
                                 <span>{{ __('inventory_movement.button.filter') }}</span>
                             </button>
-                            <a href="{{ route($viewMode === 'daily' ? 'admin-report-inventory-movement-daily' : 'admin-report-inventory-movement-monthly') }}"
+                            <a href="{{ route($viewMode === 'daily' ? 'admin-report-inventory-movement-daily' : 'admin-report-inventory-movement-monthly', ['grouping' => $grouping]) }}"
                                 class="btn-filter-reset">
                                 <i class='bx bx-reset'></i>
                                 <span>{{ __('inventory_movement.button.reset') }}</span>
@@ -784,14 +830,123 @@
             <div class="report-table-card">
                 <div class="table-header-bar">
                     <div class="table-title">
-                        <i class='bx bx-table'></i>
-                        <span>{{ $viewMode === 'daily' ? __('inventory_movement.table.daily_breakdown') : __('inventory_movement.table.monthly_breakdown') }}</span>
-                        <span class="table-count-badge">{{ count($rows) }} {{ $viewMode === 'daily' ? __('inventory_movement.table.days') : __('inventory_movement.table.months') }}</span>
+                        <i class='bx {{ $grouping === 'grouped' ? ($viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt') : 'bx-transfer' }}'></i>
+                        @if ($grouping === 'grouped')
+                            <span>{{ $viewMode === 'daily' ? __('inventory_movement.table.daily_breakdown') : __('inventory_movement.table.monthly_breakdown') }}</span>
+                            <span class="table-count-badge">{{ $rows ? count($rows) : 0 }} {{ $viewMode === 'daily' ? __('inventory_movement.table.days') : __('inventory_movement.table.months') }}</span>
+                        @else
+                            <span>{{ __('inventory_movement.table.individual_movements') }}</span>
+                            <span class="table-count-badge">{{ $ungroupedRows ? $ungroupedRows->total() : 0 }} {{ __('inventory_movement.table.movements_recorded') }}</span>
+                        @endif
+                    </div>
+
+                    <!-- View Grouping Toggle Controls -->
+                    <div class="view-grouping-toggle">
+                        <span class="toggle-label">{{ __('inventory_movement.toggle.view_as') }}:</span>
+                        <div class="toggle-pill-group">
+                            <a href="{{ route(request()->route()?->getName() ?: ($viewMode === 'daily' ? 'admin-report-inventory-movement-daily' : 'admin-report-inventory-movement-monthly'), array_merge(request()->query(), ['grouping' => 'ungrouped', 'page' => 1])) }}"
+                                class="toggle-pill {{ $grouping === 'ungrouped' ? 'active' : '' }}"
+                                title="{{ __('inventory_movement.toggle.ungrouped_tooltip') }}">
+                                <i class='bx bx-list-ul'></i>
+                                <span>{{ __('inventory_movement.toggle.ungrouped') }}</span>
+                            </a>
+                            <a href="{{ route(request()->route()?->getName() ?: ($viewMode === 'daily' ? 'admin-report-inventory-movement-daily' : 'admin-report-inventory-movement-monthly'), array_merge(request()->query(), ['grouping' => 'grouped', 'page' => 1])) }}"
+                                class="toggle-pill {{ $grouping === 'grouped' ? 'active' : '' }}"
+                                title="{{ $viewMode === 'daily' ? __('inventory_movement.toggle.grouped_tooltip') : __('inventory_movement.toggle.grouped_month_tooltip') }}">
+                                <i class='bx {{ $viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt' }}'></i>
+                                <span>{{ $viewMode === 'daily' ? __('inventory_movement.toggle.grouped_by_date') : __('inventory_movement.toggle.grouped_by_month') }}</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
                 <div style="overflow-x: auto;">
-                    @if ($viewMode === 'daily')
+                    @if ($grouping === 'ungrouped')
+                        <!-- UNGROUPED TABLE (INDIVIDUAL STOCK MOVEMENTS) -->
+                        <table class="movement-data-table" id="inventoryMovementTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;" class="text-center">{{ __('inventory_movement.table.no') }}</th>
+                                    <th>{{ __('inventory_movement.table.time') }}</th>
+                                    <th>{{ __('inventory_movement.table.product') }}</th>
+                                    <th>{{ __('inventory_movement.table.branch') }}</th>
+                                    <th>{{ __('inventory_movement.table.type') }}</th>
+                                    <th>{{ __('inventory_movement.table.origin_destination') }}</th>
+                                    <th class="text-right">{{ __('inventory_movement.table.qty_change') }}</th>
+                                    <th class="text-right">{{ __('inventory_movement.table.stock_after') }}</th>
+                                    <th>{{ __('inventory_movement.table.processed_by') }}</th>
+                                    <th>{{ __('inventory_movement.table.remark_ref') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($ungroupedRows as $row)
+                                    @php
+                                        $rowIndex = ($ungroupedRows->currentPage() - 1) * $ungroupedRows->perPage() + $loop->iteration;
+                                    @endphp
+                                    <tr>
+                                        <td class="text-center">{{ $rowIndex }}</td>
+                                        <td>
+                                            <strong style="color: #1e293b; white-space: nowrap;">{{ $row->created_at_formatted }}</strong>
+                                            <small class="text-muted" style="display: block;">{{ $row->created_at }}</small>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; color: #1e293b;">{{ $row->product_name }}</div>
+                                            <small class="text-muted">{{ $row->category_name }} • {{ $row->uom_name }}</small>
+                                        </td>
+                                        <td>
+                                            <span style="font-weight: 500; color: #334155;">{{ $row->shop_name }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="movement-badge {{ $row->movement_type }}">{{ $row->movement_label }}</span>
+                                        </td>
+                                        <td>
+                                            <small style="color: #334155; font-weight: 500;">
+                                                {{ $row->status === 'stock_in' ? __('inventory_movement.modal.from_prefix') . ': ' . $row->from_title : __('inventory_movement.modal.to_prefix') . ': ' . $row->to_title }}
+                                            </small>
+                                        </td>
+                                        <td class="text-right">
+                                            <span class="qty-badge {{ $row->status === 'stock_in' ? 'in' : ($row->status === 'stock_transfer' ? 'transfer' : 'out') }}">
+                                                {{ $row->status === 'stock_in' ? '+' : ($row->status === 'stock_transfer' ? '⇄ ' : '-') }}{{ number_format($row->qty) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-right font-weight-bold" style="color: #1e293b;">
+                                            {{ number_format($row->current_stock) }}
+                                        </td>
+                                        <td>
+                                            <small style="color: #475569; font-weight: 500;">{{ $row->request_by_name }}</small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ $row->remark }}</small>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="10" class="empty-placeholder">
+                                            <i class='bx bx-cube-alt'></i>
+                                            <p>{{ __('inventory_movement.empty.ungrouped_description') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if ($ungroupedRows && $ungroupedRows->count() > 0)
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="6">{{ __('inventory_movement.table.total_summary') }} ({{ number_format($summary['total_transactions']) }} {{ __('inventory_movement.table.movements_recorded') }})</td>
+                                        <td class="text-right {{ $summary['net_movement'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                            {{ $summary['net_movement'] >= 0 ? '+' : '' }}{{ number_format($summary['net_movement']) }}
+                                        </td>
+                                        <td colspan="3"></td>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+
+                        @if ($ungroupedRows && $ungroupedRows->hasPages())
+                            <div class="paginationLayout2" style="padding: 12px 18px; border-top: 1px solid #e2e8f0; background: #fafbfc;">
+                                @include('admin::components.pagination', ['paginate' => $ungroupedRows])
+                            </div>
+                        @endif
+                    @elseif ($viewMode === 'daily')
                         <table class="movement-data-table">
                             <thead>
                                 <tr>
@@ -1137,6 +1292,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('xInventoryReport', () => ({
                 viewMode: '{{ $viewMode }}',
+                grouping: '{{ $grouping }}',
                 showDetailModal: false,
                 modalLoading: false,
                 periodData: null,
@@ -1189,15 +1345,58 @@
                     try {
                         const currentParams = new URLSearchParams(window.location.search);
                         currentParams.set('view_mode', this.viewMode);
+                        currentParams.set('grouping', this.grouping);
 
                         const response = await Axios.get(`{{ route('admin-report-inventory-movement-report') }}?` + currentParams.toString());
                         const reportData = response.data;
 
                         const workbook = new ExcelJS.Workbook();
-                        const sheetName = this.viewMode === 'monthly' ? '{{ __('inventory_movement.excel.sheet_monthly') }}' : '{{ __('inventory_movement.excel.sheet_daily') }}';
+                        let sheetName = '';
+                        if (this.grouping === 'ungrouped') {
+                            sheetName = '{{ __('inventory_movement.excel.sheet_ungrouped') }}';
+                        } else if (this.viewMode === 'monthly') {
+                            sheetName = '{{ __('inventory_movement.excel.sheet_monthly') }}';
+                        } else {
+                            sheetName = '{{ __('inventory_movement.excel.sheet_daily') }}';
+                        }
                         const worksheet = workbook.addWorksheet(sheetName);
 
-                        if (this.viewMode === 'daily') {
+                        if (this.grouping === 'ungrouped') {
+                            worksheet.columns = [
+                                { header: '{{ __('inventory_movement.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('inventory_movement.excel.date_time') }}', key: 'created_at', width: 22 },
+                                { header: '{{ __('inventory_movement.excel.product_name') }}', key: 'product_name', width: 24 },
+                                { header: '{{ __('inventory_movement.excel.category') }}', key: 'category_name', width: 16 },
+                                { header: '{{ __('inventory_movement.excel.uom') }}', key: 'uom_name', width: 12 },
+                                { header: '{{ __('inventory_movement.excel.shop') }}', key: 'shop_name', width: 20 },
+                                { header: '{{ __('inventory_movement.excel.movement_type') }}', key: 'movement_label', width: 18 },
+                                { header: '{{ __('inventory_movement.excel.origin') }}', key: 'from_title', width: 20 },
+                                { header: '{{ __('inventory_movement.excel.destination') }}', key: 'to_title', width: 20 },
+                                { header: '{{ __('inventory_movement.excel.qty_change') }}', key: 'qty_display', width: 14 },
+                                { header: '{{ __('inventory_movement.excel.stock_after') }}', key: 'current_stock', width: 14 },
+                                { header: '{{ __('inventory_movement.excel.processed_by') }}', key: 'request_by_name', width: 18 },
+                                { header: '{{ __('inventory_movement.excel.remark') }}', key: 'remark', width: 26 },
+                            ];
+
+                            reportData.rows.forEach((r, idx) => {
+                                const sign = r.status === 'stock_in' ? '+' : (r.status === 'stock_transfer' ? '⇄ ' : '-');
+                                worksheet.addRow({
+                                    index: idx + 1,
+                                    created_at: r.created_at_formatted || r.created_at,
+                                    product_name: r.product_name,
+                                    category_name: r.category_name,
+                                    uom_name: r.uom_name,
+                                    shop_name: r.shop_name,
+                                    movement_label: r.movement_label,
+                                    from_title: r.from_title,
+                                    to_title: r.to_title,
+                                    qty_display: sign + Number(r.qty || 0),
+                                    current_stock: Number(r.current_stock || 0),
+                                    request_by_name: r.request_by_name,
+                                    remark: r.remark || '',
+                                });
+                            });
+                        } else if (this.viewMode === 'daily') {
                             worksheet.columns = [
                                 { header: '{{ __('inventory_movement.excel.no') }}', key: 'index', width: 8 },
                                 { header: '{{ __('inventory_movement.excel.date') }}', key: 'date', width: 16 },
@@ -1272,7 +1471,15 @@
                         const blob = new Blob([buffer], {
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         });
-                        const filename = (this.viewMode === 'monthly' ? '{{ __('inventory_movement.excel.file_monthly_prefix') }}' : '{{ __('inventory_movement.excel.file_daily_prefix') }}') + moment().format('YYYY_MM_DD_HHmmss');
+                        let filePrefix = '';
+                        if (this.grouping === 'ungrouped') {
+                            filePrefix = '{{ __('inventory_movement.excel.file_ungrouped_prefix') }}';
+                        } else if (this.viewMode === 'monthly') {
+                            filePrefix = '{{ __('inventory_movement.excel.file_monthly_prefix') }}';
+                        } else {
+                            filePrefix = '{{ __('inventory_movement.excel.file_daily_prefix') }}';
+                        }
+                        const filename = filePrefix + moment().format('YYYY_MM_DD_HHmmss');
                         saveAs(blob, filename);
                     } catch (err) {
                         console.error('Export failed:', err);
@@ -1291,7 +1498,9 @@
             const chartCanvas = document.getElementById('inventoryMovementChart');
             if (!chartCanvas) return;
 
-            const rowsData = @json($rows);
+            const rowsData = @json($chartRows ?? ($rows ?? []));
+            if (!rowsData || !Array.isArray(rowsData) || rowsData.length === 0) return;
+
             const viewMode = '{{ $viewMode }}';
 
             let labels = [];

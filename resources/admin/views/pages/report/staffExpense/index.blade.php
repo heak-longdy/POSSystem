@@ -373,6 +373,76 @@
             background: #059669;
         }
 
+        /* View Grouping Toggle Controls */
+        .view-grouping-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .view-grouping-toggle .toggle-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .toggle-pill-group {
+            display: inline-flex;
+            background: #e2e8f0;
+            padding: 3px;
+            border-radius: 8px;
+            gap: 2px;
+        }
+
+        .toggle-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .toggle-pill:hover {
+            color: #1e293b;
+            background: rgba(255, 255, 255, 0.65);
+        }
+
+        .toggle-pill.active {
+            background: #ffffff;
+            color: #2563eb;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        }
+
+        .status-badge-active {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #ecfdf5;
+            color: #059669;
+        }
+
+        .status-badge-disabled {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
         /* Drilldown Modal */
         .modal-overlay {
             position: fixed;
@@ -496,7 +566,7 @@
                     <div class="menu-row">
                         <div class="tabs">
                             @php
-                                $currentParams = request()->query();
+                                $currentParams = array_merge(request()->query(), ['grouping' => $grouping]);
                             @endphp
                             <a href="{{ route('admin-report-staff-expense-daily', $currentParams) }}"
                                 class="{{ $viewMode === 'daily' ? 'tabActive' : '' }}">
@@ -530,21 +600,22 @@
             <!-- Filter Panel -->
             <div class="report-filter-panel">
                 <form id="expenseFilterForm" method="GET" action="{{ url()->current() }}">
+                    <input type="hidden" name="grouping" value="{{ $grouping }}">
                     @if ($viewMode === 'daily')
                         <div class="filter-header-row">
                             <div class="preset-badge-group">
                                 <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">{{ __('staff_expense_report.presets.title') }}</span>
-                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'today'])) }}"
+                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'today', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">{{ __('staff_expense_report.presets.today') }}</a>
-                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'yesterday'])) }}"
+                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'yesterday', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">{{ __('staff_expense_report.presets.yesterday') }}</a>
-                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '7days'])) }}"
+                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '7days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '7days' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_7_days') }}</a>
-                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => '30days'])) }}"
+                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '30days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_30_days') }}</a>
-                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'this_month'])) }}"
+                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'this_month', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'this_month' || (!request('preset') && !request('from_date')) ? 'active' : '' }}">{{ __('staff_expense_report.presets.this_month') }}</a>
-                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset']), ['preset' => 'last_month'])) }}"
+                                <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'last_month', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_month') }}</a>
                             </div>
                         </div>
@@ -640,7 +711,7 @@
                                 <i class='bx bx-filter-alt'></i>
                                 <span>{{ __('staff_expense_report.button.filter') }}</span>
                             </button>
-                            <a href="{{ $viewMode === 'daily' ? route('admin-report-staff-expense-daily') : route('admin-report-staff-expense-monthly') }}"
+                            <a href="{{ route($viewMode === 'daily' ? 'admin-report-staff-expense-daily' : 'admin-report-staff-expense-monthly', ['grouping' => $grouping]) }}"
                                 class="btn-filter-reset" title="{{ __('staff_expense_report.button.reset_tooltip') }}">
                                 <i class='bx bx-reset'></i>
                                 <span>{{ __('staff_expense_report.button.reset') }}</span>
@@ -742,14 +813,146 @@
             <div class="report-table-card">
                 <div class="table-header-bar">
                     <div class="table-title">
-                        <i class='bx bx-table' style="color: #64748b;"></i>
-                        <span>{{ $viewMode === 'daily' ? __('staff_expense_report.table.daily_breakdown') : __('staff_expense_report.table.monthly_breakdown') }}</span>
-                        <span class="table-count-badge">{{ $rows->count() }} {{ $viewMode === 'daily' ? __('staff_expense_report.table.days') : __('staff_expense_report.table.months') }}</span>
+                        <i class='bx {{ $grouping === 'grouped' ? ($viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt') : 'bx-list-ul' }}' style="color: #64748b;"></i>
+                        @if ($grouping === 'grouped')
+                            <span>{{ $viewMode === 'daily' ? __('staff_expense_report.table.daily_breakdown') : __('staff_expense_report.table.monthly_breakdown') }}</span>
+                            <span class="table-count-badge">{{ $rows ? $rows->count() : 0 }} {{ $viewMode === 'daily' ? __('staff_expense_report.table.days_recorded') : __('staff_expense_report.table.months_recorded') }}</span>
+                        @else
+                            <span>{{ __('staff_expense_report.table.individual_expenses') }}</span>
+                            <span class="table-count-badge">{{ $ungroupedRows ? $ungroupedRows->total() : 0 }} {{ __('staff_expense_report.table.expenses_recorded') }}</span>
+                        @endif
+                    </div>
+
+                    <!-- View Grouping Toggle Controls -->
+                    <div class="view-grouping-toggle">
+                        <span class="toggle-label">{{ __('staff_expense_report.toggle.view_as') }}:</span>
+                        <div class="toggle-pill-group">
+                            <a href="{{ route(request()->route()?->getName() ?: ($viewMode === 'daily' ? 'admin-report-staff-expense-daily' : 'admin-report-staff-expense-monthly'), array_merge(request()->query(), ['grouping' => 'ungrouped', 'page' => 1])) }}"
+                                class="toggle-pill {{ $grouping === 'ungrouped' ? 'active' : '' }}"
+                                title="{{ __('staff_expense_report.toggle.ungrouped_tooltip') }}">
+                                <i class='bx bx-list-ul'></i>
+                                <span>{{ __('staff_expense_report.toggle.ungrouped') }}</span>
+                            </a>
+                            <a href="{{ route(request()->route()?->getName() ?: ($viewMode === 'daily' ? 'admin-report-staff-expense-daily' : 'admin-report-staff-expense-monthly'), array_merge(request()->query(), ['grouping' => 'grouped', 'page' => 1])) }}"
+                                class="toggle-pill {{ $grouping === 'grouped' ? 'active' : '' }}"
+                                title="{{ $viewMode === 'daily' ? __('staff_expense_report.toggle.grouped_tooltip') : __('staff_expense_report.toggle.grouped_month_tooltip') }}">
+                                <i class='bx {{ $viewMode === 'daily' ? 'bx-calendar-event' : 'bx-calendar-alt' }}'></i>
+                                <span>{{ $viewMode === 'daily' ? __('staff_expense_report.toggle.grouped_by_date') : __('staff_expense_report.toggle.grouped_by_month') }}</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
                 <div style="overflow-x: auto;">
-                    <table class="expense-data-table">
+                    @if ($grouping === 'ungrouped')
+                        <!-- UNGROUPED TABLE (INDIVIDUAL STAFF EXPENSES) -->
+                        <table class="expense-data-table" id="staffExpenseUngroupedTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">{{ __('staff_expense_report.table.no') }}</th>
+                                    <th>{{ __('staff_expense_report.table.date') }}</th>
+                                    <th>{{ __('staff_expense_report.table.staff_member') }}</th>
+                                    <th>{{ __('staff_expense_report.table.shop_branch') }}</th>
+                                    <th style="text-align: center;">{{ __('staff_expense_report.table.type') }}</th>
+                                    <th style="text-align: right;">{{ __('staff_expense_report.table.amount') }} ($)</th>
+                                    <th>{{ __('staff_expense_report.table.remarks') }}</th>
+                                    <th>{{ __('staff_expense_report.table.recorded_by') }}</th>
+                                    <th style="text-align: center;">{{ __('staff_expense_report.table.status') }}</th>
+                                    <th style="text-align: center; width: 100px;">{{ __('staff_expense_report.table.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($ungroupedRows as $row)
+                                    @php
+                                        $rowIndex = ($ungroupedRows->currentPage() - 1) * $ungroupedRows->perPage() + $loop->iteration;
+                                    @endphp
+                                    <tr>
+                                        <td style="text-align: center; color: #94a3b8;">{{ $rowIndex }}</td>
+                                        <td style="white-space: nowrap;">
+                                            <strong style="color: #0f172a;">{{ $row->expense_date_formatted }}</strong>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; color: #0f172a;">{{ $row->staff_name }}</div>
+                                            <small style="color: #64748b;">
+                                                {{ $row->position_name }}
+                                                @if ($row->staff_phone && $row->staff_phone !== '---')
+                                                    • {{ $row->staff_phone }}
+                                                @endif
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span style="font-size: 13px; color: #334155;">{{ $row->shop_name }}</span>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <span class="{{ $row->badge_class }}">{{ $row->type_label }}</span>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <strong class="{{ $row->is_deduction ? 'currency-neg' : 'currency-pos' }}">
+                                                {{ $row->amount_formatted }}
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <span style="font-size: 12px; color: #334155;">{{ $row->description }}</span>
+                                        </td>
+                                        <td>
+                                            <small style="color: #64748b;">{{ $row->created_by_name }}</small>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            @if ($row->status === 1)
+                                                <span class="status-badge-active">{{ $row->status_label }}</span>
+                                            @else
+                                                <span class="status-badge-disabled">{{ $row->status_label }}</span>
+                                            @endif
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <div style="display: inline-flex; gap: 4px; justify-content: center;">
+                                                <button type="button" class="btn-view-details" @click="openPeriodDetails('{{ $row->expense_date }}')"
+                                                    title="{{ __('staff_expense_report.button.details') }}">
+                                                    <i class='bx bx-show'></i>
+                                                </button>
+                                                @can('staff-expense-update')
+                                                    <a href="{{ route('admin-staff-expense-edit', $row->id) }}"
+                                                        class="btn-view-details" target="_blank"
+                                                        title="{{ __('staff_expense_report.button.edit') }}">
+                                                        <i class='bx bx-edit'></i>
+                                                    </a>
+                                                @endcan
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="10" class="empty-placeholder">
+                                            <i class='bx bx-receipt'></i>
+                                            <h4>{{ __('staff_expense_report.empty.title') }}</h4>
+                                            <p>{{ __('staff_expense_report.empty.ungrouped_description') }}</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                            @if ($ungroupedRows && $ungroupedRows->count() > 0)
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="5" style="text-align: right; text-transform: uppercase;">{{ __('staff_expense_report.table.total_summary') }}:</td>
+                                        <td style="text-align: right;" class="currency-net">${{ number_format($summary['net_total'], 2) }}</td>
+                                        <td colspan="4">
+                                            <span style="font-size: 12px; color: #64748b;">
+                                                ({{ __('staff_expense_report.table.gross_total') }}: ${{ number_format($summary['gross_total'], 2) }} | {{ __('staff_expense_report.table.deductions') }}: -${{ number_format($summary['deduction_total'], 2) }})
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            @endif
+                        </table>
+
+                        @if ($ungroupedRows && $ungroupedRows->hasPages())
+                            <div class="paginationLayout2" style="padding: 12px 18px; border-top: 1px solid #e2e8f0; background: #fafbfc;">
+                                @include('admin::components.pagination', ['paginate' => $ungroupedRows])
+                            </div>
+                        @endif
+                    @else
+                        <!-- GROUPED TABLE -->
+                        <table class="expense-data-table">
                         <thead>
                             @if ($viewMode === 'daily')
                                 <tr>
@@ -865,7 +1068,7 @@
                                 </tr>
                             @endforelse
                         </tbody>
-                        @if ($rows->isNotEmpty())
+                        @if ($rows && $rows->isNotEmpty())
                             <tfoot>
                                 @if ($viewMode === 'daily')
                                     <tr>
@@ -895,6 +1098,7 @@
                             </tfoot>
                         @endif
                     </table>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1042,6 +1246,7 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('xStaffExpenseReport', () => ({
                 viewMode: '{{ $viewMode }}',
+                grouping: '{{ $grouping }}',
                 showDetailModal: false,
                 modalLoading: false,
                 periodData: null,
@@ -1093,15 +1298,53 @@
                     try {
                         const currentParams = new URLSearchParams(window.location.search);
                         currentParams.set('view_mode', this.viewMode);
+                        currentParams.set('grouping', this.grouping);
 
                         const response = await Axios.get(`{{ route('admin-report-staff-expense-report') }}?` + currentParams.toString());
                         const reportData = response.data;
 
                         const workbook = new ExcelJS.Workbook();
-                        const sheetName = this.viewMode === 'monthly' ? '{{ __('staff_expense_report.excel.sheet_monthly') }}' : '{{ __('staff_expense_report.excel.sheet_daily') }}';
+                        let sheetName = '';
+                        if (this.grouping === 'ungrouped') {
+                            sheetName = '{{ __('staff_expense_report.excel.sheet_ungrouped') }}';
+                        } else if (this.viewMode === 'monthly') {
+                            sheetName = '{{ __('staff_expense_report.excel.sheet_monthly') }}';
+                        } else {
+                            sheetName = '{{ __('staff_expense_report.excel.sheet_daily') }}';
+                        }
                         const worksheet = workbook.addWorksheet(sheetName);
 
-                        if (this.viewMode === 'daily') {
+                        if (this.grouping === 'ungrouped') {
+                            worksheet.columns = [
+                                { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('staff_expense_report.excel.date') }}', key: 'expense_date_formatted', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.staff_name') }}', key: 'staff_name', width: 22 },
+                                { header: '{{ __('staff_expense_report.excel.phone') }}', key: 'staff_phone', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.position') }}', key: 'position_name', width: 18 },
+                                { header: '{{ __('staff_expense_report.excel.shop') }}', key: 'shop_name', width: 20 },
+                                { header: '{{ __('staff_expense_report.excel.type') }}', key: 'type_label', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.amount') }}', key: 'amount', width: 16 },
+                                { header: '{{ __('staff_expense_report.excel.description') }}', key: 'description', width: 30 },
+                                { header: '{{ __('staff_expense_report.excel.created_by') }}', key: 'created_by_name', width: 18 },
+                                { header: '{{ __('staff_expense_report.excel.status') }}', key: 'status_label', width: 14 },
+                            ];
+
+                            reportData.rows.forEach((r, idx) => {
+                                worksheet.addRow({
+                                    index: idx + 1,
+                                    expense_date_formatted: r.expense_date_formatted,
+                                    staff_name: r.staff_name,
+                                    staff_phone: r.staff_phone,
+                                    position_name: r.position_name,
+                                    shop_name: r.shop_name,
+                                    type_label: r.type_label,
+                                    amount: (r.is_deduction ? -1 : 1) * Number(r.amount || 0),
+                                    description: r.description,
+                                    created_by_name: r.created_by_name,
+                                    status_label: r.status_label,
+                                });
+                            });
+                        } else if (this.viewMode === 'daily') {
                             worksheet.columns = [
                                 { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
                                 { header: '{{ __('staff_expense_report.excel.date') }}', key: 'date', width: 16 },
@@ -1180,7 +1423,10 @@
                         const blob = new Blob([buffer], {
                             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                         });
-                        const filename = (this.viewMode === 'monthly' ? '{{ __('staff_expense_report.excel.file_monthly_prefix') }}' : '{{ __('staff_expense_report.excel.file_daily_prefix') }}') + moment().format('YYYY_MM_DD_HHmmss');
+                        const filePrefix = this.grouping === 'ungrouped'
+                            ? '{{ __('staff_expense_report.excel.file_ungrouped_prefix') }}'
+                            : (this.viewMode === 'monthly' ? '{{ __('staff_expense_report.excel.file_monthly_prefix') }}' : '{{ __('staff_expense_report.excel.file_daily_prefix') }}');
+                        const filename = filePrefix + moment().format('YYYY_MM_DD_HHmmss');
                         saveAs(blob, filename);
                     } catch (err) {
                         console.error('Export failed:', err);
@@ -1199,7 +1445,7 @@
             const chartCanvas = document.getElementById('staffExpenseChart');
             if (!chartCanvas) return;
 
-            const rowsData = @json($rows);
+            const rowsData = @json($chartRows ?? $rows ?? []);
             const viewMode = '{{ $viewMode }}';
 
             let labels = [];

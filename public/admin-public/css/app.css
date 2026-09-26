@@ -31351,6 +31351,7 @@ li.completed {
   display: flex;
   flex-direction: column;
   position: relative;
+  flex: 1;
 }
 .container .container-wrapper .content .content-wrapper .content-body {
   padding: 0px;

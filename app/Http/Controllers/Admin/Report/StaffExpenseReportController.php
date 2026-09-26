@@ -25,6 +25,15 @@ class StaffExpenseReportController extends Controller
     }
 
     /**
+     * Resolve grouping parameter ('grouped' or 'ungrouped', default 'ungrouped')
+     */
+    private function resolveGrouping(Request $req)
+    {
+        $grouping = $req->get('grouping', 'ungrouped');
+        return in_array($grouping, ['grouped', 'ungrouped']) ? $grouping : 'ungrouped';
+    }
+
+    /**
      * Entry point: Default to Daily view
      */
     public function index(Request $req)
@@ -37,6 +46,7 @@ class StaffExpenseReportController extends Controller
      */
     public function daily(Request $req)
     {
+        $grouping = $this->resolveGrouping($req);
         $dates = $this->resolveDailyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'daily');
 
@@ -45,22 +55,33 @@ class StaffExpenseReportController extends Controller
         // Overall summary statistics for filtered date range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
 
-        // Daily aggregated breakdown
-        $dailyRows = $this->aggregateDailyExpenses(clone $baseQuery);
+        $rows = null;
+        $ungroupedRows = null;
+
+        if ($grouping === 'grouped') {
+            $rows = $this->aggregateDailyExpenses(clone $baseQuery);
+            $chartRows = $rows;
+        } else {
+            $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
+            $chartRows = $this->aggregateDailyExpenses(clone $baseQuery);
+        }
 
         $filterOptions = $this->getFilterOptions();
 
         return view($this->layout . 'index', [
-            'viewMode'     => 'daily',
-            'routeName'    => $this->routeName,
-            'from_date'    => $dates['from'],
-            'to_date'      => $dates['to'],
-            'filters'      => $appliedFilters,
-            'summary'      => $summary,
-            'rows'         => $dailyRows,
-            'staffList'    => $filterOptions['staffList'],
-            'shops'        => $filterOptions['shops'],
-            'expenseTypes' => $filterOptions['expenseTypes'],
+            'viewMode'      => 'daily',
+            'grouping'      => $grouping,
+            'routeName'     => $this->routeName,
+            'from_date'     => $dates['from'],
+            'to_date'       => $dates['to'],
+            'filters'       => $appliedFilters,
+            'summary'       => $summary,
+            'rows'          => $rows,
+            'chartRows'     => $chartRows,
+            'ungroupedRows' => $ungroupedRows,
+            'staffList'     => $filterOptions['staffList'],
+            'shops'         => $filterOptions['shops'],
+            'expenseTypes'  => $filterOptions['expenseTypes'],
         ]);
     }
 
@@ -69,6 +90,7 @@ class StaffExpenseReportController extends Controller
      */
     public function monthly(Request $req)
     {
+        $grouping = $this->resolveGrouping($req);
         $monthRange = $this->resolveMonthlyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'monthly');
 
@@ -77,13 +99,22 @@ class StaffExpenseReportController extends Controller
         // Overall summary statistics for filtered monthly range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
 
-        // Monthly aggregated breakdown
-        $monthlyRows = $this->aggregateMonthlyExpenses(clone $baseQuery);
+        $rows = null;
+        $ungroupedRows = null;
+
+        if ($grouping === 'grouped') {
+            $rows = $this->aggregateMonthlyExpenses(clone $baseQuery);
+            $chartRows = $rows;
+        } else {
+            $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
+            $chartRows = $this->aggregateMonthlyExpenses(clone $baseQuery);
+        }
 
         $filterOptions = $this->getFilterOptions();
 
         return view($this->layout . 'index', [
             'viewMode'       => 'monthly',
+            'grouping'       => $grouping,
             'routeName'      => $this->routeName,
             'selectedYear'   => $monthRange['year'],
             'from_month'     => $monthRange['from_month'],
@@ -92,7 +123,9 @@ class StaffExpenseReportController extends Controller
             'to_date'        => $monthRange['to'],
             'filters'        => $appliedFilters,
             'summary'        => $summary,
-            'rows'           => $monthlyRows,
+            'rows'           => $rows,
+            'chartRows'      => $chartRows,
+            'ungroupedRows'  => $ungroupedRows,
             'staffList'      => $filterOptions['staffList'],
             'shops'          => $filterOptions['shops'],
             'expenseTypes'   => $filterOptions['expenseTypes'],
@@ -106,22 +139,28 @@ class StaffExpenseReportController extends Controller
     public function report(Request $req)
     {
         $mode = $req->get('view_mode', 'daily');
+        $grouping = $this->resolveGrouping($req);
 
         if ($mode === 'monthly') {
             $monthRange = $this->resolveMonthlyDateRange($req);
             $baseQuery = $this->buildFilteredExpenseQuery($req, $monthRange['from'], $monthRange['to']);
             $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
-            $rows = $this->aggregateMonthlyExpenses(clone $baseQuery);
+            $rows = ($grouping === 'ungrouped')
+                ? $this->getUngroupedAll(clone $baseQuery)
+                : $this->aggregateMonthlyExpenses(clone $baseQuery);
         } else {
             $dates = $this->resolveDailyDateRange($req);
             $baseQuery = $this->buildFilteredExpenseQuery($req, $dates['from'], $dates['to']);
             $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
-            $rows = $this->aggregateDailyExpenses(clone $baseQuery);
+            $rows = ($grouping === 'ungrouped')
+                ? $this->getUngroupedAll(clone $baseQuery)
+                : $this->aggregateDailyExpenses(clone $baseQuery);
         }
 
         return response()->json([
             'status'    => 'success',
             'view_mode' => $mode,
+            'grouping'  => $grouping,
             'summary'   => $summary,
             'rows'      => $rows,
         ]);
@@ -135,7 +174,7 @@ class StaffExpenseReportController extends Controller
         $query = StaffExpense::query()
             ->with([
                 'staff:id,name,phone_number,email,image,position_id',
-                'staff.position:id,name',
+                'staff.position:id,title',
                 'shop:id,name,phone,address',
                 'createdBy:id,name,phone',
             ]);
@@ -157,39 +196,7 @@ class StaffExpenseReportController extends Controller
             ->get();
 
         $formatted = $expenses->map(function ($item) {
-            $typeEnum = $item->type instanceof ExpenseType ? $item->type : ExpenseType::tryFrom((string) $item->type);
-            $typeValue = $typeEnum ? $typeEnum->value : (string) $item->type;
-            $typeLabel = match($typeValue) {
-                ExpenseType::SALARY->value    => __('staff_expense_report.types.salary'),
-                ExpenseType::BONUS->value     => __('staff_expense_report.types.bonus'),
-                ExpenseType::DEDUCTION->value => __('staff_expense_report.types.deduction'),
-                default                       => __('staff_expense_report.types.other'),
-            };
-            $badgeClass = $typeEnum ? $typeEnum->badgeClass() : 'badge bg-secondary';
-            $isDeduction = $typeEnum ? $typeEnum->isDeduction() : ($typeValue === 'Deduction');
-
-            return [
-                'id'                   => $item->id,
-                'expense_date'         => $item->expense_date ? (is_object($item->expense_date) ? $item->expense_date->format('Y-m-d') : Carbon::parse($item->expense_date)->format('Y-m-d')) : '---',
-                'expense_date_formatted' => $item->expense_date ? Carbon::parse($item->expense_date)->format('d M Y') : '---',
-                'staff_id'             => $item->staff_id,
-                'staff_name'           => $item->staff?->name ?: __('staff_expense_report.table.unknown_staff'),
-                'staff_phone'          => $item->staff?->phone_number ?: '---',
-                'staff_image'          => $item->staff?->image_url ?: null,
-                'position_name'        => $item->staff?->position?->name ?: 'Staff',
-                'shop_id'              => $item->shop_id,
-                'shop_name'            => $item->shop?->name ?: __('staff_expense_report.filter.all_shops'),
-                'type'                 => $typeValue,
-                'type_label'           => $typeLabel,
-                'badge_class'          => $badgeClass,
-                'is_deduction'         => $isDeduction,
-                'amount'               => (float) ($item->amount ?? 0),
-                'amount_formatted'     => ($isDeduction ? '-$' : '+$') . number_format((float) ($item->amount ?? 0), 2),
-                'description'          => $item->description ?: '---',
-                'created_by_name'      => $item->createdBy?->name ?: __('staff_expense_report.table.system'),
-                'status'               => (int) ($item->status ?? 1),
-                'status_label'         => ((int) ($item->status ?? 1) === 1) ? __('staff_expense_report.status.active') : __('staff_expense_report.status.disabled'),
-            ];
+            return (array) $this->formatExpenseRecord($item);
         });
 
         $salaryTotal    = (float) $formatted->where('type', ExpenseType::SALARY->value)->sum('amount');
@@ -231,6 +238,91 @@ class StaffExpenseReportController extends Controller
             'net_total'       => $netTotal,
             'expenses'        => $formatted,
         ]);
+    }
+
+    /**
+     * Format a single staff expense model for table display or API response
+     */
+    private function formatExpenseRecord($item)
+    {
+        $typeEnum = $item->type instanceof ExpenseType ? $item->type : ExpenseType::tryFrom((string) $item->type);
+        $typeValue = $typeEnum ? $typeEnum->value : (string) $item->type;
+        $typeLabel = match($typeValue) {
+            ExpenseType::SALARY->value    => __('staff_expense_report.types.salary'),
+            ExpenseType::BONUS->value     => __('staff_expense_report.types.bonus'),
+            ExpenseType::DEDUCTION->value => __('staff_expense_report.types.deduction'),
+            default                       => __('staff_expense_report.types.other'),
+        };
+        $badgeClass = $typeEnum ? $typeEnum->badgeClass() : 'badge bg-secondary';
+        $isDeduction = $typeEnum ? $typeEnum->isDeduction() : ($typeValue === 'Deduction');
+
+        return (object) [
+            'id'                     => $item->id,
+            'expense_date'           => $item->expense_date ? (is_object($item->expense_date) ? $item->expense_date->format('Y-m-d') : Carbon::parse($item->expense_date)->format('Y-m-d')) : '---',
+            'expense_date_formatted' => $item->expense_date ? Carbon::parse($item->expense_date)->format('d M Y') : '---',
+            'staff_id'               => $item->staff_id,
+            'staff_name'             => $item->staff?->name ?: __('staff_expense_report.table.unknown_staff'),
+            'staff_phone'            => $item->staff?->phone_number ?: '---',
+            'staff_image'            => $item->staff?->image_url ?: null,
+            'position_name'          => $item->staff?->position?->title ?: 'Staff',
+            'shop_id'                => $item->shop_id,
+            'shop_name'              => $item->shop?->name ?: __('staff_expense_report.filter.all_shops'),
+            'type'                   => $typeValue,
+            'type_label'             => $typeLabel,
+            'badge_class'            => $badgeClass,
+            'is_deduction'           => $isDeduction,
+            'amount'                 => (float) ($item->amount ?? 0),
+            'amount_formatted'       => ($isDeduction ? '-$' : '+$') . number_format((float) ($item->amount ?? 0), 2),
+            'description'            => $item->description ?: '---',
+            'created_by_name'        => $item->createdBy?->name ?: __('staff_expense_report.table.system'),
+            'status'                 => (int) ($item->status ?? 1),
+            'status_label'           => ((int) ($item->status ?? 1) === 1) ? __('staff_expense_report.status.active') : __('staff_expense_report.status.disabled'),
+        ];
+    }
+
+    /**
+     * Get paginated ungrouped staff expenses formatted for table listing
+     */
+    private function getUngroupedPaginated($query, Request $req)
+    {
+        $paginated = (clone $query)
+            ->with([
+                'staff:id,name,phone_number,email,image,position_id',
+                'staff.position:id,title',
+                'shop:id,name,phone,address',
+                'createdBy:id,name,phone',
+            ])
+            ->orderBy('expense_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(50)
+            ->appends($req->query());
+
+        $paginated->getCollection()->transform(function ($item) {
+            return $this->formatExpenseRecord($item);
+        });
+
+        return $paginated;
+    }
+
+    /**
+     * Get all ungrouped staff expenses for export / JSON
+     */
+    private function getUngroupedAll($query)
+    {
+        $expenses = (clone $query)
+            ->with([
+                'staff:id,name,phone_number,email,image,position_id',
+                'staff.position:id,title',
+                'shop:id,name,phone,address',
+                'createdBy:id,name,phone',
+            ])
+            ->orderBy('expense_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return $expenses->map(function ($item) {
+            return $this->formatExpenseRecord($item);
+        });
     }
 
     /**

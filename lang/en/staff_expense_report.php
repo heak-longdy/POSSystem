@@ -36,6 +36,18 @@ return [
         'placeholder_search' => 'Staff name, remark, amount...',
     ],
 
+    'toggle' => [
+        'view_as' => 'View As',
+        'grouped' => 'Grouped',
+        'grouped_by_date' => 'Grouped by Date',
+        'grouped_by_month' => 'Grouped by Month',
+        'ungrouped' => 'Ungrouped',
+        'ungrouped_expenses' => 'Ungrouped (Expenses)',
+        'grouped_tooltip' => 'View staff expense records grouped by date',
+        'grouped_month_tooltip' => 'View staff expense records grouped by month',
+        'ungrouped_tooltip' => 'View all individual staff expense records',
+    ],
+
     'button' => [
         'export_excel' => 'Export Excel',
         'reload' => 'Reload',
@@ -43,6 +55,7 @@ return [
         'reset' => 'Reset',
         'reset_tooltip' => 'Reset Filters',
         'details' => 'Details',
+        'edit' => 'Edit Expense',
     ],
 
     'kpi' => [
@@ -93,10 +106,23 @@ return [
         'top_branch' => 'Top Branch',
         'top_staff_branch' => 'Top Staff / Branch',
         'action' => 'Action',
+        'actions' => 'Actions',
         'grand_total' => 'Grand Total',
         'unknown_staff' => 'Unknown Staff',
         'system' => 'System',
         'na' => 'N/A',
+        'individual_expenses' => 'Individual Staff Expenses',
+        'expenses_recorded' => 'expenses recorded',
+        'days_recorded' => 'days recorded',
+        'months_recorded' => 'months recorded',
+        'total_summary' => 'Total Summary',
+        'staff_member' => 'Staff Member',
+        'shop_branch' => 'Shop / Branch',
+        'type' => 'Type',
+        'amount' => 'Amount',
+        'remarks' => 'Description / Remarks',
+        'recorded_by' => 'Recorded By',
+        'status' => 'Status',
     ],
 
     'badge' => [
@@ -118,6 +144,7 @@ return [
     'empty' => [
         'title' => 'No Expense Records Found',
         'description' => 'No staff expense entries match the selected filters and date range.',
+        'ungrouped_description' => 'No individual staff expense entries match the selected filters and date range.',
     ],
 
     'modal' => [
@@ -150,8 +177,10 @@ return [
     'excel' => [
         'sheet_daily' => 'Daily Staff Expense Report',
         'sheet_monthly' => 'Monthly Staff Expense Report',
+        'sheet_ungrouped' => 'Individual Staff Expenses',
         'file_daily_prefix' => 'Daily_Staff_Expense_Report_',
         'file_monthly_prefix' => 'Monthly_Staff_Expense_Report_',
+        'file_ungrouped_prefix' => 'Staff_Expenses_Ungrouped_',
         'export_failed' => 'Excel export failed. Please try again.',
         'exporting' => 'Exporting...',
         'no' => 'Nº',
@@ -169,6 +198,15 @@ return [
         'avg_daily' => 'Avg Daily Expense',
         'top_staff' => 'Top Staff',
         'top_branch' => 'Top Branch',
+        'staff_name' => 'Staff Name',
+        'phone' => 'Phone Number',
+        'position' => 'Position',
+        'shop' => 'Shop / Branch',
+        'type' => 'Expense Type',
+        'amount' => 'Amount ($)',
+        'description' => 'Description / Remarks',
+        'created_by' => 'Recorded By',
+        'status' => 'Status',
     ],
 
     'months' => [

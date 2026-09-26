@@ -140,6 +140,7 @@ Route::middleware(['AdminGuard'])
             Route::get('edit/{id?}', [StockInController::class, 'onEdit'])->name('edit');
             Route::get('view/{id?}', [StockInController::class, 'onView'])->name('view');
             Route::post('save/{id?}', [StockInController::class, 'onSave'])->name('save');
+            Route::get('products/{shop_id}', [StockInController::class, 'getShopProducts'])->name('products');
             Route::match(['get', 'post'], 'status/{id}/{status}', [StockInController::class, 'updateStatus'])->name('status');
             Route::post('delete/{id?}', [StockInController::class, 'delete'])->name('delete');
             Route::post('restore/{id?}', [StockInController::class, 'restore'])->name('restore');

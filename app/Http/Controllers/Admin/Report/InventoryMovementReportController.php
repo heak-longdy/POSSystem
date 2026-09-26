@@ -36,10 +36,20 @@ class InventoryMovementReportController extends Controller
     }
 
     /**
+     * Resolve view grouping mode (Default: ungrouped)
+     */
+    private function resolveGrouping(Request $req)
+    {
+        $grouping = $req->get('grouping', 'ungrouped');
+        return in_array($grouping, ['grouped', 'ungrouped']) ? $grouping : 'ungrouped';
+    }
+
+    /**
      * Daily Inventory Movement Report View
      */
     public function daily(Request $req)
     {
+        $grouping = $this->resolveGrouping($req);
         $dates = $this->resolveDailyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'daily');
 
@@ -48,19 +58,30 @@ class InventoryMovementReportController extends Controller
         // Overall summary statistics for filtered date range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
 
-        // Daily aggregated breakdown
-        $dailyRows = $this->aggregateDailyMovements(clone $baseQuery);
+        $rows = null;
+        $ungroupedRows = null;
+
+        if ($grouping === 'grouped') {
+            $rows = $this->aggregateDailyMovements(clone $baseQuery);
+            $chartRows = $rows;
+        } else {
+            $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
+            $chartRows = $this->aggregateDailyMovements(clone $baseQuery);
+        }
 
         $filterOptions = $this->getFilterOptions();
 
         return view($this->layout . 'index', [
             'viewMode' => 'daily',
+            'grouping' => $grouping,
             'routeName' => $this->routeName,
             'from_date' => $dates['from'],
             'to_date' => $dates['to'],
             'filters' => $appliedFilters,
             'summary' => $summary,
-            'rows' => $dailyRows,
+            'rows' => $rows,
+            'chartRows' => $chartRows,
+            'ungroupedRows' => $ungroupedRows,
             'shops' => $filterOptions['shops'],
             'categories' => $filterOptions['categories'],
             'products' => $filterOptions['products'],
@@ -75,6 +96,7 @@ class InventoryMovementReportController extends Controller
      */
     public function monthly(Request $req)
     {
+        $grouping = $this->resolveGrouping($req);
         $monthRange = $this->resolveMonthlyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'monthly');
 
@@ -83,13 +105,22 @@ class InventoryMovementReportController extends Controller
         // Overall summary statistics for filtered monthly range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
 
-        // Monthly aggregated breakdown
-        $monthlyRows = $this->aggregateMonthlyMovements(clone $baseQuery);
+        $rows = null;
+        $ungroupedRows = null;
+
+        if ($grouping === 'grouped') {
+            $rows = $this->aggregateMonthlyMovements(clone $baseQuery);
+            $chartRows = $rows;
+        } else {
+            $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
+            $chartRows = $this->aggregateMonthlyMovements(clone $baseQuery);
+        }
 
         $filterOptions = $this->getFilterOptions();
 
         return view($this->layout . 'index', [
             'viewMode' => 'monthly',
+            'grouping' => $grouping,
             'routeName' => $this->routeName,
             'selectedYear' => $monthRange['year'],
             'from_month' => $monthRange['from_month'],
@@ -98,7 +129,9 @@ class InventoryMovementReportController extends Controller
             'to_date' => $monthRange['to'],
             'filters' => $appliedFilters,
             'summary' => $summary,
-            'rows' => $monthlyRows,
+            'rows' => $rows,
+            'chartRows' => $chartRows,
+            'ungroupedRows' => $ungroupedRows,
             'shops' => $filterOptions['shops'],
             'categories' => $filterOptions['categories'],
             'products' => $filterOptions['products'],
@@ -115,22 +148,28 @@ class InventoryMovementReportController extends Controller
     public function report(Request $req)
     {
         $mode = $req->get('view_mode', 'daily');
+        $grouping = $this->resolveGrouping($req);
 
         if ($mode === 'monthly') {
             $monthRange = $this->resolveMonthlyDateRange($req);
             $baseQuery = $this->buildFilteredMovementQuery($req, $monthRange['from'], $monthRange['to']);
             $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
-            $rows = $this->aggregateMonthlyMovements(clone $baseQuery);
+            $rows = ($grouping === 'ungrouped')
+                ? $this->getUngroupedAll(clone $baseQuery)
+                : $this->aggregateMonthlyMovements(clone $baseQuery);
         } else {
             $dates = $this->resolveDailyDateRange($req);
             $baseQuery = $this->buildFilteredMovementQuery($req, $dates['from'], $dates['to']);
             $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
-            $rows = $this->aggregateDailyMovements(clone $baseQuery);
+            $rows = ($grouping === 'ungrouped')
+                ? $this->getUngroupedAll(clone $baseQuery)
+                : $this->aggregateDailyMovements(clone $baseQuery);
         }
 
         return response()->json([
             'status' => 'success',
             'view_mode' => $mode,
+            'grouping' => $grouping,
             'summary' => $summary,
             'rows' => $rows,
         ]);
@@ -168,78 +207,7 @@ class InventoryMovementReportController extends Controller
             ->get();
 
         $formatted = $histories->map(function ($item) {
-            $isSales = ($item->status === 'stock_out') && ($item->transfer_type === 'booking' || $item->type === 'customer');
-            $isTransfer = ($item->status === 'stock_transfer');
-            $isStockIn = ($item->status === 'stock_in');
-            $isInternalOut = ($item->status === 'stock_out') && !$isSales;
-
-            $movementLabel = __('inventory_movement.movement_badge.movement');
-            $badgeClass = 'primary';
-
-            if ($isStockIn) {
-                $movementLabel = __('inventory_movement.movement_badge.stock_in');
-                $badgeClass = 'success';
-            } elseif ($isSales) {
-                $movementLabel = __('inventory_movement.movement_badge.pos_sale');
-                $badgeClass = 'primary';
-            } elseif ($isTransfer) {
-                $movementLabel = __('inventory_movement.movement_badge.stock_transfer');
-                $badgeClass = 'purple';
-            } elseif ($isInternalOut) {
-                $movementLabel = __('inventory_movement.movement_badge.stock_out');
-                $badgeClass = 'danger';
-            }
-
-            // Resolve destination / source title
-            $fromTitle = $item->from_title ?: ($item->shop?->name ?: '---');
-            $toTitle = $item->to_title;
-            if (!$toTitle) {
-                if ($isSales) {
-                    $toTitle = __('inventory_movement.modal.customer_order');
-                } elseif ($isStockIn) {
-                    $toTitle = $item->shop?->name ?: __('inventory_movement.modal.warehouse_shop');
-                } elseif ($item->type === 'stock_type') {
-                    $toTitle = __('inventory_movement.modal.adjustment_internal');
-                } else {
-                    $toTitle = '---';
-                }
-            }
-
-            // Requested by title
-            $requesterName = $item->request_by_title;
-            if (!$requesterName) {
-                if ($item->user) {
-                    $requesterName = $item->user->name;
-                } elseif ($item->barber) {
-                    $requesterName = $item->barber->name;
-                } else {
-                    $requesterName = __('inventory_movement.modal.system');
-                }
-            }
-
-            return [
-                'id' => $item->id,
-                'created_at' => $item->created_at ? Carbon::parse($item->created_at)->format('Y-m-d H:i:s') : '---',
-                'created_at_formatted' => $item->created_at ? Carbon::parse($item->created_at)->format('d M Y, h:i A') : '---',
-                'product_id' => $item->product_id,
-                'product_name' => $item->product?->name ?: ($item->product_title ?: 'Unknown Product'),
-                'product_image' => $item->product?->image_url ?: null,
-                'category_name' => $item->product?->category?->name ?: ($item->category_title ?: 'General'),
-                'uom_name' => $item->product?->uom?->name ?: ($item->uom_title ?: 'Unit'),
-                'shop_name' => $item->shop?->name ?: ($item->shop_title ?: '---'),
-                'status' => $item->status,
-                'movement_type' => $isSales ? 'sales' : ($isTransfer ? 'transfer' : ($isStockIn ? 'stock_in' : 'internal_out')),
-                'movement_label' => $movementLabel,
-                'badge_class' => $badgeClass,
-                'from_title' => $fromTitle,
-                'to_title' => $toTitle,
-                'qty' => (int) ($item->qty ?: 0),
-                'stock_in' => (int) ($item->stock_in ?: 0),
-                'stock_out' => (int) ($item->stock_out ?: 0),
-                'current_stock' => (int) ($item->current_stock ?: 0),
-                'request_by_name' => $requesterName,
-                'remark' => $item->remark ?: ($item->transfer_type ? 'Transfer Type: ' . $item->transfer_type : '---'),
-            ];
+            return (array) $this->formatMovementRecord($item);
         });
 
         $totalIn = $formatted->where('status', 'stock_in')->sum('qty');
@@ -281,6 +249,134 @@ class InventoryMovementReportController extends Controller
             'net_movement' => $netMovement,
             'movements' => $formatted,
         ]);
+    }
+
+    /**
+     * Format a stock history record into a standardized object for views and reports
+     */
+    private function formatMovementRecord($item)
+    {
+        $isSales = ($item->status === 'stock_out') && ($item->transfer_type === 'booking' || $item->type === 'customer');
+        $isTransfer = ($item->status === 'stock_transfer');
+        $isStockIn = ($item->status === 'stock_in');
+        $isInternalOut = ($item->status === 'stock_out') && !$isSales;
+
+        $movementLabel = __('inventory_movement.movement_badge.movement');
+        $badgeClass = 'primary';
+
+        if ($isStockIn) {
+            $movementLabel = __('inventory_movement.movement_badge.stock_in');
+            $badgeClass = 'success';
+        } elseif ($isSales) {
+            $movementLabel = __('inventory_movement.movement_badge.pos_sale');
+            $badgeClass = 'primary';
+        } elseif ($isTransfer) {
+            $movementLabel = __('inventory_movement.movement_badge.stock_transfer');
+            $badgeClass = 'purple';
+        } elseif ($isInternalOut) {
+            $movementLabel = __('inventory_movement.movement_badge.stock_out');
+            $badgeClass = 'danger';
+        }
+
+        // Resolve destination / source title
+        $fromTitle = $item->from_title ?: ($item->shop?->name ?: '---');
+        $toTitle = $item->to_title;
+        if (!$toTitle) {
+            if ($isSales) {
+                $toTitle = __('inventory_movement.modal.customer_order');
+            } elseif ($isStockIn) {
+                $toTitle = $item->shop?->name ?: __('inventory_movement.modal.warehouse_shop');
+            } elseif ($item->type === 'stock_type') {
+                $toTitle = __('inventory_movement.modal.adjustment_internal');
+            } else {
+                $toTitle = '---';
+            }
+        }
+
+        // Requested by title
+        $requesterName = $item->request_by_title;
+        if (!$requesterName) {
+            if ($item->user) {
+                $requesterName = $item->user->name;
+            } elseif ($item->barber) {
+                $requesterName = $item->barber->name;
+            } else {
+                $requesterName = __('inventory_movement.modal.system');
+            }
+        }
+
+        return (object) [
+            'id' => $item->id,
+            'created_at' => $item->created_at ? Carbon::parse($item->created_at)->format('Y-m-d H:i:s') : '---',
+            'created_at_formatted' => $item->created_at ? Carbon::parse($item->created_at)->format('d M Y, h:i A') : '---',
+            'product_id' => $item->product_id,
+            'product_name' => $item->product?->name ?: ($item->product_title ?: 'Unknown Product'),
+            'product_image' => $item->product?->image_url ?: null,
+            'category_name' => $item->product?->category?->name ?: ($item->category_title ?: 'General'),
+            'uom_name' => $item->product?->uom?->name ?: ($item->uom_title ?: 'Unit'),
+            'shop_name' => $item->shop?->name ?: ($item->shop_title ?: '---'),
+            'status' => $item->status,
+            'movement_type' => $isSales ? 'sales' : ($isTransfer ? 'transfer' : ($isStockIn ? 'stock_in' : 'internal_out')),
+            'movement_label' => $movementLabel,
+            'badge_class' => $badgeClass,
+            'from_title' => $fromTitle,
+            'to_title' => $toTitle,
+            'qty' => (int) ($item->qty ?: 0),
+            'stock_in' => (int) ($item->stock_in ?: 0),
+            'stock_out' => (int) ($item->stock_out ?: 0),
+            'current_stock' => (int) ($item->current_stock ?: 0),
+            'request_by_name' => $requesterName,
+            'remark' => $item->remark ?: ($item->transfer_type ? 'Transfer Type: ' . $item->transfer_type : '---'),
+        ];
+    }
+
+    /**
+     * Get paginated ungrouped stock movements formatted for table listing
+     */
+    private function getUngroupedPaginated($query, Request $req)
+    {
+        $paginated = (clone $query)
+            ->with([
+                'shop:id,name,phone,address',
+                'product' => function ($p) {
+                    $p->with(['category:id,name', 'uom:id,name']);
+                },
+                'user:id,name,phone',
+                'barber:id,name,phone',
+            ])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate(50)
+            ->appends($req->query());
+
+        $paginated->getCollection()->transform(function ($item) {
+            return $this->formatMovementRecord($item);
+        });
+
+        return $paginated;
+    }
+
+    /**
+     * Get all ungrouped movements for export / JSON
+     */
+    private function getUngroupedAll($query)
+    {
+        $histories = (clone $query)
+            ->with([
+                'shop:id,name,phone,address',
+                'product' => function ($p) {
+                    $p->with(['category:id,name', 'uom:id,name']);
+                },
+                'user:id,name,phone',
+                'barber:id,name,phone',
+            ])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return $histories->map(function ($item) {
+            return $this->formatMovementRecord($item);
+        });
     }
 
     /**

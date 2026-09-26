@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Inventory\StockInRequest;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\ShopProduct;
 use App\Models\StockIn;
 use App\Models\StockOnHand;
 use App\Models\Supplier;
@@ -113,20 +114,56 @@ class StockInController extends Controller
 
                 if ((int) $stockIn->status === 1) {
                     $this->stockTransaction->applyStockIn($stockIn);
+                    $this->stockTransaction->syncShopProduct($stockIn->shop_id, $stockIn->product_id);
                 }
 
                 $message = __('stock_in.message.update_success');
             } else {
-                $stockIn = StockIn::create($this->payload($req));
-                $this->stockTransaction->applyStockIn($stockIn);
-                $message = __('stock_in.message.create_success');
+                if ($req->has('items') && is_array($req->input('items'))) {
+                    $rawItems = $req->input('items');
+                    $validItems = array_values(array_filter($rawItems, function ($item) {
+                        return !empty($item['product_id']) && isset($item['qty']) && (int) $item['qty'] > 0;
+                    }));
+
+                    if (empty($validItems)) {
+                        throw ValidationException::withMessages([
+                            'items' => __('stock_in.validation.items_required'),
+                        ]);
+                    }
+
+                    foreach ($validItems as $item) {
+                        $itemRemark = !empty($item['remark']) ? $item['remark'] : $req->input('remark');
+
+                        $stockIn = StockIn::create([
+                            'product_id'      => $item['product_id'],
+                            'shop_id'         => $req->input('shop_id'),
+                            'supplier_id'     => $req->input('supplier_id'),
+                            'supplier_type'   => 'supplier',
+                            'qty'             => $item['qty'],
+                            'remark'          => $itemRemark,
+                            'status'          => 1,
+                            'request_by'      => Auth::id(),
+                            'request_by_type' => 'admin',
+                        ]);
+
+                        $this->stockTransaction->applyStockIn($stockIn);
+                        $this->stockTransaction->syncShopProduct($stockIn->shop_id, $stockIn->product_id);
+                    }
+
+                    $message = __('stock_in.message.create_success');
+                } else {
+                    $stockIn = StockIn::create($this->payload($req));
+                    $this->stockTransaction->applyStockIn($stockIn);
+                    $this->stockTransaction->syncShopProduct($stockIn->shop_id, $stockIn->product_id);
+                    $message = __('stock_in.message.create_success');
+                }
             }
 
             DB::commit();
             Session::flash('success', $message);
 
             if ($req->input('save_opt') === 'save_new') {
-                return redirect()->back();
+                return redirect()->route('admin-' . $this->routeName . '-create');
             }
 
             return redirect()->route('admin-' . $this->routeName . '-list', 1);
@@ -274,15 +311,77 @@ class StockInController extends Controller
         $supplierId = old('supplier_id', $stockIn?->supplier_id);
 
         return [
-            'id' => $stockIn?->id ?? '',
-            'data' => $stockIn,
-            'routeName' => $this->routeName,
-            'readonly' => $readonly,
-            'selectedShop' => $shopId ? Shop::find($shopId) : null,
-            'selectedProduct' => $productId ? Product::find($productId) : null,
-            'selectedSupplier' => $supplierId ? Supplier::find($supplierId) : null,
-            'currentStock' => $this->currentStock($shopId, $productId),
+            'id'                => $stockIn?->id ?? '',
+            'data'              => $stockIn,
+            'routeName'         => $this->routeName,
+            'readonly'          => $readonly,
+            'selectedShop'      => $shopId ? Shop::find($shopId) : null,
+            'selectedProduct'   => $productId ? Product::find($productId) : null,
+            'selectedSupplier'  => $supplierId ? Supplier::find($supplierId) : null,
+            'currentStock'      => $this->currentStock($shopId, $productId),
+            'preloadedProducts' => $shopId ? $this->getShopProductsData($shopId) : [],
         ];
+    }
+
+    public function getShopProducts($shopId)
+    {
+        return response()->json([
+            'status' => 200,
+            'data'   => $this->getShopProductsData($shopId),
+        ]);
+    }
+
+    public function getShopProductsData($shopId)
+    {
+        if (!$shopId) {
+            return [];
+        }
+
+        $shopProducts = ShopProduct::where('shop_id', $shopId)
+            ->where('status', 1)
+            ->with(['product.category', 'product.uom'])
+            ->get();
+
+        $attachedProductIds = $shopProducts->pluck('product_id')->filter()->toArray();
+
+        $otherProducts = Product::where('status', 1)
+            ->whereNotIn('id', $attachedProductIds)
+            ->with(['category', 'uom'])
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $stockOnHands = StockOnHand::where('shop_id', $shopId)
+            ->pluck('current_stock', 'product_id');
+
+        $list = [];
+
+        foreach ($shopProducts as $sp) {
+            if ($sp->product && (int) $sp->product->status === 1) {
+                $list[] = [
+                    'id'            => (string) $sp->product->id,
+                    'name'          => $sp->product->name,
+                    'category'      => $sp->product->category?->name ?? '---',
+                    'uom'           => $sp->product->uom?->name ?? '---',
+                    'image'         => $sp->product->image_url ?? asset('images/logo/default.png'),
+                    'current_stock' => (int) ($stockOnHands[$sp->product->id] ?? 0),
+                    'is_assigned'   => true,
+                ];
+            }
+        }
+
+        foreach ($otherProducts as $product) {
+            $list[] = [
+                'id'            => (string) $product->id,
+                'name'          => $product->name,
+                'category'      => $product->category?->name ?? '---',
+                'uom'           => $product->uom?->name ?? '---',
+                'image'         => $product->image_url ?? asset('images/logo/default.png'),
+                'current_stock' => (int) ($stockOnHands[$product->id] ?? 0),
+                'is_assigned'   => false,
+            ];
+        }
+
+        return $list;
     }
 
     private function currentStock($shopId, $productId)

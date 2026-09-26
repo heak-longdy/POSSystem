@@ -561,6 +561,7 @@ li.completed {
                 display       : flex;
                 flex-direction: column;
                 position      : relative;
+                flex:1;
 
                 .content-body {
                     // padding   : 0 20px;

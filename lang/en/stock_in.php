@@ -25,6 +25,9 @@ return [
         'submit' => 'Submit',
         'cancel' => 'Cancel',
         'edit' => 'Edit',
+        'add_row' => 'Add Record',
+        'add_product' => 'Add Product',
+        'remove_row' => 'Remove',
     ],
 
     'form' => [
@@ -45,6 +48,19 @@ return [
         'status' => 'Status',
         'remark' => 'Remark',
         'placeholder_remark' => 'Enter remark ...',
+        'records_title' => 'Stock In Items',
+        'records_desc' => 'Add multiple products to stock into the selected shop.',
+        'total_records' => 'Total Records',
+        'total_qty' => 'Total Quantity',
+        'search_product' => 'Search product by name or category...',
+        'select_shop_first' => 'Please select a shop first to load available products',
+        'no_products_found' => 'No products found for this shop',
+        'item_remark_placeholder' => 'Item remark (optional)...',
+        'items' => 'Stock In Items',
+        'general_remark' => 'General Remark / Note',
+        'action' => 'Action',
+        'assigned' => 'Assigned',
+        'available' => 'Available',
     ],
 
     'status' => [
@@ -74,6 +90,9 @@ return [
         'qty_integer' => 'Qty format invalid',
         'qty_min' => 'Qty must be at least 1',
         'remark_max' => 'Remark must not exceed 1000 characters.',
+        'items_required' => 'At least one product record is required',
+        'items_min' => 'At least one product record is required',
+        'item_duplicate' => 'This product has already been added to another row',
     ],
 
     'message' => [
