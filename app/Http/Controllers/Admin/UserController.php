@@ -179,6 +179,7 @@ class UserController extends Controller
             if (!is_array($permissions)) {
                 $permissions = [];
             }
+            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
             $user->syncPermissions($permissions);
             DB::commit();
             Session::flash('success', __('user.message.permission_success'));

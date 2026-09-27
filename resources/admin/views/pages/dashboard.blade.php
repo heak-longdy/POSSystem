@@ -20,6 +20,12 @@
             --primary-orange-light: #FEF5E5;
             --primary-coral: #FA896B;
             --primary-coral-light: #FDEDE8;
+            --primary-purple: #7367F0;
+            --primary-purple-light: #F2EFFF;
+            --primary-emerald: #10B981;
+            --primary-emerald-light: #E6FBF5;
+            --primary-indigo: #6366F1;
+            --primary-indigo-light: #EEF2FF;
             --text-dark: #2A3547;
             --text-muted: #7C8FAC;
             --border-color: #EAEFF4;
@@ -75,7 +81,7 @@
         }
 
         .dash-grid-row-1 {
-            grid-template-columns: 1.8fr 0.9fr 0.9fr;
+            grid-template-columns: repeat(3, 1fr);
         }
 
         .dash-grid-row-2 {
@@ -90,12 +96,27 @@
             grid-template-columns: 1fr 1.8fr;
         }
 
+        .welcome-card {
+            grid-column: span 3;
+        }
+
         @media (max-width: 1200px) {
-            .dash-grid-row-1,
             .dash-grid-row-2,
             .dash-grid-row-3,
             .dash-grid-row-4 {
                 grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dash-grid-row-1 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .welcome-card {
+                grid-column: span 2;
+            }
+            .dash-card.top-mini-card:last-child {
+                grid-column: span 2;
             }
         }
 
@@ -105,6 +126,12 @@
             .dash-grid-row-3,
             .dash-grid-row-4 {
                 grid-template-columns: 1fr;
+            }
+            .welcome-card {
+                grid-column: span 1;
+            }
+            .dash-card.top-mini-card:last-child {
+                grid-column: span 1;
             }
             .dashboard-container {
                 padding: 14px;
@@ -211,6 +238,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            padding: 20px 18px;
         }
 
         .top-mini-amount {
@@ -234,25 +262,79 @@
             margin-top: 5px;
         }
 
-        .bar-chart-box {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            height: 85px;
-            padding: 0 10px;
-            gap: 8px;
-            margin-top: 15px;
+        .badge-subtle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 6px;
         }
 
-        .mini-pill-bar {
-            width: 9px;
-            background: linear-gradient(180deg, #93C5FD 0%, #DBEAFE 100%);
-            border-radius: 12px;
-            transition: all 0.3s ease;
+        .badge-teal-subtle {
+            background-color: var(--primary-teal-light);
+            color: #0d9488;
         }
 
-        .mini-pill-bar:hover {
-            background: #5D87FF;
+        .badge-orange-subtle {
+            background-color: var(--primary-orange-light);
+            color: #d97706;
+        }
+
+        .badge-blue-subtle {
+            background-color: var(--primary-blue-light);
+            color: var(--primary-blue);
+        }
+
+        .badge-coral-subtle {
+            background-color: var(--primary-coral-light);
+            color: var(--primary-coral);
+            transition: opacity 0.2s ease;
+        }
+
+        .badge-coral-subtle:hover {
+            opacity: 0.85;
+        }
+
+        .badge-purple-subtle {
+            background-color: var(--primary-purple-light);
+            color: var(--primary-purple);
+            transition: opacity 0.2s ease;
+        }
+
+        .badge-purple-subtle:hover {
+            opacity: 0.85;
+        }
+
+        .badge-cyan-subtle {
+            background-color: var(--primary-cyan-light);
+            color: #0284c7;
+            transition: opacity 0.2s ease;
+        }
+
+        .badge-cyan-subtle:hover {
+            opacity: 0.85;
+        }
+
+        .badge-emerald-subtle {
+            background-color: var(--primary-emerald-light);
+            color: var(--primary-emerald);
+            transition: opacity 0.2s ease;
+        }
+
+        .badge-emerald-subtle:hover {
+            opacity: 0.85;
+        }
+
+        .badge-indigo-subtle {
+            background-color: var(--primary-indigo-light);
+            color: var(--primary-indigo);
+            transition: opacity 0.2s ease;
+        }
+
+        .badge-indigo-subtle:hover {
+            opacity: 0.85;
         }
 
         /* ---------------- Row 2 Cards ---------------- */
@@ -353,6 +435,21 @@
         .grid-icon-box.coral {
             background-color: var(--primary-coral-light);
             color: var(--primary-coral);
+        }
+
+        .grid-icon-box.purple {
+            background-color: var(--primary-purple-light);
+            color: var(--primary-purple);
+        }
+
+        .grid-icon-box.emerald {
+            background-color: var(--primary-emerald-light);
+            color: var(--primary-emerald);
+        }
+
+        .grid-icon-box.indigo {
+            background-color: var(--primary-indigo-light);
+            color: var(--primary-indigo);
         }
 
         .stat-details h4 {
@@ -589,57 +686,130 @@
             display: flex;
             flex-direction: column;
             gap: 0;
-            margin-top: 20px;
+            margin-top: 12px;
             position: relative;
+        }
+
+        .timeline-view-all-link {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--primary-blue);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background-color: var(--primary-blue-light);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .timeline-view-all-link:hover {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            text-decoration: none;
         }
 
         .timeline-row {
             display: flex;
             align-items: flex-start;
             position: relative;
-            padding-bottom: 24px;
+            padding: 0 10px 0 8px;
+            margin: 0 -8px;
+            border-radius: 10px;
+            transition: background-color 0.2s ease;
+        }
+
+        .timeline-row:hover {
+            background-color: #F8FAFC;
         }
 
         .timeline-row:last-child {
-            padding-bottom: 0;
+            padding-bottom: 6px;
+        }
+
+        .timeline-time-col {
+            min-width: 66px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-shrink: 0;
+            padding-top: 1px;
         }
 
         .timeline-time {
             font-size: 12px;
-            color: var(--text-muted);
-            min-width: 65px;
-            padding-top: 1px;
+            font-weight: 600;
+            color: #475569;
+            line-height: 1.25;
+            letter-spacing: -0.2px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timeline-date-sub {
+            display: inline-block;
+            font-size: 11px;
+            color: #94A3B8;
+            margin-top: 3px;
+            font-weight: 500;
+            white-space: nowrap;
+            line-height: 1.2;
         }
 
         .timeline-indicator {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 0 16px;
+            margin: 0 14px;
             position: relative;
+            flex-shrink: 0;
+            align-self: stretch;
         }
 
         .timeline-circle {
-            width: 11px;
-            height: 11px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background: #fff;
+            background: #ffffff;
             box-sizing: border-box;
             z-index: 2;
+            margin-top: 2px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .circle-blue { border: 2px solid var(--primary-blue); }
-        .circle-cyan { border: 2px solid var(--primary-cyan); }
-        .circle-teal { border: 2px solid var(--primary-teal); }
-        .circle-orange { border: 2px solid var(--primary-orange); }
-        .circle-coral { border: 2px solid var(--primary-coral); }
+        .timeline-row:hover .timeline-circle {
+            transform: scale(1.18);
+        }
+
+        .circle-teal {
+            border: 2.5px solid var(--primary-teal);
+            box-shadow: 0 0 0 3px rgba(19, 222, 185, 0.18);
+        }
+        .circle-orange {
+            border: 2.5px solid var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(255, 174, 31, 0.18);
+        }
+        .circle-cyan {
+            border: 2.5px solid var(--primary-cyan);
+            box-shadow: 0 0 0 3px rgba(73, 190, 255, 0.18);
+        }
+        .circle-coral {
+            border: 2.5px solid var(--primary-coral);
+            box-shadow: 0 0 0 3px rgba(250, 137, 107, 0.18);
+        }
+        .circle-blue {
+            border: 2.5px solid var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(93, 135, 255, 0.18);
+        }
 
         .timeline-line {
-            width: 1px;
-            background-color: #E2E8F0;
+            width: 2px;
+            background-color: #EAEFF4;
             position: absolute;
-            top: 11px;
-            bottom: -24px;
+            top: 8px;
+            bottom: -2px;
             left: 5px;
             z-index: 1;
         }
@@ -649,16 +819,134 @@
         }
 
         .timeline-content {
-            font-size: 13px;
-            color: var(--text-dark);
-            line-height: 1.4;
+            flex: 1;
+            min-width: 0;
             padding-top: 0;
+            padding-bottom: 15px;
         }
 
-        .timeline-link {
+        .timeline-title-row {
+            font-size: 13px;
+            color: var(--text-dark);
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        .timeline-title-row strong,
+        .timeline-title-row .tx-name {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .timeline-title-row .tx-amount {
+            font-weight: 600;
+            color: #1E293B;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timeline-title-row .tx-amount-paid {
+            color: #0D9488;
+        }
+
+        .timeline-title-row .tx-amount-partial {
+            color: #0284C7;
+        }
+
+        .timeline-title-row .tx-amount-cancel {
+            color: #E11D48;
+        }
+
+        .timeline-meta-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-order-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
             color: var(--primary-blue);
+            background-color: var(--primary-blue-light);
+            padding: 2px 8px;
+            border-radius: 5px;
             text-decoration: none;
-            font-weight: 500;
+            transition: all 0.2s ease;
+            line-height: 1.35;
+        }
+
+        .timeline-order-pill:hover {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            text-decoration: none;
+            box-shadow: 0 2px 6px rgba(93, 135, 255, 0.25);
+        }
+
+        .timeline-status-badge {
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.35;
+        }
+
+        .status-badge-paid {
+            background-color: var(--primary-teal-light);
+            color: var(--primary-teal);
+        }
+
+        .status-badge-pending {
+            background-color: var(--primary-orange-light);
+            color: var(--primary-orange);
+        }
+
+        .status-badge-partial {
+            background-color: var(--primary-cyan-light);
+            color: var(--primary-cyan);
+        }
+
+        .status-badge-cancel {
+            background-color: var(--primary-coral-light);
+            color: var(--primary-coral);
+        }
+
+        .timeline-shop-tag {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
+
+        .timeline-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 16px;
+            text-align: center;
+        }
+
+        .timeline-empty-state .empty-icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        .timeline-empty-state p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
         }
 
         /* Product Performance Table */
@@ -734,6 +1022,47 @@
         .product-thumb.mint { background-color: #E6FFFA; }
         .product-thumb.gray { background-color: #F4F6FA; }
         .product-thumb.pink { background-color: #FDEDE8; }
+        .product-thumb.blue { background-color: var(--primary-blue-light); }
+        .product-thumb.cyan { background-color: var(--primary-cyan-light); }
+
+        .product-name-link {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s ease;
+        }
+
+        .product-name-link:hover {
+            color: var(--primary-blue);
+            text-decoration: underline;
+        }
+
+        .product-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 16px;
+            text-align: center;
+        }
+
+        .product-empty-state .empty-icon-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+
+        .product-empty-state p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
 
         .product-info h5 {
             font-size: 14px;
@@ -757,87 +1086,184 @@
     <div class="content-wrapper" id="app">
         <div class="content-body" style="overflow-y: auto; height: 100%; width: 100%; padding: 0;">
             <div class="dashboard-container">
-
                 <!-- ================= ROW 1 ================= -->
                 <div class="dash-grid-row dash-grid-row-1">
-                    
-                    <!-- 1. Welcome Card -->
-                    <div class="dash-card welcome-card">
-                        <div class="welcome-left">
-                            <div class="welcome-user">
-                                <div class="welcome-avatar">
-                                    <!-- Vector Illustrated User Avatar matching reference image -->
-                                    <svg viewBox="0 0 64 64" width="44" height="44">
-                                        <circle cx="32" cy="32" r="32" fill="#d2f4ea"/>
-                                        <circle cx="32" cy="27" r="14" fill="#fcd34d"/>
-                                        <path d="M19 56c0-8 6-14 13-14s13 6 13 14" fill="#ffffff"/>
-                                        <path d="M22 20c2-7 18-7 20 0 2 0 4 3 2 7-2 0-3-3-5-3s-3 3-7 3-5-3-7-3c-2 0-3 3-5 3-2-4 0-7 2-7z" fill="#1e293b"/>
-                                        <!-- Glasses -->
-                                        <circle cx="27" cy="27" r="4.5" fill="none" stroke="#0f172a" stroke-width="1.5"/>
-                                        <circle cx="37" cy="27" r="4.5" fill="none" stroke="#0f172a" stroke-width="1.5"/>
-                                        <line x1="31.5" y1="27" x2="32.5" y2="27" stroke="#0f172a" stroke-width="1.5"/>
-                                        <!-- Smile -->
-                                        <path d="M29 34 Q 32 37 35 34" stroke="#e11d48" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-                                        <!-- Tie -->
-                                        <polygon points="32,42 29,56 35,56" fill="#f43f5e"/>
-                                    </svg>
-                                </div>
-                                <h2 class="welcome-title">@lang('dashboard.welcome_back', ['name' => Auth::user()?->name ?? 'Mathew Anderson'])</h2>
-                            </div>
-                            <div class="welcome-metrics">
-                                <div class="metric-item">
-                                    <div class="metric-value-row">
-                                        <span class="metric-val">$2,340</span>
-                                        <span class="arrow-up-teal">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#13deb9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="7" y1="17" x2="17" y2="7"></line>
-                                                <polyline points="7 7 17 7 17 17"></polyline>
-                                            </svg>
-                                        </span>
-                                    </div>
-                                    <span class="metric-label">@lang('dashboard.todays_sales')</span>
-                                </div>
-                                <div class="metric-item">
-                                    <div class="metric-value-row">
-                                        <span class="metric-val">35%</span>
-                                        <span class="arrow-up-teal">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#13deb9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="7" y1="17" x2="17" y2="7"></line>
-                                                <polyline points="7 7 17 7 17 17"></polyline>
-                                            </svg>
-                                        </span>
-                                    </div>
-                                    <span class="metric-label">@lang('dashboard.performance')</span>
-                                </div>
-                            </div>
-                        </div>
-                        <img src="{{ asset('admin-public/logo/welcome-bg2.webp') }}" class="welcome-illustration" alt="{{ __('dashboard.welcome_illustration') }}">
-                    </div>
-
-                    <!-- 2. Expense Card -->
+                    <!-- 4. Orders (Total Price) Card -->
                     <div class="dash-card top-mini-card">
-                        <div>
-                            <h3 class="top-mini-amount">$10,230</h3>
-                            <p class="top-mini-label">@lang('dashboard.expense')</p>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 class="top-mini-amount">${{ number_format($totalOrderPrice ?? 0, 2) }}</h3>
+                                <p class="top-mini-label">@lang('dashboard.orders_total_price')</p>
+                            </div>
+                            <div class="grid-icon-box teal">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="donut-chart-box">
-                            <div id="chart-expense-donut" style="width: 100%;"></div>
+                        <div style="margin-top: 14px;">
+                            <span class="badge-subtle badge-teal-subtle">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                </svg>
+                                <span>@lang('dashboard.total_sales')</span>
+                            </span>
                         </div>
                     </div>
 
-                    <!-- 3. Sales Card -->
+                    <!-- 5. Order Pending (Count) Card -->
                     <div class="dash-card top-mini-card">
-                        <div>
-                            <h3 class="top-mini-amount">$65,432</h3>
-                            <p class="top-mini-label">@lang('dashboard.sales')</p>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 class="top-mini-amount">{{ number_format($pendingOrderCount ?? 0) }}</h3>
+                                <p class="top-mini-label">@lang('dashboard.orders_pending')</p>
+                            </div>
+                            <div class="grid-icon-box orange">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
                         </div>
-                        <div class="bar-chart-box">
-                            <div class="mini-pill-bar" style="height: 35%;"></div>
-                            <div class="mini-pill-bar" style="height: 75%;"></div>
-                            <div class="mini-pill-bar" style="height: 55%;"></div>
-                            <div class="mini-pill-bar" style="height: 85%;"></div>
-                            <div class="mini-pill-bar" style="height: 60%;"></div>
-                            <div class="mini-pill-bar" style="height: 75%;"></div>
+                        <div style="margin-top: 14px;">
+                            <span class="badge-subtle badge-orange-subtle">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <span>@lang('dashboard.pending')</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 6. Order Remaining Amount Card -->
+                    <div class="dash-card top-mini-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 class="top-mini-amount">${{ number_format($totalOrderRemainingAmount ?? 0, 2) }}</h3>
+                                <p class="top-mini-label">@lang('dashboard.orders_remaining_amount')</p>
+                            </div>
+                            <div class="grid-icon-box coral">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                                    <line x1="7" y1="15" x2="7.01" y2="15"></line>
+                                    <line x1="11" y1="15" x2="13" y2="15"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <div style="margin-top: 14px;">
+                            <a href="{{ Route::has('admin-remaining-amount-list') ? route('admin-remaining-amount-list', 'all') : 'javascript:void(0);' }}" class="badge-subtle badge-coral-subtle" style="text-decoration: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <span>{{ isset($remainingOrderCount) && $remainingOrderCount > 0 ? __('dashboard.remaining_orders', ['count' => $remainingOrderCount]) : __('dashboard.remaining') }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 7. Products (Count) Card -->
+                    <div class="dash-card top-mini-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 class="top-mini-amount">{{ number_format($totalProductCount ?? ($totalProductsCount ?? 0)) }}</h3>
+                                <p class="top-mini-label">@lang('dashboard.products_count')</p>
+                            </div>
+                            <div class="grid-icon-box purple">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <div style="margin-top: 14px;">
+                            <a href="{{ Route::has('admin-product-list') ? route('admin-product-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-purple-subtle" style="text-decoration: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>{{ isset($activeProductCount) && $activeProductCount > 0 ? __('dashboard.active_products', ['count' => $activeProductCount]) : __('dashboard.active') }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 8. Customer (Count) Card -->
+                    <div class="dash-card top-mini-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 class="top-mini-amount">{{ number_format($totalCustomerCount ?? ($totalCustomersCount ?? 0)) }}</h3>
+                                <p class="top-mini-label">@lang('dashboard.customers_count')</p>
+                            </div>
+                            <div class="grid-icon-box cyan">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div style="margin-top: 14px;">
+                            <a href="{{ Route::has('admin-customer-list') ? route('admin-customer-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-cyan-subtle" style="text-decoration: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>{{ isset($activeCustomerCount) && $activeCustomerCount > 0 ? __('dashboard.active_customers', ['count' => $activeCustomerCount]) : __('dashboard.active') }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 9. Staff (Count) Card -->
+                    <div class="dash-card top-mini-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 class="top-mini-amount">{{ number_format($totalStaffCount ?? 0) }}</h3>
+                                <p class="top-mini-label">@lang('dashboard.staff_count')</p>
+                            </div>
+                            <div class="grid-icon-box emerald">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <polyline points="16 11 18 13 22 9"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div style="margin-top: 14px;">
+                            <a href="{{ Route::has('admin-staff-list') ? route('admin-staff-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-emerald-subtle" style="text-decoration: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>{{ isset($activeStaffCount) && $activeStaffCount > 0 ? __('dashboard.active_staff', ['count' => $activeStaffCount]) : __('dashboard.active') }}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- 10. User (Count) Card -->
+                    <div class="dash-card top-mini-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h3 class="top-mini-amount">{{ number_format($totalUserCount ?? 0) }}</h3>
+                                <p class="top-mini-label">@lang('dashboard.user_count')</p>
+                            </div>
+                            <div class="grid-icon-box indigo">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                        <div style="margin-top: 14px;">
+                            <a href="{{ Route::has('admin-user-list') ? route('admin-user-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-indigo-subtle" style="text-decoration: none;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>{{ isset($activeUserCount) && $activeUserCount > 0 ? __('dashboard.active_users', ['count' => $activeUserCount]) : __('dashboard.active') }}</span>
+                            </a>
                         </div>
                     </div>
 
@@ -847,7 +1273,7 @@
                 <div class="dash-grid-row dash-grid-row-2">
 
                     <!-- 4. Revenue Updates -->
-                    <div class="dash-card">
+                    <!-- <div class="dash-card">
                         <div class="revenue-header-row">
                             <div>
                                 <h3 class="dash-card-title">@lang('dashboard.revenue_updates')</h3>
@@ -865,10 +1291,10 @@
                             </div>
                         </div>
                         <div id="chart-revenue-updates" style="min-height: 250px;"></div>
-                    </div>
+                    </div> -->
 
                     <!-- 5. Sales Overview -->
-                    <div class="dash-card">
+                    <!-- <div class="dash-card">
                         <h3 class="dash-card-title">@lang('dashboard.sales_overview')</h3>
                         <p class="dash-card-subtitle">@lang('dashboard.every_month')</p>
                         
@@ -880,7 +1306,6 @@
                         <div class="card-dual-stats">
                             <div class="dual-stat-item">
                                 <div class="grid-icon-box blue">
-                                    <!-- 3x3 Dots Grid SVG -->
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                         <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
                                         <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
@@ -906,95 +1331,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- 6, 7, 8. Right Column Group (Mini Cards + Monthly Earnings) -->
-                    <div class="right-column-group">
-                        <!-- Mini cards pair -->
-                        <div class="mini-cards-pair">
-                            <!-- Mini Card 1: Sales -->
-                            <div class="mini-stat-card">
-                                <div class="mini-stat-top">
-                                    <div class="grid-icon-box blue">
-                                        <!-- Shopping Cart SVG -->
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="dots-row" style="margin-bottom: 8px;">
-                                        <span></span><span></span><span></span><span></span>
-                                    </div>
-                                    <h4 class="mini-stat-val">
-                                        $16.5k 
-                                        <span class="arrow-up-teal" style="margin-left: 2px;">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#13deb9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="7" y1="17" x2="17" y2="7"></line>
-                                                <polyline points="7 7 17 7 17 17"></polyline>
-                                            </svg>
-                                        </span>
-                                    </h4>
-                                    <p class="mini-stat-label">@lang('dashboard.sales')</p>
-                                </div>
-                            </div>
-
-                            <!-- Mini Card 2: Growth -->
-                            <div class="mini-stat-card">
-                                <div class="mini-stat-top">
-                                    <div class="grid-icon-box cyan">
-                                        <!-- Bar Chart Analytics SVG -->
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style="height: 16px; margin-bottom: 6px;">
-                                        <svg viewBox="0 0 60 16" width="60" height="16" fill="none">
-                                            <path d="M0 10 Q 15 4, 30 9 T 60 4" stroke="#49BEFF" stroke-width="2" stroke-linecap="round"/>
-                                        </svg>
-                                    </div>
-                                    <h4 class="mini-stat-val">
-                                        24% 
-                                        <span class="arrow-up-teal" style="margin-left: 2px;">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#13deb9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                <line x1="7" y1="17" x2="17" y2="7"></line>
-                                                <polyline points="7 7 17 7 17 17"></polyline>
-                                            </svg>
-                                        </span>
-                                    </h4>
-                                    <p class="mini-stat-label">@lang('dashboard.growth')</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Monthly Earnings Card -->
-                        <div class="dash-card monthly-earnings-card">
-                            <div>
-                                <div class="monthly-header-row">
-                                    <h3 class="dash-card-title">@lang('dashboard.monthly_earnings')</h3>
-                                    <div class="capsule-toggle">
-                                        <div class="toggle-circle"></div>
-                                    </div>
-                                </div>
-                                <div class="earnings-val-row">
-                                    <span class="earnings-val">$6,820</span>
-                                    <span class="earnings-growth">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#13deb9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="7" y1="17" x2="17" y2="7"></line>
-                                            <polyline points="7 7 17 7 17 17"></polyline>
-                                        </svg>
-                                        +9%
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="earnings-bottom-chart">
-                                <div id="chart-monthly-earnings" style="width: 100%; height: 100%;"></div>
-                            </div>
-                        </div>
-                    </div>
+                    </div> --> 
 
                 </div>
 
@@ -1004,73 +1341,88 @@
                     <!-- 9. Weekly Stats -->
                     <div class="dash-card">
                         <h3 class="dash-card-title">@lang('dashboard.weekly_stats')</h3>
-                        <p class="dash-card-subtitle">@lang('dashboard.average_sales')</p>
+                        <p class="dash-card-subtitle">
+                            @lang('dashboard.average_sales'): <strong style="color: var(--text-dark); font-weight: 700;">{{ $weeklyStats['average_sales_formatted'] ?? '$0.00' }}</strong>
+                        </p>
                         
                         <div style="margin: 5px -10px 10px -10px;">
                             <div id="chart-weekly-stats" style="width: 100%; height: 130px;"></div>
                         </div>
 
                         <div class="weekly-items-list">
-                            <!-- Item 1 -->
+                            <!-- Item 1: Top Sales -->
                             <div class="weekly-item-row">
-                                <div class="item-left-info">
-                                    <div class="grid-icon-box blue">
+                                <div class="item-left-info" style="min-width: 0; flex: 1;">
+                                    <div class="grid-icon-box blue" style="flex-shrink: 0;">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                             <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
                                             <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
                                             <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
                                         </svg>
                                     </div>
-                                    <div>
+                                    <div style="min-width: 0; overflow: hidden;">
                                         <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.top_sales')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Johnathan Doe</p>
+                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $weeklyStats['top_sales']['name'] ?? '---' }}">{{ $weeklyStats['top_sales']['name'] ?? '---' }}</p>
                                     </div>
                                 </div>
-                                <span class="item-badge-pill badge-blue">+68</span>
+                                <span class="item-badge-pill badge-blue" style="flex-shrink: 0; margin-left: 8px;">{{ $weeklyStats['top_sales']['badge'] ?? '+0' }}</span>
                             </div>
 
-                            <!-- Item 2 -->
+                            <!-- Item 2: Best Seller -->
                             <div class="weekly-item-row">
-                                <div class="item-left-info">
-                                    <div class="grid-icon-box teal">
+                                <div class="item-left-info" style="min-width: 0; flex: 1;">
+                                    <div class="grid-icon-box teal" style="flex-shrink: 0;">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                             <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
                                             <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
                                             <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
                                         </svg>
                                     </div>
-                                    <div>
+                                    <div style="min-width: 0; overflow: hidden;">
                                         <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.best_seller')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">@lang('dashboard.footware')</p>
+                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $weeklyStats['best_seller']['name'] ?? '---' }}">{{ $weeklyStats['best_seller']['name'] ?? '---' }}</p>
                                     </div>
                                 </div>
-                                <span class="item-badge-pill badge-teal">+45</span>
+                                <span class="item-badge-pill badge-teal" style="flex-shrink: 0; margin-left: 8px;">{{ $weeklyStats['best_seller']['badge'] ?? '+0' }}</span>
                             </div>
 
-                            <!-- Item 3 -->
+                            <!-- Item 3: Most Commented / Top Category -->
                             <div class="weekly-item-row">
-                                <div class="item-left-info">
-                                    <div class="grid-icon-box orange">
+                                <div class="item-left-info" style="min-width: 0; flex: 1;">
+                                    <div class="grid-icon-box orange" style="flex-shrink: 0;">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                                             <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
                                             <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
                                             <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
                                         </svg>
                                     </div>
-                                    <div>
+                                    <div style="min-width: 0; overflow: hidden;">
                                         <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.most_commented')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">@lang('dashboard.fashionware')</p>
+                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $weeklyStats['most_commented']['name'] ?? '---' }}">{{ $weeklyStats['most_commented']['name'] ?? '---' }}</p>
                                     </div>
                                 </div>
-                                <span class="item-badge-pill badge-orange">+14</span>
+                                <span class="item-badge-pill badge-orange" style="flex-shrink: 0; margin-left: 8px;">{{ $weeklyStats['most_commented']['badge'] ?? '+0' }}</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- 10. Yearly Sales -->
                     <div class="dash-card">
-                        <h3 class="dash-card-title">@lang('dashboard.yearly_sales')</h3>
-                        <p class="dash-card-subtitle">@lang('dashboard.total_sales')</p>
+                        <div class="table-header-flex" style="margin-bottom: 4px;">
+                            <div>
+                                <h3 class="dash-card-title">@lang('dashboard.yearly_sales')</h3>
+                                <p class="dash-card-subtitle" id="yearly-sales-subtitle">
+                                    @lang('dashboard.total_sales'): <strong id="yearly-sales-total-val" style="color: var(--text-dark); font-weight: 700;">{{ $yearlySalesData['total_sales_formatted'] ?? '$0.00' }}</strong>
+                                </p>
+                            </div>
+                            <select class="select-month-dropdown" id="yearly-sales-year-select" aria-label="@lang('dashboard.yearly_sales')">
+                                @foreach ($yearlySalesAvailableYears ?? [] as $yr)
+                                    <option value="{{ $yr }}" {{ (int)($selectedYearlySalesYear ?? 0) === (int)$yr ? 'selected' : '' }}>
+                                        {{ $yr }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <div id="chart-yearly-sales" style="min-height: 200px; margin: 10px 0;"></div>
 
@@ -1085,7 +1437,7 @@
                                 </div>
                                 <div class="stat-details">
                                     <p style="margin: 0; font-size: 12px; color: var(--text-muted);">@lang('dashboard.salary')</p>
-                                    <h4>$36,358</h4>
+                                    <h4 id="yearly-sales-salary-val">{{ $yearlySalesData['salary_formatted'] ?? '$0.00' }}</h4>
                                 </div>
                             </div>
                             <div class="dual-stat-item">
@@ -1098,85 +1450,10 @@
                                 </div>
                                 <div class="stat-details">
                                     <p style="margin: 0; font-size: 12px; color: var(--text-muted);">@lang('dashboard.expense')</p>
-                                    <h4>$5,296</h4>
+                                    <h4 id="yearly-sales-expense-val">{{ $yearlySalesData['expense_formatted'] ?? '$0.00' }}</h4>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- 11. Payment Gateways -->
-                    <div class="dash-card">
-                        <h3 class="dash-card-title">@lang('dashboard.payment_gateways')</h3>
-                        <p class="dash-card-subtitle">@lang('dashboard.platform_for_income')</p>
-
-                        <div class="gateway-list">
-                            <!-- Paypal -->
-                            <div class="gateway-item">
-                                <div class="item-left-info">
-                                    <div class="gateway-icon-box" style="background-color: var(--primary-blue-light);">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary-blue)">
-                                            <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.8 1.57 1.164.978 1.634 2.457 1.358 4.28-.466 3.09-2.585 5.253-5.753 5.918-.544.114-.99.516-1.077 1.066l-1.037 6.574c-.06.38-.388.657-.773.657h-4.9z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.paypal')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">@lang('dashboard.big_brands')</p>
-                                    </div>
-                                </div>
-                                <span class="gateway-amount">+$6235</span>
-                            </div>
-
-                            <!-- Wallet -->
-                            <div class="gateway-item">
-                                <div class="item-left-info">
-                                    <div class="gateway-icon-box" style="background-color: var(--primary-teal-light);">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 10h20"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.wallet')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">@lang('dashboard.bill_payment')</p>
-                                    </div>
-                                </div>
-                                <span class="gateway-amount">-$345</span>
-                            </div>
-
-                            <!-- Credit Card -->
-                            <div class="gateway-item">
-                                <div class="item-left-info">
-                                    <div class="gateway-icon-box" style="background-color: var(--primary-orange-light);">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary-orange)">
-                                            <circle cx="9" cy="12" r="5" fill-opacity="0.8"/>
-                                            <circle cx="15" cy="12" r="5" fill-opacity="0.6"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.credit_card')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">@lang('dashboard.money_reversed')</p>
-                                    </div>
-                                </div>
-                                <span class="gateway-amount">+$2235</span>
-                            </div>
-
-                            <!-- Refund -->
-                            <div class="gateway-item">
-                                <div class="item-left-info">
-                                    <div class="gateway-icon-box" style="background-color: var(--primary-coral-light);">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary-coral)">
-                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8v8h8c0 4.41-3.59 8-8 8z"/>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.refund')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">@lang('dashboard.bill_payment')</p>
-                                    </div>
-                                </div>
-                                <span class="gateway-amount">-$32</span>
-                            </div>
-                        </div>
-
-                        <button class="btn-view-all">@lang('dashboard.view_all_transactions')</button>
                     </div>
 
                 </div>
@@ -1186,80 +1463,136 @@
 
                     <!-- 12. Recent Transactions -->
                     <div class="dash-card">
-                        <h3 class="dash-card-title">@lang('dashboard.recent_transactions')</h3>
+                        <div class="table-header-flex" style="margin-bottom: 8px;">
+                            <h3 class="dash-card-title">@lang('dashboard.recent_transactions')</h3>
+                            @if (Route::has('admin-order-list'))
+                                <a href="{{ route('admin-order-list') }}" class="timeline-view-all-link" title="@lang('dashboard.view_all_transactions')">
+                                    <span>@lang('dashboard.view_all_transactions')</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </a>
+                            @endif
+                        </div>
 
                         <div class="timeline-container">
-                            <!-- Item 1 -->
-                            <div class="timeline-row">
-                                <div class="timeline-time">09:30 am</div>
-                                <div class="timeline-indicator">
-                                    <div class="timeline-circle circle-blue"></div>
-                                    <div class="timeline-line"></div>
-                                </div>
-                                <div class="timeline-content">
-                                    {{ __('dashboard.payment_received_from', ['name' => 'John Doe', 'amount' => '$385.90']) }}
-                                </div>
-                            </div>
+                            @forelse ($recentTransactions ?? [] as $tx)
+                                @php
+                                    $createdCarbon = $tx->created_at ? \Carbon\Carbon::parse($tx->created_at) : null;
+                                    $orderCarbon = $tx->order_date ? \Carbon\Carbon::parse($tx->order_date) : null;
 
-                            <!-- Item 2 -->
-                            <div class="timeline-row">
-                                <div class="timeline-time">10:00 am</div>
-                                <div class="timeline-indicator">
-                                    <div class="timeline-circle circle-cyan"></div>
-                                    <div class="timeline-line"></div>
-                                </div>
-                                <div class="timeline-content">
-                                    @lang('dashboard.new_sale_recorded') <a href="javascript:void(0)" class="timeline-link">#ML-3467</a>
-                                </div>
-                            </div>
+                                    // Detect if created_at or order_date has real hour/minute
+                                    $hasCreatedTime = $createdCarbon && $createdCarbon->format('H:i') !== '00:00';
+                                    $hasOrderTime = $orderCarbon && $orderCarbon->format('H:i') !== '00:00';
 
-                            <!-- Item 3 -->
-                            <div class="timeline-row">
-                                <div class="timeline-time">12:00 am</div>
-                                <div class="timeline-indicator">
-                                    <div class="timeline-circle circle-teal"></div>
-                                    <div class="timeline-line"></div>
-                                </div>
-                                <div class="timeline-content">
-                                    {{ __('dashboard.payment_made_to', ['amount' => '$64.95', 'name' => 'Michael']) }}
-                                </div>
-                            </div>
+                                    $timeObj = null;
+                                    if ($hasCreatedTime) {
+                                        $timeObj = $createdCarbon;
+                                    } elseif ($hasOrderTime) {
+                                        $timeObj = $orderCarbon;
+                                    }
 
-                            <!-- Item 4 -->
-                            <div class="timeline-row">
-                                <div class="timeline-time">09:30 am</div>
-                                <div class="timeline-indicator">
-                                    <div class="timeline-circle circle-orange"></div>
-                                    <div class="timeline-line"></div>
-                                </div>
-                                <div class="timeline-content">
-                                    @lang('dashboard.new_sale_recorded') <a href="javascript:void(0)" class="timeline-link">#ML-3467</a>
-                                </div>
-                            </div>
+                                    $dateObj = $orderCarbon ?: $createdCarbon;
+                                    $isToday = $dateObj ? $dateObj->isToday() : false;
 
-                            <!-- Item 5 -->
-                            <div class="timeline-row">
-                                <div class="timeline-time">09:30 am</div>
-                                <div class="timeline-indicator">
-                                    <div class="timeline-circle circle-coral"></div>
-                                    <div class="timeline-line"></div>
-                                </div>
-                                <div class="timeline-content">
-                                    @lang('dashboard.new_arrival_recorded') <a href="javascript:void(0)" class="timeline-link">#ML-3467</a>
-                                </div>
-                            </div>
+                                    if ($timeObj) {
+                                        $timeFormatted = $timeObj->format('h:i a');
+                                        $dateFormatted = $isToday ? __('dashboard.today') : ($dateObj ? $dateObj->format('d M') : '');
+                                    } else {
+                                        // Avoid showing repetitive 12:00 am when only date was recorded
+                                        $timeFormatted = $dateObj ? ($isToday ? __('dashboard.today') : $dateObj->format('d M')) : '--';
+                                        $dateFormatted = $dateObj ? $dateObj->format('Y') : '';
+                                    }
 
-                            <!-- Item 6 -->
-                            <div class="timeline-row">
-                                <div class="timeline-time">12:00 am</div>
-                                <div class="timeline-indicator">
-                                    <div class="timeline-circle circle-teal"></div>
-                                    <div class="timeline-line"></div>
+                                    $status = $tx->payment_status ?: 'Pending';
+                                    $circleColor = match ($status) {
+                                        'Paid' => 'circle-teal',
+                                        'Partial' => 'circle-cyan',
+                                        'Cancel' => 'circle-coral',
+                                        default => 'circle-orange',
+                                    };
+
+                                    $statusBadgeClass = match ($status) {
+                                        'Paid' => 'status-badge-paid',
+                                        'Partial' => 'status-badge-partial',
+                                        'Cancel' => 'status-badge-cancel',
+                                        default => 'status-badge-pending',
+                                    };
+
+                                    $statusLabel = match ($status) {
+                                        'Paid' => __('dashboard.paid'),
+                                        'Partial' => __('dashboard.partial'),
+                                        'Cancel' => __('dashboard.cancel'),
+                                        default => __('dashboard.pending'),
+                                    };
+
+                                    $rawCustomer = $tx->customer?->name ?: ($tx->customer?->phone ?: null);
+                                    $customerDisplay = $rawCustomer ?: __('dashboard.walk_in_customer');
+                                    $invoiceNumber = $tx->invoice_number ? '#' . $tx->invoice_number : '#' . $tx->id;
+                                    $orderUrl = Route::has('admin-order-detail') ? route('admin-order-detail', $tx->id) : (Route::has('admin-order-edit') ? route('admin-order-edit', $tx->id) : '#');
+                                @endphp
+                                <div class="timeline-row">
+                                    <div class="timeline-time-col">
+                                        <span class="timeline-time">{{ $timeFormatted }}</span>
+                                        @if ($dateFormatted)
+                                            <span class="timeline-date-sub">{{ $dateFormatted }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="timeline-indicator">
+                                        <div class="timeline-circle {{ $circleColor }}"></div>
+                                        <div class="timeline-line"></div>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-title-row">
+                                            @if ($status === 'Paid')
+                                                {!! __('dashboard.payment_received_from', [
+                                                    'name' => '<span class="tx-name">' . e($customerDisplay) . '</span>',
+                                                    'amount' => '<span class="tx-amount tx-amount-paid">$' . number_format($tx->total_price, 2) . '</span>'
+                                                ]) !!}
+                                            @elseif ($status === 'Partial')
+                                                {!! __('dashboard.partial_payment_from', [
+                                                    'name' => '<span class="tx-name">' . e($customerDisplay) . '</span>',
+                                                    'amount' => '<span class="tx-amount tx-amount-partial">$' . number_format($tx->paid_amount, 2) . '</span>'
+                                                ]) !!}
+                                            @elseif ($status === 'Cancel')
+                                                @lang('dashboard.order_cancelled') - <span class="tx-amount tx-amount-cancel">${{ number_format($tx->total_price, 2) }}</span>
+                                            @else
+                                                @lang('dashboard.new_sale_recorded')
+                                                @if ($rawCustomer)
+                                                    - <span class="tx-name">{{ $rawCustomer }}</span>
+                                                @endif
+                                                - <span class="tx-amount">${{ number_format($tx->total_price, 2) }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="timeline-meta-bar">
+                                            <a href="{{ $orderUrl }}" class="timeline-order-pill">
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                </svg>
+                                                {{ $invoiceNumber }}
+                                            </a>
+                                            <span class="timeline-status-badge {{ $statusBadgeClass }}">{{ $statusLabel }}</span>
+                                            @if (!empty($tx->shop?->name))
+                                                <span class="timeline-shop-tag">&bull; {{ $tx->shop->name }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="timeline-content">
-                                    @lang('dashboard.payment_done')
+                            @empty
+                                <div class="timeline-empty-state">
+                                    <div class="empty-icon-circle">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                    </div>
+                                    <p>@lang('dashboard.no_recent_transactions')</p>
                                 </div>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
 
@@ -1267,10 +1600,13 @@
                     <div class="dash-card">
                         <div class="table-header-flex">
                             <h3 class="dash-card-title">@lang('dashboard.product_performance')</h3>
-                            <select class="select-month-dropdown">
-                                <option>{{ __('dashboard.months.march') }} 2025</option>
-                                <option>{{ __('dashboard.months.february') }} 2025</option>
-                                <option>{{ __('dashboard.months.january') }} 2025</option>
+                            <select class="select-month-dropdown" id="product-performance-month-select">
+                                <option value="all" {{ ($selectedProductMonth ?? 'all') === 'all' ? 'selected' : '' }}>@lang('dashboard.all_time')</option>
+                                @foreach ($productPerformanceMonths ?? [] as $m)
+                                    <option value="{{ $m['value'] }}" {{ ($selectedProductMonth ?? '') === $m['value'] ? 'selected' : '' }}>
+                                        {{ $m['label'] }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -1285,118 +1621,8 @@
                                         <th>@lang('dashboard.table.chart')</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <!-- Product 1 -->
-                                    <tr>
-                                        <td>
-                                            <div class="product-cell">
-                                                <div class="product-thumb yellow">
-                                                    <!-- Game Console Controller Vector -->
-                                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#1E293B">
-                                                        <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 9 18.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-                                                    </svg>
-                                                </div>
-                                                <div class="product-info">
-                                                    <h5>@lang('dashboard.products.gaming_console')</h5>
-                                                    <p>@lang('dashboard.products.electronics')</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>78.5%</td>
-                                        <td>
-                                            <span class="item-badge-pill badge-teal">@lang('dashboard.priority.low')</span>
-                                        </td>
-                                        <td>$3.9k</td>
-                                        <td>
-                                            <svg class="table-sparkline" viewBox="0 0 90 30" fill="none">
-                                                <path d="M2 18 Q 20 2, 45 18 T 88 15" stroke="#5D87FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Product 2 -->
-                                    <tr>
-                                        <td>
-                                            <div class="product-cell">
-                                                <div class="product-thumb mint">
-                                                    <!-- Leather Purse Vector -->
-                                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#F472B6">
-                                                        <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/>
-                                                    </svg>
-                                                </div>
-                                                <div class="product-info">
-                                                    <h5>@lang('dashboard.products.leather_purse')</h5>
-                                                    <p>@lang('dashboard.products.fashion')</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>58.6%</td>
-                                        <td>
-                                            <span class="item-badge-pill badge-orange">@lang('dashboard.priority.medium')</span>
-                                        </td>
-                                        <td>$3.5k</td>
-                                        <td>
-                                            <svg class="table-sparkline" viewBox="0 0 90 30" fill="none">
-                                                <path d="M2 15 Q 22 24, 45 12 T 88 16" stroke="#CBD5E1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Product 3 -->
-                                    <tr>
-                                        <td>
-                                            <div class="product-cell">
-                                                <div class="product-thumb gray">
-                                                    <!-- Red Dress Vector -->
-                                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#EF4444">
-                                                        <path d="M12 2l-2 3-3 1 2 6-2 10h10l-2-10 2-6-3-1z"/>
-                                                    </svg>
-                                                </div>
-                                                <div class="product-info">
-                                                    <h5>@lang('dashboard.products.red_velvate_dress')</h5>
-                                                    <p>@lang('dashboard.products.womens_fashion')</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>25%</td>
-                                        <td>
-                                            <span class="item-badge-pill badge-blue">@lang('dashboard.priority.very_high')</span>
-                                        </td>
-                                        <td>$3.5k</td>
-                                        <td>
-                                            <svg class="table-sparkline" viewBox="0 0 90 30" fill="none">
-                                                <path d="M2 18 Q 20 2, 45 18 T 88 15" stroke="#5D87FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Product 4 -->
-                                    <tr>
-                                        <td>
-                                            <div class="product-cell">
-                                                <div class="product-thumb pink">
-                                                    <!-- Headphones Boat Vector -->
-                                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="#FB7185">
-                                                        <path d="M12 3a9 9 0 0 0-9 9v7c0 1.1.9 2 2 2h2a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1H5v-2a7 7 0 0 1 14 0v2h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h2c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z"/>
-                                                    </svg>
-                                                </div>
-                                                <div class="product-info">
-                                                    <h5>@lang('dashboard.products.headphone_boat')</h5>
-                                                    <p>@lang('dashboard.products.electronics')</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>96.3%</td>
-                                        <td>
-                                            <span class="item-badge-pill badge-coral">@lang('dashboard.priority.high')</span>
-                                        </td>
-                                        <td>$3.5k</td>
-                                        <td>
-                                            <svg class="table-sparkline" viewBox="0 0 90 30" fill="none">
-                                                <path d="M2 15 Q 22 24, 45 12 T 88 16" stroke="#CBD5E1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                        </td>
-                                    </tr>
+                                <tbody id="product-performance-tbody">
+                                    @include('admin::pages.dashboard_product_performance_rows')
                                 </tbody>
                             </table>
                         </div>
@@ -1588,11 +1814,14 @@
             }
 
             // 5. Weekly Stats Spline Chart
+            var weeklyStatsData = {!! json_encode($weeklyStats['chart_data'] ?? [0, 0, 0, 0, 0, 0, 0]) !!};
+            var weeklyStatsCategories = {!! json_encode($weeklyStats['chart_categories'] ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) !!};
             var weeklyStatsOptions = {
                 series: [{
                     name: @json(__('dashboard.sales')),
-                    data: [10, 28, 48, 22, 18, 30, 35, 20]
+                    data: weeklyStatsData
                 }],
+                labels: weeklyStatsCategories,
                 chart: {
                     type: 'area',
                     height: 125,
@@ -1614,8 +1843,20 @@
                     }
                 },
                 colors: ['#5D87FF'],
+                yaxis: {
+                    min: 0,
+                    show: false
+                },
                 tooltip: {
-                    theme: 'dark'
+                    theme: 'dark',
+                    x: {
+                        show: true
+                    },
+                    y: {
+                        formatter: function (val) {
+                            return '$' + Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                    }
                 }
             };
             if (document.querySelector("#chart-weekly-stats")) {
@@ -1623,18 +1864,12 @@
                 weeklyChart.render();
             }
 
-            // 6. Yearly Sales Column Chart (June highlighted)
+            // 6. Yearly Sales Column Chart
+            var yearlySalesData = @json($yearlySalesData['chart_data'] ?? []);
             var yearlySalesOptions = {
                 series: [{
                     name: @json(__('dashboard.sales')),
-                    data: [
-                        { x: @json(__('dashboard.months_short.apr')), y: 40, fillColor: '#F1F4F9' },
-                        { x: @json(__('dashboard.months_short.may')), y: 55, fillColor: '#F1F4F9' },
-                        { x: @json(__('dashboard.months_short.june')), y: 100, fillColor: '#5D87FF' },
-                        { x: @json(__('dashboard.months_short.july')), y: 35, fillColor: '#F1F4F9' },
-                        { x: @json(__('dashboard.months_short.aug')), y: 45, fillColor: '#F1F4F9' },
-                        { x: @json(__('dashboard.months_short.sept')), y: 60, fillColor: '#F1F4F9' }
-                    ]
+                    data: yearlySalesData
                 }],
                 chart: {
                     type: 'bar',
@@ -1644,8 +1879,8 @@
                 },
                 plotOptions: {
                     bar: {
-                        borderRadius: 5,
-                        columnWidth: '24%',
+                        borderRadius: 4,
+                        columnWidth: '38%',
                         distributed: false
                     }
                 },
@@ -1656,16 +1891,107 @@
                     axisBorder: { show: false },
                     axisTicks: { show: false },
                     labels: {
-                        style: { colors: '#7C8FAC', fontSize: '12px' }
+                        style: { colors: '#7C8FAC', fontSize: '11px' }
                     }
                 },
                 tooltip: {
-                    theme: 'dark'
+                    theme: 'dark',
+                    y: {
+                        formatter: function (val) {
+                            return '$' + Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        }
+                    }
                 }
             };
             if (document.querySelector("#chart-yearly-sales")) {
                 var yearlyChart = new ApexCharts(document.querySelector("#chart-yearly-sales"), yearlySalesOptions);
                 yearlyChart.render();
+            }
+
+            // Yearly Sales Year Filter (AJAX)
+            var yearlySalesYearSelect = document.getElementById('yearly-sales-year-select');
+            var chartYearlyEl = document.querySelector("#chart-yearly-sales");
+            if (yearlySalesYearSelect && yearlyChart) {
+                yearlySalesYearSelect.addEventListener('change', function () {
+                    var selectedYear = this.value;
+                    if (chartYearlyEl) {
+                        chartYearlyEl.style.opacity = '0.4';
+                        chartYearlyEl.style.transition = 'opacity 0.2s ease';
+                    }
+
+                    fetch(`{{ route('admin-dashboard') }}?yearly_sales_year=${encodeURIComponent(selectedYear)}&ajax=yearly_sales`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('Network error');
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (data && data.status === 'success') {
+                            var totalValEl = document.getElementById('yearly-sales-total-val');
+                            if (totalValEl && data.total_sales_formatted) {
+                                totalValEl.textContent = data.total_sales_formatted;
+                            }
+                            var salaryValEl = document.getElementById('yearly-sales-salary-val');
+                            if (salaryValEl && data.salary_formatted) {
+                                salaryValEl.textContent = data.salary_formatted;
+                            }
+                            var expenseValEl = document.getElementById('yearly-sales-expense-val');
+                            if (expenseValEl && data.expense_formatted) {
+                                expenseValEl.textContent = data.expense_formatted;
+                            }
+                            yearlyChart.updateSeries([{
+                                name: @json(__('dashboard.sales')),
+                                data: data.chart_data || []
+                            }]);
+                        }
+                        if (chartYearlyEl) {
+                            chartYearlyEl.style.opacity = '1';
+                        }
+                    })
+                    .catch(function (err) {
+                        console.error('Error fetching yearly sales:', err);
+                        if (chartYearlyEl) {
+                            chartYearlyEl.style.opacity = '1';
+                        }
+                    });
+                });
+            }
+
+            // 7. Product Performance Month Filter (AJAX)
+            var productMonthSelect = document.getElementById('product-performance-month-select');
+            var productTbody = document.getElementById('product-performance-tbody');
+            if (productMonthSelect && productTbody) {
+                productMonthSelect.addEventListener('change', function () {
+                    var selectedMonth = this.value;
+                    productTbody.style.opacity = '0.35';
+                    productTbody.style.pointerEvents = 'none';
+                    productTbody.style.transition = 'opacity 0.2s ease';
+
+                    fetch(`{{ route('admin-dashboard') }}?product_month=${encodeURIComponent(selectedMonth)}&ajax=product_performance`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(function (response) {
+                        if (!response.ok) throw new Error('Network error');
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (data && typeof data.html === 'string') {
+                            productTbody.innerHTML = data.html;
+                        }
+                        productTbody.style.opacity = '1';
+                        productTbody.style.pointerEvents = '';
+                    })
+                    .catch(function (err) {
+                        console.error('Error fetching product performance:', err);
+                        productTbody.style.opacity = '1';
+                        productTbody.style.pointerEvents = '';
+                    });
+                });
             }
 
         });

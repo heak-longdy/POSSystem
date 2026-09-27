@@ -25,10 +25,11 @@ class Barber extends Authenticatable
         }
         return null;
     }
-    public function booking()
+    public function orders()
     {
-        return $this->hasMany(Booking::class, 'barber_id', 'id');
+        return $this->hasMany(Order::class, 'barber_id', 'id');
     }
+
     public function shop()
     {
         return $this->belongsTo(Shop::class, 'shop_id');

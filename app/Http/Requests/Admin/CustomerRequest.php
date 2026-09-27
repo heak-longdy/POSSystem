@@ -26,13 +26,10 @@ class CustomerRequest extends FormRequest
     {
         return [
             'name'       => 'required|string|max:255',
-            // 'ordering'   => 'nullable|integer',
-            // 'phone'      => 'nullable|string|max:20',
-            // 'address'    => 'nullable|string|max:255',
-            // 'profile'    => 'nullable|string|max:255',
-            // 'password'   => 'required|string|min:6|confirmed',
-            // 'status'     => 'required|boolean',
-            // 'total_point'=> 'nullable|integer|min:0',
+            'phone'      => 'required|string|max:50',
+            'address'    => 'nullable|string|max:500',
+            'profile'    => 'nullable|string|max:255',
+            'status'     => 'required|in:1,2',
         ];
     }
     public function messages()
@@ -40,12 +37,10 @@ class CustomerRequest extends FormRequest
         return [
             'name.required'        => __('customer.validation.name_required'),
             'name.max'             => __('customer.validation.name_max'),
-            'password.required'    => __('customer.validation.password_required'),
-            'password.min'         => __('customer.validation.password_min'),
-            'password.confirmed'   => __('customer.validation.password_confirmed'),
+            'phone.required'       => __('customer.validation.phone_required'),
+            'phone.max'            => __('customer.validation.phone_max'),
             'status.required'      => __('customer.validation.status_required'),
-            'status.boolean'       => __('customer.validation.status_boolean'),
-            // Add more messages as needed
+            'status.in'            => __('customer.validation.status_invalid'),
         ];
     }
 }

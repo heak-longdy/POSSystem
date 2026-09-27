@@ -16,7 +16,8 @@ class Customer extends Model
     public function getImageUrlAttribute()
     {
         if ($this->profile != null) {
-            return url('file_manager' . $this->profile);
+            $path = str_starts_with($this->profile, '/') ? $this->profile : '/' . $this->profile;
+            return url('file_manager' . $path);
         }
         return null;
     }
@@ -24,4 +25,9 @@ class Customer extends Model
         'created_at',
         'updated_at'
     ];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id', 'id');
+    }
 }

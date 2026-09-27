@@ -11,12 +11,13 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ShopController;
 
-use App\Http\Controllers\Admin\BookingController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\RemainingAmountController;
 
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\InvoiceSettingController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CustomerPaidController;
@@ -250,30 +251,30 @@ Route::middleware(['AdminGuard'])
         });
 
 
-        //Bookings
+        // Orders
         Route::group([
-            'prefix' => 'booking',
-            'as'     => 'booking-'
+            'prefix' => 'order',
+            'as'     => 'order-'
         ], function () {
-            Route::get('list/{status?}', [BookingController::class, 'index'])->name('list');
-            Route::get('create', [BookingController::class, 'onCreate'])->name('create');
-            Route::match(['get', 'post'], 'status/{id}/{status}', [BookingController::class, 'updateStatus'])->name('status');
-            Route::get('list-product/{status?}', [BookingController::class, 'product'])->name('list-product');
-            Route::get('edit/{id?}', [BookingController::class, 'onEdit'])->name('edit');
-            Route::get('detail/{id}', [BookingController::class, 'show'])->name('detail');
-            Route::post('save/{id?}', [BookingController::class, 'Save'])->name('save');
-            Route::post('delete/{id}', [BookingController::class, 'delete'])->name('delete');
-            Route::post('restore/{id}', [BookingController::class, 'restore'])->name('restore');
-            Route::post('destroy/{id}', [BookingController::class, 'destroy'])->name('destroy');
+            Route::get('list/{status?}', [OrderController::class, 'index'])->name('list');
+            Route::get('create', [OrderController::class, 'onCreate'])->name('create');
+            Route::match(['get', 'post'], 'status/{id}/{status}', [OrderController::class, 'updateStatus'])->name('status');
+            Route::get('list-product/{status?}', [OrderController::class, 'product'])->name('list-product');
+            Route::get('edit/{id?}', [OrderController::class, 'onEdit'])->name('edit');
+            Route::get('detail/{id}', [OrderController::class, 'show'])->name('detail');
+            Route::post('save/{id?}', [OrderController::class, 'Save'])->name('save');
+            Route::post('delete/{id}', [OrderController::class, 'delete'])->name('delete');
+            Route::post('restore/{id}', [OrderController::class, 'restore'])->name('restore');
+            Route::post('destroy/{id}', [OrderController::class, 'destroy'])->name('destroy');
 
-            Route::get('report', [BookingController::class, 'report'])->name('report');
-            Route::get('payment-details/{id}', [BookingController::class, 'getPaymentDetails'])->name('payment-details');
-            Route::post('add-payment/{id}', [BookingController::class, 'addPayment'])->name('add-payment');
-            Route::put('update-payment/{paymentId}', [BookingController::class, 'updatePayment'])->name('update-payment');
-            Route::delete('delete-payment/{paymentId}', [BookingController::class, 'deletePayment'])->name('delete-payment');
-            Route::post('send-payment-reminder/{id}', [BookingController::class, 'sendPaymentReminder'])->name('send-payment-reminder');
-            Route::post('cancel/{id}', [BookingController::class, 'cancelBooking'])->name('cancel');
-            Route::post('update-payment-status/{id}', [BookingController::class, 'updatePaymentStatus'])->name('update-payment-status');
+            Route::get('report', [OrderController::class, 'report'])->name('report');
+            Route::get('payment-details/{id}', [OrderController::class, 'getPaymentDetails'])->name('payment-details');
+            Route::post('add-payment/{id}', [OrderController::class, 'addPayment'])->name('add-payment');
+            Route::put('update-payment/{paymentId}', [OrderController::class, 'updatePayment'])->name('update-payment');
+            Route::delete('delete-payment/{paymentId}', [OrderController::class, 'deletePayment'])->name('delete-payment');
+            Route::post('send-payment-reminder/{id}', [OrderController::class, 'sendPaymentReminder'])->name('send-payment-reminder');
+            Route::post('cancel/{id}', [OrderController::class, 'cancelOrder'])->name('cancel');
+            Route::post('update-payment-status/{id}', [OrderController::class, 'updatePaymentStatus'])->name('update-payment-status');
         });
 
         // Remaining Amount Management
@@ -299,6 +300,10 @@ Route::middleware(['AdminGuard'])
         ], function () {
             Route::get('/data', [SettingController::class, 'index'])->name('setting');
             Route::post('save/{id?}', [SettingController::class, 'store'])->name('save');
+
+            Route::get('/invoice', [InvoiceSettingController::class, 'index'])->name('invoice-index');
+            Route::post('/invoice/save', [InvoiceSettingController::class, 'save'])->name('invoice-save');
+            Route::post('/invoice/preview', [InvoiceSettingController::class, 'preview'])->name('invoice-preview');
         });
 
         //File Manager

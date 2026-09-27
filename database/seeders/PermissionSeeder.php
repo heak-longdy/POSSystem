@@ -17,6 +17,8 @@ class PermissionSeeder extends Seeder
     public $index = 0;
     public function run()
     {
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
         Schema::disableForeignKeyConstraints();
         if (Schema::hasTable('module_permissions')) {
             ModulePermission::truncate();
@@ -35,7 +37,7 @@ class PermissionSeeder extends Seeder
         $reportExcel = "Report Excel";
 
         $stDashboard =  $this->increaseIndex();
-        $stBooking =  $this->increaseIndex();
+        $stOrder =  $this->increaseIndex();
         $stCustomer =  $this->increaseIndex();
         $stShop =  $this->increaseIndex();
         $stBarber =  $this->increaseIndex();
@@ -92,41 +94,41 @@ class PermissionSeeder extends Seeder
             'module_id' => $dashboard->id,
         ]);
 
-        //Booking
-        $booking = ModulePermission::create([
-            'name' => 'Booking',
-            'parent_id' => $stBooking,
-            'sort_no' => $stBooking,
+        //Order
+        $order = ModulePermission::create([
+            'name' => 'Order',
+            'parent_id' => $stOrder,
+            'sort_no' => $stOrder,
 
         ]);
         Permission::insert([
             [
                 'display_name' => $view,
-                'name' => 'booking-view',
+                'name' => 'order-view',
                 'guard_name' => 'web',
-                'module_id' => $booking->id,
+                'module_id' => $order->id,
             ],
             [
                 'display_name' => $create,
-                'name' => 'booking-create',
+                'name' => 'order-create',
                 'guard_name' => 'web',
-                'module_id' => $booking->id,
+                'module_id' => $order->id,
             ],
             [
                 'display_name' => $edit,
-                'name' => 'booking-update',
+                'name' => 'order-update',
                 'guard_name' => 'web',
-                'module_id' => $booking->id,
+                'module_id' => $order->id,
             ],
             [
                 'display_name' => $delete,
-                'name' => 'booking-delete',
+                'name' => 'order-delete',
                 'guard_name' => 'web',
-                'module_id' => $booking->id,
+                'module_id' => $order->id,
             ],
         ]);
         
-        //end Booking
+        //end Order
 
         //Customer
         $customer = ModulePermission::create([
@@ -926,6 +928,8 @@ class PermissionSeeder extends Seeder
                 'module_id' => $staffExpense->id,
             ],
         ]);
+
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
     public function increaseIndex()
     {

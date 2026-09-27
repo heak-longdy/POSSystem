@@ -15,25 +15,25 @@ class Shop extends Authenticatable
     protected $casts = [
         'product_id' => 'array',
     ];
-    public function booking()
+    public function orders()
     {
         $today = date('Y-m-d');
         $fromDate = request('from_date');
         $toDate = request('to_date');
         $id = request('id');
-        return $this->hasMany(Booking::class, 'shop_id', 'id')
+        return $this->hasMany(Order::class, 'shop_id', 'id')
             ->where(function($q) use ($fromDate, $toDate, $id, $today) {
                 if ($fromDate && $toDate && $id) {
-                    $q->whereDate('booking_date', '>=', $fromDate);
-                    $q->whereDate('booking_date', '<=', $toDate);
+                    $q->whereDate('order_date', '>=', $fromDate);
+                    $q->whereDate('order_date', '<=', $toDate);
                     $q->where('shop_id', (int)$id);
                 } else if ($fromDate && $toDate && !$id) {
-                    $q->whereDate('booking_date', '>=', $fromDate);
-                    $q->whereDate('booking_date', '<=', $toDate);
+                    $q->whereDate('order_date', '>=', $fromDate);
+                    $q->whereDate('order_date', '<=', $toDate);
                 } else if ($id) {
                     $q->where('shop_id', $id);
                 } else {
-                    $q->whereDate('booking_date', $today);
+                    $q->whereDate('order_date', $today);
                 }
             });
     }
@@ -46,13 +46,12 @@ class Shop extends Authenticatable
 
     public function getTotalAmountAttribute()
     {
-        return $this->booking()->sum('total_price');
+        return $this->orders()->sum('total_price');
     }
 
     public function getTotalCommissionAttribute()
     {
-        return $this->booking()->sum('total_commission');
-        return $this->booking()->sum('commission');
+        return $this->orders()->sum('total_commission');
     }
     public function brand()
     {

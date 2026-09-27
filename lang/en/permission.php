@@ -39,7 +39,6 @@ return [
         'setting' => 'Setting',
         'customer' => 'Customer',
         'order' => 'Order',
-        'booking' => 'Booking',
         'exchange-reward' => 'Exchange Reward',
         'package' => 'Package',
         'advertise' => 'Advertise',
@@ -173,13 +172,8 @@ return [
         'order-view' => 'View',
         'order-create' => 'Create',
         'order-update' => 'Update',
+        'order-delete' => 'Delete',
         'order-print' => 'Print',
-        // booking
-        'booking-view' => 'View',
-        'booking-create' => 'Create',
-        'booking-update' => 'Update',
-        'booking-delete' => 'Delete',
-        'booking-print' => 'Print',
         // exchange reward
         'exchange-reward-view' => 'View',
         'exchange-reward-create' => 'Create',

@@ -647,7 +647,7 @@
                         "Barber's Phone Number",
                         "Amount KHR",
                         "Type",
-                        "Pay To Booking ID",
+                        "Pay To Order ID",
                         "Status",
                         "Created At"
                     ];

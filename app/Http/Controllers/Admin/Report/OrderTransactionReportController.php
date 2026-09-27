@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin\Report;
 
 use App\Http\Controllers\Controller;
 use App\Models\Barber;
-use App\Models\Booking;
-use App\Models\BookingDetail;
 use App\Models\Customer;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Models\OrderPayment;
 use App\Models\Shop;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class OrderTransactionReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:report-transaction-view|report-sales-view|booking-view', [
+        $this->middleware('permission:report-transaction-view|report-sales-view|order-view', [
             'only' => ['index', 'daily', 'monthly', 'report', 'details']
         ]);
     }
@@ -50,7 +51,7 @@ class OrderTransactionReportController extends Controller
         $dates = $this->resolveDailyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'daily');
 
-        $baseQuery = $this->buildFilteredBookingQuery($req, $dates['from'], $dates['to']);
+        $baseQuery = $this->buildFilteredOrderQuery($req, $dates['from'], $dates['to']);
 
         // Overall summary statistics for filtered date range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
@@ -88,29 +89,20 @@ class OrderTransactionReportController extends Controller
      */
     public function monthly(Request $req)
     {
-        $grouping = $this->resolveGrouping($req);
         $monthRange = $this->resolveMonthlyDateRange($req);
         $appliedFilters = $this->extractFilters($req, 'monthly');
 
-        $baseQuery = $this->buildFilteredBookingQuery($req, $monthRange['from'], $monthRange['to']);
+        $baseQuery = $this->buildFilteredOrderQuery($req, $monthRange['from'], $monthRange['to']);
 
-        // Overall summary statistics for filtered monthly range
+        // Overall summary statistics for monthly range
         $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
 
-        $rows = null;
-        $ungroupedRows = null;
-
-        if ($grouping === 'grouped') {
-            $rows = $this->aggregateMonthlyTransactions(clone $baseQuery);
-        } else {
-            $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
-        }
-
+        $rows = $this->aggregateMonthlyTransactions(clone $baseQuery);
         $filterOptions = $this->getFilterOptions();
 
         return view($this->layout . 'index', [
             'viewMode' => 'monthly',
-            'grouping' => $grouping,
+            'grouping' => 'grouped',
             'routeName' => $this->routeName,
             'selectedYear' => $monthRange['year'],
             'from_month' => $monthRange['from_month'],
@@ -120,7 +112,7 @@ class OrderTransactionReportController extends Controller
             'filters' => $appliedFilters,
             'summary' => $summary,
             'rows' => $rows,
-            'ungroupedRows' => $ungroupedRows,
+            'ungroupedRows' => null,
             'shops' => $filterOptions['shops'],
             'barbers' => $filterOptions['barbers'],
             'paymentMethods' => $filterOptions['paymentMethods'],
@@ -130,32 +122,40 @@ class OrderTransactionReportController extends Controller
     }
 
     /**
-     * API / JSON endpoint for export and charts
+     * AJAX endpoint to return JSON data (for export, chart updates, dynamic redraws)
      */
     public function report(Request $req)
     {
-        $mode = $req->get('view_mode', 'daily');
+        $viewMode = $req->get('view_mode', 'daily');
         $grouping = $this->resolveGrouping($req);
 
-        if ($mode === 'monthly') {
+        if ($viewMode === 'monthly') {
             $monthRange = $this->resolveMonthlyDateRange($req);
-            $baseQuery = $this->buildFilteredBookingQuery($req, $monthRange['from'], $monthRange['to']);
+            $baseQuery = $this->buildFilteredOrderQuery($req, $monthRange['from'], $monthRange['to']);
             $summary = $this->calculateSummaryMetrics(clone $baseQuery, $monthRange['from'], $monthRange['to']);
-            $rows = ($grouping === 'ungrouped')
-                ? $this->getUngroupedAll(clone $baseQuery)
-                : $this->aggregateMonthlyTransactions(clone $baseQuery);
+            $rows = $this->aggregateMonthlyTransactions(clone $baseQuery);
+
+            return response()->json([
+                'viewMode' => 'monthly',
+                'grouping' => 'grouped',
+                'summary' => $summary,
+                'rows' => $rows,
+            ]);
+        }
+
+        // Daily
+        $dates = $this->resolveDailyDateRange($req);
+        $baseQuery = $this->buildFilteredOrderQuery($req, $dates['from'], $dates['to']);
+        $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
+
+        if ($grouping === 'ungrouped') {
+            $rows = $this->getUngroupedAll(clone $baseQuery);
         } else {
-            $dates = $this->resolveDailyDateRange($req);
-            $baseQuery = $this->buildFilteredBookingQuery($req, $dates['from'], $dates['to']);
-            $summary = $this->calculateSummaryMetrics(clone $baseQuery, $dates['from'], $dates['to']);
-            $rows = ($grouping === 'ungrouped')
-                ? $this->getUngroupedAll(clone $baseQuery)
-                : $this->aggregateDailyTransactions(clone $baseQuery);
+            $rows = $this->aggregateDailyTransactions(clone $baseQuery);
         }
 
         return response()->json([
-            'status' => 'success',
-            'view_mode' => $mode,
+            'viewMode' => 'daily',
             'grouping' => $grouping,
             'summary' => $summary,
             'rows' => $rows,
@@ -167,35 +167,35 @@ class OrderTransactionReportController extends Controller
      */
     public function details(Request $req, $period)
     {
-        $query = Booking::query()
+        $query = Order::query()
             ->with([
                 'shop:id,name,phone,address',
                 'barber:id,name,phone',
                 'customer:id,name,phone',
-                'bookingDetail' => function ($detail) {
+                'orderDetails' => function ($detail) {
                     $detail->withTrashed()->with(['service:id,name', 'product:id,name']);
                 },
-                'payments:id,booking_id,amount,payment_method,payment_date',
+                'payments:id,order_id,amount,payment_method,payment_date',
             ]);
 
         // Period filter: check if daily (YYYY-MM-DD) or monthly (YYYY-MM)
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $period)) {
-            $query->whereDate('booking_date', $period);
+            $query->whereDate('order_date', $period);
         } elseif (preg_match('/^\d{4}-\d{2}$/', $period)) {
             $startOfMonth = Carbon::createFromFormat('Y-m', $period)->startOfMonth()->format('Y-m-d');
             $endOfMonth = Carbon::createFromFormat('Y-m', $period)->endOfMonth()->format('Y-m-d');
-            $query->whereBetween(DB::raw('DATE(booking_date)'), [$startOfMonth, $endOfMonth]);
+            $query->whereBetween(DB::raw('DATE(order_date)'), [$startOfMonth, $endOfMonth]);
         }
 
         // Apply any active secondary filters
         $this->applySecondaryFilters($query, $req);
 
-        $bookings = $query->orderBy('booking_date', 'desc')
+        $orders = $query->orderBy('order_date', 'desc')
             ->orderBy('id', 'desc')
             ->get();
 
-        $formatted = $bookings->map(function ($booking) {
-            return (array) $this->formatBookingRecord($booking);
+        $formatted = $orders->map(function ($order) {
+            return (array) $this->formatOrderRecord($order);
         });
 
         $totalRevenue = $formatted->sum('total_price');
@@ -208,16 +208,23 @@ class OrderTransactionReportController extends Controller
             $parsedDate = Carbon::parse($period);
             if (app()->getLocale() === 'km') {
                 $dayKey = strtolower($parsedDate->format('D'));
-                $periodLabel = 'ថ្ងៃ' . __('order_transaction.days.' . $dayKey) . ' ទី' . $parsedDate->format('d') . ' ' . __('order_transaction.months.' . $parsedDate->month) . ' ឆ្នាំ' . $parsedDate->format('Y');
+                $khmerDay = __('order_transaction.day_names.' . $dayKey);
+                $periodLabel = $khmerDay . ' ' . $parsedDate->format('d/m/Y');
             } else {
-                $periodLabel = $parsedDate->format('l, d F Y');
+                $periodLabel = $parsedDate->format('D, d M Y');
             }
         } else {
-            $parsedMonth = Carbon::createFromFormat('Y-m', $period);
-            if (app()->getLocale() === 'km') {
-                $periodLabel = __('order_transaction.months.' . $parsedMonth->month) . ' ឆ្នាំ' . $parsedMonth->format('Y');
-            } else {
-                $periodLabel = $parsedMonth->format('F Y');
+            try {
+                $parsedMonth = Carbon::createFromFormat('Y-m', $period);
+                if (app()->getLocale() === 'km') {
+                    $monthNum = (int) $parsedMonth->format('n');
+                    $khmerMonth = __('order_transaction.month_names.' . $monthNum);
+                    $periodLabel = $khmerMonth . ' ' . $parsedMonth->format('Y');
+                } else {
+                    $periodLabel = $parsedMonth->format('F Y');
+                }
+            } catch (\Exception $e) {
+                $periodLabel = $period;
             }
         }
 
@@ -225,20 +232,20 @@ class OrderTransactionReportController extends Controller
             'status' => 'success',
             'period' => $period,
             'period_label' => $periodLabel,
-            'count' => $formatted->count(),
+            'invoices_count' => $formatted->count(),
             'total_revenue' => $totalRevenue,
             'total_paid' => $totalPaid,
             'total_remaining' => $totalRemaining,
-            'bookings' => $formatted,
+            'orders' => $formatted,
         ]);
     }
 
     /**
-     * Format a booking model into a standardized object for views and reports
+     * Format an order model into a standardized object for views and reports
      */
-    private function formatBookingRecord($booking)
+    private function formatOrderRecord($order)
     {
-        $items = $booking->bookingDetail->map(function ($detail) {
+        $items = $order->orderDetails->map(function ($detail) {
             $isService = $detail->type === 'service';
             $name = $isService ? ($detail->service?->name ?? __('order_transaction.modal.unknown_service')) : ($detail->product?->name ?? __('order_transaction.modal.unknown_product'));
             return [
@@ -252,23 +259,24 @@ class OrderTransactionReportController extends Controller
             ];
         });
 
-        $totalPrice = (float) ($booking->total_price ?? 0);
-        $totalDiscount = (float) ($booking->total_discount ?? 0);
+        $totalPrice = (float) ($order->total_price ?? 0);
+        $totalDiscount = (float) ($order->total_discount ?? 0);
         $grossSales = $totalPrice + $totalDiscount;
-        $paidAmount = (float) ($booking->paid_amount ?? 0);
-        $remainingAmount = (float) ($booking->remaining_amount ?? 0);
+        $paidAmount = (float) ($order->paid_amount ?? 0);
+        $remainingAmount = (float) ($order->remaining_amount ?? 0);
+        $orderDate = $order->order_date;
 
         return (object) [
-            'id' => $booking->id,
-            'invoice_number' => $booking->invoice_number ?: ('#' . $booking->id),
-            'booking_date' => $booking->booking_date ? Carbon::parse($booking->booking_date)->format('Y-m-d H:i') : '---',
-            'booking_date_formatted' => $booking->booking_date ? Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---',
-            'shop_name' => $booking->shop?->name ?: '---',
-            'barber_name' => $booking->barber?->name ?: '---',
-            'customer_name' => $booking->customer?->name ?: __('order_transaction.modal.walk_in_customer'),
-            'customer_phone' => $booking->customer?->phone ?: '---',
-            'payment_status' => $booking->payment_status ?: 'Pending',
-            'pay_way' => $booking->pay_way ?: ($booking->payments->first()?->payment_method ?: 'Cash'),
+            'id' => $order->id,
+            'invoice_number' => $order->invoice_number ?: ('#' . $order->id),
+            'order_date' => $orderDate ? Carbon::parse($orderDate)->format('Y-m-d H:i') : '---',
+            'order_date_formatted' => $orderDate ? Carbon::parse($orderDate)->format('d M Y, h:i A') : '---',
+            'shop_name' => $order->shop?->name ?: '---',
+            'barber_name' => $order->barber?->name ?: '---',
+            'customer_name' => $order->customer?->name ?: __('order_transaction.modal.walk_in_customer'),
+            'customer_phone' => $order->customer?->phone ?: '---',
+            'payment_status' => $order->payment_status ?: 'Pending',
+            'pay_way' => $order->pay_way ?: ($order->payments->first()?->payment_method ?: 'Cash'),
             'total_price' => $totalPrice,
             'total_discount' => $totalDiscount,
             'gross_sales' => $grossSales,
@@ -276,12 +284,12 @@ class OrderTransactionReportController extends Controller
             'remaining_amount' => $remainingAmount,
             'items' => $items,
             'items_count' => $items->sum('qty'),
-            'remark' => $booking->remark,
+            'remark' => $order->remark,
         ];
     }
 
     /**
-     * Get paginated ungrouped bookings formatted for table listing
+     * Get paginated ungrouped orders formatted for table listing
      */
     private function getUngroupedPaginated($query, Request $req)
     {
@@ -290,61 +298,61 @@ class OrderTransactionReportController extends Controller
                 'shop:id,name,phone,address',
                 'barber:id,name,phone',
                 'customer:id,name,phone',
-                'bookingDetail' => function ($detail) {
+                'orderDetails' => function ($detail) {
                     $detail->withTrashed()->with(['service:id,name', 'product:id,name']);
                 },
-                'payments:id,booking_id,amount,payment_method,payment_date',
+                'payments',
             ])
-            ->orderBy('booking_date', 'desc')
+            ->orderBy('order_date', 'desc')
             ->orderBy('id', 'desc')
             ->paginate(50)
             ->appends($req->query());
 
-        $paginated->getCollection()->transform(function ($booking) {
-            return $this->formatBookingRecord($booking);
+        $paginated->getCollection()->transform(function ($order) {
+            return $this->formatOrderRecord($order);
         });
 
         return $paginated;
     }
 
     /**
-     * Get all ungrouped bookings for export / JSON
+     * Get all ungrouped orders for export / JSON
      */
     private function getUngroupedAll($query)
     {
-        $bookings = (clone $query)
+        $orders = (clone $query)
             ->with([
                 'shop:id,name,phone,address',
                 'barber:id,name,phone',
                 'customer:id,name,phone',
-                'bookingDetail' => function ($detail) {
+                'orderDetails' => function ($detail) {
                     $detail->withTrashed()->with(['service:id,name', 'product:id,name']);
                 },
-                'payments:id,booking_id,amount,payment_method,payment_date',
+                'payments',
             ])
-            ->orderBy('booking_date', 'desc')
+            ->orderBy('order_date', 'desc')
             ->orderBy('id', 'desc')
             ->get();
 
-        return $bookings->map(function ($booking) {
-            return $this->formatBookingRecord($booking);
+        return $orders->map(function ($order) {
+            return $this->formatOrderRecord($order);
         });
     }
 
     /**
-     * Build filtered base query on Booking
+     * Build filtered base query on Order
      */
-    private function buildFilteredBookingQuery(Request $req, $fromDate, $toDate)
+    private function buildFilteredOrderQuery(Request $req, $fromDate, $toDate)
     {
-        $query = Booking::query()
-            ->with(['shop', 'barber', 'customer', 'bookingDetail']);
+        $query = Order::query()
+            ->with(['shop', 'barber', 'customer', 'orderDetails']);
 
         if ($fromDate && $toDate) {
-            $query->whereBetween(DB::raw('DATE(booking_date)'), [$fromDate, $toDate]);
+            $query->whereBetween(DB::raw('DATE(order_date)'), [$fromDate, $toDate]);
         } elseif ($fromDate) {
-            $query->whereDate('booking_date', '>=', $fromDate);
+            $query->whereDate('order_date', '>=', $fromDate);
         } elseif ($toDate) {
-            $query->whereDate('booking_date', '<=', $toDate);
+            $query->whereDate('order_date', '<=', $toDate);
         }
 
         $this->applySecondaryFilters($query, $req);
@@ -379,7 +387,7 @@ class OrderTransactionReportController extends Controller
                 $query->where('payment_status', $status);
             }
         } else {
-            // By default, exclude canceled bookings unless explicitly requested
+            // By default, exclude canceled orders unless explicitly requested
             $query->where('payment_status', '!=', 'Cancel');
         }
 
@@ -395,7 +403,7 @@ class OrderTransactionReportController extends Controller
 
         // Item type filter (Product only / Service only)
         if ($req->filled('item_type') && in_array($req->item_type, ['product', 'service'])) {
-            $query->whereHas('bookingDetail', function ($detail) use ($req) {
+            $query->whereHas('orderDetails', function ($detail) use ($req) {
                 $detail->where('type', $req->item_type);
             });
         }
@@ -424,25 +432,25 @@ class OrderTransactionReportController extends Controller
      */
     private function calculateSummaryMetrics($query, $fromDate, $toDate)
     {
-        $bookings = $query->get();
+        $orders = $query->get();
 
-        $totalInvoices = $bookings->count();
-        $totalNetSales = (float) $bookings->sum('total_price');
-        $totalDiscount = (float) $bookings->sum('total_discount');
+        $totalInvoices = $orders->count();
+        $totalNetSales = (float) $orders->sum('total_price');
+        $totalDiscount = (float) $orders->sum('total_discount');
         $totalGrossSales = $totalNetSales + $totalDiscount;
-        $totalPaid = (float) $bookings->sum('paid_amount');
+        $totalPaid = (float) $orders->sum('paid_amount');
         $totalRemaining = max(0, $totalNetSales - $totalPaid);
 
         // Calculate product vs service breakdown and item quantities
-        $bookingIds = $bookings->pluck('id')->toArray();
+        $orderIds = $orders->pluck('id')->toArray();
         $productSales = 0.0;
         $serviceSales = 0.0;
         $totalProductQty = 0;
         $totalServiceQty = 0;
 
-        if (!empty($bookingIds)) {
-            $details = BookingDetail::withTrashed()
-                ->whereIn('booking_id', $bookingIds)
+        if (!empty($orderIds)) {
+            $details = OrderDetail::withTrashed()
+                ->whereIn('order_id', $orderIds)
                 ->get();
 
             foreach ($details as $detail) {
@@ -466,9 +474,9 @@ class OrderTransactionReportController extends Controller
         $avgInvoiceValue = $totalInvoices > 0 ? ($totalNetSales / $totalInvoices) : 0;
 
         // Payment status counts
-        $paidCount = $bookings->where('payment_status', 'Paid')->count();
-        $partialCount = $bookings->where('payment_status', 'Partial')->count();
-        $pendingCount = $bookings->where('payment_status', 'Pending')->count();
+        $paidCount = $orders->where('payment_status', 'Paid')->count();
+        $partialCount = $orders->where('payment_status', 'Partial')->count();
+        $pendingCount = $orders->where('payment_status', 'Pending')->count();
 
         return [
             'total_invoices' => $totalInvoices,
@@ -490,36 +498,36 @@ class OrderTransactionReportController extends Controller
     }
 
     /**
-     * Aggregate daily transactions grouped by DATE(booking_date)
+     * Aggregate daily transactions grouped by DATE(order_date)
      */
     private function aggregateDailyTransactions($query)
     {
-        $bookings = $query->with([
-            'bookingDetail' => function ($d) {
+        $orders = $query->with([
+            'orderDetails' => function ($d) {
                 $d->withTrashed();
             },
             'payments'
         ])
-        ->orderBy('booking_date', 'desc')
+        ->orderBy('order_date', 'desc')
         ->get();
 
         // Group by Date YYYY-MM-DD
-        $grouped = $bookings->groupBy(function ($item) {
-            return $item->booking_date ? Carbon::parse($item->booking_date)->format('Y-m-d') : 'unknown';
+        $grouped = $orders->groupBy(function ($item) {
+            return $item->order_date ? Carbon::parse($item->order_date)->format('Y-m-d') : 'unknown';
         });
 
         $rows = [];
         $index = 1;
 
-        foreach ($grouped as $dateKey => $dayBookings) {
+        foreach ($grouped as $dateKey => $dayOrders) {
             if ($dateKey === 'unknown') continue;
 
             $cDate = Carbon::parse($dateKey);
-            $invoicesCount = $dayBookings->count();
-            $netSales = (float) $dayBookings->sum('total_price');
-            $discount = (float) $dayBookings->sum('total_discount');
+            $invoicesCount = $dayOrders->count();
+            $netSales = (float) $dayOrders->sum('total_price');
+            $discount = (float) $dayOrders->sum('total_discount');
             $grossSales = $netSales + $discount;
-            $paid = (float) $dayBookings->sum('paid_amount');
+            $paid = (float) $dayOrders->sum('paid_amount');
             $remaining = max(0, $netSales - $paid);
 
             // Item count & breakdown for this day
@@ -527,8 +535,8 @@ class OrderTransactionReportController extends Controller
             $productRevenue = 0.0;
             $serviceRevenue = 0.0;
 
-            foreach ($dayBookings as $b) {
-                foreach ($b->bookingDetail as $d) {
+            foreach ($dayOrders as $b) {
+                foreach ($b->orderDetails as $d) {
                     $qty = (int) ($d->qty ?: 1);
                     $price = (float) ($d->price ?? 0);
                     $itemsQty += $qty;
@@ -543,7 +551,7 @@ class OrderTransactionReportController extends Controller
 
             // Payment method breakdown
             $payMethods = [];
-            foreach ($dayBookings as $b) {
+            foreach ($dayOrders as $b) {
                 $method = $b->pay_way ?: ($b->payments->first()?->payment_method ?: 'Cash');
                 $method = trim($method) ?: 'Cash';
                 if (!isset($payMethods[$method])) {
@@ -553,9 +561,9 @@ class OrderTransactionReportController extends Controller
             }
 
             // Status counts
-            $paidCount = $dayBookings->where('payment_status', 'Paid')->count();
-            $partialCount = $dayBookings->where('payment_status', 'Partial')->count();
-            $pendingCount = $dayBookings->where('payment_status', 'Pending')->count();
+            $paidCount = $dayOrders->where('payment_status', 'Paid')->count();
+            $partialCount = $dayOrders->where('payment_status', 'Partial')->count();
+            $pendingCount = $dayOrders->where('payment_status', 'Pending')->count();
 
             $rows[] = (object) [
                 'index' => $index++,
@@ -585,42 +593,42 @@ class OrderTransactionReportController extends Controller
     }
 
     /**
-     * Aggregate monthly transactions grouped by DATE_FORMAT(booking_date, '%Y-%m')
+     * Aggregate monthly transactions grouped by DATE_FORMAT(order_date, '%Y-%m')
      */
     private function aggregateMonthlyTransactions($query)
     {
-        $bookings = $query->with([
+        $orders = $query->with([
             'shop',
             'barber',
-            'bookingDetail' => function ($d) {
+            'orderDetails' => function ($d) {
                 $d->withTrashed();
             },
             'payments'
         ])
-        ->orderBy('booking_date', 'desc')
+        ->orderBy('order_date', 'desc')
         ->get();
 
         // Group by Month YYYY-MM
-        $grouped = $bookings->groupBy(function ($item) {
-            return $item->booking_date ? Carbon::parse($item->booking_date)->format('Y-m') : 'unknown';
+        $grouped = $orders->groupBy(function ($item) {
+            return $item->order_date ? Carbon::parse($item->order_date)->format('Y-m') : 'unknown';
         });
 
         $rows = [];
         $index = 1;
 
-        foreach ($grouped as $monthKey => $monthBookings) {
+        foreach ($grouped as $monthKey => $monthOrders) {
             if ($monthKey === 'unknown') continue;
 
             $cMonth = Carbon::createFromFormat('Y-m', $monthKey);
-            $invoicesCount = $monthBookings->count();
-            $netSales = (float) $monthBookings->sum('total_price');
-            $discount = (float) $monthBookings->sum('total_discount');
+            $invoicesCount = $monthOrders->count();
+            $netSales = (float) $monthOrders->sum('total_price');
+            $discount = (float) $monthOrders->sum('total_discount');
             $grossSales = $netSales + $discount;
-            $paid = (float) $monthBookings->sum('paid_amount');
+            $paid = (float) $monthOrders->sum('paid_amount');
             $remaining = max(0, $netSales - $paid);
 
             // Active sales days in this month
-            $activeDays = $monthBookings->pluck('booking_date')
+            $activeDays = $monthOrders->pluck('order_date')
                 ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
                 ->unique()
                 ->count();
@@ -630,8 +638,8 @@ class OrderTransactionReportController extends Controller
             $productRevenue = 0.0;
             $serviceRevenue = 0.0;
 
-            foreach ($monthBookings as $b) {
-                foreach ($b->bookingDetail as $d) {
+            foreach ($monthOrders as $b) {
+                foreach ($b->orderDetails as $d) {
                     $qty = (int) ($d->qty ?: 1);
                     $price = (float) ($d->price ?? 0);
                     $itemsQty += $qty;
@@ -646,7 +654,7 @@ class OrderTransactionReportController extends Controller
 
             // Top Payment method in month
             $payMethods = [];
-            foreach ($monthBookings as $b) {
+            foreach ($monthOrders as $b) {
                 $method = $b->pay_way ?: ($b->payments->first()?->payment_method ?: 'Cash');
                 $method = trim($method) ?: 'Cash';
                 $payMethods[$method] = ($payMethods[$method] ?? 0) + 1;
@@ -655,10 +663,10 @@ class OrderTransactionReportController extends Controller
             $topPayMethod = !empty($payMethods) ? array_key_first($payMethods) : '---';
 
             // Top shop
-            $shopCounts = $monthBookings->whereNotNull('shop_id')->groupBy('shop_id')->map->count()->toArray();
+            $shopCounts = $monthOrders->whereNotNull('shop_id')->groupBy('shop_id')->map->count()->toArray();
             arsort($shopCounts);
             $topShopId = !empty($shopCounts) ? array_key_first($shopCounts) : null;
-            $topShopName = $topShopId ? ($monthBookings->firstWhere('shop_id', $topShopId)?->shop?->name ?? '---') : '---';
+            $topShopName = $topShopId ? ($monthOrders->firstWhere('shop_id', $topShopId)?->shop?->name ?? '---') : '---';
 
             $rows[] = (object) [
                 'index' => $index++,
@@ -803,7 +811,7 @@ class OrderTransactionReportController extends Controller
         $currentYear = (int) Carbon::now()->year;
         $oldestYear = $currentYear - 4;
 
-        $dbMinYear = Booking::min(DB::raw('YEAR(booking_date)'));
+        $dbMinYear = Order::min(DB::raw('YEAR(order_date)'));
         if ($dbMinYear && $dbMinYear < $oldestYear) {
             $oldestYear = (int) $dbMinYear;
         }

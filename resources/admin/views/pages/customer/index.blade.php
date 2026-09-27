@@ -11,13 +11,10 @@
             'status' => $status,
             'tbHeader' => [
                 ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
-                // ['field' => 'image_url', 'title' => 'Image', 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 90],
-                // ['field' => 'sector_title', 'title' => 'Sector', 'class' => 'text left', 'colVal' => 15],
-                // ['field' => 'month', 'title' => 'Month', 'class' => 'text left', 'colVal' => 10],
-                // ['field' => 'post_date_for', 'title' => 'Start Date', 'class' => 'text left', 'colVal' => 10],
-                // ['field' => 'close_date_for', 'title' => 'Close Date', 'class' => 'text left', 'colVal' => 10],
-                // ['field' => 'salary_from', 'title' => 'Amount ($)', 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'image_url', 'title' => __('global.table.image'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 25],
+                ['field' => 'phone', 'title' => __('customer.form.phone.label'), 'class' => 'text left', 'colVal' => 20],
+                ['field' => 'address', 'title' => __('customer.form.address.label'), 'class' => 'text left', 'colVal' => 35],
                 [
                     'field' => 'action',
                     'title' => "",

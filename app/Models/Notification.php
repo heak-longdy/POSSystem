@@ -18,12 +18,23 @@ class Notification extends Model
         'is_read_member',
         'is_read_garage',
         'booking_id',
+        'order_id',
         'member_id',
         'garage_id',
         'user_id',
         'status',
         'type_send',
     ];
+
+    public function setOrderIdAttribute($value)
+    {
+        $this->attributes['booking_id'] = $value;
+    }
+
+    public function getOrderIdAttribute()
+    {
+        return $this->attributes['booking_id'] ?? null;
+    }
     protected $casts = [
         'is_read_member' => 'integer',
         'is_read_garage' => 'integer',

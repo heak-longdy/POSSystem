@@ -11,16 +11,6 @@ return [
     //     ],
     //     'icon' => 'bxs-dashboard',
     // ],
-    // Booking
-    // [
-    //     'path' => 'admin/booking/list/1',
-    //     'active' => 'admin/booking*',
-    //     'permission' => 'booking-view',
-    //     'name' => [
-    //         'en' => 'Bookings',
-    //     ],
-    //     'icon' => 'bx-bookmark',
-    // ],
     // user
     // [
     //     'type'  => 'single',
@@ -67,12 +57,12 @@ return [
     ],
     [
         'type'  => 'single',
-        'active' => 'admin/booking/*',
-        'path' => 'admin/booking/list/1',
-        'permission' => 'booking-view',
+        'active' => 'admin/order/*',
+        'path' => 'admin/order/list/1',
+        'permission' => ['order-view'],
         'name' => [
-            'en' => 'Bookings',
-            'km' => 'ការកក់',
+            'en' => 'Orders',
+            'km' => 'ការបញ្ជាទិញ',
         ],
         'icon' => 'bx-calendar',
     ],
@@ -80,7 +70,7 @@ return [
         'type'  => 'single',
         'active' => 'admin/remaining-amount/*',
         'path' => 'admin/remaining-amount/list/all',
-        'permission' => 'booking-view',
+        'permission' => 'order-view',
         'name' => [
             'en' => 'Remaining Amount',
             'km' => 'គ្រប់គ្រងទឹកប្រាក់នៅសល់',
@@ -315,7 +305,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/report/order-transaction*',
                 'path' => 'admin/report/order-transaction/daily',
-                'permission' => ['report-transaction-view', 'report-sales-view', 'booking-view'],
+                'permission' => ['report-transaction-view', 'report-sales-view', 'order-view'],
                 'name' => [
                     'en' => 'Order Transaction Report',
                     'km' => 'របាយការណ៍ប្រតិបត្តិការបញ្ជាទិញ',
@@ -327,7 +317,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/report/sales*',
                 'path' => 'admin/report/sales/daily',
-                'permission' => ['report-sales-view', 'booking-view'],
+                'permission' => ['report-sales-view', 'order-view'],
                 'name' => [
                     'en' => 'Sales Report',
                     'km' => 'របាយការណ៍ការលក់',
@@ -351,7 +341,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/report/staff-expense*',
                 'path' => 'admin/report/staff-expense/daily',
-                'permission' => ['staff-expense-view', 'report-sales-view', 'booking-view'],
+                'permission' => ['staff-expense-view', 'report-sales-view'],
                 'name' => [
                     'en' => 'Staff Expense Report',
                     'km' => 'របាយការណ៍ចំណាយបុគ្គលិក',
@@ -472,7 +462,7 @@ return [
                 //     'en' => 'Reports',
                 // ],
                 // 'icon' => 'bxs-report',
-                'active' => 'admin/contact*,admin/about/privacy*,admin/OurService*,admin/aboutUs*,admin/uom/*,admin/category/*,admin/supplier/*',
+                'active' => 'admin/contact*,admin/about/privacy*,admin/OurService*,admin/aboutUs*,admin/uom/*,admin/category/*,admin/supplier/*,admin/setting/invoice*',
                 'permission' => ['contact-view', 'about-view', 'uom-view'],
                 'name' => [
                     'en' => 'Setting',
@@ -539,6 +529,15 @@ return [
                             'km' => 'ខ្នាត',
                         ],
                         'icon' => 'bx-ruler',
+                    ],
+                    [
+                        'active' => 'admin/setting/invoice*',
+                        'path' => 'admin/setting/invoice',
+                        'name' => [
+                            'en' => 'Invoice Setting',
+                            'km' => 'ការកំណត់វិក្កយបត្រ',
+                        ],
+                        'icon' => 'bx-receipt',
                     ]
                 ],
             ],

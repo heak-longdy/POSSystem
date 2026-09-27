@@ -62,10 +62,13 @@ return [
     'validation' => [
         'name_required' => 'Please enter the customer name.',
         'name_max' => 'The name may not be greater than 255 characters.',
+        'phone_required' => 'Please enter the phone number.',
+        'phone_max' => 'The phone may not be greater than 50 characters.',
         'password_required' => 'Password is required.',
         'password_min' => 'Password must be at least 6 characters.',
         'password_confirmed' => 'Password confirmation does not match.',
         'status_required' => 'Status is required.',
         'status_boolean' => 'Status must be true or false.',
+        'status_invalid' => 'The selected status is invalid.',
     ],
 ];

@@ -1,17 +1,17 @@
 @extends('admin::shared.layout')
 
 @section('title')
-    | {{ __('remaining_amount.detail.title') }} #{{ $booking->invoice_number ?: $booking->id }}
+    | {{ __('remaining_amount.detail.title') }} #{{ $order->invoice_number ?: $order->id }}
 @stop
 
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('remaining_amount.detail.title')])
 
-    <div class="content-wrapper booking-detail-wrapper" id="bookingDetailApp" x-data="xBookingDetail()" :class="'printing-' + activePrintTemplate" x-cloak>
+    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate" x-cloak>
         <div class="content-body" id="bookingDetailContentBody">
             <div class="booking-detail-page-wrapper">
                 <!-- Top Navigation / Breadcrumb -->
-                <nav class="detail-breadcrumb">
+                <div class="detail-breadcrumb">
                     <a href="{{ route('admin-remaining-amount-list', 'all') }}" class="breadcrumb-link">
                         <i data-feather="dollar-sign"></i>
                         <span>{{ __('remaining_amount.title') }}</span>
@@ -19,16 +19,16 @@
                     <span class="breadcrumb-sep">/</span>
                     <span class="breadcrumb-current">{{ __('remaining_amount.detail.title') }}</span>
                     <span class="breadcrumb-sep">/</span>
-                    <span class="breadcrumb-invoice">#{{ $booking->invoice_number ?: $booking->id }}</span>
-                </nav>
+                    <span class="breadcrumb-invoice">#{{ $order->invoice_number ?: $order->id }}</span>
+                </div>
 
                 <!-- Main Detail Header Banner -->
                 <header class="detail-header-card">
                     <div class="header-left">
                         <div class="invoice-badge-title">
-                            <h1 class="invoice-title">#{{ $booking->invoice_number ?: $booking->id }}</h1>
+                            <h1 class="invoice-title">#{{ $order->invoice_number ?: $order->id }}</h1>
                             @php
-                                $paymentStatus = $booking->payment_status ?: 'Pending';
+                                $paymentStatus = $order->payment_status ?: 'Pending';
                                 $statusClass = match ($paymentStatus) {
                                     'Paid' => 'status-paid',
                                     'Partial' => 'status-partial',
@@ -36,16 +36,16 @@
                                     default => 'status-pending',
                                 };
                                 $statusLabel = match ($paymentStatus) {
-                                    'Paid' => __('booking.status.paid'),
-                                    'Partial' => __('booking.status.partial'),
-                                    'Cancel' => __('booking.status.canceled'),
-                                    default => __('booking.status.pending'),
+                                    'Paid' => __('order.status.paid'),
+                                    'Partial' => __('order.status.partial'),
+                                    'Cancel' => __('order.status.canceled'),
+                                    default => __('order.status.pending'),
                                 };
 
-                                $customerName = $booking->customer?->name ?: ($booking->customer?->phone ?: __('booking.walk_in_customer'));
-                                $customerPhone = $booking->customer?->phone ?: '---';
-                                $customerEmail = $booking->customer?->email ?: null;
-                                $customerAddress = $booking->customer?->address ?: null;
+                                $customerName = $order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer'));
+                                $customerPhone = $order->customer?->phone ?: '---';
+                                $customerEmail = $order->customer?->email ?: null;
+                                $customerAddress = $order->customer?->address ?: null;
                                 $customerInitials = strtoupper(substr($customerName, 0, 2));
                             @endphp
                             <span class="detail-status-pill {{ $statusClass }}">
@@ -53,18 +53,18 @@
                                 {{ $statusLabel }}
                             </span>
 
-                            @if ($booking->trashed())
+                            @if ($order->trashed())
                                 <span class="detail-status-pill status-trash">
                                     <i data-feather="trash-2"></i>
-                                    {{ __('booking.tab.trash') }}
+                                    {{ __('order.tab.trash') }}
                                 </span>
                             @endif
                         </div>
                         <p class="invoice-subtitle">
-                            <span><i data-feather="clock"></i> {{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---' }}</span>
-                            @if ($booking->shop)
+                            <span><i data-feather="clock"></i> {{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d M Y, h:i A') : '---' }}</span>
+                            @if ($order->shop)
                                 <span class="meta-sep">•</span>
-                                <span><i data-feather="home"></i> {{ $booking->shop->name }}</span>
+                                <span><i data-feather="home"></i> {{ $order->shop->name }}</span>
                             @endif
                         </p>
                     </div>
@@ -74,31 +74,31 @@
                         @if ($canAddPayment)
                             <button type="button" class="btn btn-create bg-success btn-system btn-system-success" @click="openPaymentModal = true">
                                 <i data-feather="plus-circle"></i>
-                                <span>{{ __('booking.detail.add_payment') }}</span>
+                                <span>{{ __('order.detail.add_payment') }}</span>
                             </button>
                         @endif
 
                         @if ($canEdit)
-                            <a href="{{ route('admin-booking-edit', $booking->id) }}" class="btn btn-create bg-primary btn-system btn-system-primary">
+                            <a href="{{ route('admin-order-edit', $order->id) }}" class="btn btn-create bg-primary btn-system btn-system-primary">
                                 <i data-feather="edit-2"></i>
-                                <span>{{ __('booking.detail.edit_booking') }}</span>
+                                <span>{{ __('order.detail.edit_order') }}</span>
                             </a>
                         @endif
 
                         <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate1()">
                             <i data-feather="printer"></i>
-                            <span>{{ __('booking.detail.print_invoice') }}</span>
+                            <span>{{ __('order.detail.print_invoice') }}</span>
                         </button>
 
                         <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2()">
                             <i data-feather="printer"></i>
-                            <span>{{ __('booking.detail.print_slip') }}</span>
+                            <span>{{ __('order.detail.print_slip') }}</span>
                         </button>
 
                         @if ($canCancel)
                             <button type="button" class="btn btn-create bg-danger btn-system btn-system-danger" @click="confirmCancel()">
                                 <i data-feather="x-circle"></i>
-                                <span>{{ __('booking.detail.cancel_booking') }}</span>
+                                <span>{{ __('order.detail.cancel_order') }}</span>
                             </button>
                         @endif
 
@@ -116,8 +116,8 @@
                             <i data-feather="dollar-sign"></i>
                         </div>
                         <div class="kpi-info">
-                            <span class="kpi-label">{{ __('booking.detail.total_bill') }}</span>
-                            <strong class="kpi-value">${{ number_format((float) ($booking->total_price ?? 0), 2) }}</strong>
+                            <span class="kpi-label">{{ __('order.detail.total_bill') }}</span>
+                            <strong class="kpi-value">${{ number_format((float) ($order->total_price ?? 0), 2) }}</strong>
                         </div>
                     </article>
 
@@ -126,19 +126,19 @@
                             <i data-feather="check-circle"></i>
                         </div>
                         <div class="kpi-info">
-                            <span class="kpi-label">{{ __('booking.detail.paid_amount') }}</span>
-                            <strong class="kpi-value text-success">${{ number_format((float) ($booking->paid_amount ?? 0), 2) }}</strong>
+                            <span class="kpi-label">{{ __('order.detail.paid_amount') }}</span>
+                            <strong class="kpi-value text-success">${{ number_format((float) ($order->paid_amount ?? 0), 2) }}</strong>
                         </div>
                     </article>
 
                     <article class="kpi-card">
-                        <div class="kpi-icon-wrap {{ (float) ($booking->remaining_amount ?? 0) > 0 ? 'kpi-orange' : 'kpi-gray' }}">
+                        <div class="kpi-icon-wrap {{ (float) ($order->remaining_amount ?? 0) > 0 ? 'kpi-orange' : 'kpi-gray' }}">
                             <i data-feather="credit-card"></i>
                         </div>
                         <div class="kpi-info">
-                            <span class="kpi-label">{{ __('booking.detail.balance_due') }}</span>
-                            <strong class="kpi-value {{ (float) ($booking->remaining_amount ?? 0) > 0 ? 'text-danger' : 'text-muted' }}">
-                                ${{ number_format((float) ($booking->remaining_amount ?? 0), 2) }}
+                            <span class="kpi-label">{{ __('order.detail.balance_due') }}</span>
+                            <strong class="kpi-value {{ (float) ($order->remaining_amount ?? 0) > 0 ? 'text-danger' : 'text-muted' }}">
+                                ${{ number_format((float) ($order->remaining_amount ?? 0), 2) }}
                             </strong>
                         </div>
                     </article>
@@ -148,8 +148,8 @@
                             <i data-feather="award"></i>
                         </div>
                         <div class="kpi-info">
-                            <span class="kpi-label">{{ __('booking.detail.customer_points') }}</span>
-                            <strong class="kpi-value text-primary">+{{ (int) ($booking->total_point ?? 0) }} {{ __('booking.detail.pts') }}</strong>
+                            <span class="kpi-label">{{ __('order.detail.customer_points') }}</span>
+                            <strong class="kpi-value text-primary">+{{ (int) ($order->total_point ?? 0) }} {{ __('order.detail.pts') }}</strong>
                         </div>
                     </article>
                 </section>
@@ -163,8 +163,8 @@
                             <div class="detail-card-header">
                                 <div class="card-title-group">
                                     <i data-feather="scissors"></i>
-                                    <h2>{{ __('booking.detail.item_details') }}</h2>
-                                    <span class="count-badge">{{ $booking->bookingDetail ? $booking->bookingDetail->count() : 0 }}</span>
+                                    <h2>{{ __('order.detail.item_details') }}</h2>
+                                    <span class="count-badge">{{ $order->orderDetails ? $order->orderDetails->count() : 0 }}</span>
                                 </div>
                             </div>
 
@@ -173,17 +173,17 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 50px;">#</th>
-                                            <th>{{ __('booking.table.item') }}</th>
-                                            <th style="width: 110px;">{{ __('booking.table.type') }}</th>
-                                            <th>{{ __('booking.detail.stylist_barber') }}</th>
-                                            <th class="text-right">{{ __('booking.detail.unit_price') }}</th>
-                                            <th class="text-center">{{ __('booking.detail.quantity') }}</th>
-                                            <th class="text-right">{{ __('booking.detail.discount') }}</th>
-                                            <th class="text-right">{{ __('booking.detail.line_total') }}</th>
+                                            <th>{{ __('order.table.item') }}</th>
+                                            <th style="width: 110px;">{{ __('order.table.type') }}</th>
+                                            <th>{{ __('order.detail.stylist_barber') }}</th>
+                                            <th class="text-right">{{ __('order.detail.unit_price') }}</th>
+                                            <th class="text-center">{{ __('order.detail.quantity') }}</th>
+                                            <th class="text-right">{{ __('order.detail.discount') }}</th>
+                                            <th class="text-right">{{ __('order.detail.line_total') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($booking->bookingDetail as $index => $detail)
+                                        @forelse ($order->orderDetails as $index => $detail)
                                             @php
                                                 $isService = $detail->type === 'service';
                                                 $itemName = $isService
@@ -200,18 +200,18 @@
                                                     <div class="item-name-cell">
                                                         <strong>{{ $itemName }}</strong>
                                                         @if ($detail->point)
-                                                            <small class="point-badge">+{{ $detail->point }} {{ __('booking.detail.pts') }}</small>
+                                                            <small class="point-badge">+{{ $detail->point }} {{ __('order.detail.pts') }}</small>
                                                         @endif
                                                     </div>
                                                 </td>
                                                 <td>
                                                     @if ($isService)
-                                                        <span class="type-pill pill-service">{{ __('booking.detail.service') }}</span>
+                                                        <span class="type-pill pill-service">{{ __('order.detail.service') }}</span>
                                                     @else
-                                                        <span class="type-pill pill-product">{{ __('booking.detail.product') }}</span>
+                                                        <span class="type-pill pill-product">{{ __('order.detail.product') }}</span>
                                                     @endif
                                                 </td>
-                                                <td>{{ $booking->barber?->name ?? '---' }}</td>
+                                                <td>{{ $order->barber?->name ?? '---' }}</td>
                                                 <td class="text-right">${{ number_format($unitPrice, 2) }}</td>
                                                 <td class="text-center">{{ $qty }}</td>
                                                 <td class="text-right">
@@ -226,7 +226,7 @@
                                         @empty
                                             <tr>
                                                 <td colspan="8" class="text-center text-muted py-4">
-                                                    {{ __('booking.empty_cart.title') }}
+                                                    {{ __('order.empty_cart.title') }}
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -240,13 +240,13 @@
                             <div class="detail-card-header">
                                 <div class="card-title-group">
                                     <i data-feather="file-text"></i>
-                                    <h2>{{ __('booking.detail.payment_history') }}</h2>
-                                    <span class="count-badge">{{ $booking->payments ? $booking->payments->count() : 0 }}</span>
+                                    <h2>{{ __('order.detail.payment_history') }}</h2>
+                                    <span class="count-badge">{{ $order->payments ? $order->payments->count() : 0 }}</span>
                                 </div>
                                 @if ($canAddPayment)
                                     <button type="button" class="btn btn-create bg-success btn-system-sm btn-system-success" @click="openPaymentModal = true">
                                         <i data-feather="plus"></i>
-                                        <span>{{ __('booking.detail.add_payment') }}</span>
+                                        <span>{{ __('order.detail.add_payment') }}</span>
                                     </button>
                                 @endif
                             </div>
@@ -256,16 +256,16 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 50px;">#</th>
-                                            <th>{{ __('booking.detail.transaction_date') }}</th>
-                                            <th>{{ __('booking.detail.method') }}</th>
-                                            <th class="text-right">{{ __('booking.table.paid') }}</th>
-                                            <th>{{ __('booking.detail.cashier') }}</th>
-                                            <th>{{ __('booking.table.note') }}</th>
+                                            <th>{{ __('order.detail.transaction_date') }}</th>
+                                            <th>{{ __('order.detail.method') }}</th>
+                                            <th class="text-right">{{ __('order.table.paid') }}</th>
+                                            <th>{{ __('order.detail.cashier') }}</th>
+                                            <th>{{ __('order.table.note') }}</th>
                                             <th class="text-center" style="width: 70px;">{{ __('global.table.action') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($booking->payments as $pIdx => $pay)
+                                        @forelse ($order->payments as $pIdx => $pay)
                                             @php
                                                 $method = $pay->payment_method ?: 'Cash';
                                                 $methodClass = match(strtolower($method)) {
@@ -290,8 +290,8 @@
                                                     <span class="text-muted">{{ $pay->note ?: '---' }}</span>
                                                 </td>
                                                 <td class="text-center">
-                                                    @if ($booking->payment_status !== 'Cancel')
-                                                        @can('booking-delete')
+                                                    @if ($order->payment_status !== 'Cancel')
+                                                        @can('order-delete')
                                                             <button type="button"
                                                                 class="btn-action-delete"
                                                                 title="{{ __('remaining_amount.action.delete_payment') }}"
@@ -307,7 +307,7 @@
                                         @empty
                                             <tr>
                                                 <td colspan="7" class="text-center text-muted py-4">
-                                                    {{ __('booking.detail.no_payments') }}
+                                                    {{ __('order.detail.no_payments') }}
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -316,19 +316,19 @@
                             </div>
                         </section>
 
-                        <!-- Booking Remarks / Internal Notes -->
+                        <!-- Remarks / Notes -->
                         <section class="detail-card">
                             <div class="detail-card-header">
                                 <div class="card-title-group">
                                     <i data-feather="message-square"></i>
-                                    <h2>{{ __('booking.detail.remarks') }}</h2>
+                                    <h2>{{ __('order.detail.remarks') }}</h2>
                                 </div>
                             </div>
                             <div class="remark-content-box">
-                                @if ($booking->remark)
-                                    <p class="remark-text">{{ $booking->remark }}</p>
+                                @if ($order->remark)
+                                    <p class="remark-text">{{ $order->remark }}</p>
                                 @else
-                                    <p class="remark-empty">{{ __('booking.detail.no_remarks') }}</p>
+                                    <p class="remark-empty">{{ __('order.detail.no_remarks') }}</p>
                                 @endif
                             </div>
                         </section>
@@ -341,15 +341,15 @@
                             <div class="detail-card-header">
                                 <div class="card-title-group">
                                     <i data-feather="user"></i>
-                                    <h2>{{ __('booking.detail.customer_profile') }}</h2>
+                                    <h2>{{ __('order.detail.customer_profile') }}</h2>
                                 </div>
                             </div>
                             <div class="customer-profile-body">
                                 @php
-                                    $customerName = $booking->customer?->name ?: ($booking->customer?->phone ?: __('booking.walk_in_customer'));
-                                    $customerPhone = $booking->customer?->phone ?: '---';
-                                    $customerEmail = $booking->customer?->email ?: null;
-                                    $customerAddress = $booking->customer?->address ?: null;
+                                    $customerName = $order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer'));
+                                    $customerPhone = $order->customer?->phone ?: '---';
+                                    $customerEmail = $order->customer?->email ?: null;
+                                    $customerAddress = $order->customer?->address ?: null;
                                     $customerInitials = strtoupper(substr($customerName, 0, 2));
                                 @endphp
                                 <div class="customer-avatar-header">
@@ -364,24 +364,24 @@
 
                                 <ul class="customer-info-list">
                                     <li>
-                                        <span class="info-label"><i data-feather="phone"></i> {{ __('booking.detail.phone') }}:</span>
+                                        <span class="info-label"><i data-feather="phone"></i> {{ __('order.detail.phone') }}:</span>
                                         <span class="info-val">{{ $customerPhone }}</span>
                                     </li>
                                     @if ($customerEmail)
                                         <li>
-                                            <span class="info-label"><i data-feather="mail"></i> {{ __('booking.detail.email') }}:</span>
+                                            <span class="info-label"><i data-feather="mail"></i> {{ __('order.detail.email') }}:</span>
                                             <span class="info-val">{{ $customerEmail }}</span>
                                         </li>
                                     @endif
                                     @if ($customerAddress)
                                         <li>
-                                            <span class="info-label"><i data-feather="map-pin"></i> {{ __('booking.detail.address') }}:</span>
+                                            <span class="info-label"><i data-feather="map-pin"></i> {{ __('order.detail.address') }}:</span>
                                             <span class="info-val">{{ $customerAddress }}</span>
                                         </li>
                                     @endif
                                     <li>
-                                        <span class="info-label"><i data-feather="award"></i> {{ __('booking.detail.customer_points') }}:</span>
-                                        <span class="info-val points-tag">{{ $booking->customer?->point ?? 0 }} {{ __('booking.detail.pts') }}</span>
+                                        <span class="info-label"><i data-feather="award"></i> {{ __('order.detail.customer_points') }}:</span>
+                                        <span class="info-val points-tag">{{ $order->customer?->point ?? 0 }} {{ __('order.detail.pts') }}</span>
                                     </li>
                                 </ul>
                             </div>
@@ -392,25 +392,25 @@
                             <div class="detail-card-header">
                                 <div class="card-title-group">
                                     <i data-feather="calendar"></i>
-                                    <h2>{{ __('booking.detail.appointment_details') }}</h2>
+                                    <h2>{{ __('order.detail.appointment_details') }}</h2>
                                 </div>
                             </div>
                             <div class="appointment-body">
                                 <div class="appointment-info-row">
-                                    <span class="label"><i data-feather="home"></i> {{ __('booking.detail.shop') }}:</span>
-                                    <span class="val font-weight-bold">{{ $booking->shop?->name ?: '---' }}</span>
+                                    <span class="label"><i data-feather="home"></i> {{ __('order.detail.shop') }}:</span>
+                                    <span class="val font-weight-bold">{{ $order->shop?->name ?: '---' }}</span>
                                 </div>
                                 <div class="appointment-info-row">
-                                    <span class="label"><i data-feather="user-check"></i> {{ __('booking.detail.barber') }}:</span>
-                                    <span class="val font-weight-bold">{{ $booking->barber?->name ?: '---' }}</span>
+                                    <span class="label"><i data-feather="user-check"></i> {{ __('order.detail.barber') }}:</span>
+                                    <span class="val font-weight-bold">{{ $order->barber?->name ?: '---' }}</span>
                                 </div>
                                 <div class="appointment-info-row">
-                                    <span class="label"><i data-feather="clock"></i> {{ __('booking.detail.appointment_time') }}:</span>
-                                    <span class="val">{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y, h:i A') : '---' }}</span>
+                                    <span class="label"><i data-feather="clock"></i> {{ __('order.detail.appointment_time') }}:</span>
+                                    <span class="val">{{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d M Y, h:i A') : '---' }}</span>
                                 </div>
                                 <div class="appointment-info-row">
-                                    <span class="label"><i data-feather="plus-square"></i> {{ __('booking.detail.created_at') }}:</span>
-                                    <span class="val">{{ $booking->created_at ? \Carbon\Carbon::parse($booking->created_at)->format('d M Y, h:i A') : '---' }}</span>
+                                    <span class="label"><i data-feather="plus-square"></i> {{ __('order.detail.created_at') }}:</span>
+                                    <span class="val">{{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d M Y, h:i A') : '---' }}</span>
                                 </div>
                             </div>
                         </section>
@@ -420,37 +420,37 @@
                             <div class="detail-card-header">
                                 <div class="card-title-group">
                                     <i data-feather="credit-card"></i>
-                                    <h2>{{ __('booking.detail.billing_summary') }}</h2>
+                                    <h2>{{ __('order.detail.billing_summary') }}</h2>
                                 </div>
                             </div>
                             <div class="billing-body">
                                 @php
-                                    $subtotal = (float) ($booking->total_price ?? 0) + (float) ($booking->total_discount ?? 0);
-                                    $discount = (float) ($booking->total_discount ?? 0);
-                                    $grandTotal = (float) ($booking->total_price ?? 0);
-                                    $paid = (float) ($booking->paid_amount ?? 0);
-                                    $remaining = (float) ($booking->remaining_amount ?? 0);
+                                    $subtotal = (float) ($order->total_price ?? 0) + (float) ($order->total_discount ?? 0);
+                                    $discount = (float) ($order->total_discount ?? 0);
+                                    $grandTotal = (float) ($order->total_price ?? 0);
+                                    $paid = (float) ($order->paid_amount ?? 0);
+                                    $remaining = (float) ($order->remaining_amount ?? 0);
                                 @endphp
                                 <div class="billing-row">
-                                    <span>{{ __('booking.detail.subtotal') }}</span>
+                                    <span>{{ __('order.detail.subtotal') }}</span>
                                     <span>${{ number_format($subtotal, 2) }}</span>
                                 </div>
                                 <div class="billing-row">
-                                    <span>{{ __('booking.detail.discount') }}</span>
+                                    <span>{{ __('order.detail.discount') }}</span>
                                     <span class="text-danger">- ${{ number_format($discount, 2) }}</span>
                                 </div>
                                 <div class="billing-divider"></div>
                                 <div class="billing-row billing-grand-total">
-                                    <span>{{ __('booking.detail.grand_total') }}</span>
+                                    <span>{{ __('order.detail.grand_total') }}</span>
                                     <span>${{ number_format($grandTotal, 2) }}</span>
                                 </div>
                                 <div class="billing-row billing-paid">
-                                    <span>{{ __('booking.detail.paid_amount') }}</span>
+                                    <span>{{ __('order.detail.paid_amount') }}</span>
                                     <span class="text-success">${{ number_format($paid, 2) }}</span>
                                 </div>
                                 <div class="billing-divider"></div>
                                 <div class="billing-row billing-due">
-                                    <span>{{ __('booking.detail.balance_due') }}</span>
+                                    <span>{{ __('order.detail.balance_due') }}</span>
                                     <span class="{{ $remaining > 0 ? 'text-danger' : 'text-success' }}">
                                         ${{ number_format($remaining, 2) }}
                                     </span>
@@ -459,7 +459,7 @@
                                 @if ($canAddPayment)
                                     <button type="button" class="btn btn-create bg-success btn-system btn-system-success btn-full-width mt-3" @click="openPaymentModal = true">
                                         <i data-feather="check-circle"></i>
-                                        <span>{{ __('booking.button.make_payment') }}</span>
+                                        <span>{{ __('order.button.make_payment') }}</span>
                                     </button>
                                 @endif
                             </div>
@@ -473,7 +473,7 @@
                         <div class="modal-header-custom">
                             <div class="modal-title-wrap">
                                 <i data-feather="plus-circle" class="text-success"></i>
-                                <h3>{{ __('booking.detail.add_payment') }}</h3>
+                                <h3>{{ __('order.detail.add_payment') }}</h3>
                             </div>
                             <button type="button" class="btn-close-modal" :disabled="paymentSubmitting" @click="openPaymentModal = false">
                                 &times;
@@ -483,61 +483,61 @@
                         <form @submit.prevent="submitPayment()">
                             <div class="modal-body-custom">
                                 <div class="form-group-modal">
-                                    <label>{{ __('booking.amount') }} ($) <span class="text-danger">*</span></label>
+                                    <label>{{ __('order.amount') }} ($) <span class="text-danger">*</span></label>
                                     <div class="input-action-wrap">
-                                        <input type="number" step="0.01" min="0.01" max="{{ $booking->remaining_amount }}"
+                                        <input type="number" step="0.01" min="0.01" max="{{ $order->remaining_amount }}"
                                             class="modal-input" x-model="paymentForm.amount" required>
-                                        <button type="button" class="btn-fill-max" @click="paymentForm.amount = {{ (float) $booking->remaining_amount }}">
-                                            {{ __('booking.button.full_balance') }}
+                                        <button type="button" class="btn-fill-max" @click="paymentForm.amount = {{ (float) $order->remaining_amount }}">
+                                            {{ __('order.button.full_balance') }}
                                         </button>
                                     </div>
                                 </div>
 
                                 <div class="form-group-modal">
-                                    <label>{{ __('booking.detail.method') }}</label>
+                                    <label>{{ __('order.detail.method') }}</label>
                                     <div class="payment-method-selector">
                                         <label class="method-option" :class="paymentForm.payment_method === 'Cash' ? 'is-active' : ''">
                                             <input type="radio" value="Cash" x-model="paymentForm.payment_method">
                                             <i data-feather="dollar-sign"></i>
-                                            <span>{{ __('booking.payment.cash') }}</span>
+                                            <span>{{ __('order.payment.cash') }}</span>
                                         </label>
                                         <label class="method-option" :class="paymentForm.payment_method === 'ABA' ? 'is-active' : ''">
                                             <input type="radio" value="ABA" x-model="paymentForm.payment_method">
                                             <i data-feather="credit-card"></i>
-                                            <span>{{ __('booking.payment.aba') }}</span>
+                                            <span>{{ __('order.payment.aba') }}</span>
                                         </label>
                                         <label class="method-option" :class="paymentForm.payment_method === 'Card' ? 'is-active' : ''">
                                             <input type="radio" value="Card" x-model="paymentForm.payment_method">
                                             <i data-feather="server"></i>
-                                            <span>{{ __('booking.payment.card') }}</span>
+                                            <span>{{ __('order.payment.card') }}</span>
                                         </label>
                                         <label class="method-option" :class="paymentForm.payment_method === 'QR' ? 'is-active' : ''">
                                             <input type="radio" value="QR" x-model="paymentForm.payment_method">
                                             <i data-feather="maximize"></i>
-                                            <span>{{ __('booking.payment.qr') }}</span>
+                                            <span>{{ __('order.payment.qr') }}</span>
                                         </label>
                                     </div>
                                 </div>
 
                                 <div class="form-group-modal">
-                                    <label>{{ __('booking.table.pay_date') }}</label>
+                                    <label>{{ __('order.table.pay_date') }}</label>
                                     <input type="datetime-local" class="modal-input" x-model="paymentForm.payment_date">
                                 </div>
 
                                 <div class="form-group-modal">
-                                    <label>{{ __('booking.note') }}</label>
+                                    <label>{{ __('order.note') }}</label>
                                     <textarea class="modal-textarea" rows="3" x-model="paymentForm.note"
-                                        placeholder="{{ __('booking.placeholder.note') }}"></textarea>
+                                        placeholder="{{ __('order.placeholder.note') }}"></textarea>
                                 </div>
                             </div>
 
                             <div class="modal-footer-custom">
                                 <button type="button" class="btn btn-system btn-system-outline btn-system-neutral" :disabled="paymentSubmitting" @click="openPaymentModal = false">
-                                    <span>{{ __('booking.button.close') }}</span>
+                                    <span>{{ __('order.button.close') }}</span>
                                 </button>
                                 <button type="submit" class="btn btn-create bg-success btn-system btn-system-success" :disabled="paymentSubmitting">
-                                    <span x-show="!paymentSubmitting">{{ __('booking.detail.add_payment') }}</span>
-                                    <span x-show="paymentSubmitting">{{ __('booking.button.processing_payment') }}</span>
+                                    <span x-show="!paymentSubmitting">{{ __('order.detail.add_payment') }}</span>
+                                    <span x-show="paymentSubmitting">{{ __('order.button.processing_payment') }}</span>
                                 </button>
                             </div>
                         </form>
@@ -548,12 +548,12 @@
 
                 <!-- Print Only Invoice View - Template 1 (Matching design in invoice_01.png) -->
                 <div class="print-only-invoice print-template-1">
-                    @include('admin::pages.booking.invoice-template')
+                    @include('admin::pages.order.invoice-template')
                 </div>
 
                 <!-- Print Only Invoice View - Template 2 (Matching design in invoice_02.png) -->
                 <div class="print-only-invoice print-template-2">
-                    @include('admin::pages.booking.invoice-template-02')
+                    @include('admin::pages.order.invoice-template-02')
                 </div>
             </div>
         </div>
@@ -613,12 +613,22 @@
 
         /* Breadcrumb */
         .detail-breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            position: static !important;
+            top: auto !important;
+            left: auto !important;
+            z-index: auto !important;
+            height: auto !important;
+            min-height: unset !important;
+            max-height: unset !important;
+            padding: 0 !important;
+            grid-gap: 8px !important;
+            gap: 8px !important;
+            display: flex !important;
+            align-items: center !important;
             font-size: 13px;
             color: #64748b;
             margin-bottom: 16px;
+            background: transparent !important;
         }
         .detail-breadcrumb a {
             display: inline-flex;
@@ -2161,13 +2171,13 @@
             }
         });
 
-        function xBookingDetail() {
+        function xOrderDetail() {
             return {
                 openPaymentModal: false,
                 activePrintTemplate: 'template1',
                 paymentSubmitting: false,
                 paymentForm: {
-                    amount: {{ (float) ($booking->remaining_amount ?? 0) }},
+                    amount: {{ (float) ($order->remaining_amount ?? 0) }},
                     payment_method: 'Cash',
                     payment_date: '{{ \Carbon\Carbon::now()->format('Y-m-d\TH:i') }}',
                     note: ''
@@ -2213,7 +2223,7 @@
                     }
 
                     this.paymentSubmitting = true;
-                    const url = '{{ route('admin-remaining-amount-add-payment', $booking->id) }}';
+                    const url = '{{ route('admin-remaining-amount-add-payment', $order->id) }}';
 
                     try {
                         const response = await Axios.post(url, {
@@ -2226,7 +2236,7 @@
 
                         if (response.data && (response.data.message === 'success' || response.status === 200)) {
                             if (window.toastr) {
-                                toastr.success('{{ __('booking.message.payment_status_success') }}');
+                                toastr.success('{{ __('order.message.payment_status_success') }}');
                             }
                             setTimeout(() => {
                                 window.location.reload();
@@ -2256,18 +2266,18 @@
                     }, 50);
                 },
                 confirmCancel() {
-                    const invoiceName = '{{ $booking->invoice_number ?: '#' . $booking->id }}';
-                    if (!confirm(`Are you sure you want to cancel booking ${invoiceName}?`)) {
+                    const invoiceName = '{{ $order->invoice_number ?: '#' . $order->id }}';
+                    if (!confirm(`Are you sure you want to cancel order ${invoiceName}?`)) {
                         return;
                     }
 
-                    const url = '{{ route('admin-booking-cancel', $booking->id) }}';
+                    const url = '{{ route('admin-order-cancel', $order->id) }}';
                     Axios.post(url, {
                         _token: '{{ csrf_token() }}'
                     }).then((res) => {
                         if (res.data.message === 'success' || res.status === 200) {
                             if (window.toastr) {
-                                toastr.success('{{ __('booking.message.reject_success') }}');
+                                toastr.success('{{ __('order.message.reject_success') }}');
                             }
                             setTimeout(() => {
                                 window.location.reload();
@@ -2276,7 +2286,7 @@
                     }).catch((err) => {
                         const message = err.response?.data?.error ||
                             Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-                            'Failed to cancel booking.';
+                            'Failed to cancel order.';
                         alert(message);
                     });
                 },

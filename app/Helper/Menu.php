@@ -16,13 +16,14 @@ class Menu
             ],
             'icon' => 'bxs-dashboard',
         ],
-        // Booking
+        // Orders
         [
-            'path' => 'admin/booking/list/1',
-            'active' => 'admin/booking*',
-            'permission' => 'booking-view',
+            'path' => 'admin/order/list/1',
+            'active' => 'admin/order*',
+            'permission' => 'order-view',
             'name' => [
-                'en' => 'Bookings',
+                'en' => 'Orders',
+                'km' => 'ការបញ្ជាទិញ',
             ],
             'icon' => 'bxs-book',
         ],
@@ -459,7 +460,7 @@ class Menu
                 // Setting children about and contact
                 [
                     'type'  => 'dropdown-single',
-                    'active' => 'admin/category/*,admin/supplier/*,admin/uom/*,admin/setting/data,admin/reward/*,admin/pointSetting/*,admin/brand/*,admin/brandSetting/*',
+                    'active' => 'admin/category/*,admin/supplier/*,admin/uom/*,admin/setting/data,admin/setting/invoice*,admin/reward/*,admin/pointSetting/*,admin/brand/*,admin/brandSetting/*',
                     'permission' => ['category-view', 'supplier-view', 'uom-view', 'reward-view', 'data-view', 'pointSetting-view', 'brand-view', 'brandSetting-view'],
                     'name' => [
                         'en' => 'Settings',
@@ -520,6 +521,14 @@ class Menu
                             'permission' => 'top-up-rate-view',
                             'name' => [
                                 'en' => 'Top Up Rate',
+                            ],
+                        ],
+                        [
+                            'path' => 'admin/setting/invoice',
+                            'active' => 'admin/setting/invoice*',
+                            'name' => [
+                                'en' => 'Invoice Setting',
+                                'km' => 'ការកំណត់វិក្កយបត្រ',
                             ],
                         ],
     

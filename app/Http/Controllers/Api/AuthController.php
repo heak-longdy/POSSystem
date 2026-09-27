@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\WalletHistory;
 use App\Models\Barber;
 use App\Models\CommissionHistory;
-use App\Models\Booking;
-use App\Models\BookingDetail;
+use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Brand;
 use Illuminate\Support\Facades\Session;
 
@@ -58,10 +58,10 @@ class AuthController extends Controller
             $pending = $wallet->where('status', 1)->sum('amount');
             $reject = $wallet->where('status', 3)->sum('amount');
 
-            $net_earning = Booking::where('barber_id', $barber->id)->sum('total_commission');
-            $id = Booking::where('barber_id', $barber->id)->select('id')->pluck('id');
-            $c_product = BookingDetail::whereIn('booking_id', $id)->where('type', 'product')->sum('product_commission');
-            $c_service = BookingDetail::whereIn('booking_id', $id)->where('type', 'service')->sum('service_commission');
+            $net_earning = Order::where('barber_id', $barber->id)->sum('total_commission');
+            $id = Order::where('barber_id', $barber->id)->select('id')->pluck('id');
+            $c_product = OrderDetail::whereIn('order_id', $id)->where('type', 'product')->sum('product_commission');
+            $c_service = OrderDetail::whereIn('order_id', $id)->where('type', 'service')->sum('service_commission');
 
             $dataUser = [
                 'id' => $barber?->id,
@@ -136,10 +136,10 @@ class AuthController extends Controller
             $pending = $wallet->where('status', 1)->sum('amount');
             $reject = $wallet->where('status', 3)->sum('amount');
 
-            $net_earning = Booking::where('barber_id', $barber->id)->sum('total_commission');
-            $id = Booking::where('barber_id', $barber->id)->select('id')->pluck('id');
-            $c_product = BookingDetail::whereIn('booking_id', $id)->where('type', 'product')->sum('product_commission');
-            $c_service = BookingDetail::whereIn('booking_id', $id)->where('type', 'service')->sum('service_commission');
+            $net_earning = Order::where('barber_id', $barber->id)->sum('total_commission');
+            $id = Order::where('barber_id', $barber->id)->select('id')->pluck('id');
+            $c_product = OrderDetail::whereIn('order_id', $id)->where('type', 'product')->sum('product_commission');
+            $c_service = OrderDetail::whereIn('order_id', $id)->where('type', 'service')->sum('service_commission');
 
             $shop = Shop::where('id', $barber->shop_id)->first();
             if ($shop) {
@@ -239,11 +239,11 @@ class AuthController extends Controller
         $pending = $wallet->where('status', 1)->sum('amount');
         $reject = $wallet->where('status', 3)->sum('amount');
 
-        $net_earning = Booking::where('barber_id', $barber->id)->sum('total_commission');
+        $net_earning = Order::where('barber_id', $barber->id)->sum('total_commission');
 
-        $id = Booking::where('barber_id', $barber->id)->select('id')->pluck('id');
-        $c_product = BookingDetail::whereIn('booking_id', $id)->where('type', 'product')->sum('product_commission');
-        $c_service = BookingDetail::whereIn('booking_id', $id)->where('type', 'service')->sum('service_commission');
+        $id = Order::where('barber_id', $barber->id)->select('id')->pluck('id');
+        $c_product = OrderDetail::whereIn('order_id', $id)->where('type', 'product')->sum('product_commission');
+        $c_service = OrderDetail::whereIn('order_id', $id)->where('type', 'service')->sum('service_commission');
 
         //$pending = $wallet->where('status',1)->sum('amount');
         //$reject = $wallet->where('status',3)->sum('amount');
@@ -345,11 +345,11 @@ class AuthController extends Controller
         $pending = $wallet->where('status', 1)->sum('amount');
         $reject = $wallet->where('status', 3)->sum('amount');
 
-        $net_earning = Booking::where('barber_id', $barber->id)->sum('total_commission');
+        $net_earning = Order::where('barber_id', $barber->id)->sum('total_commission');
 
-        $id = Booking::where('barber_id', $barber->id)->select('id')->pluck('id');
-        $c_product = BookingDetail::whereIn('booking_id', $id)->where('type', 'product')->sum('product_commission');
-        $c_service = BookingDetail::whereIn('booking_id', $id)->where('type', 'service')->sum('service_commission');
+        $id = Order::where('barber_id', $barber->id)->select('id')->pluck('id');
+        $c_product = OrderDetail::whereIn('order_id', $id)->where('type', 'product')->sum('product_commission');
+        $c_service = OrderDetail::whereIn('order_id', $id)->where('type', 'service')->sum('service_commission');
 
         $shop = Shop::where('id', $barber->shop_id)->first();
         if ($shop) {
@@ -449,9 +449,9 @@ class AuthController extends Controller
             $barber = auth('barber-api')->user();
 
             WalletHistory::where('barber_id', $barber->id)->delete();
-            $bookingData = Booking::where('barber_id', $barber->id)->get();
+            $bookingData = Order::where('barber_id', $barber->id)->get();
             foreach ($bookingData as $book) {
-                BookingDetail::where('booking_id', $book->id)->delete();
+                OrderDetail::where('order_id', $book->id)->delete();
                 $book->delete();
             }
             $barber->delete();

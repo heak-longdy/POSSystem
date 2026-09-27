@@ -41,7 +41,7 @@
                         <div class="item bg-success" s-click-link="">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>@lang('dashboard.list.all_booking')</span>
+                                    <span>@lang('dashboard.list.all_order')</span>
                                     <h3>{!! number_format($booking->totalBookingAll, 2) !!}&nbsp;KHR</h3>
                                 </div>
                             </div>
@@ -163,7 +163,7 @@
                     </div>
 
                     <div class="charts-card" style="width: calc(100% - 25px) !important;margin-right: 0;">
-                        <p class="chart-title">@lang('dashboard.list.booking_by_time')</p>
+                        <p class="chart-title">@lang('dashboard.list.order_by_time')</p>
                         <div id="chart">
                         </div>
                     </div>

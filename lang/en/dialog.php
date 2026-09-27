@@ -21,9 +21,9 @@ return [
         'approve_member_car' => 'Are you want to approve member<label>:member</label> to member car <b>:name</b>?',
         'cancel_member_car' => 'Are you want to cancel member<label>:member</label> to member car <b>:name</b>?',
         'order' => [
-            'confirm' => 'Are you sure to confirm booking invoice number <b>:number</b> ?',
-            'cancel' => 'Are you sure to cancel booking invoice number <b>:number</b> ?',
-            'complete' => 'Are you sure to complete booking invoice number <b>:number</b> ?',
+            'confirm' => 'Are you sure to confirm order invoice number <b>:number</b> ?',
+            'cancel' => 'Are you sure to cancel order invoice number <b>:number</b> ?',
+            'complete' => 'Are you sure to complete order invoice number <b>:number</b> ?',
         ],
         'copy' => 'Are you sure to copy <b>:name</b> ?',
         'carReport' => 'Are you sure view report.',

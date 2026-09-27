@@ -2,10 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Booking;
-use App\Models\BookingDetail;
-use App\Models\BookingPayment;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\Service;
 use App\Models\Shop;
 use App\Models\User;
@@ -21,7 +19,7 @@ class RemainingAmountLocalizationTest extends TestCase
     protected User $enUser;
     protected Shop $shop;
     protected Customer $customer;
-    protected Booking $booking;
+    protected Order $order;
 
     protected function setUp(): void
     {
@@ -33,14 +31,14 @@ class RemainingAmountLocalizationTest extends TestCase
             'status' => 1,
             'language_preference' => 'km',
         ]);
-        $this->kmUser->givePermissionTo(['booking-view', 'booking-update', 'booking-delete']);
+        $this->kmUser->givePermissionTo(['order-view', 'order-update', 'order-delete']);
 
         $this->enUser = User::factory()->create([
             'role' => 'admin',
             'status' => 1,
             'language_preference' => 'en',
         ]);
-        $this->enUser->givePermissionTo(['booking-view', 'booking-update', 'booking-delete']);
+        $this->enUser->givePermissionTo(['order-view', 'order-update', 'order-delete']);
 
         $this->shop = Shop::create([
             'name' => 'TK Central',
@@ -55,14 +53,14 @@ class RemainingAmountLocalizationTest extends TestCase
             'user' => $this->kmUser->id,
         ]);
 
-        $this->booking = Booking::create([
+        $this->order = Order::create([
             'invoice_number' => 'INV-' . rand(1000, 9999),
             'customer_id' => $this->customer->id,
             'shop_id' => $this->shop->id,
             'total_price' => 100.00,
             'paid_amount' => 30.00,
             'payment_status' => 'Partial',
-            'booking_date' => now(),
+            'order_date' => now(),
         ]);
     }
 
@@ -84,7 +82,7 @@ class RemainingAmountLocalizationTest extends TestCase
         // Excel Report Button
         $response->assertSee('របាយការណ៍ទឹកប្រាក់នៅសល់');
         // Table Headers
-        $response->assertSee('លេខកូដកក់');
+        $response->assertSee('លេខកូដបញ្ជាទិញ');
         $response->assertSee('ហាង');
         $response->assertSee('អតិថិជន');
         $response->assertSee('សេវាកម្ម/ផលិតផល');
@@ -92,7 +90,7 @@ class RemainingAmountLocalizationTest extends TestCase
         $response->assertSee('សរុប');
         $response->assertSee('បានបង់');
         $response->assertSee('នៅសល់');
-        $response->assertSee('កាលបរិច្ឆេទកក់');
+        $response->assertSee('កាលបរិច្ឆេទបញ្ជាទិញ');
         $response->assertSee('សកម្មភាព');
         // Localized badge in table
         $response->assertSee('បង់ប្រាក់ខ្លះ');
@@ -126,7 +124,7 @@ class RemainingAmountLocalizationTest extends TestCase
         $response->assertSee('Pending Payment');
         $response->assertSee('Fully Paid');
         $response->assertSee('Remaining Amount Report');
-        $response->assertSee('Booking ID');
+        $response->assertSee('Order ID');
         $response->assertSee('Shop');
         $response->assertSee('Customer');
         $response->assertSee('Action');
@@ -143,7 +141,7 @@ class RemainingAmountLocalizationTest extends TestCase
         $this->actingAs($this->kmUser);
 
         // Submit amount exceeding remaining amount (remaining is 70)
-        $response = $this->postJson(route('admin-remaining-amount-add-payment', $this->booking->id), [
+        $response = $this->postJson(route('admin-remaining-amount-add-payment', $this->order->id), [
             'amount' => 999.00,
             'payment_method' => 'Cash',
         ]);
@@ -159,32 +157,32 @@ class RemainingAmountLocalizationTest extends TestCase
     {
         $this->actingAs($this->kmUser);
 
-        $response = $this->postJson(route('admin-remaining-amount-send-reminder', $this->booking->id));
+        $response = $this->postJson(route('admin-remaining-amount-send-reminder', $this->order->id));
 
         $response->assertStatus(200);
         $response->assertJson([
             'message' => 'success',
             'status' => 200,
-            'success_message' => __('remaining_amount.message.reminder_sent_booking', ['invoice' => $this->booking->invoice_number]),
+            'success_message' => __('remaining_amount.message.reminder_sent_order', ['invoice' => $this->order->invoice_number]),
         ]);
     }
 
     /** @test */
     public function it_returns_localized_details_fallback_for_walk_in_customer()
     {
-        $walkInBooking = Booking::create([
+        $walkInOrder = Order::create([
             'invoice_number' => 'INV-' . rand(1000, 9999),
             'customer_id' => null,
             'shop_id' => $this->shop->id,
             'total_price' => 50.00,
             'paid_amount' => 0.00,
             'payment_status' => 'Pending',
-            'booking_date' => now(),
+            'order_date' => now(),
         ]);
 
         $this->actingAs($this->kmUser);
 
-        $response = $this->getJson(route('admin-remaining-amount-payment-details', $walkInBooking->id));
+        $response = $this->getJson(route('admin-remaining-amount-payment-details', $walkInOrder->id));
 
         $response->assertStatus(200);
         $response->assertJson([

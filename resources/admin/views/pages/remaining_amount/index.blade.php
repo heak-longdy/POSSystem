@@ -1,7 +1,7 @@
 @extends('admin::shared.layout')
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('remaining_amount.title')])
-    <div class="content-wrapper booking-listing-wrapper" id="app" x-data="xRemainingAmount">
+    <div class="content-wrapper order-listing-wrapper remaining-amount-wrapper" id="app" x-data="xRemainingAmount">
         @php
             $tabQuery = request()->except(['page', 'payment_status']);
             $tabUrl = function ($tabStatus) use ($tabQuery) {
@@ -55,16 +55,16 @@
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => __('booking.table.no'), 'class' => '', 'colVal' => 4],
-                ['field' => 'invoice_title', 'title' => __('booking.table.booking_id'), 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'shop_title', 'title' => __('booking.table.shop'), 'class' => 'text left', 'colVal' => 12],
-                ['field' => 'customer_title', 'title' => __('booking.table.customer'), 'class' => 'text left', 'colVal' => 14],
-                ['field' => 'booking_items_title', 'title' => __('booking.table.services_products'), 'class' => 'text left', 'colVal' => 18],
-                ['field' => 'payment_status_title', 'title' => __('booking.table.pay_status'), 'class' => '', 'colVal' => 10],
-                ['field' => 'total_price_title', 'title' => __('booking.table.total'), 'class' => '', 'colVal' => 8],
-                ['field' => 'paid_amount_title', 'title' => __('booking.table.paid'), 'class' => '', 'colVal' => 8],
-                ['field' => 'remaining_amount_title', 'title' => __('booking.table.remaining'), 'class' => 'text-danger font-weight-bold', 'colVal' => 8],
-                ['field' => 'booking_date_title', 'title' => __('booking.table.booking_date'), 'class' => '', 'colVal' => 10],
+                ['field' => 'index', 'title' => __('order.table.no'), 'class' => '', 'colVal' => 4],
+                ['field' => 'invoice_title', 'title' => __('order.table.order_id'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'shop_title', 'title' => __('order.table.shop'), 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'customer_title', 'title' => __('order.table.customer'), 'class' => 'text left', 'colVal' => 14],
+                ['field' => 'order_items_title', 'title' => __('order.table.services_products'), 'class' => 'text left', 'colVal' => 18],
+                ['field' => 'payment_status_title', 'title' => __('order.table.pay_status'), 'class' => '', 'colVal' => 10],
+                ['field' => 'total_price_title', 'title' => __('order.table.total'), 'class' => '', 'colVal' => 8],
+                ['field' => 'paid_amount_title', 'title' => __('order.table.paid'), 'class' => '', 'colVal' => 8],
+                ['field' => 'remaining_amount_title', 'title' => __('order.table.remaining'), 'class' => 'text-danger font-weight-bold', 'colVal' => 8],
+                ['field' => 'order_date_title', 'title' => __('order.table.order_date'), 'class' => '', 'colVal' => 10],
                 [
                     'field' => 'action',
                     'title' => __('global.table.action'),
@@ -142,16 +142,16 @@
         ])
         @endcomponent
 
-        <!-- Dedicated Add Payment Modal (Similar to Booking Detail) -->
+        <!-- Dedicated Add Payment Modal (Similar to Order Detail) -->
         <div class="modal-backdrop-custom" x-show="showAddPaymentModal" x-transition.opacity style="display: none;">
             <div class="modal-dialog-custom" @click.away="if (!addPaymentSubmitting) closeAddPaymentModal()">
                 <div class="modal-header-custom">
                     <div class="modal-title-wrap">
                         <i data-feather="plus-circle" class="text-success"></i>
                         <div>
-                            <h3>{{ __('booking.detail.add_payment') }}</h3>
+                            <h3>{{ __('order.detail.add_payment') }}</h3>
                             <div class="modal-subtitle-text"
-                                x-text="`${addPaymentBooking?.invoice_number || addPaymentBooking?.invoice_title || ''} • ${addPaymentBooking?.customer_name || (addPaymentBooking?.customer ? (addPaymentBooking.customer.name || addPaymentBooking.customer.phone) : '') || @json(__('booking.walk_in_customer'))}`">
+                                x-text="`${addPaymentOrder?.invoice_number || addPaymentOrder?.invoice_title || ''} • ${addPaymentOrder?.customer_name || (addPaymentOrder?.customer ? (addPaymentOrder.customer.name || addPaymentOrder.customer.phone) : '') || @json(__('order.walk_in_customer'))}`">
                             </div>
                         </div>
                     </div>
@@ -164,65 +164,65 @@
                     <div class="modal-body-custom">
                         <div class="remaining-info-box">
                             <span class="info-label">{{ __('remaining_amount.ledger.remaining_balance') }}</span>
-                            <strong class="info-val text-danger" x-text="formatCurrency(addPaymentBooking?.remaining_amount)"></strong>
+                            <strong class="info-val text-danger" x-text="formatCurrency(addPaymentOrder?.remaining_amount)"></strong>
                         </div>
 
                         <div class="form-group-modal">
-                            <label>{{ __('booking.amount') }} ($) <span class="text-danger">*</span></label>
+                            <label>{{ __('order.amount') }} ($) <span class="text-danger">*</span></label>
                             <div class="input-action-wrap">
-                                <input type="number" step="0.01" min="0.01" :max="addPaymentBooking?.remaining_amount"
+                                <input type="number" step="0.01" min="0.01" :max="addPaymentOrder?.remaining_amount"
                                     class="modal-input" x-model="addPaymentForm.amount" required placeholder="0.00">
-                                <button type="button" class="btn-fill-max" @click="addPaymentForm.amount = Number(addPaymentBooking?.remaining_amount || 0)">
-                                    {{ __('booking.button.full_balance') }}
+                                <button type="button" class="btn-fill-max" @click="addPaymentForm.amount = Number(addPaymentOrder?.remaining_amount || 0)">
+                                    {{ __('order.button.full_balance') }}
                                 </button>
                             </div>
                         </div>
 
                         <div class="form-group-modal">
-                            <label>{{ __('booking.detail.method') }}</label>
+                            <label>{{ __('order.detail.method') }}</label>
                             <div class="payment-method-selector">
                                 <label class="method-option" :class="addPaymentForm.payment_method === 'Cash' ? 'is-active' : ''">
                                     <input type="radio" value="Cash" x-model="addPaymentForm.payment_method">
                                     <i data-feather="dollar-sign"></i>
-                                    <span>{{ __('booking.payment.cash') }}</span>
+                                    <span>{{ __('order.payment.cash') }}</span>
                                 </label>
                                 <label class="method-option" :class="addPaymentForm.payment_method === 'ABA' ? 'is-active' : ''">
                                     <input type="radio" value="ABA" x-model="addPaymentForm.payment_method">
                                     <i data-feather="credit-card"></i>
-                                    <span>{{ __('booking.payment.aba') }}</span>
+                                    <span>{{ __('order.payment.aba') }}</span>
                                 </label>
                                 <label class="method-option" :class="addPaymentForm.payment_method === 'Card' ? 'is-active' : ''">
                                     <input type="radio" value="Card" x-model="addPaymentForm.payment_method">
                                     <i data-feather="server"></i>
-                                    <span>{{ __('booking.payment.card') }}</span>
+                                    <span>{{ __('order.payment.card') }}</span>
                                 </label>
                                 <label class="method-option" :class="addPaymentForm.payment_method === 'QR' ? 'is-active' : ''">
                                     <input type="radio" value="QR" x-model="addPaymentForm.payment_method">
                                     <i data-feather="maximize"></i>
-                                    <span>{{ __('booking.payment.qr') }}</span>
+                                    <span>{{ __('order.payment.qr') }}</span>
                                 </label>
                             </div>
                         </div>
 
                         <div class="form-group-modal">
-                            <label>{{ __('booking.table.pay_date') }}</label>
+                            <label>{{ __('order.table.pay_date') }}</label>
                             <input type="datetime-local" class="modal-input" x-model="addPaymentForm.payment_date">
                         </div>
 
                         <div class="form-group-modal">
-                            <label>{{ __('booking.note') }}</label>
+                            <label>{{ __('order.note') }}</label>
                             <textarea class="modal-textarea" rows="3" x-model="addPaymentForm.note"
-                                placeholder="{{ __('booking.placeholder.note') }}"></textarea>
+                                placeholder="{{ __('order.placeholder.note') }}"></textarea>
                         </div>
                     </div>
 
                     <div class="modal-footer-custom">
                         <button type="button" class="btn btn-system btn-system-outline btn-system-neutral" :disabled="addPaymentSubmitting" @click="closeAddPaymentModal()">
-                            <span>{{ __('booking.button.close') }}</span>
+                            <span>{{ __('order.button.close') }}</span>
                         </button>
                         <button type="submit" class="btn btn-create bg-success btn-system btn-system-success" :disabled="addPaymentSubmitting">
-                            <span x-show="!addPaymentSubmitting">{{ __('booking.detail.add_payment') }}</span>
-                            <span x-show="addPaymentSubmitting" style="display: none;">{{ __('booking.button.processing_payment') }}</span>
+                            <span x-show="!addPaymentSubmitting">{{ __('order.detail.add_payment') }}</span>
+                            <span x-show="addPaymentSubmitting" style="display: none;">{{ __('order.button.processing_payment') }}</span>
                         </button>
                     </div>
                 </form>
@@ -240,8 +240,8 @@
                                 <i class='bx bx-wallet'></i>
                             </div>
                             <div>
-                                <h3 class="modal-title" x-text="`{{ __('booking.table.booking_id') }}: ${activeBooking?.invoice_number || ''}`"></h3>
-                                <p class="modal-subtitle" x-text="`${activeBooking?.customer_name || @json(__('booking.walk_in_customer'))} • ${activeBooking?.shop_name || @json(__('booking.table.shop'))}`"></p>
+                                <h3 class="modal-title" x-text="`{{ __('order.table.order_id') }}: ${activeOrder?.invoice_number || ''}`"></h3>
+                                <p class="modal-subtitle" x-text="`${activeOrder?.customer_name || @json(__('order.walk_in_customer'))} • ${activeOrder?.shop_name || @json(__('order.table.shop'))}`"></p>
                             </div>
                         </div>
                         <button type="button" class="btn-close-modal" @click="closePaymentModal()">&times;</button>
@@ -253,15 +253,15 @@
                         <div class="modal-ledger-summary">
                             <div class="summary-col">
                                 <span class="summary-label">{{ __('remaining_amount.ledger.total_amount') }}</span>
-                                <strong class="summary-val" x-text="activeBooking?.total_price_formatted || '$0.00'"></strong>
+                                <strong class="summary-val" x-text="activeOrder?.total_price_formatted || '$0.00'"></strong>
                             </div>
                             <div class="summary-col">
                                 <span class="summary-label">{{ __('remaining_amount.ledger.amount_paid') }}</span>
-                                <strong class="summary-val text-success" x-text="activeBooking?.paid_amount_formatted || '$0.00'"></strong>
+                                <strong class="summary-val text-success" x-text="activeOrder?.paid_amount_formatted || '$0.00'"></strong>
                             </div>
                             <div class="summary-col">
                                 <span class="summary-label">{{ __('remaining_amount.ledger.remaining_balance') }}</span>
-                                <strong class="summary-val text-danger" x-text="activeBooking?.remaining_amount_formatted || '$0.00'"></strong>
+                                <strong class="summary-val text-danger" x-text="activeOrder?.remaining_amount_formatted || '$0.00'"></strong>
                             </div>
                         </div>
 
@@ -272,35 +272,35 @@
                                     :class="modalStatusClass()"></div>
                             </div>
                             <div class="progress-meta">
-                                <span x-text="`{{ __('booking.status_label') }}: ${paymentStatusLabel(activeBooking?.payment_status)}`"
-                                    :class="'badge-' + (activeBooking?.payment_status || 'pending').toLowerCase()"></span>
-                                <span x-text="`${modalProgressPercent()}% {{ __('booking.paid') }}`"></span>
+                                <span x-text="`{{ __('order.status_label') }}: ${paymentStatusLabel(activeOrder?.payment_status)}`"
+                                    :class="'badge-' + (activeOrder?.payment_status || 'pending').toLowerCase()"></span>
+                                <span x-text="`${modalProgressPercent()}% {{ __('order.paid') }}`"></span>
                             </div>
                         </div>
 
                         <!-- Modal Tabs -->
                         <div class="modal-nav-tabs">
                             <button type="button" class="modal-tab-btn" :class="{ 'is-active': activeModalTab === 'pay' }"
-                                @click="activeModalTab = 'pay'" x-show="activeBooking?.remaining_amount > 0">
+                                @click="activeModalTab = 'pay'" x-show="activeOrder?.remaining_amount > 0">
                                 <i class='bx bx-plus-circle'></i> {{ __('remaining_amount.modal.make_payment') }}
                             </button>
                             <button type="button" class="modal-tab-btn" :class="{ 'is-active': activeModalTab === 'history' }"
                                 @click="activeModalTab = 'history'">
-                                <i class='bx bx-history'></i> {{ __('remaining_amount.modal.payment_history') }} (<span x-text="activeBooking?.payments?.length || 0"></span>)
+                                <i class='bx bx-history'></i> {{ __('remaining_amount.modal.payment_history') }} (<span x-text="activeOrder?.payments?.length || 0"></span>)
                             </button>
                         </div>
 
                         <!-- Tab 1: Make Payment Form -->
-                        <div class="modal-tab-content" x-show="activeModalTab === 'pay' && activeBooking?.remaining_amount > 0">
+                        <div class="modal-tab-content" x-show="activeModalTab === 'pay' && activeOrder?.remaining_amount > 0">
                             <form @submit.prevent="submitModalPayment()">
                                 <div class="modal-form-grid">
                                     <div class="modal-form-group">
                                         <label>{{ __('remaining_amount.form.payment_amount') }} <span class="text-danger">*</span></label>
                                         <div class="input-with-action">
-                                            <input type="number" step="0.01" min="0.01" :max="activeBooking?.remaining_amount"
+                                            <input type="number" step="0.01" min="0.01" :max="activeOrder?.remaining_amount"
                                                 x-model="paymentForm.amount" class="modal-input" placeholder="0.00" required>
                                             <button type="button" class="btn-quick-full"
-                                                @click="paymentForm.amount = activeBooking?.remaining_amount">
+                                                @click="paymentForm.amount = activeOrder?.remaining_amount">
                                                 {{ __('remaining_amount.form.full_balance') }}
                                             </button>
                                         </div>
@@ -311,22 +311,22 @@
                                             <label class="method-option" :class="paymentForm.payment_method === 'Cash' ? 'is-active' : ''">
                                                 <input type="radio" value="Cash" x-model="paymentForm.payment_method">
                                                 <i data-feather="dollar-sign"></i>
-                                                <span>{{ __('booking.payment.cash') }}</span>
+                                                <span>{{ __('order.payment.cash') }}</span>
                                             </label>
                                             <label class="method-option" :class="paymentForm.payment_method === 'ABA' ? 'is-active' : ''">
                                                 <input type="radio" value="ABA" x-model="paymentForm.payment_method">
                                                 <i data-feather="credit-card"></i>
-                                                <span>{{ __('booking.payment.aba') }}</span>
+                                                <span>{{ __('order.payment.aba') }}</span>
                                             </label>
                                             <label class="method-option" :class="paymentForm.payment_method === 'Card' ? 'is-active' : ''">
                                                 <input type="radio" value="Card" x-model="paymentForm.payment_method">
                                                 <i data-feather="server"></i>
-                                                <span>{{ __('booking.payment.card') }}</span>
+                                                <span>{{ __('order.payment.card') }}</span>
                                             </label>
                                             <label class="method-option" :class="paymentForm.payment_method === 'QR' ? 'is-active' : ''">
                                                 <input type="radio" value="QR" x-model="paymentForm.payment_method">
                                                 <i data-feather="maximize"></i>
-                                                <span>{{ __('booking.payment.qr') }}</span>
+                                                <span>{{ __('order.payment.qr') }}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -341,14 +341,14 @@
                                 </div>
                                 <div class="modal-form-actions">
                                     <button type="button" class="btn-secondary-action" :disabled="reminderLoading"
-                                        @click="sendReminderNotification()" x-show="activeBooking?.remaining_amount > 0">
+                                        @click="sendReminderNotification()" x-show="activeOrder?.remaining_amount > 0">
                                         <i class='bx bx-bell'></i>
                                         <span x-show="!reminderLoading">{{ __('remaining_amount.action.send_reminder') }}</span>
                                         <span x-show="reminderLoading" style="display: none;">{{ __('remaining_amount.button.sending') }}</span>
                                     </button>
                                     <button type="submit" class="btn-primary-action" :disabled="paymentSubmitting">
                                         <i class='bx bx-check-circle' x-show="!paymentSubmitting"></i>
-                                        <span x-show="!paymentSubmitting">{{ __('booking.record_payment') }}</span>
+                                        <span x-show="!paymentSubmitting">{{ __('order.record_payment') }}</span>
                                         <span x-show="paymentSubmitting" style="display: none;">{{ __('remaining_amount.button.processing_payment') }}</span>
                                     </button>
                                 </div>
@@ -356,15 +356,15 @@
                         </div>
 
                         <!-- Tab 2: Payment History Table -->
-                        <div class="modal-tab-content" x-show="activeModalTab === 'history' || activeBooking?.remaining_amount <= 0">
+                        <div class="modal-tab-content" x-show="activeModalTab === 'history' || activeOrder?.remaining_amount <= 0">
                             <div class="history-table-container">
-                                <template x-if="!activeBooking?.payments || activeBooking?.payments?.length === 0">
+                                <template x-if="!activeOrder?.payments || activeOrder?.payments?.length === 0">
                                     <div class="empty-history-state">
                                         <i class='bx bx-folder-open'></i>
                                         <p>{{ __('remaining_amount.history.empty') }}</p>
                                     </div>
                                 </template>
-                                <template x-if="activeBooking?.payments && activeBooking?.payments?.length > 0">
+                                <template x-if="activeOrder?.payments && activeOrder?.payments?.length > 0">
                                     <table class="history-data-table">
                                         <thead>
                                             <tr>
@@ -377,7 +377,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template x-for="pay in activeBooking.payments" :key="pay.id">
+                                            <template x-for="pay in activeOrder.payments" :key="pay.id">
                                                 <tr>
                                                     <!-- Normal Row View -->
                                                     <template x-if="editingPaymentId !== pay.id">
@@ -400,10 +400,10 @@
                                                     </template>
                                                     <template x-if="editingPaymentId !== pay.id">
                                                         <td style="text-align:right;">
-                                                            <button type="button" class="btn-table-icon" @click="startEditPayment(pay)" title="{{ __('booking.action.edit') }}">
+                                                            <button type="button" class="btn-table-icon" @click="startEditPayment(pay)" title="{{ __('remaining_amount.action.edit_payment') }}">
                                                                 <i class='bx bx-edit'></i>
                                                             </button>
-                                                            <button type="button" class="btn-table-icon text-danger" @click="deletePayment(pay)" title="{{ __('booking.action.delete') }}">
+                                                            <button type="button" class="btn-table-icon text-danger" @click="deletePayment(pay)" title="{{ __('remaining_amount.action.delete_payment') }}">
                                                                 <i class='bx bx-trash'></i>
                                                             </button>
                                                         </td>
@@ -420,10 +420,10 @@
                                                                 <div class="edit-field">
                                                                     <label>{{ __('remaining_amount.history.method') }}</label>
                                                                     <select x-model="editPaymentForm.payment_method" class="modal-select-sm">
-                                                                        <option value="Cash">{{ __('booking.payment.cash') }}</option>
-                                                                        <option value="ABA">{{ __('booking.payment.aba') }}</option>
-                                                                        <option value="Card">{{ __('booking.payment.card') }}</option>
-                                                                        <option value="QR">{{ __('booking.payment.qr') }}</option>
+                                                                        <option value="Cash">{{ __('order.payment.cash') }}</option>
+                                                                        <option value="ABA">{{ __('order.payment.aba') }}</option>
+                                                                        <option value="Card">{{ __('order.payment.card') }}</option>
+                                                                        <option value="QR">{{ __('order.payment.qr') }}</option>
                                                                     </select>
                                                                 </div>
                                                                 <div class="edit-field">
@@ -432,7 +432,7 @@
                                                                 </div>
                                                                 <div class="edit-field" style="grid-column: span 3;">
                                                                     <label>{{ __('remaining_amount.history.note') }}</label>
-                                                                    <input type="text" x-model="editPaymentForm.note" class="modal-input-sm" placeholder="{{ __('booking.placeholder.note') }}">
+                                                                    <input type="text" x-model="editPaymentForm.note" class="modal-input-sm" placeholder="{{ __('order.placeholder.note') }}">
                                                                 </div>
                                                                 <div class="edit-actions" style="grid-column: span 3; justify-content: flex-end; display: flex; gap: 8px;">
                                                                     <button type="button" class="btn-cancel-sm" @click="cancelEditPayment()">{{ __('action_button.cancel') }}</button>
@@ -735,8 +735,8 @@
                 showPaymentModal: false,
                 showAddPaymentModal: false,
                 activeModalTab: 'pay',
-                activeBooking: null,
-                addPaymentBooking: null,
+                activeOrder: null,
+                addPaymentOrder: null,
                 paymentSubmitting: false,
                 addPaymentSubmitting: false,
                 reminderLoading: false,
@@ -780,7 +780,7 @@
                 },
                 fetchSelectShop() {
                     $('#shop_id').select2({
-                        placeholder: @json(__('booking.select_shop')),
+                        placeholder: @json(__('order.select_shop')),
                         ajax: {
                             url: '{{ route('admin-select-shop') }}',
                             dataType: 'json',
@@ -800,7 +800,7 @@
                 },
                 fetchSelectBarber() {
                     $('#barber_id').select2({
-                        placeholder: @json(__('booking.select_barber')),
+                        placeholder: @json(__('order.select_barber')),
                         ajax: {
                             url: '{{ route('admin-select-barber') }}',
                             dataType: 'json',
@@ -820,24 +820,24 @@
                 },
                 paymentStatusLabel(status) {
                     const map = {
-                        'Paid': @json(__('booking.status.paid')),
-                        'Partial': @json(__('booking.status.partial')),
-                        'Cancel': @json(__('booking.status.rejected')),
-                        'Pending': @json(__('booking.status.pending')),
+                        'Paid': @json(__('order.status.paid')),
+                        'Partial': @json(__('order.status.partial')),
+                        'Cancel': @json(__('order.status.canceled')),
+                        'Pending': @json(__('order.status.pending')),
                     };
-                    return map[status] || status || @json(__('booking.status.pending'));
+                    return map[status] || status || @json(__('order.status.pending'));
                 },
                 paymentMethodLabel(method) {
                     const map = {
-                        'Cash': @json(__('booking.payment.cash')),
-                        'ABA': @json(__('booking.payment.aba')),
-                        'Card': @json(__('booking.payment.card')),
-                        'QR': @json(__('booking.payment.qr')),
+                        'Cash': @json(__('order.payment.cash')),
+                        'ABA': @json(__('order.payment.aba')),
+                        'Card': @json(__('order.payment.card')),
+                        'QR': @json(__('order.payment.qr')),
                     };
                     return map[method] || method || 'Cash';
                 },
                 openAddPaymentModal(item) {
-                    this.addPaymentBooking = item;
+                    this.addPaymentOrder = item;
                     this.showAddPaymentModal = true;
                     this.addPaymentSubmitting = false;
                     const initialAmount = (item && Number(item.remaining_amount) > 0)
@@ -860,35 +860,35 @@
                         Axios.get(`{{ url('admin/remaining-amount/payment-details') }}/${item.id}`)
                             .then((res) => {
                                 if (res.data) {
-                                    this.addPaymentBooking = res.data;
+                                    this.addPaymentOrder = res.data;
                                     if (!this.addPaymentForm.amount && res.data.remaining_amount) {
                                         this.addPaymentForm.amount = Number(res.data.remaining_amount);
                                     }
                                 }
                             })
                             .catch((err) => {
-                                console.error('Error fetching booking details for Add Payment:', err);
+                                console.error('Error fetching order details for Add Payment:', err);
                             });
                     }
                 },
                 closeAddPaymentModal() {
                     this.showAddPaymentModal = false;
-                    this.addPaymentBooking = null;
+                    this.addPaymentOrder = null;
                     this.addPaymentSubmitting = false;
                 },
                 async submitAddPayment() {
-                    if (this.addPaymentSubmitting || !this.addPaymentBooking?.id) return;
+                    if (this.addPaymentSubmitting || !this.addPaymentOrder?.id) return;
                     if (!this.addPaymentForm.amount || Number(this.addPaymentForm.amount) <= 0) {
-                        alert(@json(__('booking.validation.payment_amount_required') ?: 'Please enter a valid payment amount.'));
+                        alert(@json(__('order.validation.payment_amount_required') ?: 'Please enter a valid payment amount.'));
                         return;
                     }
-                    if (Number(this.addPaymentForm.amount) > Number(this.addPaymentBooking.remaining_amount || 0)) {
-                        alert(@json(__('booking.validation.payment_amount_exceeds') ?: 'Payment amount exceeds available balance.'));
+                    if (Number(this.addPaymentForm.amount) > Number(this.addPaymentOrder.remaining_amount || 0)) {
+                        alert(@json(__('order.validation.payment_amount_exceeds') ?: 'Payment amount exceeds available balance.'));
                         return;
                     }
 
                     this.addPaymentSubmitting = true;
-                    const url = `{{ url('admin/remaining-amount/add-payment') }}/${this.addPaymentBooking.id}`;
+                    const url = `{{ url('admin/remaining-amount/add-payment') }}/${this.addPaymentOrder.id}`;
 
                     try {
                         const response = await Axios.post(url, {
@@ -901,11 +901,11 @@
 
                         if (response.data && (response.data.message === 'success' || response.status === 200)) {
                             if (window.toastr) {
-                                toastr.success(@json(__('booking.message.payment_status_success')));
+                                toastr.success(@json(__('order.message.payment_status_success')));
                             } else if (window.iziToast) {
                                 iziToast.success({
                                     title: 'Success',
-                                    message: @json(__('booking.message.payment_status_success')),
+                                    message: @json(__('order.message.payment_status_success')),
                                     position: 'topRight'
                                 });
                             }
@@ -916,7 +916,7 @@
                             this.addPaymentSubmitting = false;
                         }
                     } catch (error) {
-                        this.addPaymentSubmitting = false;
+                        this.paymentSubmitting = false;
                         const errorMsg = error.response?.data?.error ||
                             Object.values(error.response?.data?.errors || {})?.[0]?.[0] ||
                             @json(__('remaining_amount.message.error_record_payment'));
@@ -924,7 +924,7 @@
                     }
                 },
                 openPaymentModal(item) {
-                    this.activeBooking = item;
+                    this.activeOrder = item;
                     this.showPaymentModal = true;
                     this.activeModalTab = (item?.remaining_amount > 0) ? 'pay' : 'history';
                     this.editingPaymentId = null;
@@ -943,8 +943,8 @@
 
                     Axios.get(`{{ url('admin/remaining-amount/payment-details') }}/${item.id}`)
                         .then((res) => {
-                            this.activeBooking = res.data;
-                            if (this.activeBooking.remaining_amount <= 0) {
+                            this.activeOrder = res.data;
+                            if (this.activeOrder.remaining_amount <= 0) {
                                 this.activeModalTab = 'history';
                             }
                         })
@@ -954,37 +954,37 @@
                 },
                 closePaymentModal() {
                     this.showPaymentModal = false;
-                    this.activeBooking = null;
+                    this.activeOrder = null;
                     this.editingPaymentId = null;
                 },
                 modalProgressPercent() {
-                    if (!this.activeBooking) return 0;
-                    const total = Number(this.activeBooking.total_price || 0);
-                    const paid = Number(this.activeBooking.paid_amount || 0);
+                    if (!this.activeOrder) return 0;
+                    const total = Number(this.activeOrder.total_price || 0);
+                    const paid = Number(this.activeOrder.paid_amount || 0);
                     if (total <= 0) return 0;
                     return Math.min(100, Math.max(0, Math.round((paid / total) * 100)));
                 },
                 modalStatusClass() {
-                    const status = this.activeBooking?.payment_status;
+                    const status = this.activeOrder?.payment_status;
                     if (status === 'Paid') return 'fill-paid';
                     if (status === 'Partial') return 'fill-partial';
                     return 'fill-pending';
                 },
                 submitModalPayment() {
-                    if (!this.activeBooking?.id) return;
+                    if (!this.activeOrder?.id) return;
                     this.paymentSubmitting = true;
 
-                    Axios.post(`{{ url('admin/remaining-amount/add-payment') }}/${this.activeBooking.id}`, {
+                    Axios.post(`{{ url('admin/remaining-amount/add-payment') }}/${this.activeOrder.id}`, {
                         amount: this.paymentForm.amount,
                         payment_method: this.paymentForm.payment_method,
                         payment_date: this.paymentForm.payment_date,
                         note: this.paymentForm.note,
                     }).then((res) => {
-                        this.activeBooking = res.data;
-                        this.paymentForm.amount = this.activeBooking.remaining_amount || null;
+                        this.activeOrder = res.data;
+                        this.paymentForm.amount = this.activeOrder.remaining_amount || null;
                         this.paymentForm.note = '';
                         this.paymentForm.payment_date = moment().format('YYYY-MM-DDTHH:mm');
-                        if (this.activeBooking.remaining_amount <= 0) {
+                        if (this.activeOrder.remaining_amount <= 0) {
                             this.activeModalTab = 'history';
                         }
                         reloadData(`{{ url()->full() }}`);
@@ -1017,7 +1017,7 @@
                         payment_date: this.editPaymentForm.payment_date,
                         note: this.editPaymentForm.note,
                     }).then((res) => {
-                        this.activeBooking = res.data;
+                        this.activeOrder = res.data;
                         this.cancelEditPayment();
                         reloadData(`{{ url()->full() }}`);
                     }).catch((err) => {
@@ -1061,12 +1061,12 @@
                     const template = @json(__('remaining_amount.confirm.delete_payment_record'));
                     const message = template.replace(':amount', amount).replace(':method', method);
 
-                    this.confirmPaymentAction(message, @json(__('booking.action.delete_payment')), () => {
+                    this.confirmPaymentAction(message, @json(__('remaining_amount.action.delete_payment')), () => {
                         this.paymentSubmitting = true;
                         Axios.delete(`{{ url('admin/remaining-amount/delete-payment') }}/${pay.id}`, {
                             data: { _token: '{{ csrf_token() }}' }
                         }).then((res) => {
-                            this.activeBooking = res.data;
+                            this.activeOrder = res.data;
                             reloadData(`{{ url()->full() }}`);
                         }).catch((err) => {
                             const message = err.response?.data?.error ||
@@ -1079,9 +1079,9 @@
                     });
                 },
                 sendReminderNotification() {
-                    if (!this.activeBooking?.id) return;
+                    if (!this.activeOrder?.id) return;
                     this.reminderLoading = true;
-                    Axios.post(`{{ url('admin/remaining-amount/send-reminder') }}/${this.activeBooking.id}`, {
+                    Axios.post(`{{ url('admin/remaining-amount/send-reminder') }}/${this.activeOrder.id}`, {
                         _token: '{{ csrf_token() }}'
                     }).then((res) => {
                         alert(res.data.success_message || @json(__('remaining_amount.message.reminder_sent_success')));
@@ -1118,8 +1118,8 @@
                     const workbook = new ExcelJS.Workbook();
                     const worksheet = workbook.addWorksheet(@json(__('remaining_amount.excel.sheet_name')));
                     worksheet.columns = [
-                        { header: @json(__('remaining_amount.excel.booking_id')), key: 'booking_id', width: 16 },
-                        { header: @json(__('remaining_amount.excel.booking_date')), key: 'booking_date', width: 18 },
+                        { header: @json(__('remaining_amount.excel.order_id')), key: 'order_id', width: 16 },
+                        { header: @json(__('remaining_amount.excel.order_date')), key: 'order_date', width: 18 },
                         { header: @json(__('remaining_amount.excel.shop')), key: 'shop', width: 22 },
                         { header: @json(__('remaining_amount.excel.barber')), key: 'barber', width: 22 },
                         { header: @json(__('remaining_amount.excel.customer_phone')), key: 'customer_phone', width: 18 },
@@ -1132,8 +1132,8 @@
 
                     rows.forEach((item) => {
                         worksheet.addRow({
-                            booking_id: item?.invoice_number || '',
-                            booking_date: item?.booking_date ? moment(item.booking_date).format('YYYY-MM-DD HH:mm') : '',
+                            order_id: item?.invoice_number || '',
+                            order_date: item?.order_date ? moment(item.order_date).format('YYYY-MM-DD HH:mm') : '',
                             shop: item?.shop?.name || '',
                             barber: item?.barber?.name || '',
                             customer_phone: item?.customer?.phone || '',

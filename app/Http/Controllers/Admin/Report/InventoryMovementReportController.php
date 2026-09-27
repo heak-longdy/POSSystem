@@ -22,7 +22,7 @@ class InventoryMovementReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:report-inventory-view|stock-movement-view|report-sales-view|booking-view', [
+        $this->middleware('permission:report-inventory-view|stock-movement-view|report-sales-view|order-view', [
             'only' => ['index', 'daily', 'monthly', 'report', 'details']
         ]);
     }
@@ -256,7 +256,7 @@ class InventoryMovementReportController extends Controller
      */
     private function formatMovementRecord($item)
     {
-        $isSales = ($item->status === 'stock_out') && ($item->transfer_type === 'booking' || $item->type === 'customer');
+        $isSales = ($item->status === 'stock_out') && ($item->transfer_type === 'order' || $item->type === 'customer');
         $isTransfer = ($item->status === 'stock_transfer');
         $isStockIn = ($item->status === 'stock_in');
         $isInternalOut = ($item->status === 'stock_out') && !$isSales;
@@ -447,14 +447,14 @@ class InventoryMovementReportController extends Controller
             } elseif ($mType === 'sales') {
                 $query->where('status', 'stock_out')
                     ->where(function ($q) {
-                        $q->where('transfer_type', 'booking')
+                        $q->where('transfer_type', 'order')
                             ->orWhere('type', 'customer');
                     });
             } elseif ($mType === 'internal_out') {
                 $query->where('status', 'stock_out')
                     ->where(function ($q) {
                         $q->whereNull('transfer_type')
-                            ->orWhere('transfer_type', '!=', 'booking');
+                            ->orWhere('transfer_type', '!=', 'order');
                     })
                     ->where(function ($q) {
                         $q->whereNull('type')
@@ -510,7 +510,7 @@ class InventoryMovementReportController extends Controller
         foreach ($items as $item) {
             $qty = (int) ($item->qty ?: 0);
             $status = $item->status;
-            $isSales = ($status === 'stock_out') && ($item->transfer_type === 'booking' || $item->type === 'customer');
+            $isSales = ($status === 'stock_out') && ($item->transfer_type === 'order' || $item->type === 'customer');
             $isTransfer = ($status === 'stock_transfer');
             $isStockIn = ($status === 'stock_in');
             $isInternalOut = ($status === 'stock_out') && !$isSales;
@@ -601,7 +601,7 @@ class InventoryMovementReportController extends Controller
             foreach ($dayItems as $item) {
                 $qty = (int) ($item->qty ?: 0);
                 $status = $item->status;
-                $isSales = ($status === 'stock_out') && ($item->transfer_type === 'booking' || $item->type === 'customer');
+                $isSales = ($status === 'stock_out') && ($item->transfer_type === 'order' || $item->type === 'customer');
                 $isTransfer = ($status === 'stock_transfer');
                 $isStockIn = ($status === 'stock_in');
 
@@ -685,7 +685,7 @@ class InventoryMovementReportController extends Controller
             foreach ($monthItems as $item) {
                 $qty = (int) ($item->qty ?: 0);
                 $status = $item->status;
-                $isSales = ($status === 'stock_out') && ($item->transfer_type === 'booking' || $item->type === 'customer');
+                $isSales = ($status === 'stock_out') && ($item->transfer_type === 'order' || $item->type === 'customer');
                 $isTransfer = ($status === 'stock_transfer');
                 $isStockIn = ($status === 'stock_in');
 

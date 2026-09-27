@@ -164,7 +164,7 @@
                                     <span>Type</span>
                                 </div>
                                 <div class="row table-row-15">
-                                    <span>Pay To Booking ID</span>
+                                    <span>Pay To Order ID</span>
                                 </div>
                                 <div class="row table-row-5">
                                     <span>Status</span>
@@ -568,7 +568,7 @@
                         "Barber's Phone Number",
                         "Amount KHR",
                         "Type",
-                        "Pay To Booking ID",
+                        "Pay To Order ID",
                         "Status",
                         "Created At"
                     ];

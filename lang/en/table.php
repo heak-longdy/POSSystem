@@ -146,7 +146,6 @@ return [
         'member' => 'Member',
         'member_car' => 'Member Car',
         'request_price' => 'Request Price',
-        'booking_date' => 'Booking Date',
     ],
     'option' => [
         'agree' => 'Agree',

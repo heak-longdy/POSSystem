@@ -873,7 +873,7 @@
                                             <strong style="color: #2563eb; font-weight: 700;">{{ $row->invoice_number }}</strong>
                                         </td>
                                         <td>
-                                            <div style="font-weight: 600; color: #1e293b;white-space: nowrap;">{{ $row->booking_date_formatted }}</div>
+                                            <div style="font-weight: 600; color: #1e293b;white-space: nowrap;">{{ $row->order_date_formatted }}</div>
                                         </td>
                                         <td>
                                             <div style="font-weight: 600; color: #1e293b;">{{ $row->customer_name }}</div>
@@ -932,9 +932,9 @@
                                                     title="{{ __('sales_report.modal.invoices_for') }} {{ $row->invoice_number }}">
                                                     <i class='bx bx-detail'></i>
                                                 </button>
-                                                <a href="{{ route('admin-booking-detail', $row->id) }}"
+                                                <a href="{{ route('admin-order-detail', $row->id) }}"
                                                     class="btn-drilldown" target="_blank"
-                                                    title="{{ __('sales_report.button.view_booking_detail') }}">
+                                                    title="{{ __('sales_report.button.view_order_detail') }}">
                                                     <i class='bx bx-link-external'></i>
                                                 </a>
                                             </div>
@@ -1238,13 +1238,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template x-for="inv in periodData.bookings" :key="inv.id">
+                                            <template x-for="inv in periodData.orders" :key="inv.id">
                                                 <tr>
                                                     <td>
                                                         <strong style="color: #2563eb;" x-text="inv.invoice_number"></strong>
                                                     </td>
                                                     <td>
-                                                        <small x-text="inv.booking_date_formatted"></small>
+                                                        <small x-text="inv.order_date_formatted"></small>
                                                     </td>
                                                     <td>
                                                         <div style="font-weight: 600;" x-text="inv.customer_name"></div>
@@ -1333,12 +1333,12 @@
                 openSingleInvoice(inv) {
                     this.periodData = {
                         period: inv.invoice_number,
-                        period_label: inv.invoice_number + ' (' + inv.booking_date_formatted + ')',
+                        period_label: inv.invoice_number + ' (' + inv.order_date_formatted + ')',
                         count: 1,
                         total_revenue: inv.total_price,
                         total_paid: inv.paid_amount,
                         total_remaining: inv.remaining_amount,
-                        bookings: [inv]
+                        orders: [inv]
                     };
                     this.modalLoading = false;
                     this.showDetailModal = true;
@@ -1415,7 +1415,7 @@
                                 worksheet.addRow({
                                     index: idx + 1,
                                     invoice_number: r.invoice_number,
-                                    date_time: r.booking_date_formatted || r.booking_date,
+                                    date_time: r.order_date_formatted || r.order_date,
                                     customer_name: r.customer_name,
                                     customer_phone: r.customer_phone,
                                     shop_name: r.shop_name,

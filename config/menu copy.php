@@ -17,7 +17,7 @@ return [
         'active' => 'admin/booking*',
         'permission' => 'booking-view',
         'name' => [
-            'en' => 'Bookings',
+            'en' => 'Orders',
         ],
         'icon' => 'bxs-book',
     ],

@@ -44,9 +44,9 @@
                         <div class="item bg-success">
                             <div class="item-body">
                                 <div class="left">
-                                    <span>All Booking&nbsp;(Total Price)</span>
+                                    <span>All Orders&nbsp;(Total Price)</span>
                                     <h3>{!! number_format($booking->totalBookingAll, 2) !!}&nbsp;KHR</h3>
-                                    <p>{{ $booking?->totalCountBookingAll }}&nbsp;(Number of Booking)</p>
+                                    <p>{{ $booking?->totalCountBookingAll }}&nbsp;(Number of Orders)</p>
                                 </div>
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                                 <div class="left">
                                     <span>Products&nbsp;(Total Price)</span>
                                     <h3>{!! number_format($booking->totalProductBooking, 2) !!}&nbsp;KHR</h3>
-                                    <p>{{ $booking?->totalCountProductBooking }}&nbsp;(Number of Booking)</p>
+                                    <p>{{ $booking?->totalCountProductBooking }}&nbsp;(Number of Orders)</p>
                                 </div>
                             </div>
                         </div>
@@ -64,7 +64,7 @@
                                 <div class="left">
                                     <span>Services&nbsp;(Total Price)</span>
                                     <h3>{!! number_format($booking->totalServiceBooking, 2) !!}&nbsp;KHR</h3>
-                                    <p>{{ $booking?->totalCountServiceBooking }}&nbsp;(Number of Booking)</p>
+                                    <p>{{ $booking?->totalCountServiceBooking }}&nbsp;(Number of Orders)</p>
                                 </div>
                             </div>
                         </div>
@@ -241,7 +241,7 @@
                     </div>
 
                     <div class="charts-card">
-                        <p class="chart-title">Booking by Time</p>
+                        <p class="chart-title">Orders by Time</p>
                         <div id="chart">
                         </div>
                     </div>

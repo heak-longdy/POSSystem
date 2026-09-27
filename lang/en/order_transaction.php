@@ -67,7 +67,7 @@ return [
         'daily' => 'Daily',
         'view_daily_tooltip' => 'View Daily Transactions for this Month',
         'view_orders_tooltip' => 'View Orders Breakdown',
-        'view_booking_detail' => 'View Full Booking Details',
+        'view_order_detail' => 'View Full Order Details',
     ],
 
     'kpi' => [

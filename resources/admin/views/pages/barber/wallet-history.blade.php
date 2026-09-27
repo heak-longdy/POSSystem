@@ -2,7 +2,7 @@
 @section('layout')
 <div class="content-wrapper">
     <div class="header">
-        @include('admin::shared.header', ['header_name' => 'Booking History '.'Customer: '.$name->name . ' ' .$name->phone])
+        @include('admin::shared.header', ['header_name' => 'Order History '.'Customer: '.$name->name . ' ' .$name->phone])
     </div>
 <div class="content-body">
     <div class="table">

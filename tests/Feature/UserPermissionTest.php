@@ -42,7 +42,7 @@ class UserPermissionTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Cashier User');
         $response->assertSee('Dashboard');
-        $response->assertSee('Booking');
+        $response->assertSee('Order');
         $response->assertSee('Product');
         $response->assertViewHas('groupedModules');
         $response->assertViewHas('user');
@@ -64,7 +64,7 @@ class UserPermissionTest extends TestCase
 
         $this->actingAs($admin);
 
-        $permissionsToAssign = ['booking-view', 'booking-create', 'product-view'];
+        $permissionsToAssign = ['order-view', 'order-create', 'product-view'];
 
         $response = $this->post(route('admin-user-save-permission', $targetUser->id), [
             'id' => $targetUser->id,
@@ -74,10 +74,10 @@ class UserPermissionTest extends TestCase
         $response->assertRedirect(route('admin-user-list', 1));
 
         $targetUser->refresh();
-        $this->assertTrue($targetUser->hasPermissionTo('booking-view'));
-        $this->assertTrue($targetUser->hasPermissionTo('booking-create'));
+        $this->assertTrue($targetUser->hasPermissionTo('order-view'));
+        $this->assertTrue($targetUser->hasPermissionTo('order-create'));
         $this->assertTrue($targetUser->hasPermissionTo('product-view'));
-        $this->assertFalse($targetUser->hasPermissionTo('booking-delete'));
+        $this->assertFalse($targetUser->hasPermissionTo('order-delete'));
     }
 
     /** @test */
@@ -93,8 +93,8 @@ class UserPermissionTest extends TestCase
             'status' => 1,
         ]);
 
-        $targetUser->givePermissionTo(['booking-view', 'product-view']);
-        $this->assertTrue($targetUser->hasPermissionTo('booking-view'));
+        $targetUser->givePermissionTo(['order-view', 'product-view']);
+        $this->assertTrue($targetUser->hasPermissionTo('order-view'));
 
         $this->actingAs($admin);
 
@@ -106,7 +106,7 @@ class UserPermissionTest extends TestCase
         $response->assertRedirect(route('admin-user-list', 1));
 
         $targetUser->refresh();
-        $this->assertFalse($targetUser->hasPermissionTo('booking-view'));
+        $this->assertFalse($targetUser->hasPermissionTo('order-view'));
         $this->assertFalse($targetUser->hasPermissionTo('product-view'));
         $this->assertCount(0, $targetUser->permissions);
     }
