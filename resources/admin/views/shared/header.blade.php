@@ -147,7 +147,7 @@
     }
 
     .input {
-        width: 110px;
+        width: 125px;
         height: 100%;
         border: none;
         outline: none;
@@ -459,8 +459,8 @@
                     {{-- <input type="checkbox" id="switch-mode" hidden>
                 <label for="switch-mode" class="switch-mode"></label> --}}
                     <div style=" display: flex;justify-content: center;align-items: center; grid-gap: 20px;">
-                        <div class="InputContainer" @click="openQuickSearch()" title="Quick Search (⌘K)">
-                            <input placeholder="Search Menu" id="input" class="input" name="text" type="text" readonly
+                        <div class="InputContainer" @click="openQuickSearch()" title="{{ __('global.header.quick_search') }} (⌘K)">
+                            <input placeholder="{{ __('global.header.search_menu') }}" id="input" class="input" name="text" type="text" readonly
                                 @click="openQuickSearch()" />
                             <label class="labelforsearch" for="input" @click="openQuickSearch()">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -855,8 +855,8 @@
         },
         openQuickSearch() {
             window.SearchMenu({
-                title: "Quick Search Menu",
-                placeholder: "Type a command or search... (e.g. Stock, Booking, Sales)"
+                title: @json(__('global.header.quick_search_menu')),
+                placeholder: @json(__('global.header.quick_search_placeholder'))
             });
         },
         editUser(id) {
@@ -872,8 +872,8 @@
                 Alpine.store('componentSearchMenu').active = false;
             } else {
                 window.SearchMenu({
-                    title: "Quick Search Menu",
-                    placeholder: "Type a command or search... (e.g. Stock, Booking, Sales)"
+                    title: @json(__('global.header.quick_search_menu')),
+                    placeholder: @json(__('global.header.quick_search_placeholder'))
                 });
             }
         }

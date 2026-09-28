@@ -36,7 +36,7 @@
         .dashboard-container {
             font-family: 'Plus Jakarta Sans', 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--page-bg);
-            padding: 24px;
+            padding: 20px;
             color: var(--text-dark);
             min-height: 100%;
             width: 100%;
@@ -76,11 +76,19 @@
         /* Grid Layouts */
         .dash-grid-row {
             display: grid;
-            gap: 24px;
-            margin-bottom: 24px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .dash-grid-row:last-child {
+            margin-bottom: 0;
         }
 
         .dash-grid-row-1 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .dash-grid-row-secondary {
             grid-template-columns: repeat(3, 1fr);
         }
 
@@ -89,7 +97,7 @@
         }
 
         .dash-grid-row-3 {
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1.8fr;
         }
 
         .dash-grid-row-4 {
@@ -101,6 +109,9 @@
         }
 
         @media (max-width: 1200px) {
+            .dash-grid-row-secondary {
+                grid-template-columns: repeat(3, 1fr);
+            }
             .dash-grid-row-2,
             .dash-grid-row-3,
             .dash-grid-row-4 {
@@ -112,20 +123,34 @@
             .dash-grid-row-1 {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .dash-grid-row-secondary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .dash-grid-row-secondary > .dash-card:last-child {
+                grid-column: span 2;
+            }
             .welcome-card {
                 grid-column: span 2;
             }
             .dash-card.top-mini-card:last-child {
                 grid-column: span 2;
             }
+            .dash-grid-row-3,
+            .dash-grid-row-4 {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
             .dash-grid-row-1,
+            .dash-grid-row-secondary,
             .dash-grid-row-2,
             .dash-grid-row-3,
             .dash-grid-row-4 {
                 grid-template-columns: 1fr;
+            }
+            .dash-grid-row-secondary > .dash-card:last-child {
+                grid-column: span 1;
             }
             .welcome-card {
                 grid-column: span 1;
@@ -1191,6 +1216,10 @@
                             </a>
                         </div>
                     </div>
+                </div>
+
+                <!-- ================= ROW 2: USER & STAFF COUNTS ================= -->
+                <div class="dash-grid-row dash-grid-row-secondary">
 
                     <!-- 8. Customer (Count) Card -->
                     <div class="dash-card top-mini-card">
@@ -1269,71 +1298,6 @@
 
                 </div>
 
-                <!-- ================= ROW 2 ================= -->
-                <div class="dash-grid-row dash-grid-row-2">
-
-                    <!-- 4. Revenue Updates -->
-                    <!-- <div class="dash-card">
-                        <div class="revenue-header-row">
-                            <div>
-                                <h3 class="dash-card-title">@lang('dashboard.revenue_updates')</h3>
-                                <p class="dash-card-subtitle">@lang('dashboard.overview_of_profit')</p>
-                            </div>
-                        </div>
-                        <div class="chart-legend">
-                            <div class="legend-item">
-                                <span class="legend-dot dot-blue"></span>
-                                <span>@lang('dashboard.footware')</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-dot dot-cyan"></span>
-                                <span>@lang('dashboard.fashionware')</span>
-                            </div>
-                        </div>
-                        <div id="chart-revenue-updates" style="min-height: 250px;"></div>
-                    </div> -->
-
-                    <!-- 5. Sales Overview -->
-                    <!-- <div class="dash-card">
-                        <h3 class="dash-card-title">@lang('dashboard.sales_overview')</h3>
-                        <p class="dash-card-subtitle">@lang('dashboard.every_month')</p>
-                        
-                        <div class="sales-radial-container">
-                            <div id="chart-sales-radial" style="width: 100%;"></div>
-                            <div class="radial-center-text">$500,458</div>
-                        </div>
-
-                        <div class="card-dual-stats">
-                            <div class="dual-stat-item">
-                                <div class="grid-icon-box blue">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
-                                        <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
-                                        <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-details">
-                                    <h4>$23,450</h4>
-                                    <p>@lang('dashboard.profit')</p>
-                                </div>
-                            </div>
-                            <div class="dual-stat-item">
-                                <div class="grid-icon-box cyan">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
-                                        <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
-                                        <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-details">
-                                    <h4>$23,450</h4>
-                                    <p>@lang('dashboard.expense')</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div> --> 
-
-                </div>
 
                 <!-- ================= ROW 3 ================= -->
                 <div class="dash-grid-row dash-grid-row-3">
@@ -1457,6 +1421,7 @@
                     </div>
 
                 </div>
+
 
                 <!-- ================= ROW 4 ================= -->
                 <div class="dash-grid-row dash-grid-row-4">
@@ -1629,6 +1594,8 @@
                     </div>
 
                 </div>
+
+                
 
             </div>
         </div>

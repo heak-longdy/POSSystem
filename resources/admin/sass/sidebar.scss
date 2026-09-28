@@ -73,10 +73,17 @@ li {
     .brand {
         padding: 0 2px;
     }
+    
 
     .side-menu {
         a {
-            padding: 5px 0 !important;
+            padding: 3px 0 !important;
+            margin : 2px 0 !important;
+            height: 35px !important;
+
+            &.overView {
+                height: 50px !important;
+            }
         }
 
         &.active {}
@@ -93,15 +100,20 @@ li {
     }
 
     &:hover {
-        .navItemSiderbarGroup {
-            .navSidber {
-                margin: 0 12px;
+        .side-menu {
+            a {
+                height: auto !important;
+                padding: 3px 12px 3px 12px !important;
+
+                &.overView {
+                    height: 50px !important;
+                }
             }
         }
 
-        .side-menu {
-            a {
-                padding: 5px 12px 5px 12px !important;
+        .navItemSiderbarGroup {
+            .navSidber {
+                margin: 0 12px;
             }
         }
 
@@ -109,7 +121,7 @@ li {
             .navSidber {
                 li {
                     a {
-                        padding: 12px 12px 12px 0px !important;
+                        padding: 8px 12px 8px 0px !important;
                     }
                 }
 
@@ -290,11 +302,11 @@ li {
     // color                 : var(--nav-group-title-color, $sidebar-color);
     color                    : rgba(255, 255, 255, .7);
     // color           : #fff;
-    padding                  : 5px 12px 5px 12px;
+    padding                  : 3px 12px 3px 12px;
     transition               : all .3s ease;
     border-radius            : 10px;
-    margin                   : 4px 0;
-    white-space              : nowrap;
+    margin                   : 2px 0;
+    white-space              : normal;
     overflow                 : hidden;
     cursor                   : pointer;
 
@@ -326,7 +338,7 @@ li {
 }
 
 #sidebar .divider {
-    margin-top    : 24px;
+    margin-top    : 14px;
     font-size     : 12px;
     text-transform: uppercase;
     font-weight   : 700;
@@ -337,12 +349,12 @@ li {
 
 #sidebar.hide:hover .divider {
     text-align: left;
-    margin    : 20px 20px 5px 30px !important;
+    margin    : 14px 20px 5px 30px !important;
 }
 
 #sidebar.hide .divider {
     text-align: center;
-    margin    : 20px 0 5px 0 !important;
+    margin    : 14px 0 5px 0 !important;
 }
 
 #sidebar .side-dropdown {
@@ -466,10 +478,10 @@ li {
         .overView {
             box-shadow         : 0 -1px 0 rgba(255, 255, 255, 0.1) inset;
             // padding-top  : 5px;
-            margin-bottom      : 20px !important;
+            margin-bottom      : 10px !important;
             // padding         : 12px !important;
             margin-top         : 0 !important;
-            height             : 50px;
+            height             : 50px !important;
 
             .div,
             .iRight {
@@ -500,7 +512,7 @@ li {
         }
 
         &.divider {
-            margin: 20px 20px 0 30px !important;
+            margin: 12px 20px 0 30px !important;
         }
     }
 
@@ -541,7 +553,7 @@ li {
                     // border-top   : 1px solid black;
                     margin          : 0 !important;
                     transition      : all 0.3s ease;
-                    padding         : 12px 12px 12px 0px !important;
+                    padding         : 8px 12px 8px 0px !important;
 
                     &.active {
                         .icon-right {
@@ -572,7 +584,7 @@ li {
                         background-color: unset !important;
                         display         : flex;
                         align-items     : center;
-                        padding         : 9px 0;
+                        padding         : 5px 0;
 
                         a {
                             border-top: 0;

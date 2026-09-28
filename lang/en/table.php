@@ -192,5 +192,10 @@ return [
     'paginate' => [
         'showing' => 'Showing',
         'of' => 'of',
+        'rows_per_page' => 'Rows per page:',
+        'first' => 'First page',
+        'last' => 'Last page',
+        'previous' => 'Previous',
+        'next' => 'Next',
     ],
 ];

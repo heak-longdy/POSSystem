@@ -31503,7 +31503,12 @@ li {
   padding: 0 2px;
 }
 #sidebar.hide .side-menu a {
-  padding: 5px 0 !important;
+  padding: 3px 0 !important;
+  margin: 2px 0 !important;
+  height: 35px !important;
+}
+#sidebar.hide .side-menu a.overView {
+  height: 50px !important;
 }
 #sidebar.hide .navItemSiderbarGroup .navSidber {
   margin: 0;
@@ -31511,14 +31516,18 @@ li {
 #sidebar.hide .navItemSiderbarGroup .navSidber li a.active {
   color: var(--blue) !important;
 }
+#sidebar.hide:hover .side-menu a {
+  height: auto !important;
+  padding: 3px 12px 3px 12px !important;
+}
+#sidebar.hide:hover .side-menu a.overView {
+  height: 50px !important;
+}
 #sidebar.hide:hover .navItemSiderbarGroup .navSidber {
   margin: 0 12px;
 }
-#sidebar.hide:hover .side-menu a {
-  padding: 5px 12px 5px 12px !important;
-}
 #sidebar.hide:hover .navItemSiderbarGroup .navSidber li a {
-  padding: 12px 12px 12px 0px !important;
+  padding: 8px 12px 8px 0px !important;
 }
 #sidebar.hide:hover .navItemSiderbarGroup .navSidber .side-dropdown li a {
   padding: 0 !important;
@@ -31663,11 +31672,11 @@ li {
   align-items: center;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
-  padding: 5px 12px 5px 12px;
+  padding: 3px 12px 3px 12px;
   transition: all 0.3s ease;
   border-radius: 10px;
-  margin: 4px 0;
-  white-space: nowrap;
+  margin: 2px 0;
+  white-space: normal;
   overflow: hidden;
   cursor: pointer;
 }
@@ -31696,7 +31705,7 @@ li {
 }
 
 #sidebar .divider {
-  margin-top: 24px;
+  margin-top: 14px;
   font-size: 12px;
   text-transform: uppercase;
   font-weight: 700;
@@ -31707,12 +31716,12 @@ li {
 
 #sidebar.hide:hover .divider {
   text-align: left;
-  margin: 20px 20px 5px 30px !important;
+  margin: 14px 20px 5px 30px !important;
 }
 
 #sidebar.hide .divider {
   text-align: center;
-  margin: 20px 0 5px 0 !important;
+  margin: 14px 0 5px 0 !important;
 }
 
 #sidebar .side-dropdown {
@@ -31815,9 +31824,9 @@ li {
 
 .side-menu li .overView {
   box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.1) inset;
-  margin-bottom: 20px !important;
+  margin-bottom: 10px !important;
   margin-top: 0 !important;
-  height: 50px;
+  height: 50px !important;
 }
 .side-menu li .overView .div,
 .side-menu li .overView .iRight {
@@ -31841,7 +31850,7 @@ li {
   border-radius: unset !important;
 }
 .side-menu li.divider {
-  margin: 20px 20px 0 30px !important;
+  margin: 12px 20px 0 30px !important;
 }
 .side-menu .navItemSiderbarGroup .divider {
   margin-bottom: 5px !important;
@@ -31865,7 +31874,7 @@ li {
   border-radius: 0 !important;
   margin: 0 !important;
   transition: all 0.3s ease;
-  padding: 12px 12px 12px 0px !important;
+  padding: 8px 12px 8px 0px !important;
 }
 .side-menu .navItemSiderbarGroup .navSidber li a.active .icon-right {
   transform: rotateZ(90deg) !important;
@@ -31887,7 +31896,7 @@ li {
   background-color: unset !important;
   display: flex;
   align-items: center;
-  padding: 9px 0;
+  padding: 5px 0;
 }
 .side-menu .navItemSiderbarGroup .navSidber li .side-dropdown li a {
   border-top: 0;
@@ -34361,7 +34370,29 @@ nav .divider {
 .form-admin .form-wrapper .form-body .form-row.iconInput input {
   padding: 0 40px 0 15px !important;
 }
+.form-admin .form-wrapper .form-body .form-row .icon-input-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.form-admin .form-wrapper .form-body .form-row .icon-input-wrap i,
+.form-admin .form-wrapper .form-body .form-row .icon-input-wrap svg {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(90, 94, 102, 0.6392156863);
+  font-size: 22px;
+  line-height: 1;
+  pointer-events: none;
+  margin: 0;
+}
+.form-admin .form-wrapper .form-body .form-row .icon-input-wrap input {
+  padding: 0 40px 0 15px !important;
+}
 .form-admin .form-wrapper .form-body .form-row > input,
+.form-admin .form-wrapper .form-body .form-row .icon-input-wrap input,
 .form-admin .form-wrapper .form-body .form-row select {
   background-color: #fff;
   border-radius: 7px;
@@ -34377,13 +34408,14 @@ nav .divider {
   transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
   width: 100%;
 }
-.form-admin .form-wrapper .form-body .form-row > input::-moz-placeholder, .form-admin .form-wrapper .form-body .form-row select::-moz-placeholder {
+.form-admin .form-wrapper .form-body .form-row > input::-moz-placeholder, .form-admin .form-wrapper .form-body .form-row .icon-input-wrap input::-moz-placeholder, .form-admin .form-wrapper .form-body .form-row select::-moz-placeholder {
   color: #b7bac1;
 }
-.form-admin .form-wrapper .form-body .form-row > input:-ms-input-placeholder, .form-admin .form-wrapper .form-body .form-row select:-ms-input-placeholder {
+.form-admin .form-wrapper .form-body .form-row > input:-ms-input-placeholder, .form-admin .form-wrapper .form-body .form-row .icon-input-wrap input:-ms-input-placeholder, .form-admin .form-wrapper .form-body .form-row select:-ms-input-placeholder {
   color: #b7bac1;
 }
 .form-admin .form-wrapper .form-body .form-row > input::placeholder,
+.form-admin .form-wrapper .form-body .form-row .icon-input-wrap input::placeholder,
 .form-admin .form-wrapper .form-body .form-row select::placeholder {
   color: #b7bac1;
 }

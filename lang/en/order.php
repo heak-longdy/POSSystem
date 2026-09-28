@@ -113,6 +113,7 @@ return [
         'pay_date' => 'Pay Date',
         'customer_phone' => 'Customer Phone',
         'actions' => 'Actions',
+        'note' => 'Note',
     ],
 
     'action' => [
@@ -179,6 +180,7 @@ return [
         'address' => 'Address',
         'shop' => 'Shop Branch',
         'barber' => 'Assigned Barber',
+        'note' => 'Note',
     ],
 
     'invoice' => [

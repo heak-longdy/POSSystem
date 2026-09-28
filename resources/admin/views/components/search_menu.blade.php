@@ -526,9 +526,9 @@
             <div class="cp-header">
                 <h3 class="cp-title">
                     <i class='bx bx-command'></i>
-                    <span x-text="options?.title || 'Quick Search Menu'">Quick Search Menu</span>
+                    <span x-text="options?.title || @json(__('global.header.quick_search_menu'))">{{ __('global.header.quick_search_menu') }}</span>
                 </h3>
-                <button type="button" class="cp-close-btn" id="cp-close-btn" @click="close()" title="Close (Esc)">
+                <button type="button" class="cp-close-btn" id="cp-close-btn" @click="close()" title="{{ __('global.button.close') }} (Esc)">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
@@ -541,7 +541,7 @@
                     x-model="searchQuery"
                     @input="onSearchInput()"
                     class="cp-search-input"
-                    :placeholder="options?.placeholder || 'Type a command or search... (e.g. Stock, Booking, Sales)'"
+                    :placeholder="options?.placeholder || @json(__('global.header.quick_search_placeholder'))"
                     autocomplete="off"
                     spellcheck="false">
                 
@@ -572,7 +572,7 @@
                                             <div class="cp-item-info">
                                                 <div class="cp-item-title" x-text="item.title || item.name?.en || item.name"></div>
                                                 <div class="cp-item-subtitle">
-                                                    <span class="cp-badge-category" x-text="item.category || 'General'"></span>
+                                                    <span class="cp-badge-category" x-text="item.category || @json(__('global.header.general'))"></span>
                                                     <template x-if="item.title_km && item.title_km !== item.title">
                                                         <span x-text="'• ' + item.title_km" style="color: #94a3b8;"></span>
                                                     </template>
@@ -581,7 +581,7 @@
                                         </div>
                                         <div class="cp-item-right">
                                             <div class="cp-enter-hint">
-                                                <span>Jump to</span>
+                                                <span>{{ __('global.header.jump_to') }}</span>
                                                 <i class='bx bx-right-arrow-alt'></i>
                                                 <kbd>↵</kbd>
                                             </div>
@@ -599,7 +599,7 @@
                         <div class="cp-empty-icon">
                             <i class='bx bx-search-alt'></i>
                         </div>
-                        <div class="cp-empty-title">No matching menu found</div>
+                        <div class="cp-empty-title">{{ __('global.header.no_matching_menu') }}</div>
                         <div class="cp-empty-desc">
                             No menu or action matches "<span x-text="searchQuery" style="font-weight: 600; color: #1e293b;"></span>".
                             Try searching for general terms like <em>Stock</em>, <em>Booking</em>, <em>Customer</em>, or <em>Report</em>.
@@ -613,19 +613,19 @@
                 <div class="cp-footer-hints">
                     <div class="cp-footer-hint">
                         <kbd>↑</kbd><kbd>↓</kbd>
-                        <span>Navigate</span>
+                        <span>{{ __('global.header.navigate') }}</span>
                     </div>
                     <div class="cp-footer-hint">
                         <kbd>↵</kbd>
-                        <span>Open</span>
+                        <span>{{ __('global.header.open') }}</span>
                     </div>
                     <div class="cp-footer-hint">
                         <kbd>ESC</kbd>
-                        <span>Close</span>
+                        <span>{{ __('global.header.close') }}</span>
                     </div>
                 </div>
                 <div class="cp-footer-count">
-                    <span x-text="visibleItems.length + ' item' + (visibleItems.length === 1 ? '' : 's')"></span>
+                    <span x-text="visibleItems.length + ' ' + (visibleItems.length === 1 ? @json(__('global.header.item')) : @json(__('global.header.items')))"></span>
                 </div>
             </div>
         </div>
@@ -793,8 +793,8 @@
     Alpine.store('componentSearchMenu', {
         active: false,
         options: {
-            title: 'Quick Search Menu',
-            placeholder: 'Type a command or search...',
+            title: @json(__('global.header.quick_search_menu')),
+            placeholder: @json(__('global.header.quick_search_placeholder')),
             data: null,
             afterClose: () => {}
         }
