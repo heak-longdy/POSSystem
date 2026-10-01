@@ -528,24 +528,16 @@ class RemainingAmountController extends Controller
     private function customerTitle(Order $order)
     {
         $name = e($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer')));
-        $phone = e($order->customer?->phone ?: '---');
+        $phone = e($order->customer?->phone ?: '');
 
-        return "<span>{$name}</span><small>{$phone}</small>";
+        $phoneHtml = $phone ? "<small class=\"customer-phone\"><i class=\"bx bx-phone\"></i>{$phone}</small>" : '';
+
+        return "<div class=\"customer-cell\"><span class=\"customer-name\">{$name}</span>{$phoneHtml}</div>";
     }
 
     private function orderItemsTitle(Order $order)
     {
-        $details = $order->orderDetails;
-        if (!$details || $details->count() === 0) {
-            return '---';
-        }
-
-        return $details->map(function ($detail) {
-            $name = e($detail->type === 'service' ? $detail->service?->name : $detail->product?->name);
-            $qty = (int) ($detail->qty ?: 1);
-
-            return "<span>- {$name} ({$qty})</span>";
-        })->implode('');
+        return OrderController::renderOrderItems($order);
     }
 
     private function paymentStatusBadge(Order $order)

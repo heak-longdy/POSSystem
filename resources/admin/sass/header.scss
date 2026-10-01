@@ -720,6 +720,8 @@ nav .divider {
                     // height       : 42px;
                     border-radius: $border-radius !important;
                     // padding      : 0 17px 0 10px !important;
+                    box-shadow: unset !important;
+                    padding: 0 14px 0px 10px !important;
                 }
 
                 &.btnSearch {

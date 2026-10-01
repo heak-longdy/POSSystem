@@ -40,6 +40,10 @@ return [
     'select_shop' => 'Select Shop',
     'select_barber' => 'Select Barber',
     'select_customer' => 'Select Customer',
+    'more_items' => 'more',
+    'collapse_items' => 'Collapse',
+    'all_items' => 'All Items',
+
 
     'tab' => [
         'pending' => 'Pending',
@@ -96,7 +100,8 @@ return [
         'shop' => 'Shop',
         'barber' => 'Barber',
         'customer' => 'Customer',
-        'services_products' => 'Services/Products',
+        'services_products' => 'Products',
+        'products' => 'Products',
         'pay_status' => 'Pay Status',
         'total' => 'Total',
         'paid' => 'Paid',
@@ -185,6 +190,7 @@ return [
 
     'invoice' => [
         'select_language' => 'Invoice Language',
+        'print_language' => 'Print Language',
         'khmer' => 'Khmer',
         'english' => 'English',
         'invoice_copy_original' => 'INVOICE ( COPY OR ORIGINAL )',

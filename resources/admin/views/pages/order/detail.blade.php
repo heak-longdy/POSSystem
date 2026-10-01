@@ -7,7 +7,7 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('order.detail.title')])
 
-    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate" x-cloak>
+    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate + ' print-lang-' + printLanguage" x-cloak>
         <div class="content-body" id="bookingDetailContentBody">
             <div class="booking-detail-page-wrapper">
                 <!-- Top Navigation / Breadcrumb -->
@@ -84,6 +84,30 @@
                                 <span>{{ __('order.detail.edit_order') }}</span>
                             </a>
                         @endif
+
+                        <!-- Print Language Switcher -->
+                        <div class="print-lang-switch-box" title="{{ __('order.invoice.select_language') }}">
+                            <span class="print-lang-label">
+                                <i data-feather="globe"></i>
+                                <span>{{ __('order.invoice.print_language') }}:</span>
+                            </span>
+                            <div class="print-lang-segmented">
+                                <button type="button" 
+                                        class="print-lang-btn" 
+                                        :class="{ 'is-active': printLanguage === 'km' }" 
+                                        @click="setPrintLanguage('km')">
+                                    <span class="flag">🇰🇭</span>
+                                    <span>{{ __('order.invoice.khmer') }}</span>
+                                </button>
+                                <button type="button" 
+                                        class="print-lang-btn" 
+                                        :class="{ 'is-active': printLanguage === 'en' }" 
+                                        @click="setPrintLanguage('en')">
+                                    <span class="flag">🇬🇧</span>
+                                    <span>{{ __('order.invoice.english') }}</span>
+                                </button>
+                            </div>
+                        </div>
 
                         <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate1()">
                             <i data-feather="printer"></i>
@@ -551,13 +575,19 @@
 
 
                 <!-- Print Only Invoice View - Template 1 (Matching design in invoice_01.png) -->
-                <div class="print-only-invoice print-template-1">
-                    @include('admin::pages.order.invoice-template')
+                <div class="print-only-invoice print-template-1 print-lang-km">
+                    @include('admin::pages.order.invoice-template', ['printLocale' => 'km'])
+                </div>
+                <div class="print-only-invoice print-template-1 print-lang-en">
+                    @include('admin::pages.order.invoice-template', ['printLocale' => 'en'])
                 </div>
 
                 <!-- Print Only Invoice View - Template 2 (Matching design in invoice_02.png) -->
-                <div class="print-only-invoice print-template-2">
-                    @include('admin::pages.order.invoice-template-02')
+                <div class="print-only-invoice print-template-2 print-lang-km">
+                    @include('admin::pages.order.invoice-template-02', ['printLocale' => 'km'])
+                </div>
+                <div class="print-only-invoice print-template-2 print-lang-en">
+                    @include('admin::pages.order.invoice-template-02', ['printLocale' => 'en'])
                 </div>
             </div>
         </div>
@@ -780,6 +810,7 @@
             white-space: nowrap !important;
             transition: all 0.2s ease !important;
             line-height: 1 !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
         .header-right-actions .btn svg,
@@ -864,12 +895,96 @@
             box-shadow: 0 2px 6px rgba(255, 56, 56, 0.3) !important;
         }
 
+        /* Print Language Switcher */
+        .print-lang-switch-box {
+            display: inline-flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            height: 40px;
+            padding: 3px 4px 3px 10px;
+            gap: 8px;
+            box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .print-lang-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .print-lang-label svg {
+            width: 15px;
+            height: 15px;
+            stroke-width: 2;
+            color: #3C91E6;
+        }
+
+        .print-lang-segmented {
+            display: inline-flex;
+            align-items: center;
+            background: #e2e8f0;
+            border-radius: 16px;
+            padding: 2px;
+            gap: 2px;
+        }
+
+        .print-lang-btn {
+            border: none;
+            background: transparent;
+            border-radius: 14px;
+            height: 28px;
+            padding: 0 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        .print-lang-btn:hover {
+            color: #0f172a;
+        }
+
+        .print-lang-btn.is-active {
+            background: #3C91E6;
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(60, 145, 230, 0.4);
+            border-radius: 20px !important;
+        }
+
+        .print-lang-btn .flag {
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        @media (max-width: 768px) {
+            .print-lang-label span {
+                display: none;
+            }
+            .print-lang-switch-box {
+                padding-left: 8px;
+            }
+        }
+
         /* Compact Button (for small cards) */
         .btn-system-sm {
             height: 40px !important;
             padding: 0 12px !important;
             font-size: 12px !important;
-            border-radius: 16px !important;
+            border-radius: 20px !important;
             display: inline-flex !important;
             align-items: center !important;
             gap: 5px !important;
@@ -1181,7 +1296,7 @@
         .customer-info-list li {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             font-size: 13px;
         }
         .info-label {
@@ -1197,6 +1312,7 @@
         .info-val {
             font-weight: 600;
             color: #1e293b;
+            text-align: right;
         }
         .points-tag {
             background: #eff6ff;
@@ -2092,18 +2208,31 @@
                 visibility: visible !important;
             }
 
-            /* Print template switching */
-            #bookingDetailApp.printing-template1 .print-template-1 {
-                display: block !important;
-            }
-            #bookingDetailApp.printing-template1 .print-template-2 {
+            /* Print template & language switching */
+            .print-only-invoice {
                 display: none !important;
             }
-            #bookingDetailApp.printing-template2 .print-template-1 {
-                display: none !important;
-            }
-            #bookingDetailApp.printing-template2 .print-template-2 {
+
+            #bookingDetailApp.printing-template1.print-lang-km .print-template-1.print-lang-km {
                 display: block !important;
+            }
+            #bookingDetailApp.printing-template1.print-lang-en .print-template-1.print-lang-en {
+                display: block !important;
+            }
+
+            #bookingDetailApp.printing-template2.print-lang-km .print-template-2.print-lang-km {
+                display: block !important;
+            }
+            #bookingDetailApp.printing-template2.print-lang-en .print-template-2.print-lang-en {
+                display: block !important;
+            }
+
+            /* Strict isolation: never allow the inactive template or language to show */
+            #bookingDetailApp.printing-template1 .print-template-2,
+            #bookingDetailApp.printing-template2 .print-template-1,
+            #bookingDetailApp.print-lang-km .print-lang-en,
+            #bookingDetailApp.print-lang-en .print-lang-km {
+                display: none !important;
             }
 
             .print-template-2 .pos-slip-sheet {
@@ -2179,6 +2308,7 @@
             return {
                 openPaymentModal: false,
                 activePrintTemplate: 'template1',
+                printLanguage: '{{ app()->getLocale() === 'km' ? 'km' : 'en' }}',
                 paymentSubmitting: false,
                 paymentForm: {
                     amount: {{ (float) ($order->remaining_amount ?? 0) }},
@@ -2219,6 +2349,9 @@
                         });
                     }
                 },
+                setPrintLanguage(lang) {
+                    this.printLanguage = lang;
+                },
                 async submitPayment() {
                     if (this.paymentSubmitting) return;
                     if (!this.paymentForm.amount || Number(this.paymentForm.amount) <= 0) {
@@ -2257,17 +2390,37 @@
                         alert(errorMsg);
                     }
                 },
-                printTemplate1() {
+                printTemplate1(lang = null) {
+                    if (lang) this.printLanguage = lang;
                     this.activePrintTemplate = 'template1';
-                    setTimeout(() => {
-                        window.print();
-                    }, 50);
+                    const appEl = document.getElementById('bookingDetailApp');
+                    if (appEl) {
+                        appEl.classList.remove('printing-template2');
+                        appEl.classList.add('printing-template1');
+                        appEl.classList.remove('print-lang-km', 'print-lang-en');
+                        appEl.classList.add('print-lang-' + this.printLanguage);
+                    }
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            window.print();
+                        }, 60);
+                    });
                 },
-                printTemplate2() {
+                printTemplate2(lang = null) {
+                    if (lang) this.printLanguage = lang;
                     this.activePrintTemplate = 'template2';
-                    setTimeout(() => {
-                        window.print();
-                    }, 50);
+                    const appEl = document.getElementById('bookingDetailApp');
+                    if (appEl) {
+                        appEl.classList.remove('printing-template1');
+                        appEl.classList.add('printing-template2');
+                        appEl.classList.remove('print-lang-km', 'print-lang-en');
+                        appEl.classList.add('print-lang-' + this.printLanguage);
+                    }
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            window.print();
+                        }, 60);
+                    });
                 },
                 confirmCancel() {
                     const invoiceName = '{{ $order->invoice_number ?: '#' . $order->id }}';

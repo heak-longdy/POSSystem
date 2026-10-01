@@ -1,13 +1,14 @@
 @php
-    $isKm = app()->getLocale() === 'km';
+    $printLocale = $printLocale ?? app()->getLocale();
+    $isKm = $printLocale === 'km';
     $order = $order ?? null;
 
-    $shopName = $order->shop?->name ?: 'រ៉ុង ស៊ុយ ហ័រ ( ផែ ស៊ុយហ័រ )';
+    $shopName = $order->shop?->name ?: ($isKm ? 'រ៉ុង ស៊ុយ ហ័រ ( ផែ ស៊ុយហ័រ )' : 'Rong Suy Hor (Phe Suyhor)');
     $shopSub = $order->shop?->nick_name ?: ($order->shop?->name ? '' : 'phe suy horh');
     $shopPhone = $order->shop?->phone ?: '092 98 99 28 / 096 088 6666 367';
-    $shopAddress = $order->shop?->address ?: 'ផ្លូវជាតិលេខ៤ សង្កាត់ស្នោរ ក្រុងសំរោង ខេត្តតាកែវ';
+    $shopAddress = $order->shop?->address ?: ($isKm ? 'ផ្លូវជាតិលេខ៤ សង្កាត់ស្នោរ ក្រុងសំរោង ខេត្តតាកែវ' : 'National Road 4, Sangkat Sno, Samraong, Takeo');
 
-    $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer')));
+    $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
     $cPhone = $customerPhone ?? ($order->customer?->phone ?: '---');
     $cAddress = $customerAddress ?? ($order->customer?->address ?: $shopAddress);
 
@@ -17,9 +18,9 @@
 
     $paymentStatus = $order->payment_status ?: 'Pending';
     $buyerStatusNote = match ($paymentStatus) {
-        'Paid' => __('order.invoice.status_paid'),
-        'Partial' => __('order.invoice.status_partial'),
-        default => __('order.invoice.status_unpaid'),
+        'Paid' => __('order.invoice.status_paid', [], $printLocale),
+        'Partial' => __('order.invoice.status_partial', [], $printLocale),
+        default => __('order.invoice.status_unpaid', [], $printLocale),
     };
 
     $details = $order->orderDetails ?: collect();
@@ -27,7 +28,7 @@
     $emptyRowsCount = max(0, $minRows - $details->count());
 @endphp
 
-<div class="pos-invoice-sheet" id="posInvoicePrintArea">
+<div class="pos-invoice-sheet" id="posInvoicePrintArea_{{ $printLocale }}">
     <!-- Invoice Header Block -->
     <div class="inv-header-row">
         <!-- Left: Logo & Company Name -->
@@ -46,14 +47,14 @@
                     <div class="inv-shop-subtitle-en">{{ $shopSub }}</div>
                 @endif
                 <div class="inv-shop-phone">
-                    <span class="phone-label">{{ __('order.invoice.tel') }}</span> {{ $shopPhone }}
+                    <span class="phone-label">{{ __('order.invoice.tel', [], $printLocale) }}</span> {{ $shopPhone }}
                 </div>
             </div>
         </div>
 
         <!-- Right: Official Invoice Title -->
         <div class="inv-official-title-box">
-            <div class="inv-copy-notice">{{ __('order.invoice.invoice_copy_original') }}</div>
+            <div class="inv-copy-notice">{{ __('order.invoice.invoice_copy_original', [], $printLocale) }}</div>
             <div class="inv-main-heading">
                 @if ($isKm)
                     <span class="khmer-title">វិក្កយបត្រ</span>
@@ -69,25 +70,25 @@
     <div class="inv-metadata-row">
         <div class="inv-meta-left">
             <div class="inv-meta-item">
-                <span class="meta-label">{{ __('order.invoice.customer') }}</span>
+                <span class="meta-label">{{ __('order.invoice.customer', [], $printLocale) }}</span>
                 <strong class="meta-value">{{ $cName }}</strong>
                 @if ($cPhone && $cPhone !== '---')
                     <span class="meta-phone">({{ $cPhone }})</span>
                 @endif
             </div>
             <div class="inv-meta-item meta-address-line">
-                <span class="meta-label">{{ __('order.invoice.address') }}</span>
+                <span class="meta-label">{{ __('order.invoice.address', [], $printLocale) }}</span>
                 <span class="meta-value">{{ $cAddress }}</span>
             </div>
         </div>
 
         <div class="inv-meta-right">
             <div class="inv-meta-item">
-                <span class="meta-label">{{ __('order.invoice.invoice_no') }}</span>
+                <span class="meta-label">{{ __('order.invoice.invoice_no', [], $printLocale) }}</span>
                 <strong class="meta-value inv-number">{{ $invoiceNo }}</strong>
             </div>
             <div class="inv-meta-item">
-                <span class="meta-label">{{ __('order.invoice.date') }}</span>
+                <span class="meta-label">{{ __('order.invoice.date', [], $printLocale) }}</span>
                 <span class="meta-value">
                     @if ($isKm)
                         ថ្ងៃទី{{ $orderDate->format('d') }}ខែ{{ $orderDate->format('m') }}ឆ្នាំ {{ $orderDate->format('Y') }}
@@ -97,7 +98,7 @@
                 </span>
             </div>
             <div class="inv-meta-item">
-                <span class="meta-label">{{ __('order.invoice.operator') }}</span>
+                <span class="meta-label">{{ __('order.invoice.operator', [], $printLocale) }}</span>
                 <span class="meta-value">{{ $cashierName }}</span>
             </div>
         </div>
@@ -107,11 +108,11 @@
     <table class="inv-grid-table">
         <thead>
             <tr>
-                <th class="col-num">{{ __('order.invoice.col_no') }}</th>
-                <th class="col-desc">{{ __('order.invoice.col_desc') }}</th>
-                <th class="col-qty">{{ __('order.invoice.col_qty') }}</th>
-                <th class="col-price">{{ __('order.invoice.col_price') }}</th>
-                <th class="col-total">{{ __('order.invoice.col_total') }}</th>
+                <th class="col-num">{{ __('order.invoice.col_no', [], $printLocale) }}</th>
+                <th class="col-desc">{{ __('order.invoice.col_desc', [], $printLocale) }}</th>
+                <th class="col-qty">{{ __('order.invoice.col_qty', [], $printLocale) }}</th>
+                <th class="col-price">{{ __('order.invoice.col_price', [], $printLocale) }}</th>
+                <th class="col-total">{{ __('order.invoice.col_total', [], $printLocale) }}</th>
             </tr>
         </thead>
         <tbody>
@@ -121,7 +122,7 @@
                     $rawItemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
                     if (is_string($rawItemName) && str_starts_with(trim($rawItemName), '{')) {
                         $decoded = json_decode($rawItemName, true);
-                        $itemName = $decoded[app()->getLocale()] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
+                        $itemName = $decoded[$printLocale] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
                     } else {
                         $itemName = $rawItemName;
                     }
@@ -143,7 +144,7 @@
                 <tr class="inv-item-row">
                     <td class="cell-num">1</td>
                     <td class="cell-desc">
-                        <span class="item-name">{{ __('order.invoice.sample_coca') }}</span>
+                        <span class="item-name">{{ __('order.invoice.sample_coca', [], $printLocale) }}</span>
                     </td>
                     <td class="cell-qty">50</td>
                     <td class="cell-price">2.26</td>
@@ -169,39 +170,39 @@
                     <div class="inv-signatures-wrap">
                         <div class="inv-signature-col buyer-sig">
                             <div class="sig-header">
-                                <span class="sig-title">{{ __('order.invoice.buyer_title') }}</span>
+                                <span class="sig-title">{{ __('order.invoice.buyer_title', [], $printLocale) }}</span>
                                 <span class="sig-status-tag">{{ $buyerStatusNote }}</span>
                             </div>
                             <div class="sig-space"></div>
-                            <div class="sig-action-label">{{ __('order.invoice.thumbprint') }}</div>
+                            <div class="sig-action-label">{{ __('order.invoice.thumbprint', [], $printLocale) }}</div>
                         </div>
 
                         <div class="inv-signature-col seller-sig">
                             <div class="sig-header">
-                                <span class="sig-title">{{ __('order.invoice.seller_title') }}</span>
+                                <span class="sig-title">{{ __('order.invoice.seller_title', [], $printLocale) }}</span>
                             </div>
                             <div class="sig-space"></div>
-                            <div class="sig-action-label">{{ __('order.invoice.signature') }}</div>
+                            <div class="sig-action-label">{{ __('order.invoice.signature', [], $printLocale) }}</div>
                         </div>
                     </div>
                 </td>
-                <td class="inv-foot-calc-label">{{ __('order.invoice.prev_balance') }}</td>
+                <td class="inv-foot-calc-label">{{ __('order.invoice.prev_balance', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">0.00</td>
             </tr>
             <tr>
-                <td class="inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal') }}</td>
+                <td class="inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value font-bold">
                     {{ number_format((float) ($order->total_price ?? 0), 2) }}
                 </td>
             </tr>
             <tr>
-                <td class="inv-foot-calc-label">{{ __('order.invoice.paid') }}</td>
+                <td class="inv-foot-calc-label">{{ __('order.invoice.paid', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">
                     {{ (float) ($order->paid_amount ?? 0) > 0 ? number_format((float) $order->paid_amount, 2) : '' }}
                 </td>
             </tr>
             <tr>
-                <td class="inv-foot-calc-label">{{ __('order.invoice.balance_due') }}</td>
+                <td class="inv-foot-calc-label">{{ __('order.invoice.balance_due', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">
                     {{ (float) ($order->remaining_amount ?? 0) > 0 ? number_format((float) $order->remaining_amount, 2) : '0.00' }}
                 </td>

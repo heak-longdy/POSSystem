@@ -45,6 +45,8 @@
                                                 onerror="(this).src='{{ asset('images/logo/default.png') }}'"
                                                 alt="">
                                         </div>
+                                    @elseif($header['field'] === 'order_items_title')
+                                        <div class="order-items-column-wrapper">{!! isset($item->{$header['field']}) ? $item->{$header['field']} : '---' !!}</div>
                                     @elseif($header['field'] != 'action')
                                         <span>{!! isset($item->{$header['field']}) ? $item->{$header['field']} : '---' !!}</span>
                                     @elseif($header['field'] === 'action')

@@ -1189,26 +1189,106 @@ class OrderController extends Controller
 
     protected function customerTitle(Order $order)
     {
-        $name = e($order->customer?->name ?: '---');
-        $phone = e($order->customer?->phone ?: '---');
+        $name = e($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer')));
+        $phone = e($order->customer?->phone ?: '');
 
-        return "<span>{$name}</span><small>{$phone}</small>";
+        $phoneHtml = $phone ? "<small class=\"customer-phone\"><i class=\"bx bx-phone\"></i>{$phone}</small>" : '';
+
+        return "<div class=\"customer-cell\"><span class=\"customer-name\">{$name}</span>{$phoneHtml}</div>";
     }
 
     protected function orderItemsTitle(Order $order)
     {
+        return self::renderOrderItems($order);
+    }
+
+    public static function renderOrderItems(Order $order)
+    {
         $details = $order->orderDetails;
         if (!$details || $details->count() === 0) {
-            return '---';
+            return '<span class="text-muted">---</span>';
         }
 
-        return $details->map(function ($detail) {
-            $name = e($detail->type === 'service' ? $detail->service?->name : $detail->product?->name);
-            $qty = (int) ($detail->qty ?: 1);
+        $totalCount = $details->count();
+        $isService = fn($detail) => $detail->type === 'service';
+        $getLabel = fn($detail) => $isService($detail) ? __('order.tab.service') : __('order.tab.product');
+        $getTypeClass = fn($detail) => $isService($detail) ? 'order-item-type--service' : 'order-item-type--product';
 
-            return "<span>- {$name} ({$qty})</span>";
-        })->implode('');
+        $renderSingleItem = function ($detail) use ($getLabel, $getTypeClass) {
+            $name = e($detail->type === 'service' ? ($detail->service?->name ?: '---') : ($detail->product?->name ?: '---'));
+            $qty = (int) ($detail->qty ?: 1);
+            $typeBadge = $detail->type === 'service'
+                ? '<span class="order-item-type order-item-type--service">' . e($getLabel($detail)) . '</span>'
+                : '';
+            $itemIcon = $detail->type === 'service'
+                ? '<i class="bx bx-wrench order-item-icon order-item-icon--service"></i>'
+                : '<i class="bx bx-package order-item-icon"></i>';
+
+            return "
+                <div class=\"order-table-item\">
+                    {$itemIcon}
+                    {$typeBadge}
+                    <span class=\"order-item-name\" title=\"{$name}\">{$name}</span>
+                    <span class=\"order-item-qty\">×{$qty}</span>
+                </div>
+            ";
+        };
+
+        if ($totalCount <= 2) {
+            $html = '<div class="order-table-items">';
+            foreach ($details as $detail) {
+                $html .= $renderSingleItem($detail);
+            }
+            $html .= '</div>';
+            return $html;
+        }
+
+        // More than 2 items: display first 2 items + "+N more" expand & hover preview
+        $firstTwo = $details->take(2);
+        $remaining = $details->slice(2);
+        $remainingCount = $remaining->count();
+
+        $moreText = "+{$remainingCount} " . __('order.more_items');
+        $collapseText = __('order.collapse_items');
+        $allItemsText = __('order.all_items');
+
+        $html = '<div class="order-table-items" x-data="{ expanded: false }">';
+
+        // First 2 items
+        foreach ($firstTwo as $detail) {
+            $html .= $renderSingleItem($detail);
+        }
+
+        // Collapsible remaining items
+        $html .= '<div class="order-table-items-extra" x-show="expanded" x-cloak>';
+        foreach ($remaining as $detail) {
+            $html .= $renderSingleItem($detail);
+        }
+        $html .= '</div>';
+
+        // "+N more" interactive wrapper
+        $html .= "
+            <div class=\"order-table-more-wrapper\">
+                <button type=\"button\" class=\"order-items-more-btn\" @click.stop=\"expanded = !expanded\" title=\"{$moreText}\">
+                    <span x-text=\"expanded ? '{$collapseText}' : '{$moreText}'\">{$moreText}</span>
+                    <i class=\"bx\" :class=\"expanded ? 'bx-chevron-up' : 'bx-chevron-down'\"></i>
+                </button>
+                <div class=\"order-items-hover-popover\" x-show=\"!expanded\">
+                    <div class=\"popover-header-title\">
+                        <i class=\"bx bx-package\"></i>
+                        <span>{$allItemsText} ({$totalCount})</span>
+                    </div>
+        ";
+
+        foreach ($remaining as $detail) {
+            $html .= $renderSingleItem($detail);
+        }
+
+        $html .= '</div></div></div>';
+
+        return $html;
     }
+
 
     protected function paymentStatusBadge(Order $order)
     {

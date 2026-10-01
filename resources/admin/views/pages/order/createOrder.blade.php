@@ -98,23 +98,10 @@
                         <div class="toolbar-left-group">
                             <!-- Category Filter Tabs with Dynamic Counts -->
                             <div class="booking-pos-tabs" role="tablist">
-                                <button type="button" class="booking-pos-tab"
-                                    :class="selectType === 'all' ? 'active' : ''" @click="changeSelectType('all')">
-                                    <i data-feather="layers"></i>
-                                    <span>{{ __('order.tab.all') }}</span>
-                                    <span class="tab-count-badge" x-text="getCatalogCount('all')"></span>
-                                </button>
-                                <button type="button" class="booking-pos-tab"
-                                    :class="selectType === 'product' ? 'active' : ''" @click="changeSelectType('product')">
+                                <button type="button" class="booking-pos-tab active">
                                     <i data-feather="package"></i>
                                     <span>{{ __('order.tab.products') }}</span>
                                     <span class="tab-count-badge" x-text="getCatalogCount('product')"></span>
-                                </button>
-                                <button type="button" class="booking-pos-tab"
-                                    :class="selectType === 'service' ? 'active' : ''" @click="changeSelectType('service')">
-                                    <i data-feather="scissors"></i>
-                                    <span>{{ __('order.tab.services') }}</span>
-                                    <span class="tab-count-badge" x-text="getCatalogCount('service')"></span>
                                 </button>
                             </div>
                         </div>
@@ -2028,7 +2015,7 @@
                 editingPaymentId: null,
                 editPaymentAmount: null,
                 editPaymentNote: '',
-                selectType: 'all',
+                selectType: 'product',
                 shopData: null,
                 orderDeleteId: [],
                 initialOrder: null,
@@ -2406,22 +2393,15 @@
                     clearTimeout(this.searchTimer);
                     this.searchTimer = setTimeout(async () => {
                         try {
-                            const selectedTypes = this.selectType === 'all' ? ['product', 'service'] : [this.selectType];
-                            const responses = await Promise.all(selectedTypes.map(async (type) => {
+                            const responses = await Promise.all(['product'].map(async (type) => {
                                 const res = await this.fetchJson(
                                     `/admin/select/product?search=${encodeURIComponent(search || '')}&shop_id=${shopId}&type=${type}`
                                 );
                                 return this.normalizeCatalogItems(res?.data || [], type);
                             }));
 
-                            if (this.selectType === 'all') {
-                                this.totalProductsCount = responses[0]?.length || 0;
-                                this.totalServicesCount = responses[1]?.length || 0;
-                            } else if (this.selectType === 'product') {
-                                this.totalProductsCount = responses[0]?.length || 0;
-                            } else if (this.selectType === 'service') {
-                                this.totalServicesCount = responses[0]?.length || 0;
-                            }
+                            this.totalProductsCount = responses[0]?.length || 0;
+                            this.totalServicesCount = 0;
 
                             this.dataFilter = responses.flat();
                             this.applyCatalogSort();

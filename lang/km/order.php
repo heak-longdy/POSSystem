@@ -40,6 +40,9 @@ return [
     'select_shop' => 'ជ្រើសរើសហាង',
     'select_barber' => 'ជ្រើសរើសជាងកាត់សក់',
     'select_customer' => 'ជ្រើសរើសអតិថិជន',
+    'more_items' => 'ទៀត',
+    'collapse_items' => 'បង្រួម',
+    'all_items' => 'ផលិតផលទាំងអស់',
 
     'tab' => [
         'pending' => 'រង់ចាំ',
@@ -64,7 +67,8 @@ return [
         'shop' => 'ហាង',
         'barber' => 'ជាងកាត់សក់',
         'customer' => 'អតិថិជន',
-        'services_products' => 'សេវាកម្ម/ផលិតផល',
+        'services_products' => 'ផលិតផល',
+        'products' => 'ផលិតផល',
         'pay_status' => 'ស្ថានភាពទូទាត់',
         'total' => 'សរុប',
         'paid' => 'បានបង់',
@@ -153,6 +157,7 @@ return [
 
     'invoice' => [
         'select_language' => 'ភាសាវិក្កយបត្រ',
+        'print_language' => 'ភាសាបោះពុម្ព',
         'khmer' => 'ខ្មែរ',
         'english' => 'អង់គ្លេស',
         'invoice_copy_original' => 'វិក្កយបត្រ ( ចម្លង ឬ ដើម )',

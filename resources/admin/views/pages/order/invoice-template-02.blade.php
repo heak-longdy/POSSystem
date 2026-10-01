@@ -1,12 +1,14 @@
 @php
+    $printLocale = $printLocale ?? app()->getLocale();
+    $isKm = $printLocale === 'km';
     $order = $order ?? null;
 
     $shopName = $order->shop?->name ?: 'ER-MLP1-TBK(PHE SUYHORTH)';
     $shopPhone = $order->shop?->phone ?: '092 989 928/088 666 6367';
     $shopAddress = $order->shop?->address ?: 'TBONG KHMUM';
-    $shopCity = $order->shop?->city ?: 'ត្បូងឃ្មុំ';
+    $shopCity = $order->shop?->city ?: ($isKm ? 'ត្បូងឃ្មុំ' : 'Tbong Khmum');
 
-    $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer')));
+    $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
     $cPhone = $customerPhone ?? ($order->customer?->phone ?: '012399252');
     $cAddress = $customerAddress ?? ($order->customer?->address ?: 'N/A ST 07 ផ្ទះជិត Mokwath Viheato');
     $customerCode = $order->customer?->code ?: ($order->customer?->id ? sprintf('%010d', $order->customer->id) : '0200042419');
@@ -16,32 +18,32 @@
     $deliveryDate = $order->delivery_date
         ? \Carbon\Carbon::parse($order->delivery_date)
         : ($order->order_date ? \Carbon\Carbon::parse($order->order_date)->addDays(2) : now()->addDays(2));
-    $driverName = $order->barber?->name ?: ($order->payments->first()?->createdBy?->name ?: 'សាខាអ្នកដឹក');
+    $driverName = $order->barber?->name ?: ($order->payments->first()?->createdBy?->name ?: ($isKm ? 'សាខាអ្នកដឹក' : 'Delivery Branch'));
 
     $details = $order->orderDetails ?: collect();
     $minRows = 3;
     $emptyRowsCount = max(0, min(3, $minRows - $details->count()));
 @endphp
 
-<div class="pos-slip-sheet" id="posSlipPrintArea">
+<div class="pos-slip-sheet" id="posSlipPrintArea_{{ $printLocale }}">
     <!-- Header Top Section -->
     <div class="slip-top-row">
         <div class="slip-top-left"></div>
         <div class="slip-top-center">
-            <h1 class="slip-title-khmer">{{ __('order.invoice.slip_title') }}</h1>
+            <h1 class="slip-title-khmer">{{ __('order.invoice.slip_title', [], $printLocale) }}</h1>
         </div>
         <div class="slip-top-right">
-            <div class="slip-meta-text">{{ $orderDate->format('n/j/y') }} {{ $orderDate->format('g:iA') }} <span class="draft-tag">{{ __('order.invoice.slip_draft') }}</span></div>
+            <div class="slip-meta-text">{{ $orderDate->format('n/j/y') }} {{ $orderDate->format('g:iA') }} <span class="draft-tag">{{ __('order.invoice.slip_draft', [], $printLocale) }}</span></div>
             <div class="slip-meta-item">
-                <span class="lbl">{{ __('order.invoice.slip_inv_no') }}</span> 
+                <span class="lbl">{{ __('order.invoice.slip_inv_no', [], $printLocale) }}</span> 
                 <strong class="val">{{ $invoiceNo }}</strong>
             </div>
             <div class="slip-meta-item">
-                <span class="lbl">{{ __('order.invoice.slip_issue_date') }}</span> 
+                <span class="lbl">{{ __('order.invoice.slip_issue_date', [], $printLocale) }}</span> 
                 <span class="val">{{ $orderDate->format('d/m/Y') }}</span>
             </div>
             <div class="slip-meta-item">
-                <span class="lbl">{{ __('order.invoice.slip_delivery_date') }}</span> 
+                <span class="lbl">{{ __('order.invoice.slip_delivery_date', [], $printLocale) }}</span> 
                 <span class="val">{{ $deliveryDate->format('d/m/Y') }}</span>
             </div>
         </div>
@@ -52,15 +54,15 @@
         <!-- Customer Info -->
         <div class="slip-info-col col-cust">
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.slip_cust_name') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.slip_cust_name', [], $printLocale) }}</span>
                 <span class="info-val"><span class="cust-code">{{ $customerCode }}</span> {{ $cName }}</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.slip_cust_address') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.slip_cust_address', [], $printLocale) }}</span>
                 <span class="info-val">{{ $cAddress }}</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.tel') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.tel', [], $printLocale) }}</span>
                 <span class="info-val">{{ $cPhone }}</span>
             </div>
         </div>
@@ -68,15 +70,15 @@
         <!-- Depot / Shop Info -->
         <div class="slip-info-col col-depot">
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.slip_depot_name') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.slip_depot_name', [], $printLocale) }}</span>
                 <strong class="info-val">{{ $shopName }}</strong>
             </div>
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.slip_depot_address') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.slip_depot_address', [], $printLocale) }}</span>
                 <span class="info-val">{{ $shopAddress }}</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.tel') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.tel', [], $printLocale) }}</span>
                 <span class="info-val">{{ $shopPhone }}</span>
             </div>
         </div>
@@ -84,7 +86,7 @@
         <!-- District & Delivery Branch Info -->
         <div class="slip-info-col col-dist">
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.slip_district') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.slip_district', [], $printLocale) }}</span>
                 <span class="info-val">{{ $shopCity }}</span>
             </div>
             <div class="info-row spacer-row">
@@ -92,7 +94,7 @@
                 <span class="info-val">&nbsp;</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.slip_delivery_branch') }}</span>
+                <span class="info-lbl">{{ __('order.invoice.slip_delivery_branch', [], $printLocale) }}</span>
                 <span class="info-val">{{ $driverName }}</span>
             </div>
         </div>
@@ -102,28 +104,28 @@
     <table class="slip-grid-table">
         <thead>
             <tr>
-                <th rowspan="2" class="th-no">{{ __('order.invoice.slip_col_no') }}</th>
-                <th rowspan="2" class="th-code">{{ __('order.invoice.slip_col_code') }}</th>
-                <th rowspan="2" class="th-desc">{{ __('order.invoice.slip_col_desc') }}</th>
-                <th rowspan="2" class="th-uom">{{ __('order.invoice.slip_col_uom') }}</th>
-                <th colspan="2" class="th-qty-group">{{ __('order.invoice.slip_col_qty') }}</th>
-                <th colspan="2" class="th-qty-group">{{ __('order.invoice.slip_col_deliv_qty') }}</th>
-                <th rowspan="2" class="th-price">{{ __('order.invoice.slip_col_cost') }}</th>
+                <th rowspan="2" class="th-no">{{ __('order.invoice.slip_col_no', [], $printLocale) }}</th>
+                <th rowspan="2" class="th-code">{{ __('order.invoice.slip_col_code', [], $printLocale) }}</th>
+                <th rowspan="2" class="th-desc">{{ __('order.invoice.slip_col_desc', [], $printLocale) }}</th>
+                <th rowspan="2" class="th-uom">{{ __('order.invoice.slip_col_uom', [], $printLocale) }}</th>
+                <th colspan="2" class="th-qty-group">{{ __('order.invoice.slip_col_qty', [], $printLocale) }}</th>
+                <th colspan="2" class="th-qty-group">{{ __('order.invoice.slip_col_deliv_qty', [], $printLocale) }}</th>
+                <th rowspan="2" class="th-price">{{ __('order.invoice.slip_col_cost', [], $printLocale) }}</th>
                 <th rowspan="2" class="th-disc">
-                    {{ __('order.invoice.slip_col_discount') }}<br>
-                    <span class="th-subtext">{{ __('order.invoice.slip_col_promo') }}</span>
+                    {{ __('order.invoice.slip_col_discount', [], $printLocale) }}<br>
+                    <span class="th-subtext">{{ __('order.invoice.slip_col_promo', [], $printLocale) }}</span>
                 </th>
                 <th rowspan="2" class="th-net">
-                    {{ __('order.invoice.slip_col_net_price') }}<br>
-                    <span class="th-subtext">{{ __('order.invoice.slip_col_net_sub') }}</span>
+                    {{ __('order.invoice.slip_col_net_price', [], $printLocale) }}<br>
+                    <span class="th-subtext">{{ __('order.invoice.slip_col_net_sub', [], $printLocale) }}</span>
                 </th>
-                <th rowspan="2" class="th-total">{{ __('order.invoice.slip_col_total') }}</th>
+                <th rowspan="2" class="th-total">{{ __('order.invoice.slip_col_total', [], $printLocale) }}</th>
             </tr>
             <tr class="th-sub-row">
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_case') }}</th>
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_can') }}</th>
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_case') }}</th>
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_can') }}</th>
+                <th class="th-sub-col">{{ __('order.invoice.slip_col_case', [], $printLocale) }}</th>
+                <th class="th-sub-col">{{ __('order.invoice.slip_col_can', [], $printLocale) }}</th>
+                <th class="th-sub-col">{{ __('order.invoice.slip_col_case', [], $printLocale) }}</th>
+                <th class="th-sub-col">{{ __('order.invoice.slip_col_can', [], $printLocale) }}</th>
             </tr>
         </thead>
         <tbody>
@@ -133,7 +135,7 @@
                     $rawItemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
                     if (is_string($rawItemName) && str_starts_with(trim($rawItemName), '{')) {
                         $decoded = json_decode($rawItemName, true);
-                        $itemName = $decoded[app()->getLocale()] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
+                        $itemName = $decoded[$printLocale] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
                     } else {
                         $itemName = $rawItemName;
                     }
@@ -163,7 +165,7 @@
                 <tr class="slip-row">
                     <td class="td-no">1</td>
                     <td class="td-code">3801</td>
-                    <td class="td-desc">{{ __('order.invoice.sample_coca_12') }}</td>
+                    <td class="td-desc">{{ __('order.invoice.sample_coca_12', [], $printLocale) }}</td>
                     <td class="td-uom">12</td>
                     <td class="td-cases">35</td>
                     <td class="td-cans">0</td>
@@ -199,11 +201,11 @@
     <!-- Bottom Table Extension & Summary -->
     <div class="slip-table-bottom-bar">
         <div class="slip-bottom-left">
-            <span class="slip-free-goods-note">{{ __('order.invoice.slip_free_goods') }}</span>
+            <span class="slip-free-goods-note">{{ __('order.invoice.slip_free_goods', [], $printLocale) }}</span>
         </div>
         <div class="slip-bottom-right">
             <div class="slip-total-pay-box">
-                <span class="pay-lbl">{{ __('order.invoice.slip_total_pay') }}</span>
+                <span class="pay-lbl">{{ __('order.invoice.slip_total_pay', [], $printLocale) }}</span>
                 <strong class="pay-val">{{ number_format((float) ($order->total_price ?? 0), 2) }}</strong>
             </div>
         </div>
@@ -212,17 +214,17 @@
     <!-- Dual Signatures Section -->
     <div class="slip-signatures-section">
         <div class="slip-sig-col">
-            <div class="sig-title">{{ __('order.invoice.slip_driver_signature') }}</div>
+            <div class="sig-title">{{ __('order.invoice.slip_driver_signature', [], $printLocale) }}</div>
             <div class="sig-underline"></div>
         </div>
         <div class="slip-sig-col">
-            <div class="sig-title">{{ __('order.invoice.slip_customer_signature') }}</div>
+            <div class="sig-title">{{ __('order.invoice.slip_customer_signature', [], $printLocale) }}</div>
             <div class="sig-underline"></div>
         </div>
     </div>
 
     <!-- Footer Disclaimer Note -->
     <div class="slip-footer-disclaimer">
-        {{ __('order.invoice.slip_disclaimer') }}
+        {{ __('order.invoice.slip_disclaimer', [], $printLocale) }}
     </div>
 </div>
