@@ -12,6 +12,7 @@ use App\Models\Shop;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class OrderTransactionReportController extends Controller
 {
@@ -371,7 +372,7 @@ class OrderTransactionReportController extends Controller
         }
 
         // Barber / Staff filter
-        if ($req->filled('barber_id')) {
+        if ($req->filled('barber_id') && Schema::hasColumn('orders', 'barber_id')) {
             $query->where('barber_id', $req->barber_id);
         }
 

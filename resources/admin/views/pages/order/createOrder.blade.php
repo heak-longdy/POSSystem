@@ -292,7 +292,7 @@
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group form-group--full">
                                 <label><i data-feather="home"></i> {{ __('order.form.shop') }}</label>
                                 <select name="shop_id" id="shop_id" x-model="formData.shop_id"
                                     :disabled="!canEditOrderItems()"
@@ -300,17 +300,6 @@
                                     <option value="">{{ __('order.form.select_shop') }}</option>
                                 </select>
                                 <template x-for="item in dataError?.shop_id">
-                                    <span class="error" x-text="item">Error</span>
-                                </template>
-                            </div>
-                            <div class="form-group">
-                                <label><i data-feather="user-check"></i> {{ __('order.form.barber') }}</label>
-                                <select name="barber_id" id="barber_id" x-model="formData.barber_id"
-                                    :disabled="!canEditOrderItems()"
-                                    class="booking-select booking-select--barber" x-init="fetchSelectBarber()">
-                                    <option value="">{{ __('order.form.select_barber') }}</option>
-                                </select>
-                                <template x-for="item in dataError?.barber_id">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
@@ -1956,7 +1945,6 @@
                 dataError: {},
                 formData: {
                     shop_id: null,
-                    barber_id: null,
                     status: 'confirmed',
                     customer_id: null,
                     disable: false,
@@ -2006,20 +1994,16 @@
                 orderDeleteId: [],
                 initialOrder: null,
                 initialSelectedShop: null,
-                initialSelectedBarber: null,
                 init() {
                     const payload = @json($data);
                     const order = payload?.data ?? payload ?? null;
                     const selectedShop = @json($selectedShop);
-                    const selectedBarber = @json($selectedBarber);
                     const details = this.orderDetails(order);
                     this.initialOrder = order;
                     this.initialSelectedShop = selectedShop;
-                    this.initialSelectedBarber = selectedBarber;
 
                     this.shopData = order?.shop || selectedShop || null;
                     this.formData.shop_id = order?.shop_id || selectedShop?.id || null;
-                    this.formData.barber_id = order?.barber_id || selectedBarber?.id || order?.barber?.id || null;
                     this.formData.customer_id = order?.customer_id || order?.customer?.id || null;
                     const orderDateVal = order?.order_date;
                     this.formData.order_date = orderDateVal
@@ -2063,7 +2047,7 @@
                     this.fiterProduct(this.searchFilter);
                     this.initOrderDatepicker();
                     this.$nextTick(() => {
-                        this.prefillSelectFields(order, selectedShop, selectedBarber);
+                        this.prefillSelectFields(order, selectedShop);
                         this.initTwoColumnSticky();
                     });
                     this.refreshIcons();
@@ -2228,16 +2212,15 @@
                     }
 
                     const $select = $(selector);
+                    if (!$select.is('select')) return;
                     $select.find('option').filter((index, option) => String(option.value) === String(value)).remove();
                     $select.append(new Option(text || value, value, true, true)).trigger('change');
                 },
-                prefillSelectFields(order, selectedShop, selectedBarber) {
+                prefillSelectFields(order, selectedShop) {
                     const shop = order?.shop || selectedShop;
-                    const barber = order?.barber || selectedBarber;
                     const customer = order?.customer;
 
                     this.setSelect2Value('#shop_id', this.formData.shop_id, shop?.name || shop?.phone);
-                    this.setSelect2Value('#barber_id', this.formData.barber_id, barber?.name || barber?.phone);
                     this.setSelect2Value('#customer_id', this.formData.customer_id, customer?.name || customer?.phone);
                 },
                 mapDetailToCart(detail) {
@@ -2311,33 +2294,7 @@
                         this.calculatorProductPrice();
                         this.fiterProduct(this.searchFilter);
                     });
-                    this.prefillSelectFields(this.initialOrder, this.initialSelectedShop, this.initialSelectedBarber);
-                },
-                fetchSelectBarber() {
-                    $('#barber_id').select2({
-                        placeholder: @json(__('order.form.select_barber')),
-                        allowClear: true,
-                        ajax: {
-                            url: '{{ route('admin-select-barber') }}',
-                            dataType: 'json',
-                            type: 'GET',
-                            quietMillis: 50,
-                            data: (param) => ({ search: param.term }),
-                            processResults: (data) => ({
-                                results: $.map(data.data, (item) => ({
-                                    text: item?.name ? item.name : item?.phone,
-                                    id: item.id
-                                }))
-                            })
-                        }
-                    }).on('select2:open', () => {
-                        document.querySelector('.select2-search__field')?.focus();
-                    }).on('select2:select', (event) => {
-                        this.formData.barber_id = event.params.data.id;
-                    }).on('select2:clear', () => {
-                        this.formData.barber_id = null;
-                    });
-                    this.prefillSelectFields(this.initialOrder, this.initialSelectedShop, this.initialSelectedBarber);
+                    this.prefillSelectFields(this.initialOrder, this.initialSelectedShop);
                 },
                 fetchSelectCustomer() {
                     $('#customer_id').select2({
@@ -2362,7 +2319,7 @@
                     }).on('select2:clear', () => {
                         this.formData.customer_id = null;
                     });
-                    this.prefillSelectFields(this.initialOrder, this.initialSelectedShop, this.initialSelectedBarber);
+                    this.prefillSelectFields(this.initialOrder, this.initialSelectedShop);
                 },
                 async fiterProduct(search = this.searchFilter) {
                     const shopId = this.formData.shop_id || this.shopData?.id;

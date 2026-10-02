@@ -145,7 +145,7 @@ return [
         'invoice_no' => 'Invoice No',
         'customer_profile' => 'Customer Profile',
         'appointment_details' => 'Appointment & Shop Details',
-        'item_details' => 'Itemized Services & Products',
+        'item_details' => 'Ordered Products',
         'payment_history' => 'Payment History',
         'billing_summary' => 'Billing Summary',
         'remarks' => 'Order Remarks & Notes',
@@ -184,7 +184,7 @@ return [
         'email' => 'Email',
         'address' => 'Address',
         'shop' => 'Shop Branch',
-        'barber' => 'Assigned Barber',
+        'barber' => 'Staff',
         'note' => 'Note',
     ],
 

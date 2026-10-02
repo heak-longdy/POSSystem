@@ -31,10 +31,6 @@ class OrderRequest extends FormRequest
                 'required',
                 Rule::exists('shops', 'id')->where('status', 1),
             ],
-            'barber_id' => [
-                'nullable',
-                Rule::exists('barbers', 'id')->where('status', 1),
-            ],
             'customer_id' => [
                 'required',
                 Rule::exists('customers', 'id')->where('status', 1),
@@ -54,7 +50,6 @@ class OrderRequest extends FormRequest
             'dataCarts.json'       => __('order.validation.cart_invalid'),
             'shop_id.required'     => __('order.validation.shop_required'),
             'shop_id.exists'       => __('order.validation.shop_invalid'),
-            'barber_id.exists'     => __('order.validation.barber_invalid'),
             'customer_id.required' => __('order.validation.customer_required'),
             'customer_id.exists'   => __('order.validation.customer_invalid'),
             'order_date.required'  => __('order.validation.order_date_required'),

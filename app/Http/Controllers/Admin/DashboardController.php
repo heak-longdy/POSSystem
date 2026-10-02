@@ -526,7 +526,7 @@ class DashboardController extends Controller
 
         // 2. Top Sales (Barber / Staff)
         $topStaff = null;
-        if (Schema::hasTable('barbers')) {
+        if (Schema::hasTable('barbers') && Schema::hasColumn('orders', 'barber_id')) {
             // Attempt 1: Current week top barber
             $topStaff = DB::table('orders')
                 ->join('barbers', 'barbers.id', '=', 'orders.barber_id')

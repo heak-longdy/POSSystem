@@ -56,7 +56,7 @@ class OrderController extends Controller
         $data['status'] = $status;
         $data['routeName'] = $this->routeName;
         $data['shop'] = $req->shop_id ? Shop::find($req->shop_id) : null;
-        $data['barber'] = $req->barber_id ? Barber::find($req->barber_id) : null;
+        $data['barber'] = null;
         $data['firstMonthDay'] = $dates['from'];
         $data['lastMonthDay'] = $dates['to'];
 
@@ -66,7 +66,6 @@ class OrderController extends Controller
 
         $data['data'] = $query->with([
                 'shop',
-                'barber',
                 'customer',
                 'orderDetails' => function ($detail) {
                     $detail->withTrashed()->with(['service', 'product']);
@@ -78,9 +77,6 @@ class OrderController extends Controller
             ->when($req->shop_id, function ($query) use ($req) {
                 $query->where('shop_id', $req->shop_id);
             })
-            ->when($req->barber_id, function ($query) use ($req) {
-                $query->where('barber_id', $req->barber_id);
-            })
             ->when($paymentStatus, function ($query) use ($paymentStatus) {
                 $query->where('payment_status', $paymentStatus);
             })
@@ -89,9 +85,6 @@ class OrderController extends Controller
                     $q->where('invoice_number', 'like', '%' . $req->search . '%')
                         ->orWhereHas('shop', function ($shop) use ($req) {
                             $shop->where('name', 'like', '%' . $req->search . '%');
-                        })
-                        ->orWhereHas('barber', function ($barber) use ($req) {
-                            $barber->where('name', 'like', '%' . $req->search . '%');
                         })
                         ->orWhereHas('customer', function ($customer) use ($req) {
                             $customer->where('name', 'like', '%' . $req->search . '%')
@@ -129,9 +122,6 @@ class OrderController extends Controller
             })
             ->when($req->shop_id, function ($q) use ($req) {
                 $q->where('shop_id', $req->shop_id);
-            })
-            ->when($req->barber_id, function ($q) use ($req) {
-                $q->where('barber_id', $req->barber_id);
             })
             ->paginate(50)
             ->appends($req->query());
@@ -699,9 +689,6 @@ class OrderController extends Controller
                     ->when($req->shop_id, function ($q) use ($req) {
                         $q->where('shop_id', $req->shop_id);
                     })
-                    ->when($req->barber_id, function ($q) use ($req) {
-                        $q->where('barber_id', $req->barber_id);
-                    })
                     ->when($paymentStatus, function ($q) use ($paymentStatus) {
                         $q->where('payment_status', $paymentStatus);
                     });
@@ -838,8 +825,6 @@ class OrderController extends Controller
                 'id' => null,
                 'shop' => $shop,
                 'shop_id' => $shop?->id,
-                'barber' => null,
-                'barber_id' => null,
                 'customer' => null,
                 'customer_id' => null,
                 'orderDetails' => collect([]),
@@ -852,7 +837,7 @@ class OrderController extends Controller
             ];
         }
 
-        $recentOrders = Order::with(['customer', 'barber'])
+        $recentOrders = Order::with(['customer'])
             ->withCount('orderDetails')
             ->when($shop?->id, function ($query) use ($shop) {
                 $query->where('shop_id', $shop->id);
@@ -862,7 +847,7 @@ class OrderController extends Controller
             ->get();
 
         if ($recentOrders->isEmpty()) {
-            $recentOrders = Order::with(['customer', 'barber'])
+            $recentOrders = Order::with(['customer'])
                 ->withCount('orderDetails')
                 ->latest('id')
                 ->take(3)
@@ -875,7 +860,6 @@ class OrderController extends Controller
             'order' => $order,
             'routeName' => $this->routeName,
             'selectedShop' => $shop,
-            'selectedBarber' => isset($order->barber_id) && $order->barber_id ? Barber::find($order->barber_id) : null,
             'recentOrders' => $recentOrders,
         ];
     }
@@ -885,7 +869,6 @@ class OrderController extends Controller
         return [
             'customer_id' => $req->customer_id,
             'shop_id' => $req->shop_id,
-            'barber_id' => $req->barber_id,
             'order_date' => $req->order_date,
             'delivery_date' => $req->delivery_date ?: null,
             'total_price' => $req->subTotal ?? 0,

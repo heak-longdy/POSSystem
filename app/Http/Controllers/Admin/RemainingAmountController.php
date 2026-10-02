@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -66,7 +67,7 @@ class RemainingAmountController extends Controller
         if ($req->shop_id) {
             $query->where('shop_id', $req->shop_id);
         }
-        if ($req->barber_id) {
+        if ($req->barber_id && Schema::hasColumn('orders', 'barber_id')) {
             $query->where('barber_id', $req->barber_id);
         }
 
@@ -387,7 +388,7 @@ class RemainingAmountController extends Controller
             ->when($req->shop_id, function ($q) use ($req) {
                 $q->where('shop_id', $req->shop_id);
             })
-            ->when($req->barber_id, function ($q) use ($req) {
+            ->when($req->barber_id && Schema::hasColumn('orders', 'barber_id'), function ($q) use ($req) {
                 $q->where('barber_id', $req->barber_id);
             })
             ->when($status === 'partial', function ($q) {

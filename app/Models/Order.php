@@ -19,7 +19,6 @@ class Order extends Model
         'total_discount',
         'paid_amount',
         'shop_id',
-        'barber_id',
         'order_date',
         'delivery_date',
         'payment_status',

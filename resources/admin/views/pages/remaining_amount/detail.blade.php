@@ -166,27 +166,17 @@
                             </strong>
                         </div>
                     </article>
-
-                    <article class="kpi-card">
-                        <div class="kpi-icon-wrap kpi-purple">
-                            <i data-feather="award"></i>
-                        </div>
-                        <div class="kpi-info">
-                            <span class="kpi-label">{{ __('order.detail.customer_points') }}</span>
-                            <strong class="kpi-value text-primary">+{{ (int) ($order->total_point ?? 0) }} {{ __('order.detail.pts') }}</strong>
-                        </div>
-                    </article>
                 </section>
 
                 <!-- Main Content 2-Column Grid (70% Left / 30% Right) -->
                 <div class="detail-columns-layout">
                     <!-- Left Main Column (70%) -->
                     <div class="detail-col-main">
-                        <!-- Itemized Services & Products Table -->
+                        <!-- Ordered Products Table -->
                         <section class="detail-card">
                             <div class="detail-card-header">
                                 <div class="card-title-group">
-                                    <i data-feather="scissors"></i>
+                                    <i data-feather="package"></i>
                                     <h2>{{ __('order.detail.item_details') }}</h2>
                                     <span class="count-badge">{{ $order->orderDetails ? $order->orderDetails->count() : 0 }}</span>
                                 </div>
@@ -198,8 +188,6 @@
                                         <tr>
                                             <th style="width: 50px;">#</th>
                                             <th>{{ __('order.table.item') }}</th>
-                                            <th style="width: 110px;">{{ __('order.table.type') }}</th>
-                                            <th>{{ __('order.detail.stylist_barber') }}</th>
                                             <th class="text-right">{{ __('order.detail.unit_price') }}</th>
                                             <th class="text-center">{{ __('order.detail.quantity') }}</th>
                                             <th class="text-right">{{ __('order.detail.discount') }}</th>
@@ -223,19 +211,8 @@
                                                 <td>
                                                     <div class="item-name-cell">
                                                         <strong>{{ $itemName }}</strong>
-                                                        @if ($detail->point)
-                                                            <small class="point-badge">+{{ $detail->point }} {{ __('order.detail.pts') }}</small>
-                                                        @endif
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    @if ($isService)
-                                                        <span class="type-pill pill-service">{{ __('order.detail.service') }}</span>
-                                                    @else
-                                                        <span class="type-pill pill-product">{{ __('order.detail.product') }}</span>
-                                                    @endif
-                                                </td>
-                                                <td>{{ $order->barber?->name ?? '---' }}</td>
                                                 <td class="text-right">${{ number_format($unitPrice, 2) }}</td>
                                                 <td class="text-center">{{ $qty }}</td>
                                                 <td class="text-right">
@@ -249,7 +226,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="text-center text-muted py-4">
+                                                <td colspan="6" class="text-center text-muted py-4">
                                                     {{ __('order.empty_cart.title') }}
                                                 </td>
                                             </tr>
@@ -403,10 +380,6 @@
                                             <span class="info-val">{{ $customerAddress }}</span>
                                         </li>
                                     @endif
-                                    <li>
-                                        <span class="info-label"><i data-feather="award"></i> {{ __('order.detail.customer_points') }}:</span>
-                                        <span class="info-val points-tag">{{ $order->customer?->point ?? 0 }} {{ __('order.detail.pts') }}</span>
-                                    </li>
                                 </ul>
                             </div>
                         </section>
@@ -423,10 +396,6 @@
                                 <div class="appointment-info-row">
                                     <span class="label"><i data-feather="home"></i> {{ __('order.detail.shop') }}:</span>
                                     <span class="val font-weight-bold">{{ $order->shop?->name ?: '---' }}</span>
-                                </div>
-                                <div class="appointment-info-row">
-                                    <span class="label"><i data-feather="user-check"></i> {{ __('order.detail.barber') }}:</span>
-                                    <span class="val font-weight-bold">{{ $order->barber?->name ?: '---' }}</span>
                                 </div>
                                 <div class="appointment-info-row">
                                     <span class="label"><i data-feather="clock"></i> {{ __('order.detail.appointment_time') }}:</span>
@@ -1020,10 +989,10 @@
             height: 14px !important;
         }
 
-        /* Top 4 KPI Grid */
+        /* Top 3 KPI Grid */
         .detail-kpi-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
