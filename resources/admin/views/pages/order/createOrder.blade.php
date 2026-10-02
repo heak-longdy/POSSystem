@@ -459,15 +459,12 @@
                         cursor: not-allowed !important;
                     }
 
-                    /* 3-Column Inputs Row */
+                    /* 2-Column Inputs Row */
                     .booking-pos-sidebar-middle .booking-pos-cart-adjustments {
                         display: grid !important;
-                        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                         gap: 6px !important;
                         margin: 4px 0 !important;
-                    }
-                    .booking-pos-sidebar-middle .booking-pos-cart-adjustments:not(.has-commission) {
-                        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                     }
                     .booking-pos-sidebar-middle .booking-pos-cart-adjustments .booking-pos-adjustment {
                         display: flex !important;
@@ -993,7 +990,7 @@
                         display: flex !important;
                         align-items: stretch !important;
                         width: 100% !important;
-                        height: 38px !important;
+                        height: 43px !important;
                         min-height: 38px !important;
                         border: 1px solid #cbd5e1 !important;
                         border-radius: 8px !important;
@@ -1045,7 +1042,7 @@
                     }
                     .booking-payment-form--record .booking-note-input {
                         width: 100% !important;
-                        height: 38px !important;
+                        height: 43px !important;
                         min-height: 38px !important;
                         border: 1px solid #cbd5e1 !important;
                         border-radius: 8px !important;
@@ -1698,7 +1695,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="booking-pos-cart-adjustments" :class="{'has-commission': item?.itemData?.commission || item?.itemData?.commission === 0}">
+                                            <div class="booking-pos-cart-adjustments">
                                                 <div class="booking-pos-adjustment">
                                                     <label>{{ __('order.unit_price') }}</label>
                                                     <div class="booking-input-prefix-group">
@@ -1724,17 +1721,6 @@
                                                             x-model="item.itemData.discount"
                                                             :disabled="!canEditOrderItems()"
                                                             x-on:input="discountRealTiemAction(item)">
-                                                    </div>
-                                                </div>
-                                                <div class="booking-pos-adjustment"
-                                                    x-show="item?.itemData?.commission || item?.itemData?.commission === 0">
-                                                    <label>{{ __('order.commission') }}</label>
-                                                    <div class="booking-input-prefix-group">
-                                                        <span class="input-addon-prefix" x-text="item?.itemData?.commissionType === 'percent' ? '%' : '$'">$</span>
-                                                        <input type="number" min="0" step="1"
-                                                            x-model="item.itemData.commission"
-                                                            :disabled="!canEditOrderItems()"
-                                                            x-on:input="commissionRealTimeAction(item)">
                                                     </div>
                                                 </div>
                                             </div>

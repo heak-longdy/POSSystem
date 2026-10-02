@@ -43,6 +43,9 @@
                             <input type="hidden" :name="`products[${index}][product_image]`" x-model="row.product_image">
                             <input type="hidden" :name="`products[${index}][product_uom]`" x-model="row.product_uom">
                             <input type="hidden" :name="`products[${index}][product_category]`" x-model="row.product_category">
+                            <input type="hidden" :name="`products[${index}][point]`" x-model="row.point">
+                            <input type="hidden" :name="`products[${index}][commission]`" x-model="row.commission">
+                            <input type="hidden" :name="`products[${index}][commission_type]`" x-model="row.commission_type">
 
                             <div class="shop-product-row-header">
                                 <div>
@@ -98,15 +101,7 @@
                                         <label class="error" x-text="fieldError(index, 'price')"></label>
                                     </template>
                                 </div>
-                                <div class="form-row iconInput">
-                                    <label>{{ __('shop.table.point') }}</label>
-                                    <input type="number" step="0.01" :name="`products[${index}][point]`"
-                                        x-model="row.point" placeholder="{{ __('shop.placeholder.enter_point') }}">
-                                    <i class='bx bx-badge-check'></i>
-                                    <template x-if="fieldError(index, 'point')">
-                                        <label class="error" x-text="fieldError(index, 'point')"></label>
-                                    </template>
-                                </div>
+
                                 <div class="form-row iconInput">
                                     <label>{{ __('shop.table.max_qty') }}</label>
                                     <input type="number" step="1" :name="`products[${index}][max_qty]`"
@@ -116,26 +111,7 @@
                                         <label class="error" x-text="fieldError(index, 'max_qty')"></label>
                                     </template>
                                 </div>
-                                <div class="form-row iconInput">
-                                    <label>{{ __('shop.table.commission') }}</label>
-                                    <input type="number" step="0.01" :name="`products[${index}][commission]`"
-                                        x-model="row.commission" placeholder="{{ __('shop.placeholder.enter_commission') }}">
-                                    <i class='bx bx-money'></i>
-                                    <template x-if="fieldError(index, 'commission')">
-                                        <label class="error" x-text="fieldError(index, 'commission')"></label>
-                                    </template>
-                                </div>
-                                <div class="form-row">
-                                    <label>{{ __('shop.table.commission_type') }}</label>
-                                    <select :name="`products[${index}][commission_type]`" x-model="row.commission_type">
-                                        <option value="">{{ __('shop.select_type') }}</option>
-                                        <option value="usd">{{ __('shop.commission_usd') }}</option>
-                                        <option value="percent">{{ __('shop.commission_percent') }}</option>
-                                    </select>
-                                    <template x-if="fieldError(index, 'commission_type')">
-                                        <label class="error" x-text="fieldError(index, 'commission_type')"></label>
-                                    </template>
-                                </div>
+
                                 <div class="form-row">
                                     <label>{{ __('shop.table.status') }} <span>*</span></label>
                                     <select :name="`products[${index}][status]`" x-model="row.status">

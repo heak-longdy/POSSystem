@@ -12,6 +12,8 @@ return [
     ],
 
     'table' => [
+        'no' => 'Nº',
+        'image' => 'Image',
         'product' => 'Product',
         'category' => 'Category',
         'uom' => 'UOM',
@@ -20,10 +22,21 @@ return [
         'max_qty' => 'Max Qty',
         'commission' => 'Commission',
         'commission_type' => 'Commission Type',
+        'status' => 'Status',
+        'action' => 'Action',
     ],
 
     'action' => [
         'product' => 'Product',
+        'edit' => 'Edit',
+        'delete' => 'Delete',
+        'restore' => 'Restore',
+        'destroy' => 'Destroy',
+    ],
+
+    'dialog' => [
+        'confirm_delete' => 'Are you sure you want to delete this product?',
+        'confirm_action' => 'Are you sure you want to :action ?',
     ],
 
     'button' => [

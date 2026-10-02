@@ -134,7 +134,7 @@
                                                     </li>
                                                     <li>
                                                         <a class="dropdown-item text-danger"
-                                                            @click="verifyDialog({{ $item }},'delete','Delete')">
+                                                            @click="verifyDialog({{ $item }},'delete','@lang('action_button.delete')')">
                                                             <i class="material-symbols-outlined">Delete</i>
                                                             <span>{{ __('shop.action.delete') }}</span>
                                                         </a>
@@ -142,14 +142,14 @@
                                                 @else
                                                     <li>
                                                         <a class="dropdown-item"
-                                                            @click="verifyDialog({{ $item }},'restore','Restore')">
+                                                            @click="verifyDialog({{ $item }},'restore','@lang('action_button.restore')')">
                                                             <i class="material-symbols-outlined">settings_backup_restore</i>
                                                             <span>{{ __('shop.action.restore') }}</span>
                                                         </a>
                                                     </li>
                                                     <li>
                                                         <a class="dropdown-item text-danger"
-                                                            @click="verifyDialog({{ $item }},'destroy','Destroy')">
+                                                            @click="verifyDialog({{ $item }},'destroy','@lang('action_button.destroy')')">
                                                             <i class="material-symbols-outlined">Delete</i>
                                                             <span>{{ __('shop.action.destroy') }}</span>
                                                         </a>

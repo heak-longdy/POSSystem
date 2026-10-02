@@ -12,6 +12,8 @@ return [
     ],
 
     'table' => [
+        'no' => 'ល.រ',
+        'image' => 'រូបភាព',
         'product' => 'ផលិតផល',
         'category' => 'ប្រភេទ',
         'uom' => 'ខ្នាត',
@@ -20,10 +22,21 @@ return [
         'max_qty' => 'ចំនួនអតិបរមា',
         'commission' => 'កម្រៃជើងសារ',
         'commission_type' => 'ប្រភេទកម្រៃជើងសារ',
+        'status' => 'ស្ថានភាព',
+        'action' => 'សកម្មភាព',
     ],
 
     'action' => [
         'product' => 'ផលិតផល',
+        'edit' => 'កែប្រែ',
+        'delete' => 'លុប',
+        'restore' => 'ស្តារឡើងវិញ',
+        'destroy' => 'លុបជាអចិន្ត្រៃយ៍',
+    ],
+
+    'dialog' => [
+        'confirm_delete' => 'តើអ្នកប្រាកដជាចង់លុបផលិតផលនេះមែនទេ?',
+        'confirm_action' => 'តើអ្នកប្រាកដជាចង់ :action មែនទេ?',
     ],
 
     'button' => [
