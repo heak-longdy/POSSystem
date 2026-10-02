@@ -33,7 +33,7 @@ class RemainingAmountController extends Controller
     public function index(Request $req)
     {
         $status = $this->normalizeStatusTab($req->status ?? 'all');
-        $dates = $this->dateRange($req);
+        $dates = $this->dateRange($req, false);
 
         $query = Order::query()
             ->with([
@@ -59,8 +59,11 @@ class RemainingAmountController extends Controller
         }
 
         // Date range filtering
-        if ($dates['from'] && $dates['to']) {
-            $query->whereBetween(DB::raw('DATE(order_date)'), [$dates['from'], $dates['to']]);
+        if ($dates['from']) {
+            $query->whereDate('order_date', '>=', $dates['from']);
+        }
+        if ($dates['to']) {
+            $query->whereDate('order_date', '<=', $dates['to']);
         }
 
         // Shop / Barber filters
@@ -371,7 +374,7 @@ class RemainingAmountController extends Controller
 
     public function report(Request $req)
     {
-        $dates = $this->dateRange($req);
+        $dates = $this->dateRange($req, false);
         $status = $this->normalizeStatusTab($req->status ?? 'all');
 
         $data = Order::with([
@@ -382,8 +385,11 @@ class RemainingAmountController extends Controller
             'orderDetails.product:id,name',
             'payments.createdBy:id,name,phone',
         ])
-            ->when($dates['from'] && $dates['to'], function ($q) use ($dates) {
-                $q->whereBetween(DB::raw('DATE(order_date)'), [$dates['from'], $dates['to']]);
+            ->when($dates['from'], function ($q) use ($dates) {
+                $q->whereDate('order_date', '>=', $dates['from']);
+            })
+            ->when($dates['to'], function ($q) use ($dates) {
+                $q->whereDate('order_date', '<=', $dates['to']);
             })
             ->when($req->shop_id, function ($q) use ($req) {
                 $q->where('shop_id', $req->shop_id);

@@ -49,7 +49,7 @@ class OrderController extends Controller
             return redirect()->route('admin-' . $this->routeName . '-list', 'Pending');
         }
 
-        $dates = $this->dateRange($req);
+        $dates = $this->dateRange($req, false);
         $paymentStatus = $this->orderPaymentStatusForTab($status)
             ?: $this->normalizePaymentStatus($req->payment_status);
 
@@ -71,8 +71,11 @@ class OrderController extends Controller
                     $detail->withTrashed()->with(['service', 'product']);
                 },
             ])
-            ->when($dates['from'] && $dates['to'], function ($query) use ($dates) {
-                $query->whereBetween(DB::raw('DATE(order_date)'), [$dates['from'], $dates['to']]);
+            ->when($dates['from'], function ($query) use ($dates) {
+                $query->whereDate('order_date', '>=', $dates['from']);
+            })
+            ->when($dates['to'], function ($query) use ($dates) {
+                $query->whereDate('order_date', '<=', $dates['to']);
             })
             ->when($req->shop_id, function ($query) use ($req) {
                 $query->where('shop_id', $req->shop_id);
@@ -662,7 +665,7 @@ class OrderController extends Controller
 
     public function report(Request $req)
     {
-        $dates = $this->dateRange($req);
+        $dates = $this->dateRange($req, false);
         $itemSelect = ['id', 'name', 'phone'];
         $paymentStatus = $this->normalizePaymentStatus($req->payment_status ?: $req->status);
 
@@ -674,9 +677,6 @@ class OrderController extends Controller
                     'shop' => function ($query) use ($itemSelect) {
                         $query->select($itemSelect);
                     },
-                    'barber' => function ($query) use ($itemSelect) {
-                        $query->select($itemSelect);
-                    },
                     'customer' => function ($query) use ($itemSelect) {
                         $query->select($itemSelect);
                     },
@@ -684,13 +684,26 @@ class OrderController extends Controller
             },
         ])
             ->whereHas('order', function ($query) use ($req, $dates, $paymentStatus) {
-                $query->whereDate('order_date', '>=', $dates['from'])
-                    ->whereDate('order_date', '<=', $dates['to'])
+                $query->when($dates['from'], function ($q) use ($dates) {
+                        $q->whereDate('order_date', '>=', $dates['from']);
+                    })
+                    ->when($dates['to'], function ($q) use ($dates) {
+                        $q->whereDate('order_date', '<=', $dates['to']);
+                    })
                     ->when($req->shop_id, function ($q) use ($req) {
                         $q->where('shop_id', $req->shop_id);
                     })
                     ->when($paymentStatus, function ($q) use ($paymentStatus) {
                         $q->where('payment_status', $paymentStatus);
+                    })
+                    ->when($req->search, function ($q) use ($req) {
+                        $q->where(function ($sub) use ($req) {
+                            $sub->where('invoice_number', 'like', '%' . $req->search . '%')
+                                ->orWhereHas('customer', function ($c) use ($req) {
+                                    $c->where('name', 'like', '%' . $req->search . '%')
+                                        ->orWhere('phone', 'like', '%' . $req->search . '%');
+                                });
+                        });
                     });
             })
             ->orderBy('id', 'desc')

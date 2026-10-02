@@ -1,6 +1,164 @@
 @extends('admin::shared.layout')
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('order.title')])
+    <style>
+        .order-listing-wrapper .header .header-action-button .filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .form-row {
+            height: 38px;
+            border-radius: 25px !important;
+            border: 1px solid rgba(152, 152, 152, 0.35) !important;
+            background: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 12px;
+            box-sizing: border-box;
+            margin-left: 0;
+            min-width: unset;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .form-row:focus-within {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        }
+        .order-listing-wrapper .header .header-action-button .filter .form-row input {
+            height: 100%;
+            width: 100%;
+            border: none !important;
+            background: transparent !important;
+            font-size: 13px;
+            color: #1e293b;
+            padding: 0 4px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .form-row input::placeholder {
+            color: #8892a0 !important;
+        }
+        div#ui-datepicker-div {
+            z-index: 9999 !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input {
+            position: relative !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            padding: 0 34px 0 14px !important;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input input {
+            cursor: pointer;
+            width: 100% !important;
+            height: 100% !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input i,
+        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input i.bx,
+        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input i.bx-calendar {
+            position: absolute !important;
+            right: 12px !important;
+            top: 50% !important;
+            bottom: auto !important;
+            left: auto !important;
+            transform: translateY(-50%) !important;
+            font-size: 18px !important;
+            color: #64748b !important;
+            margin: 0 !important;
+            pointer-events: none !important;
+            line-height: 1 !important;
+            display: block !important;
+        }
+
+        /* Seamless Select2 styling inside pill form-row */
+        .order-listing-wrapper .header .header-action-button .filter .form-row.shop-select {
+            padding: 0 8px 0 12px;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2.select2-container {
+            width: 100% !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection--single {
+            border: none !important;
+            background: transparent !important;
+            height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__rendered {
+            color: #1e293b !important;
+            font-size: 13px !important;
+            line-height: 36px !important;
+            padding-left: 0 !important;
+            padding-right: 20px !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__placeholder {
+            color: #8892a0 !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__arrow {
+            height: 36px !important;
+            top: 0 !important;
+            right: 4px !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__arrow b {
+            border-color: #64748b transparent transparent transparent !important;
+        }
+
+        /* Search submit button */
+        .order-listing-wrapper .header .header-action-button .filter .btnSearch {
+            height: 38px !important;
+            width: 38px !important;
+            border-radius: 50% !important;
+            border: 1px solid rgba(152, 152, 152, 0.35) !important;
+            background: #ffffff !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 !important;
+            margin-left: 0 !important;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .btnSearch:hover {
+            background: #f1f5f9 !important;
+            border-color: #3b82f6 !important;
+            color: #2563eb !important;
+        }
+        .order-listing-wrapper .header .header-action-button .filter .btnSearch svg {
+            width: 18px;
+            height: 18px;
+            color: #475569;
+        }
+
+        /* Reset / Clear button */
+        .btn-clear-filter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #fee2e2;
+            color: #ef4444;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            margin-left: 2px;
+            border: 1px solid #fca5a5;
+            align-self: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .btn-clear-filter:hover {
+            background: #fecaca;
+            color: #b91c1c;
+            transform: scale(1.05);
+        }
+    </style>
     <div class="content-wrapper order-listing-wrapper" id="app" x-data="xIndex">
         @php
             $orderTabQuery = request()->except(['page', 'payment_status']);
@@ -15,10 +173,11 @@
             'createName' => __('order.button.create'),
             'createPermission' => 'order-create',
             'filterStatus' => false,
-            // 'filterView' => 'admin::pages.order.filter',
+            'filterView' => 'admin::pages.order.filter',
             'filterData' => [
                 'shop' => $shop,
-                'barber' => $barber,
+                'status' => $status,
+                'routeName' => $routeName,
                 'firstMonthDay' => $firstMonthDay,
                 'lastMonthDay' => $lastMonthDay,
             ],
@@ -172,27 +331,48 @@
     <script src="{{ asset('admin-public/js/exceljs.min.js') }}"></script>
     <script src="{{ asset('admin-public/js/FileSaver.min.js') }}"></script>
     <script>
+        function initOrderDatepickers() {
+            if ($("#from_date").length) {
+                $("#from_date").datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeYear: true,
+                    changeMonth: true,
+                    gotoCurrent: true,
+                    yearRange: "-50:+10",
+                    onSelect: function(selected) {
+                        $("#to_date").datepicker("option", "minDate", selected);
+                    }
+                });
+            }
+            if ($("#to_date").length) {
+                $("#to_date").datepicker({
+                    dateFormat: 'yy-mm-dd',
+                    changeYear: true,
+                    changeMonth: true,
+                    gotoCurrent: true,
+                    yearRange: "-50:+10",
+                    onSelect: function(selected) {
+                        $("#from_date").datepicker("option", "maxDate", selected);
+                    }
+                });
+            }
+            if ($("#from_date").val()) {
+                $("#to_date").datepicker("option", "minDate", $("#from_date").val());
+            }
+            if ($("#to_date").val()) {
+                $("#from_date").datepicker("option", "maxDate", $("#to_date").val());
+            }
+        }
+
         $(document).ready(function() {
-            $("#from_date").datepicker({
-                dateFormat: 'yy-mm-dd',
-                changeYear: true,
-                changeMonth: true,
-                gotoCurrent: true,
-                yearRange: "-50:+0",
-                onSelect: function(selected) {
-                    $("#to_date").datepicker("option", "minDate", selected);
-                }
+            initOrderDatepickers();
+
+            $(document).on('click', '.form-row.date-input i', function(e) {
+                e.stopPropagation();
+                $(this).siblings('input').focus();
             });
-            $("#to_date").datepicker({
-                minDate: `{{ $firstMonthDay }}`,
-                dateFormat: 'yy-mm-dd',
-                changeYear: true,
-                changeMonth: true,
-                gotoCurrent: true,
-                yearRange: "-50:+0",
-                onSelect: function(selected) {
-                    $("#from_date").datepicker("option", "maxDate", selected);
-                }
+            $(document).on('click', '.form-row.date-input', function() {
+                $(this).find('input').focus();
             });
         });
     </script>
@@ -204,21 +384,20 @@
                     status: @json($status),
                     payment_status: null,
                     shop_id: @json(request('shop_id')),
-                    barber_id: @json(request('barber_id')),
-                    from_date: @json($firstMonthDay),
-                    to_date: @json($lastMonthDay),
+                    from_date: @json(request('from_date')),
+                    to_date: @json(request('to_date')),
                     search: @json(request('search')),
                 },
                 init() {
                     const shop = @json($shop);
-                    const barber = @json($barber);
 
                     if (shop?.id) {
                         $select2Data('#shop_id', shop.id, shop.name || shop.phone);
                     }
-                    if (barber?.id) {
-                        $select2Data('#barber_id', barber.id, barber.name || barber.phone);
-                    }
+
+                    this.$nextTick(() => {
+                        initOrderDatepickers();
+                    });
                 },
                 fetchSelectShop() {
                     $('#shop_id').select2({
