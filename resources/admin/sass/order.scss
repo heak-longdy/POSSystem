@@ -5945,6 +5945,7 @@ span.error {
 }
 
 /* Enhanced Booking POS UI Styles - High-Density Space Efficient Layout */
+.form-admin.booking.booking-order-ui,
 .form-admin.booking-order-ui,
 .booking-dashboard.booking-order-ui,
 .booking-order-ui {
@@ -5956,10 +5957,12 @@ span.error {
     --pos-accent: #2563eb;
     background: #f8fafc;
     width: 100%;
-    height: calc(100vh - 45px);
-    min-height: calc(100vh - 45px);
-    max-height: calc(100vh - 45px);
-    overflow: auto !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    overflow-x: visible !important;
     padding: 0 !important;
     margin: 0 !important;
 
@@ -5973,6 +5976,7 @@ span.error {
         overflow: visible;
         width: calc(100% - 140px);
         margin: 0 70px;
+        padding-bottom: 32px;
         button:not(.text-gray-400):not(.fancybox-button){
             line-height: 0 !important;
         }
@@ -6728,7 +6732,7 @@ span.error {
     .booking-pos-sidebar.is-sticky-column {
         position: -webkit-sticky;
         position: sticky;
-        top: var(--sticky-top, 16px);
+        top: var(--sticky-top, 60px);
         align-self: start;
         z-index: 10;
     }

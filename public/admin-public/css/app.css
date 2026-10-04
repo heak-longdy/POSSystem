@@ -34263,14 +34263,25 @@ nav .divider {
       -ms-user-select: none;
           user-select: none;
   transition: background-color 0.2s ease, border-color 0.2s ease;
+  /* YouTube-style Nav Overlays (Left & Right) */
   /* Single Tab Item */
   /* Right Action Tools */
   /* Exact original profile-card styles from header.blade.php & header.scss */
+}
+.mdi-workspace-tabs-container .mdi-tabs-carousel-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
 }
 .mdi-workspace-tabs-container .mdi-tabs-scroll-wrapper {
   display: flex;
   align-items: flex-end;
   height: 100%;
+  width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -34281,6 +34292,64 @@ nav .divider {
 }
 .mdi-workspace-tabs-container .mdi-tabs-scroll-wrapper::-webkit-scrollbar {
   display: none;
+}
+.mdi-workspace-tabs-container .mdi-tab-nav-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  z-index: 25;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.mdi-workspace-tabs-container .mdi-tab-nav-overlay.left {
+  left: 0;
+  justify-content: flex-start;
+  padding-left: 6px;
+  background: linear-gradient(to right, #f8fafc 55%, rgba(248, 250, 252, 0) 100%);
+}
+.mdi-workspace-tabs-container .mdi-tab-nav-overlay.right {
+  right: 0;
+  justify-content: flex-end;
+  padding-right: 6px;
+  background: linear-gradient(to left, #f8fafc 55%, rgba(248, 250, 252, 0) 100%);
+}
+.mdi-workspace-tabs-container .mdi-tab-nav-overlay .mdi-tab-nav-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+  padding: 0;
+}
+.mdi-workspace-tabs-container .mdi-tab-nav-overlay .mdi-tab-nav-btn i {
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mdi-workspace-tabs-container .mdi-tab-nav-overlay .mdi-tab-nav-btn:hover {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #94a3b8;
+  transform: scale(1.08);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+}
+.mdi-workspace-tabs-container .mdi-tab-nav-overlay .mdi-tab-nav-btn:active {
+  transform: scale(0.96);
 }
 .mdi-workspace-tabs-container .mdi-tab-item {
   position: relative;
@@ -34296,7 +34365,7 @@ nav .divider {
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  border: 1px solid transparent;
+  border-right: 1px solid #e2e8f0;
   border-bottom: none;
   transition: all 0.15s ease-in-out;
   max-width: 220px;
@@ -34333,7 +34402,6 @@ nav .divider {
   transition: transform 0.15s ease;
 }
 .mdi-workspace-tabs-container .mdi-tab-item .mdi-tab-close-btn {
-  display: none !important;
   align-items: center !important;
   justify-content: center !important;
   width: 18px !important;
@@ -34373,9 +34441,6 @@ nav .divider {
 }
 .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned):hover .mdi-tab-close-btn, .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned).active .mdi-tab-close-btn {
   display: inline-flex !important;
-}
-.mdi-workspace-tabs-container .mdi-tab-item:not(.pinned):hover .mdi-tab-dirty-dot {
-  display: none !important;
 }
 .mdi-workspace-tabs-container .mdi-tab-item.drag-over {
   background: #eff6ff !important;
@@ -34452,7 +34517,7 @@ nav .divider {
   width: 17px;
   height: 17px;
 }
-.mdi-workspace-tabs-container .mdi-tabs-actions .mdi-action-btn:hover, .mdi-workspace-tabs-container .mdi-tabs-actions .mdi-action-btn.active {
+.mdi-workspace-tabs-container .mdi-tabs-actions .mdi-action-btn:hover:not(:disabled), .mdi-workspace-tabs-container .mdi-tabs-actions .mdi-action-btn.active:not(:disabled) {
   background: #f1f5f9;
   color: #1e293b;
   border-color: #e2e8f0;
@@ -34463,9 +34528,10 @@ nav .divider {
   border-color: #fca5a5;
 }
 .mdi-workspace-tabs-container .mdi-tabs-actions .mdi-action-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: unset !important;
+  opacity: 0.35;
+  cursor: not-allowed !important;
+  background: transparent !important;
+  border-color: transparent !important;
 }
 .mdi-workspace-tabs-container .mdi-tabs-actions [data-tooltip] {
   position: relative;
@@ -45368,6 +45434,7 @@ span.error {
 }
 
 /* Enhanced Booking POS UI Styles - High-Density Space Efficient Layout */
+.form-admin.booking.booking-order-ui,
 .form-admin.booking-order-ui,
 .booking-dashboard.booking-order-ui,
 .booking-order-ui {
@@ -45379,10 +45446,12 @@ span.error {
   --pos-accent: #2563eb;
   background: #f8fafc;
   width: 100%;
-  height: calc(100vh - 45px);
-  min-height: calc(100vh - 45px);
-  max-height: calc(100vh - 45px);
-  overflow: auto !important;
+  height: auto !important;
+  min-height: 100% !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: visible !important;
   padding: 0 !important;
   margin: 0 !important;
   /* Left Main Workspace */
@@ -45392,6 +45461,7 @@ span.error {
   /* Sidebar Bottom: Payment & Checkout */
   /* Record Payment Card */
 }
+.form-admin.booking.booking-order-ui .booking-pos-workspace,
 .form-admin.booking-order-ui .booking-pos-workspace,
 .booking-dashboard.booking-order-ui .booking-pos-workspace,
 .booking-order-ui .booking-pos-workspace {
@@ -45404,12 +45474,15 @@ span.error {
   overflow: visible;
   width: calc(100% - 140px);
   margin: 0 70px;
+  padding-bottom: 32px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-workspace button:not(.text-gray-400):not(.fancybox-button),
 .form-admin.booking-order-ui .booking-pos-workspace button:not(.text-gray-400):not(.fancybox-button),
 .booking-dashboard.booking-order-ui .booking-pos-workspace button:not(.text-gray-400):not(.fancybox-button),
 .booking-order-ui .booking-pos-workspace button:not(.text-gray-400):not(.fancybox-button) {
   line-height: 0 !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-workspace .booking-pos-header,
 .form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header,
 .booking-dashboard.booking-order-ui .booking-pos-workspace .booking-pos-header,
 .booking-order-ui .booking-pos-workspace .booking-pos-header {
@@ -45419,6 +45492,7 @@ span.error {
   background: unset;
   border: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header,
 .form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header,
 .booking-dashboard.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header,
 .booking-order-ui .booking-pos-workspace .booking-pos-header .form-header {
@@ -45426,6 +45500,7 @@ span.error {
   display: flex;
   align-items: center;
 }
+.form-admin.booking.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3,
 .form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3,
 .booking-dashboard.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3,
 .booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 {
@@ -45437,6 +45512,7 @@ span.error {
   color: #1e293b;
   line-height: 1.2;
 }
+.form-admin.booking.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon,
 .form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon,
 .booking-dashboard.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon,
 .booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon {
@@ -45449,7 +45525,9 @@ span.error {
   text-decoration: none;
   transition: transform 0.15s ease, color 0.15s ease;
 }
-.form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon svg, .form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon i,
+.form-admin.booking.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon svg, .form-admin.booking.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon i,
+.form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon svg,
+.form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon i,
 .booking-dashboard.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon svg,
 .booking-dashboard.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon i,
 .booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon svg,
@@ -45461,12 +45539,14 @@ span.error {
   stroke-width: 2;
   background-color: transparent !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon:hover,
 .form-admin.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon:hover,
 .booking-dashboard.booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon:hover,
 .booking-order-ui .booking-pos-workspace .booking-pos-header .form-header h3 .back-link-icon:hover {
   color: #2563eb;
   transform: translateX(-3px);
 }
+.form-admin.booking.booking-order-ui .booking-pos-main-col,
 .form-admin.booking-order-ui .booking-pos-main-col,
 .booking-dashboard.booking-order-ui .booking-pos-main-col,
 .booking-order-ui .booking-pos-main-col {
@@ -45483,6 +45563,7 @@ span.error {
   align-self: start;
   transition: top 0.2s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-recent-section,
 .form-admin.booking-order-ui .booking-pos-recent-section,
 .booking-dashboard.booking-order-ui .booking-pos-recent-section,
 .booking-order-ui .booking-pos-recent-section {
@@ -45493,6 +45574,7 @@ span.error {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-section-header,
 .form-admin.booking-order-ui .booking-pos-section-header,
 .booking-dashboard.booking-order-ui .booking-pos-section-header,
 .booking-order-ui .booking-pos-section-header {
@@ -45501,6 +45583,7 @@ span.error {
   justify-content: space-between;
   margin-bottom: 12px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-section-header .title-wrap,
 .form-admin.booking-order-ui .booking-pos-section-header .title-wrap,
 .booking-dashboard.booking-order-ui .booking-pos-section-header .title-wrap,
 .booking-order-ui .booking-pos-section-header .title-wrap {
@@ -45508,6 +45591,7 @@ span.error {
   align-items: center;
   gap: 8px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-section-header .title-wrap svg,
 .form-admin.booking-order-ui .booking-pos-section-header .title-wrap svg,
 .booking-dashboard.booking-order-ui .booking-pos-section-header .title-wrap svg,
 .booking-order-ui .booking-pos-section-header .title-wrap svg {
@@ -45515,6 +45599,7 @@ span.error {
   height: 18px;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-pos-section-header .title-wrap h2,
 .form-admin.booking-order-ui .booking-pos-section-header .title-wrap h2,
 .booking-dashboard.booking-order-ui .booking-pos-section-header .title-wrap h2,
 .booking-order-ui .booking-pos-section-header .title-wrap h2 {
@@ -45523,6 +45608,7 @@ span.error {
   color: #0f172a;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-section-header .btn-link-all,
 .form-admin.booking-order-ui .booking-pos-section-header .btn-link-all,
 .booking-dashboard.booking-order-ui .booking-pos-section-header .btn-link-all,
 .booking-order-ui .booking-pos-section-header .btn-link-all {
@@ -45536,12 +45622,14 @@ span.error {
   gap: 4px;
   cursor: pointer;
 }
+.form-admin.booking.booking-order-ui .booking-pos-section-header .btn-link-all svg,
 .form-admin.booking-order-ui .booking-pos-section-header .btn-link-all svg,
 .booking-dashboard.booking-order-ui .booking-pos-section-header .btn-link-all svg,
 .booking-order-ui .booking-pos-section-header .btn-link-all svg {
   width: 14px;
   height: 14px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-recent-cards,
 .form-admin.booking-order-ui .booking-pos-recent-cards,
 .booking-dashboard.booking-order-ui .booking-pos-recent-cards,
 .booking-order-ui .booking-pos-recent-cards {
@@ -45549,6 +45637,7 @@ span.error {
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 10px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card,
 .form-admin.booking-order-ui .booking-pos-order-card,
 .booking-dashboard.booking-order-ui .booking-pos-order-card,
 .booking-order-ui .booking-pos-order-card {
@@ -45562,6 +45651,7 @@ span.error {
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card:hover,
 .form-admin.booking-order-ui .booking-pos-order-card:hover,
 .booking-dashboard.booking-order-ui .booking-pos-order-card:hover,
 .booking-order-ui .booking-pos-order-card:hover {
@@ -45569,6 +45659,7 @@ span.error {
   border-color: #2563eb;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-card-top,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-card-top,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-card-top,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-card-top {
@@ -45576,6 +45667,7 @@ span.error {
   align-items: center;
   justify-content: space-between;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .order-customer-avatar,
 .form-admin.booking-order-ui .booking-pos-order-card .order-customer-avatar,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .order-customer-avatar,
 .booking-order-ui .booking-pos-order-card .order-customer-avatar {
@@ -45589,6 +45681,7 @@ span.error {
   display: grid;
   place-items: center;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status {
@@ -45600,6 +45693,7 @@ span.error {
   font-size: 11px;
   font-weight: 700;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status .status-dot,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status .status-dot,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status .status-dot,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status .status-dot {
@@ -45607,39 +45701,46 @@ span.error {
   height: 5px;
   border-radius: 50%;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready {
   background: #ecfdf5;
   color: #047857;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready .status-dot,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready .status-dot,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready .status-dot,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status.ready .status-dot {
   background: #10b981;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting {
   background: #fffbeb;
   color: #b45309;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting .status-dot,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting .status-dot,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting .status-dot,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status.waiting .status-dot {
   background: #f59e0b;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled {
   background: #fef2f2;
   color: #b91c1c;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled .status-dot,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled .status-dot,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled .status-dot,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-status.canceled .status-dot {
   background: #ef4444;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid strong,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid strong,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid strong,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid strong {
@@ -45648,6 +45749,7 @@ span.error {
   display: block;
   font-weight: 700;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid .invoice-num,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid .invoice-num,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid .invoice-num,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-card-mid .invoice-num {
@@ -45656,6 +45758,7 @@ span.error {
   font-weight: 700;
   font-family: monospace;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-date,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-date,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-date,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-date {
@@ -45666,12 +45769,14 @@ span.error {
   align-items: center;
   gap: 4px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-order-card .booking-pos-order-date svg,
 .form-admin.booking-order-ui .booking-pos-order-card .booking-pos-order-date svg,
 .booking-dashboard.booking-order-ui .booking-pos-order-card .booking-pos-order-date svg,
 .booking-order-ui .booking-pos-order-card .booking-pos-order-date svg {
   width: 12px;
   height: 12px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-section,
 .form-admin.booking-order-ui .booking-pos-catalog-section,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-section,
 .booking-order-ui .booking-pos-catalog-section {
@@ -45685,6 +45790,7 @@ span.error {
   flex-direction: column;
   min-height: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-header,
 .form-admin.booking-order-ui .booking-pos-catalog-header,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-header,
 .booking-order-ui .booking-pos-catalog-header {
@@ -45695,6 +45801,7 @@ span.error {
   margin-bottom: 14px;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-header .catalog-header-left,
 .form-admin.booking-order-ui .booking-pos-catalog-header .catalog-header-left,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-header .catalog-header-left,
 .booking-order-ui .booking-pos-catalog-header .catalog-header-left {
@@ -45702,6 +45809,7 @@ span.error {
   align-items: center;
   gap: 16px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap,
 .form-admin.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap,
 .booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap {
@@ -45709,6 +45817,7 @@ span.error {
   align-items: center;
   gap: 8px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap svg,
 .form-admin.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap svg,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap svg,
 .booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap svg {
@@ -45716,6 +45825,7 @@ span.error {
   height: 18px;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap h2,
 .form-admin.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap h2,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap h2,
 .booking-order-ui .booking-pos-catalog-header .catalog-header-left .title-wrap h2 {
@@ -45724,6 +45834,7 @@ span.error {
   color: #0f172a;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-toolbar,
 .form-admin.booking-order-ui .booking-pos-catalog-toolbar,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-toolbar,
 .booking-order-ui .booking-pos-catalog-toolbar {
@@ -45734,6 +45845,7 @@ span.error {
   margin-bottom: 16px;
   flex-wrap: wrap;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-toolbar .toolbar-left-group,
 .form-admin.booking-order-ui .booking-pos-catalog-toolbar .toolbar-left-group,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-toolbar .toolbar-left-group,
 .booking-order-ui .booking-pos-catalog-toolbar .toolbar-left-group {
@@ -45743,6 +45855,7 @@ span.error {
   flex: 1;
   min-width: 280px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-toolbar .toolbar-right-group,
 .form-admin.booking-order-ui .booking-pos-catalog-toolbar .toolbar-right-group,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-toolbar .toolbar-right-group,
 .booking-order-ui .booking-pos-catalog-toolbar .toolbar-right-group {
@@ -45751,6 +45864,7 @@ span.error {
   gap: 10px;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box,
 .form-admin.booking-order-ui .booking-pos-search-box,
 .booking-dashboard.booking-order-ui .booking-pos-search-box,
 .booking-order-ui .booking-pos-search-box {
@@ -45760,6 +45874,7 @@ span.error {
   display: flex;
   align-items: center;
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box .search-icon,
 .form-admin.booking-order-ui .booking-pos-search-box .search-icon,
 .booking-dashboard.booking-order-ui .booking-pos-search-box .search-icon,
 .booking-order-ui .booking-pos-search-box .search-icon {
@@ -45772,6 +45887,7 @@ span.error {
   color: #64748b;
   pointer-events: none;
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box input,
 .form-admin.booking-order-ui .booking-pos-search-box input,
 .booking-dashboard.booking-order-ui .booking-pos-search-box input,
 .booking-order-ui .booking-pos-search-box input {
@@ -45788,23 +45904,26 @@ span.error {
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.form-admin.booking-order-ui .booking-pos-search-box input::-moz-placeholder, .booking-dashboard.booking-order-ui .booking-pos-search-box input::-moz-placeholder, .booking-order-ui .booking-pos-search-box input::-moz-placeholder {
+.form-admin.booking.booking-order-ui .booking-pos-search-box input::-moz-placeholder, .form-admin.booking-order-ui .booking-pos-search-box input::-moz-placeholder, .booking-dashboard.booking-order-ui .booking-pos-search-box input::-moz-placeholder, .booking-order-ui .booking-pos-search-box input::-moz-placeholder {
   color: #94a3b8;
 }
-.form-admin.booking-order-ui .booking-pos-search-box input:-ms-input-placeholder, .booking-dashboard.booking-order-ui .booking-pos-search-box input:-ms-input-placeholder, .booking-order-ui .booking-pos-search-box input:-ms-input-placeholder {
+.form-admin.booking.booking-order-ui .booking-pos-search-box input:-ms-input-placeholder, .form-admin.booking-order-ui .booking-pos-search-box input:-ms-input-placeholder, .booking-dashboard.booking-order-ui .booking-pos-search-box input:-ms-input-placeholder, .booking-order-ui .booking-pos-search-box input:-ms-input-placeholder {
   color: #94a3b8;
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box input::placeholder,
 .form-admin.booking-order-ui .booking-pos-search-box input::placeholder,
 .booking-dashboard.booking-order-ui .booking-pos-search-box input::placeholder,
 .booking-order-ui .booking-pos-search-box input::placeholder {
   color: #94a3b8;
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box input:focus,
 .form-admin.booking-order-ui .booking-pos-search-box input:focus,
 .booking-dashboard.booking-order-ui .booking-pos-search-box input:focus,
 .booking-order-ui .booking-pos-search-box input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box .btn-clear-search,
 .form-admin.booking-order-ui .booking-pos-search-box .btn-clear-search,
 .booking-dashboard.booking-order-ui .booking-pos-search-box .btn-clear-search,
 .booking-order-ui .booking-pos-search-box .btn-clear-search {
@@ -45826,12 +45945,14 @@ span.error {
   color: #64748b;
   transition: all 0.12s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box .btn-clear-search:hover,
 .form-admin.booking-order-ui .booking-pos-search-box .btn-clear-search:hover,
 .booking-dashboard.booking-order-ui .booking-pos-search-box .btn-clear-search:hover,
 .booking-order-ui .booking-pos-search-box .btn-clear-search:hover {
   background: #e2e8f0;
   color: #0f172a;
 }
+.form-admin.booking.booking-order-ui .booking-pos-search-box .search-kbd-hint,
 .form-admin.booking-order-ui .booking-pos-search-box .search-kbd-hint,
 .booking-dashboard.booking-order-ui .booking-pos-search-box .search-kbd-hint,
 .booking-order-ui .booking-pos-search-box .search-kbd-hint {
@@ -45849,6 +45970,7 @@ span.error {
   pointer-events: none;
   line-height: 1.2;
 }
+.form-admin.booking.booking-order-ui .booking-catalog-select-wrap,
 .form-admin.booking-order-ui .booking-catalog-select-wrap,
 .booking-dashboard.booking-order-ui .booking-catalog-select-wrap,
 .booking-order-ui .booking-catalog-select-wrap {
@@ -45856,6 +45978,7 @@ span.error {
   display: inline-flex;
   align-items: center;
 }
+.form-admin.booking.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select,
 .form-admin.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select,
 .booking-dashboard.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select,
 .booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select {
@@ -45875,17 +45998,20 @@ span.error {
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:focus,
 .form-admin.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:focus,
 .booking-dashboard.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:focus,
 .booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
+.form-admin.booking.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:hover,
 .form-admin.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:hover,
 .booking-dashboard.booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:hover,
 .booking-order-ui .booking-catalog-select-wrap .booking-pos-catalog-select:hover {
   border-color: #94a3b8;
 }
+.form-admin.booking.booking-order-ui .booking-catalog-select-wrap .select-chevron,
 .form-admin.booking-order-ui .booking-catalog-select-wrap .select-chevron,
 .booking-dashboard.booking-order-ui .booking-catalog-select-wrap .select-chevron,
 .booking-order-ui .booking-catalog-select-wrap .select-chevron {
@@ -45896,6 +46022,7 @@ span.error {
   height: 14px;
   color: #64748b;
 }
+.form-admin.booking.booking-order-ui .booking-pos-tabs,
 .form-admin.booking-order-ui .booking-pos-tabs,
 .booking-dashboard.booking-order-ui .booking-pos-tabs,
 .booking-order-ui .booking-pos-tabs {
@@ -45907,6 +46034,7 @@ span.error {
   border-radius: 9px;
   height: 38px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-tabs .booking-pos-tab,
 .form-admin.booking-order-ui .booking-pos-tabs .booking-pos-tab,
 .booking-dashboard.booking-order-ui .booking-pos-tabs .booking-pos-tab,
 .booking-order-ui .booking-pos-tabs .booking-pos-tab {
@@ -45924,12 +46052,14 @@ span.error {
   height: 100%;
   transition: all 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-tabs .booking-pos-tab svg,
 .form-admin.booking-order-ui .booking-pos-tabs .booking-pos-tab svg,
 .booking-dashboard.booking-order-ui .booking-pos-tabs .booking-pos-tab svg,
 .booking-order-ui .booking-pos-tabs .booking-pos-tab svg {
   width: 14px;
   height: 14px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-tabs .booking-pos-tab .tab-count-badge,
 .form-admin.booking-order-ui .booking-pos-tabs .booking-pos-tab .tab-count-badge,
 .booking-dashboard.booking-order-ui .booking-pos-tabs .booking-pos-tab .tab-count-badge,
 .booking-order-ui .booking-pos-tabs .booking-pos-tab .tab-count-badge {
@@ -45942,6 +46072,7 @@ span.error {
   transition: all 0.15s ease;
   line-height: 1.5;
 }
+.form-admin.booking.booking-order-ui .booking-pos-tabs .booking-pos-tab.active,
 .form-admin.booking-order-ui .booking-pos-tabs .booking-pos-tab.active,
 .booking-dashboard.booking-order-ui .booking-pos-tabs .booking-pos-tab.active,
 .booking-order-ui .booking-pos-tabs .booking-pos-tab.active {
@@ -45950,18 +46081,21 @@ span.error {
   font-weight: 700;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+.form-admin.booking.booking-order-ui .booking-pos-tabs .booking-pos-tab.active .tab-count-badge,
 .form-admin.booking-order-ui .booking-pos-tabs .booking-pos-tab.active .tab-count-badge,
 .booking-dashboard.booking-order-ui .booking-pos-tabs .booking-pos-tab.active .tab-count-badge,
 .booking-order-ui .booking-pos-tabs .booking-pos-tab.active .tab-count-badge {
   background: #eff6ff;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-pos-tabs .booking-pos-tab:hover:not(.active),
 .form-admin.booking-order-ui .booking-pos-tabs .booking-pos-tab:hover:not(.active),
 .booking-dashboard.booking-order-ui .booking-pos-tabs .booking-pos-tab:hover:not(.active),
 .booking-order-ui .booking-pos-tabs .booking-pos-tab:hover:not(.active) {
   color: #0f172a;
   background: rgba(255, 255, 255, 0.6);
 }
+.form-admin.booking.booking-order-ui .booking-pos-catalog-body,
 .form-admin.booking-order-ui .booking-pos-catalog-body,
 .booking-dashboard.booking-order-ui .booking-pos-catalog-body,
 .booking-order-ui .booking-pos-catalog-body {
@@ -45971,6 +46105,7 @@ span.error {
   padding-right: 4px;
   padding-top: 5px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-products,
 .form-admin.booking-order-ui .booking-pos-products,
 .booking-dashboard.booking-order-ui .booking-pos-products,
 .booking-order-ui .booking-pos-products {
@@ -45978,6 +46113,7 @@ span.error {
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 12px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card,
 .form-admin.booking-order-ui .booking-pos-product-card,
 .booking-dashboard.booking-order-ui .booking-pos-product-card,
 .booking-order-ui .booking-pos-product-card {
@@ -45989,6 +46125,7 @@ span.error {
   flex-direction: column;
   transition: all 0.2s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card:hover,
 .form-admin.booking-order-ui .booking-pos-product-card:hover,
 .booking-dashboard.booking-order-ui .booking-pos-product-card:hover,
 .booking-order-ui .booking-pos-product-card:hover {
@@ -45996,12 +46133,14 @@ span.error {
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
   transform: translateY(-1px);
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card.is-selected,
 .form-admin.booking-order-ui .booking-pos-product-card.is-selected,
 .booking-dashboard.booking-order-ui .booking-pos-product-card.is-selected,
 .booking-order-ui .booking-pos-product-card.is-selected {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-media,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-media,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-media,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-media {
@@ -46010,6 +46149,7 @@ span.error {
   position: relative;
   overflow: hidden;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-media img,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-media img,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-media img,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-media img {
@@ -46018,6 +46158,7 @@ span.error {
   -o-object-fit: cover;
      object-fit: cover;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-type-badge,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-type-badge,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-type-badge,
 .booking-order-ui .booking-pos-product-card .booking-pos-type-badge {
@@ -46030,16 +46171,19 @@ span.error {
   font-weight: 700;
   color: #ffffff;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-type-badge.product,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-type-badge.product,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-type-badge.product,
 .booking-order-ui .booking-pos-product-card .booking-pos-type-badge.product {
   background: rgba(37, 99, 235, 0.9);
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-type-badge.service,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-type-badge.service,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-type-badge.service,
 .booking-order-ui .booking-pos-product-card .booking-pos-type-badge.service {
   background: rgba(16, 185, 129, 0.9);
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-selected,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-selected,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-selected,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-selected {
@@ -46054,17 +46198,20 @@ span.error {
   display: grid;
   place-items: center;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-selected[style*="display: none"],
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-selected[style*="display: none"],
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-selected[style*="display: none"],
 .booking-order-ui .booking-pos-product-card .booking-pos-product-selected[style*="display: none"] {
   display: none !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-selected svg,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-selected svg,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-selected svg,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-selected svg {
   width: 14px;
   height: 14px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-body,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-body,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-body,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-body {
@@ -46074,6 +46221,7 @@ span.error {
   flex-direction: column;
   gap: 6px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-product-title,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-product-title,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-product-title,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-product-title {
@@ -46084,6 +46232,7 @@ span.error {
   line-height: 1.3;
   min-height: 14px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-price,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-price,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-price,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-body .booking-pos-price {
@@ -46092,6 +46241,7 @@ span.error {
   color: #2563eb;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-chip-list,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-chip-list,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-chip-list,
 .booking-order-ui .booking-pos-product-card .booking-pos-chip-list {
@@ -46099,6 +46249,7 @@ span.error {
   gap: 4px;
   flex-wrap: wrap;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip,
 .booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip {
@@ -46107,18 +46258,21 @@ span.error {
   font-size: 10px;
   font-weight: 700;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--discount,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--discount,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--discount,
 .booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--discount {
   background: #fef2f2;
   color: #dc2626;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--commission,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--commission,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--commission,
 .booking-order-ui .booking-pos-product-card .booking-pos-chip-list .booking-pos-chip--commission {
   background: #fffbeb;
   color: #d97706;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot {
@@ -46128,11 +46282,13 @@ span.error {
   display: flex;
   align-items: center;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .card-action-container,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .card-action-container,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .card-action-container,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .card-action-container {
   width: 100%;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full {
@@ -46153,6 +46309,7 @@ span.error {
   transition: all 0.15s ease;
   padding: 0 10px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full span,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full span,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full span,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full span {
@@ -46160,6 +46317,7 @@ span.error {
   font-size: 13px;
   font-weight: 700;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full svg,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full svg,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full svg,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full svg {
@@ -46167,6 +46325,7 @@ span.error {
   height: 15px;
   color: #ffffff;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:hover:not(:disabled),
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:hover:not(:disabled) {
@@ -46175,6 +46334,7 @@ span.error {
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
   transform: translateY(-1px);
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:disabled,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:disabled,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:disabled,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full:disabled {
@@ -46183,6 +46343,7 @@ span.error {
   transform: none;
   box-shadow: none;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added {
@@ -46190,19 +46351,23 @@ span.error {
   border-color: #a7f3d0;
   box-shadow: none;
 }
-.form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added span, .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added svg,
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added span, .form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added svg,
+.form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added span,
+.form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added svg,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added span,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added svg,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added span,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added svg {
   color: #059669 !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added:hover:not(:disabled),
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-pos-add-btn--full.is-service-added:hover:not(:disabled) {
   background: #d1fae5;
   border-color: #6ee7b7;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph {
@@ -46217,6 +46382,7 @@ span.error {
   padding: 2px;
   box-shadow: 0 1px 2px rgba(37, 99, 235, 0.05);
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn {
@@ -46235,6 +46401,7 @@ span.error {
   transition: all 0.12s ease;
   padding: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn svg,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn svg,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn svg,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn svg {
@@ -46242,23 +46409,27 @@ span.error {
   height: 13px;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled),
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled) {
   background: #2563eb;
   color: #ffffff;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled) svg,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled) svg,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled) svg,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:hover:not(:disabled) svg {
   color: #ffffff;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:disabled,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:disabled,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:disabled,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label {
@@ -46273,6 +46444,7 @@ span.error {
       -ms-user-select: none;
           user-select: none;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-qty,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-qty,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-qty,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-qty {
@@ -46280,6 +46452,7 @@ span.error {
   font-weight: 800;
   color: #1d4ed8;
 }
+.form-admin.booking.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-in-cart,
 .form-admin.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-in-cart,
 .booking-dashboard.booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-in-cart,
 .booking-order-ui .booking-pos-product-card .booking-pos-product-foot .booking-catalog-stepper--morph .morph-stepper-label .morph-in-cart {
@@ -46287,6 +46460,7 @@ span.error {
   font-weight: 600;
   color: #3b82f6;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar,
 .form-admin.booking-order-ui .booking-pos-sidebar,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar,
 .booking-order-ui .booking-pos-sidebar {
@@ -46305,6 +46479,8 @@ span.error {
   align-self: start;
   transition: top 0.2s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-main-col.is-sticky-column,
+.form-admin.booking.booking-order-ui .booking-pos-sidebar.is-sticky-column,
 .form-admin.booking-order-ui .booking-pos-main-col.is-sticky-column,
 .form-admin.booking-order-ui .booking-pos-sidebar.is-sticky-column,
 .booking-dashboard.booking-order-ui .booking-pos-main-col.is-sticky-column,
@@ -46313,10 +46489,11 @@ span.error {
 .booking-order-ui .booking-pos-sidebar.is-sticky-column {
   position: -webkit-sticky;
   position: sticky;
-  top: var(--sticky-top, 16px);
+  top: var(--sticky-top, 60px);
   align-self: start;
   z-index: 10;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top,
 .form-admin.booking-order-ui .booking-pos-sidebar-top,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top,
 .booking-order-ui .booking-pos-sidebar-top {
@@ -46324,6 +46501,7 @@ span.error {
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-header-row {
@@ -46332,6 +46510,7 @@ span.error {
   justify-content: space-between;
   margin-bottom: 12px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row h2,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row h2,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row h2,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-header-row h2 {
@@ -46340,6 +46519,7 @@ span.error {
   color: #0f172a;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .booking-ref-badge,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .booking-ref-badge,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .booking-ref-badge,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .booking-ref-badge {
@@ -46351,6 +46531,7 @@ span.error {
   border-radius: 4px;
   margin-left: 6px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter {
@@ -46364,12 +46545,14 @@ span.error {
   align-items: center;
   gap: 4px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter svg,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter svg,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter svg,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-header-row .cart-items-counter svg {
   width: 13px;
   height: 13px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-form-card,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-form-card,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-form-card,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-form-card {
@@ -46378,6 +46561,7 @@ span.error {
   border-radius: 10px;
   padding: 12px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-section-title,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-section-title,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-section-title,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-section-title {
@@ -46391,6 +46575,7 @@ span.error {
   align-items: center;
   gap: 6px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-section-title svg,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-section-title svg,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-section-title svg,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-section-title svg {
@@ -46398,6 +46583,7 @@ span.error {
   height: 13px;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid {
@@ -46405,11 +46591,13 @@ span.error {
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .form-group--full,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .form-group--full,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .form-group--full,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .form-group--full {
   grid-column: 1/-1;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label {
@@ -46421,12 +46609,14 @@ span.error {
   align-items: center;
   gap: 4px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label svg,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label svg,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label svg,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid label svg {
   width: 12px;
   height: 12px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .sidebar-date-input,
 .form-admin.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .sidebar-date-input,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .sidebar-date-input,
 .booking-order-ui .booking-pos-sidebar-top .sidebar-form-grid .sidebar-date-input {
@@ -46441,6 +46631,7 @@ span.error {
   background: #ffffff;
   outline: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle,
 .booking-order-ui .booking-pos-sidebar-middle {
@@ -46448,6 +46639,7 @@ span.error {
   display: flex;
   flex-direction: column;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .cart-head-row,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .cart-head-row,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .cart-head-row,
 .booking-order-ui .booking-pos-sidebar-middle .cart-head-row {
@@ -46456,6 +46648,7 @@ span.error {
   justify-content: space-between;
   margin-bottom: 10px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title,
 .booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title {
@@ -46466,6 +46659,7 @@ span.error {
   font-weight: 700;
   color: #0f172a;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title svg,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title svg,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title svg,
 .booking-order-ui .booking-pos-sidebar-middle .cart-head-row .cart-head-title svg {
@@ -46473,6 +46667,7 @@ span.error {
   height: 16px;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart,
 .booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart {
@@ -46486,18 +46681,21 @@ span.error {
   gap: 4px;
   cursor: pointer;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart svg,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart svg,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart svg,
 .booking-order-ui .booking-pos-sidebar-middle .cart-head-row .btn-clear-cart svg {
   width: 13px;
   height: 13px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .cart-items-container,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .cart-items-container,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .cart-items-container,
 .booking-order-ui .booking-pos-sidebar-middle .cart-items-container {
   display: flex;
   flex-direction: column;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart,
 .booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart {
@@ -46509,6 +46707,7 @@ span.error {
   text-align: center;
   color: #94a3b8;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart svg,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart svg,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart svg,
 .booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart svg {
@@ -46517,6 +46716,7 @@ span.error {
   margin-bottom: 8px;
   color: #cbd5e1;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart p,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart p,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart p,
 .booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart p {
@@ -46525,6 +46725,7 @@ span.error {
   color: #64748b;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart small,
 .form-admin.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart small,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart small,
 .booking-order-ui .booking-pos-sidebar-middle .sidebar-empty-cart small {
@@ -46532,6 +46733,7 @@ span.error {
   color: #94a3b8;
   margin-top: 4px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item,
 .form-admin.booking-order-ui .booking-pos-cart-item,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item,
 .booking-order-ui .booking-pos-cart-item {
@@ -46545,12 +46747,14 @@ span.error {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item:hover,
 .form-admin.booking-order-ui .booking-pos-cart-item:hover,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item:hover,
 .booking-order-ui .booking-pos-cart-item:hover {
   border-color: #cbd5e1;
   box-shadow: 0 4px 10px -2px rgba(15, 23, 42, 0.06);
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb {
@@ -46565,6 +46769,7 @@ span.error {
   align-items: center;
   justify-content: center;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb img,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb img,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb img,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-thumb img {
@@ -46573,6 +46778,7 @@ span.error {
   -o-object-fit: cover;
      object-fit: cover;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-info,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-info,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-info,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-info {
@@ -46582,6 +46788,7 @@ span.error {
   flex-direction: column;
   gap: 8px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-row,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-row,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-row,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-row {
@@ -46591,12 +46798,14 @@ span.error {
   gap: 8px;
   margin-bottom: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-wrap,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-wrap,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-wrap,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-title-wrap {
   min-width: 0;
   flex: 1;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-name,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-name,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-name,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-name {
@@ -46607,6 +46816,7 @@ span.error {
   line-height: 1.35;
   word-break: break-word;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-type {
@@ -46617,18 +46827,21 @@ span.error {
   font-weight: 700;
   margin-top: 3px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.product,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.product,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.product,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.product {
   background: #eff6ff;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.service,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.service,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.service,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-type.service {
   background: #f0fdf4;
   color: #16a34a;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions {
@@ -46637,6 +46850,7 @@ span.error {
   gap: 6px;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action {
@@ -46652,12 +46866,14 @@ span.error {
   border: 1px solid transparent !important;
   padding: 0 !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action svg,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action svg,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action svg,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-action svg {
   width: 13px !important;
   height: 13px !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit {
@@ -46665,6 +46881,7 @@ span.error {
   border-color: #e2e8f0;
   color: #475569;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit:hover:not(:disabled),
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-edit:hover:not(:disabled) {
@@ -46672,6 +46889,7 @@ span.error {
   border-color: #cbd5e1;
   color: #0f172a;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove {
@@ -46679,6 +46897,7 @@ span.error {
   border-color: #fee2e2;
   color: #ef4444;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove:hover:not(:disabled),
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions .btn-cart-remove:hover:not(:disabled) {
@@ -46686,12 +46905,14 @@ span.error {
   border-color: #fca5a5;
   color: #dc2626;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions button:disabled,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions button:disabled,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions button:disabled,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-actions button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments {
@@ -46700,6 +46921,7 @@ span.error {
   gap: 6px;
   margin: 4px 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment {
@@ -46709,11 +46931,13 @@ span.error {
   min-width: 0;
   grid-column: auto;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment:first-child,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment:first-child,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment:first-child,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment:first-child {
   grid-column: auto;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment label,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment label,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment label,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-adjustments .booking-pos-adjustment label {
@@ -46726,6 +46950,7 @@ span.error {
   text-overflow: ellipsis;
   line-height: 1.2;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group,
 .booking-order-ui .booking-pos-cart-item .booking-input-prefix-group {
@@ -46739,12 +46964,14 @@ span.error {
   overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group:focus-within,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group:focus-within,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group:focus-within,
 .booking-order-ui .booking-pos-cart-item .booking-input-prefix-group:focus-within {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group .input-addon-prefix,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group .input-addon-prefix,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group .input-addon-prefix,
 .booking-order-ui .booking-pos-cart-item .booking-input-prefix-group .input-addon-prefix {
@@ -46764,6 +46991,7 @@ span.error {
           user-select: none;
   min-width: 22px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input,
 .booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input {
@@ -46780,7 +47008,9 @@ span.error {
   background: transparent;
   -moz-appearance: textfield;
 }
-.form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-outer-spin-button, .form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-inner-spin-button,
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-outer-spin-button, .form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-inner-spin-button,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-outer-spin-button,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-inner-spin-button,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-outer-spin-button,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-inner-spin-button,
 .booking-order-ui .booking-pos-cart-item .booking-input-prefix-group input::-webkit-outer-spin-button,
@@ -46788,6 +47018,7 @@ span.error {
   -webkit-appearance: none;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-discount-group,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-discount-group,
 .booking-order-ui .booking-pos-cart-item .booking-discount-group {
@@ -46801,12 +47032,14 @@ span.error {
   overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-discount-group:focus-within,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group:focus-within,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-discount-group:focus-within,
 .booking-order-ui .booking-pos-cart-item .booking-discount-group:focus-within {
   border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-discount-group .discount-prefix-select,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group .discount-prefix-select,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-discount-group .discount-prefix-select,
 .booking-order-ui .booking-pos-cart-item .booking-discount-group .discount-prefix-select {
@@ -46825,6 +47058,7 @@ span.error {
   text-align: center;
   border-radius: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-discount-group input,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group input,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-discount-group input,
 .booking-order-ui .booking-pos-cart-item .booking-discount-group input {
@@ -46841,7 +47075,9 @@ span.error {
   background: transparent;
   -moz-appearance: textfield;
 }
-.form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-outer-spin-button, .form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-inner-spin-button,
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-outer-spin-button, .form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-inner-spin-button,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-outer-spin-button,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-inner-spin-button,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-outer-spin-button,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-inner-spin-button,
 .booking-order-ui .booking-pos-cart-item .booking-discount-group input::-webkit-outer-spin-button,
@@ -46849,6 +47085,7 @@ span.error {
   -webkit-appearance: none;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-footer-row,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-footer-row,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-footer-row,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-footer-row {
@@ -46860,6 +47097,7 @@ span.error {
   border-top: 1px dashed #e2e8f0;
   margin-top: 2px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill,
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill {
@@ -46872,13 +47110,16 @@ span.error {
   overflow: hidden;
   transition: border-color 0.15s ease;
 }
-.form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:hover, .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:focus-within,
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:hover, .form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:focus-within,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:hover,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:focus-within,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:hover,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:focus-within,
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:hover,
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill:focus-within {
   border-color: #94a3b8;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn,
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn {
@@ -46903,18 +47144,21 @@ span.error {
   transition: background-color 0.12s ease, color 0.12s ease !important;
   line-height: 1 !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:hover:not(:disabled),
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:hover:not(:disabled) {
   background: #e2e8f0 !important;
   color: #0f172a !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:disabled,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:disabled,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:disabled,
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-btn:disabled {
   opacity: 0.35 !important;
   cursor: not-allowed !important;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input,
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input {
@@ -46931,7 +47175,9 @@ span.error {
   margin: 0 !important;
   -moz-appearance: textfield !important;
 }
-.form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-outer-spin-button, .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-inner-spin-button,
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-outer-spin-button, .form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-inner-spin-button,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-outer-spin-button,
+.form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-inner-spin-button,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-outer-spin-button,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-inner-spin-button,
 .booking-order-ui .booking-pos-cart-item .booking-pos-qty-pill .qty-pill-input::-webkit-outer-spin-button,
@@ -46939,6 +47185,7 @@ span.error {
   -webkit-appearance: none;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill,
 .booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill {
@@ -46953,12 +47200,14 @@ span.error {
   font-weight: 600;
   color: #64748b;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill .service-qty-val,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill .service-qty-val,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill .service-qty-val,
 .booking-order-ui .booking-pos-cart-item .booking-pos-service-qty-pill .service-qty-val {
   font-weight: 700;
   color: #0f172a;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-price {
@@ -46967,6 +47216,7 @@ span.error {
   gap: 4px;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price .subtext,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price .subtext,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price .subtext,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-price .subtext {
@@ -46974,6 +47224,7 @@ span.error {
   font-weight: 600;
   color: #64748b;
 }
+.form-admin.booking.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price strong,
 .form-admin.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price strong,
 .booking-dashboard.booking-order-ui .booking-pos-cart-item .booking-pos-cart-price strong,
 .booking-order-ui .booking-pos-cart-item .booking-pos-cart-price strong {
@@ -46982,6 +47233,7 @@ span.error {
   color: #2563eb;
   letter-spacing: -0.2px;
 }
+.form-admin.booking.booking-order-ui .booking-pos-sidebar-bottom,
 .form-admin.booking-order-ui .booking-pos-sidebar-bottom,
 .booking-dashboard.booking-order-ui .booking-pos-sidebar-bottom,
 .booking-order-ui .booking-pos-sidebar-bottom {
@@ -46990,6 +47242,7 @@ span.error {
   background: #ffffff;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .payment-methods-row,
 .form-admin.booking-order-ui .payment-methods-row,
 .booking-dashboard.booking-order-ui .payment-methods-row,
 .booking-order-ui .payment-methods-row {
@@ -46998,6 +47251,7 @@ span.error {
   gap: 6px;
   margin-bottom: 12px;
 }
+.form-admin.booking.booking-order-ui .payment-methods-row .payment-method-btn,
 .form-admin.booking-order-ui .payment-methods-row .payment-method-btn,
 .booking-dashboard.booking-order-ui .payment-methods-row .payment-method-btn,
 .booking-order-ui .payment-methods-row .payment-method-btn {
@@ -47011,11 +47265,13 @@ span.error {
   gap: 2px;
   cursor: pointer;
 }
+.form-admin.booking.booking-order-ui .payment-methods-row .payment-method-btn input[type=radio],
 .form-admin.booking-order-ui .payment-methods-row .payment-method-btn input[type=radio],
 .booking-dashboard.booking-order-ui .payment-methods-row .payment-method-btn input[type=radio],
 .booking-order-ui .payment-methods-row .payment-method-btn input[type=radio] {
   display: none;
 }
+.form-admin.booking.booking-order-ui .payment-methods-row .payment-method-btn svg,
 .form-admin.booking-order-ui .payment-methods-row .payment-method-btn svg,
 .booking-dashboard.booking-order-ui .payment-methods-row .payment-method-btn svg,
 .booking-order-ui .payment-methods-row .payment-method-btn svg {
@@ -47023,6 +47279,7 @@ span.error {
   height: 16px;
   color: #64748b;
 }
+.form-admin.booking.booking-order-ui .payment-methods-row .payment-method-btn span,
 .form-admin.booking-order-ui .payment-methods-row .payment-method-btn span,
 .booking-dashboard.booking-order-ui .payment-methods-row .payment-method-btn span,
 .booking-order-ui .payment-methods-row .payment-method-btn span {
@@ -47030,19 +47287,23 @@ span.error {
   font-weight: 700;
   color: #475569;
 }
+.form-admin.booking.booking-order-ui .payment-methods-row .payment-method-btn.is-active,
 .form-admin.booking-order-ui .payment-methods-row .payment-method-btn.is-active,
 .booking-dashboard.booking-order-ui .payment-methods-row .payment-method-btn.is-active,
 .booking-order-ui .payment-methods-row .payment-method-btn.is-active {
   background: #eff6ff;
   border-color: #2563eb;
 }
-.form-admin.booking-order-ui .payment-methods-row .payment-method-btn.is-active svg, .form-admin.booking-order-ui .payment-methods-row .payment-method-btn.is-active span,
+.form-admin.booking.booking-order-ui .payment-methods-row .payment-method-btn.is-active svg, .form-admin.booking.booking-order-ui .payment-methods-row .payment-method-btn.is-active span,
+.form-admin.booking-order-ui .payment-methods-row .payment-method-btn.is-active svg,
+.form-admin.booking-order-ui .payment-methods-row .payment-method-btn.is-active span,
 .booking-dashboard.booking-order-ui .payment-methods-row .payment-method-btn.is-active svg,
 .booking-dashboard.booking-order-ui .payment-methods-row .payment-method-btn.is-active span,
 .booking-order-ui .payment-methods-row .payment-method-btn.is-active svg,
 .booking-order-ui .payment-methods-row .payment-method-btn.is-active span {
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .payment-summary-box,
 .form-admin.booking-order-ui .payment-summary-box,
 .booking-dashboard.booking-order-ui .payment-summary-box,
 .booking-order-ui .payment-summary-box {
@@ -47052,6 +47313,7 @@ span.error {
   padding: 10px 12px;
   margin-bottom: 12px;
 }
+.form-admin.booking.booking-order-ui .payment-summary-box .summary-line,
 .form-admin.booking-order-ui .payment-summary-box .summary-line,
 .booking-dashboard.booking-order-ui .payment-summary-box .summary-line,
 .booking-order-ui .payment-summary-box .summary-line {
@@ -47061,11 +47323,13 @@ span.error {
   color: #64748b;
   margin-bottom: 4px;
 }
+.form-admin.booking.booking-order-ui .payment-summary-box .summary-line .deduct,
 .form-admin.booking-order-ui .payment-summary-box .summary-line .deduct,
 .booking-dashboard.booking-order-ui .payment-summary-box .summary-line .deduct,
 .booking-order-ui .payment-summary-box .summary-line .deduct {
   color: #dc2626;
 }
+.form-admin.booking.booking-order-ui .payment-summary-box .summary-total-line,
 .form-admin.booking-order-ui .payment-summary-box .summary-total-line,
 .booking-dashboard.booking-order-ui .payment-summary-box .summary-total-line,
 .booking-order-ui .payment-summary-box .summary-total-line {
@@ -47080,6 +47344,7 @@ span.error {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.form-admin.booking.booking-order-ui .payment-summary-box .summary-total-line strong,
 .form-admin.booking-order-ui .payment-summary-box .summary-total-line strong,
 .booking-dashboard.booking-order-ui .payment-summary-box .summary-total-line strong,
 .booking-order-ui .payment-summary-box .summary-total-line strong {
@@ -47087,11 +47352,13 @@ span.error {
   font-weight: 900;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .partial-payment-input-wrap,
 .form-admin.booking-order-ui .partial-payment-input-wrap,
 .booking-dashboard.booking-order-ui .partial-payment-input-wrap,
 .booking-order-ui .partial-payment-input-wrap {
   margin-bottom: 14px;
 }
+.form-admin.booking.booking-order-ui .partial-payment-input-wrap label,
 .form-admin.booking-order-ui .partial-payment-input-wrap label,
 .booking-dashboard.booking-order-ui .partial-payment-input-wrap label,
 .booking-order-ui .partial-payment-input-wrap label {
@@ -47103,6 +47370,7 @@ span.error {
   align-items: center;
   gap: 4px;
 }
+.form-admin.booking.booking-order-ui .partial-payment-input-wrap label svg,
 .form-admin.booking-order-ui .partial-payment-input-wrap label svg,
 .booking-dashboard.booking-order-ui .partial-payment-input-wrap label svg,
 .booking-order-ui .partial-payment-input-wrap label svg {
@@ -47110,6 +47378,7 @@ span.error {
   height: 14px;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .partial-payment-input-wrap input,
 .form-admin.booking-order-ui .partial-payment-input-wrap input,
 .booking-dashboard.booking-order-ui .partial-payment-input-wrap input,
 .booking-order-ui .partial-payment-input-wrap input {
@@ -47124,12 +47393,14 @@ span.error {
   background: #ffffff;
   outline: 0;
 }
+.form-admin.booking.booking-order-ui .partial-payment-input-wrap input:focus,
 .form-admin.booking-order-ui .partial-payment-input-wrap input:focus,
 .booking-dashboard.booking-order-ui .partial-payment-input-wrap input:focus,
 .booking-order-ui .partial-payment-input-wrap input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
+.form-admin.booking.booking-order-ui .booking-payment-ledger,
 .form-admin.booking-order-ui .booking-payment-ledger,
 .booking-dashboard.booking-order-ui .booking-payment-ledger,
 .booking-order-ui .booking-payment-ledger {
@@ -47143,6 +47414,7 @@ span.error {
   gap: 12px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
+.form-admin.booking.booking-order-ui .booking-payment-progress-wrapper,
 .form-admin.booking-order-ui .booking-payment-progress-wrapper,
 .booking-dashboard.booking-order-ui .booking-payment-progress-wrapper,
 .booking-order-ui .booking-payment-progress-wrapper {
@@ -47150,6 +47422,7 @@ span.error {
   flex-direction: column;
   gap: 8px;
 }
+.form-admin.booking.booking-order-ui .booking-payment-progress-head,
 .form-admin.booking-order-ui .booking-payment-progress-head,
 .booking-dashboard.booking-order-ui .booking-payment-progress-head,
 .booking-order-ui .booking-payment-progress-head {
@@ -47160,6 +47433,7 @@ span.error {
   font-weight: 700;
   color: #0f172a;
 }
+.form-admin.booking.booking-order-ui .booking-payment-progress-head strong,
 .form-admin.booking-order-ui .booking-payment-progress-head strong,
 .booking-dashboard.booking-order-ui .booking-payment-progress-head strong,
 .booking-order-ui .booking-payment-progress-head strong {
@@ -47167,6 +47441,7 @@ span.error {
   font-weight: 800;
   color: #0f172a;
 }
+.form-admin.booking.booking-order-ui .booking-payment-progress-bar,
 .form-admin.booking-order-ui .booking-payment-progress-bar,
 .booking-dashboard.booking-order-ui .booking-payment-progress-bar,
 .booking-order-ui .booking-payment-progress-bar {
@@ -47176,6 +47451,7 @@ span.error {
   border-radius: 9999px;
   overflow: hidden;
 }
+.form-admin.booking.booking-order-ui .booking-payment-progress-fill,
 .form-admin.booking-order-ui .booking-payment-progress-fill,
 .booking-dashboard.booking-order-ui .booking-payment-progress-fill,
 .booking-order-ui .booking-payment-progress-fill {
@@ -47184,30 +47460,37 @@ span.error {
   background: #2563eb;
   transition: width 0.3s ease;
 }
+.form-admin.booking.booking-order-ui .booking-payment-progress-fill.is-paid,
 .form-admin.booking-order-ui .booking-payment-progress-fill.is-paid,
 .booking-dashboard.booking-order-ui .booking-payment-progress-fill.is-paid,
 .booking-order-ui .booking-payment-progress-fill.is-paid {
   background: #16a34a;
 }
+.form-admin.booking.booking-order-ui .booking-payment-progress-fill.is-partial,
 .form-admin.booking-order-ui .booking-payment-progress-fill.is-partial,
 .booking-dashboard.booking-order-ui .booking-payment-progress-fill.is-partial,
 .booking-order-ui .booking-payment-progress-fill.is-partial {
   background: #2563eb;
 }
-.form-admin.booking-order-ui .booking-payment-progress-fill.is-waiting, .form-admin.booking-order-ui .booking-payment-progress-fill.is-pending,
+.form-admin.booking.booking-order-ui .booking-payment-progress-fill.is-waiting, .form-admin.booking.booking-order-ui .booking-payment-progress-fill.is-pending,
+.form-admin.booking-order-ui .booking-payment-progress-fill.is-waiting,
+.form-admin.booking-order-ui .booking-payment-progress-fill.is-pending,
 .booking-dashboard.booking-order-ui .booking-payment-progress-fill.is-waiting,
 .booking-dashboard.booking-order-ui .booking-payment-progress-fill.is-pending,
 .booking-order-ui .booking-payment-progress-fill.is-waiting,
 .booking-order-ui .booking-payment-progress-fill.is-pending {
   background: #f59e0b;
 }
-.form-admin.booking-order-ui .booking-payment-progress-fill.is-cancel, .form-admin.booking-order-ui .booking-payment-progress-fill.is-canceled,
+.form-admin.booking.booking-order-ui .booking-payment-progress-fill.is-cancel, .form-admin.booking.booking-order-ui .booking-payment-progress-fill.is-canceled,
+.form-admin.booking-order-ui .booking-payment-progress-fill.is-cancel,
+.form-admin.booking-order-ui .booking-payment-progress-fill.is-canceled,
 .booking-dashboard.booking-order-ui .booking-payment-progress-fill.is-cancel,
 .booking-dashboard.booking-order-ui .booking-payment-progress-fill.is-canceled,
 .booking-order-ui .booking-payment-progress-fill.is-cancel,
 .booking-order-ui .booking-payment-progress-fill.is-canceled {
   background: #ef4444;
 }
+.form-admin.booking.booking-order-ui .booking-payment-ledger-grid,
 .form-admin.booking-order-ui .booking-payment-ledger-grid,
 .booking-dashboard.booking-order-ui .booking-payment-ledger-grid,
 .booking-order-ui .booking-payment-ledger-grid {
@@ -47217,6 +47500,7 @@ span.error {
   padding-top: 8px;
   border-top: 1px solid #f1f5f9;
 }
+.form-admin.booking.booking-order-ui .booking-payment-ledger-card,
 .form-admin.booking-order-ui .booking-payment-ledger-card,
 .booking-dashboard.booking-order-ui .booking-payment-ledger-card,
 .booking-order-ui .booking-payment-ledger-card {
@@ -47231,6 +47515,7 @@ span.error {
   text-align: center;
   gap: 3px;
 }
+.form-admin.booking.booking-order-ui .booking-payment-ledger-card .label,
 .form-admin.booking-order-ui .booking-payment-ledger-card .label,
 .booking-dashboard.booking-order-ui .booking-payment-ledger-card .label,
 .booking-order-ui .booking-payment-ledger-card .label {
@@ -47240,6 +47525,7 @@ span.error {
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
+.form-admin.booking.booking-order-ui .booking-payment-ledger-card .val,
 .form-admin.booking-order-ui .booking-payment-ledger-card .val,
 .booking-dashboard.booking-order-ui .booking-payment-ledger-card .val,
 .booking-order-ui .booking-payment-ledger-card .val {
@@ -47247,16 +47533,19 @@ span.error {
   font-weight: 800;
   line-height: 1.2;
 }
+.form-admin.booking.booking-order-ui .booking-payment-ledger-card .val--paid,
 .form-admin.booking-order-ui .booking-payment-ledger-card .val--paid,
 .booking-dashboard.booking-order-ui .booking-payment-ledger-card .val--paid,
 .booking-order-ui .booking-payment-ledger-card .val--paid {
   color: #16a34a;
 }
+.form-admin.booking.booking-order-ui .booking-payment-ledger-card .val--remaining,
 .form-admin.booking-order-ui .booking-payment-ledger-card .val--remaining,
 .booking-dashboard.booking-order-ui .booking-payment-ledger-card .val--remaining,
 .booking-order-ui .booking-payment-ledger-card .val--remaining {
   color: #0f172a;
 }
+.form-admin.booking.booking-order-ui .booking-payment-status-pill,
 .form-admin.booking-order-ui .booking-payment-status-pill,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill,
 .booking-order-ui .booking-payment-status-pill {
@@ -47269,6 +47558,7 @@ span.error {
   font-weight: 700;
   line-height: 1.2;
 }
+.form-admin.booking.booking-order-ui .booking-payment-status-pill .status-dot,
 .form-admin.booking-order-ui .booking-payment-status-pill .status-dot,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill .status-dot,
 .booking-order-ui .booking-payment-status-pill .status-dot {
@@ -47278,29 +47568,35 @@ span.error {
   display: inline-block;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-paid,
 .form-admin.booking-order-ui .booking-payment-status-pill.is-paid,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-paid,
 .booking-order-ui .booking-payment-status-pill.is-paid {
   background: #dcfce7;
   color: #15803d;
 }
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-paid .status-dot,
 .form-admin.booking-order-ui .booking-payment-status-pill.is-paid .status-dot,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-paid .status-dot,
 .booking-order-ui .booking-payment-status-pill.is-paid .status-dot {
   background: #16a34a;
 }
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-partial,
 .form-admin.booking-order-ui .booking-payment-status-pill.is-partial,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-partial,
 .booking-order-ui .booking-payment-status-pill.is-partial {
   background: #eff6ff;
   color: #2563eb;
 }
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-partial .status-dot,
 .form-admin.booking-order-ui .booking-payment-status-pill.is-partial .status-dot,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-partial .status-dot,
 .booking-order-ui .booking-payment-status-pill.is-partial .status-dot {
   background: #2563eb;
 }
-.form-admin.booking-order-ui .booking-payment-status-pill.is-waiting, .form-admin.booking-order-ui .booking-payment-status-pill.is-pending,
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-waiting, .form-admin.booking.booking-order-ui .booking-payment-status-pill.is-pending,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-waiting,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-pending,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-waiting,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-pending,
 .booking-order-ui .booking-payment-status-pill.is-waiting,
@@ -47308,14 +47604,18 @@ span.error {
   background: #fef3c7;
   color: #b45309;
 }
-.form-admin.booking-order-ui .booking-payment-status-pill.is-waiting .status-dot, .form-admin.booking-order-ui .booking-payment-status-pill.is-pending .status-dot,
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-waiting .status-dot, .form-admin.booking.booking-order-ui .booking-payment-status-pill.is-pending .status-dot,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-waiting .status-dot,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-pending .status-dot,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-waiting .status-dot,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-pending .status-dot,
 .booking-order-ui .booking-payment-status-pill.is-waiting .status-dot,
 .booking-order-ui .booking-payment-status-pill.is-pending .status-dot {
   background: #f59e0b;
 }
-.form-admin.booking-order-ui .booking-payment-status-pill.is-cancel, .form-admin.booking-order-ui .booking-payment-status-pill.is-canceled,
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-cancel, .form-admin.booking.booking-order-ui .booking-payment-status-pill.is-canceled,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-cancel,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-canceled,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-cancel,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-canceled,
 .booking-order-ui .booking-payment-status-pill.is-cancel,
@@ -47323,13 +47623,16 @@ span.error {
   background: #fee2e2;
   color: #b91c1c;
 }
-.form-admin.booking-order-ui .booking-payment-status-pill.is-cancel .status-dot, .form-admin.booking-order-ui .booking-payment-status-pill.is-canceled .status-dot,
+.form-admin.booking.booking-order-ui .booking-payment-status-pill.is-cancel .status-dot, .form-admin.booking.booking-order-ui .booking-payment-status-pill.is-canceled .status-dot,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-cancel .status-dot,
+.form-admin.booking-order-ui .booking-payment-status-pill.is-canceled .status-dot,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-cancel .status-dot,
 .booking-dashboard.booking-order-ui .booking-payment-status-pill.is-canceled .status-dot,
 .booking-order-ui .booking-payment-status-pill.is-cancel .status-dot,
 .booking-order-ui .booking-payment-status-pill.is-canceled .status-dot {
   background: #ef4444;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record,
 .form-admin.booking-order-ui .booking-payment-form--record,
 .booking-dashboard.booking-order-ui .booking-payment-form--record,
 .booking-order-ui .booking-payment-form--record {
@@ -47343,6 +47646,7 @@ span.error {
   gap: 12px;
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-payment-form-header,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-header,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-header,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-header {
@@ -47351,6 +47655,7 @@ span.error {
   justify-content: space-between;
   gap: 8px;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-payment-form-title,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-title,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-title,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-title {
@@ -47364,6 +47669,7 @@ span.error {
   padding: 0;
   border: none;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon {
@@ -47377,6 +47683,7 @@ span.error {
   border-radius: 6px;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon svg,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon svg,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon svg,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-title .booking-payment-title-icon svg {
@@ -47384,6 +47691,7 @@ span.error {
   height: 14px;
   color: #059669;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pay-full-btn,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn,
 .booking-order-ui .booking-payment-form--record .booking-pay-full-btn {
@@ -47401,6 +47709,7 @@ span.error {
   line-height: 1;
   transition: all 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pay-full-btn svg,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn svg,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn svg,
 .booking-order-ui .booking-payment-form--record .booking-pay-full-btn svg {
@@ -47409,12 +47718,14 @@ span.error {
   color: #059669;
   flex-shrink: 0;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pay-full-btn strong,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn strong,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn strong,
 .booking-order-ui .booking-payment-form--record .booking-pay-full-btn strong {
   font-weight: 800;
   color: #047857;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:hover,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:hover,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:hover,
 .booking-order-ui .booking-payment-form--record .booking-pay-full-btn:hover {
@@ -47424,11 +47735,13 @@ span.error {
   transform: translateY(-1px);
   box-shadow: 0 2px 5px rgba(5, 150, 105, 0.15);
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:active,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:active,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pay-full-btn:active,
 .booking-order-ui .booking-payment-form--record .booking-pay-full-btn:active {
   transform: translateY(0);
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-payment-form-grid,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-grid,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-grid,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-grid {
@@ -47436,6 +47749,7 @@ span.error {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group {
@@ -47444,6 +47758,7 @@ span.error {
   gap: 4px;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group label,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group label,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group label,
 .booking-order-ui .booking-payment-form--record .booking-payment-form-grid .form-group label {
@@ -47452,6 +47767,7 @@ span.error {
   color: #475569;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-input-prefix-group,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group,
 .booking-order-ui .booking-payment-form--record .booking-input-prefix-group {
@@ -47466,12 +47782,14 @@ span.error {
   overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-input-prefix-group:focus-within,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group:focus-within,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group:focus-within,
 .booking-order-ui .booking-payment-form--record .booking-input-prefix-group:focus-within {
   border-color: #10b981;
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.16);
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-input-prefix-group .input-addon-prefix,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group .input-addon-prefix,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group .input-addon-prefix,
 .booking-order-ui .booking-payment-form--record .booking-input-prefix-group .input-addon-prefix {
@@ -47493,6 +47811,7 @@ span.error {
   min-width: 32px;
   height: 100%;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input,
 .booking-order-ui .booking-payment-form--record .booking-input-prefix-group input {
@@ -47512,7 +47831,9 @@ span.error {
   box-shadow: none;
   -moz-appearance: textfield;
 }
-.form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-outer-spin-button, .form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-inner-spin-button,
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-outer-spin-button, .form-admin.booking.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-inner-spin-button,
+.form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-outer-spin-button,
+.form-admin.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-inner-spin-button,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-outer-spin-button,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-inner-spin-button,
 .booking-order-ui .booking-payment-form--record .booking-input-prefix-group input::-webkit-outer-spin-button,
@@ -47520,6 +47841,7 @@ span.error {
   -webkit-appearance: none;
   margin: 0;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-note-input,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-note-input,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-note-input,
 .booking-order-ui .booking-payment-form--record .booking-note-input {
@@ -47535,12 +47857,14 @@ span.error {
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-note-input:focus,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-note-input:focus,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-note-input:focus,
 .booking-order-ui .booking-payment-form--record .booking-note-input:focus {
   border-color: #10b981;
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.16);
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record,
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record {
@@ -47563,6 +47887,7 @@ span.error {
   padding: 0 14px;
   margin-top: 2px;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record span,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record span,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record span,
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record span {
@@ -47570,6 +47895,7 @@ span.error {
   font-size: 13.5px;
   font-weight: 700;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record svg,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record svg,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record svg,
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record svg {
@@ -47578,6 +47904,7 @@ span.error {
   color: #ffffff;
   stroke-width: 2.5;
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:hover:not(:disabled),
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:hover:not(:disabled) {
@@ -47586,12 +47913,14 @@ span.error {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:active:not(:disabled),
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:active:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:active:not(:disabled),
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:active:not(:disabled) {
   transform: translateY(0);
   box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
 }
+.form-admin.booking.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:disabled,
 .form-admin.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:disabled,
 .booking-dashboard.booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:disabled,
 .booking-order-ui .booking-payment-form--record .booking-pos-pay-btn--record:disabled {
@@ -47600,6 +47929,7 @@ span.error {
   transform: none;
   box-shadow: none;
 }
+.form-admin.booking.booking-order-ui .booking-pos-submit-btn,
 .form-admin.booking-order-ui .booking-pos-submit-btn,
 .booking-dashboard.booking-order-ui .booking-pos-submit-btn,
 .booking-order-ui .booking-pos-submit-btn {
@@ -47622,6 +47952,7 @@ span.error {
   width: calc(100% - 25px) !important;
   margin: 0 auto;
 }
+.form-admin.booking.booking-order-ui .booking-pos-submit-btn span,
 .form-admin.booking-order-ui .booking-pos-submit-btn span,
 .booking-dashboard.booking-order-ui .booking-pos-submit-btn span,
 .booking-order-ui .booking-pos-submit-btn span {
@@ -47629,6 +47960,7 @@ span.error {
   font-size: 15px;
   font-weight: 700;
 }
+.form-admin.booking.booking-order-ui .booking-pos-submit-btn svg,
 .form-admin.booking-order-ui .booking-pos-submit-btn svg,
 .booking-dashboard.booking-order-ui .booking-pos-submit-btn svg,
 .booking-order-ui .booking-pos-submit-btn svg {
@@ -47637,6 +47969,7 @@ span.error {
   color: #ffffff;
   stroke-width: 2.5;
 }
+.form-admin.booking.booking-order-ui .booking-pos-submit-btn:hover:not(:disabled),
 .form-admin.booking-order-ui .booking-pos-submit-btn:hover:not(:disabled),
 .booking-dashboard.booking-order-ui .booking-pos-submit-btn:hover:not(:disabled),
 .booking-order-ui .booking-pos-submit-btn:hover:not(:disabled) {
@@ -47644,6 +47977,7 @@ span.error {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
+.form-admin.booking.booking-order-ui .booking-pos-submit-btn:disabled,
 .form-admin.booking-order-ui .booking-pos-submit-btn:disabled,
 .booking-dashboard.booking-order-ui .booking-pos-submit-btn:disabled,
 .booking-order-ui .booking-pos-submit-btn:disabled {

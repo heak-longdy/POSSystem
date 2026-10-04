@@ -22511,6 +22511,8 @@ window.workspaceMdi = function () {
     showOverflowDropdown: false,
     showProfileDropdown: false,
     showNotificationDropdown: false,
+    canScrollLeft: false,
+    canScrollRight: false,
     draggedTabKey: null,
     dragOverTabKey: null,
     contextMenu: {
@@ -23018,7 +23020,7 @@ window.workspaceMdi = function () {
 
       this.setupKeyboardShortcuts(); // 6. Setup form dirty detection
 
-      this.setupDirtyTracking(); // 7. Setup horizontal mouse wheel scrolling on tab bar
+      this.setupDirtyTracking(); // 7. Setup horizontal mouse wheel scrolling and scroll state detection on tab bar
 
       this.$nextTick(function () {
         var scrollWrapper = _this5.$el.querySelector('.mdi-tabs-scroll-wrapper');
@@ -23028,11 +23030,18 @@ window.workspaceMdi = function () {
             if (e.deltaY !== 0) {
               e.preventDefault();
               scrollWrapper.scrollLeft += e.deltaY;
+
+              _this5.checkScrollState();
             }
           }, {
             passive: false
           });
         }
+
+        _this5.checkScrollState();
+      });
+      window.addEventListener('resize', function () {
+        _this5.checkScrollState();
       }); // 8. Listen to browser Back/Forward (popstate)
 
       window.addEventListener('popstate', function (e) {
@@ -23271,6 +23280,150 @@ window.workspaceMdi = function () {
       } else {
         // Fetch and mount tab content
         this.fetchAndMountTab(tab);
+      } // Scroll tab header into view within tab bar
+
+
+      this.scrollToTab(tab.key);
+    },
+
+    /**
+     * Smoothly scroll a tab into view within the tab bar
+     */
+    scrollToTab: function scrollToTab(tabKey) {
+      var _this6 = this;
+
+      var key = tabKey || this.activeTabKey;
+      this.$nextTick(function () {
+        var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (_this6.$el && _this6.$el.querySelector ? _this6.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+        if (!scrollWrapper) return;
+        var activeEl = scrollWrapper.querySelector(".mdi-tab-item[data-tab-key=\"".concat(key, "\"]")) || scrollWrapper.querySelector('.mdi-tab-item.active');
+
+        if (activeEl) {
+          var wrapperRect = scrollWrapper.getBoundingClientRect();
+          var elRect = activeEl.getBoundingClientRect();
+
+          if (elRect.left < wrapperRect.left) {
+            scrollWrapper.scrollTo({
+              left: scrollWrapper.scrollLeft + (elRect.left - wrapperRect.left) - 16,
+              behavior: 'smooth'
+            });
+          } else if (elRect.right > wrapperRect.right) {
+            scrollWrapper.scrollTo({
+              left: scrollWrapper.scrollLeft + (elRect.right - wrapperRect.right) + 16,
+              behavior: 'smooth'
+            });
+          }
+
+          setTimeout(function () {
+            return _this6.checkScrollState();
+          }, 350);
+        } else {
+          _this6.checkScrollState();
+        }
+      });
+    },
+
+    /**
+     * Update horizontal scroll indicators (canScrollLeft, canScrollRight)
+     */
+    checkScrollState: function checkScrollState() {
+      var _this7 = this;
+
+      this.$nextTick(function () {
+        var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (_this7.$el && _this7.$el.querySelector ? _this7.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+        if (!scrollWrapper) return;
+        var scrollLeft = scrollWrapper.scrollLeft,
+            scrollWidth = scrollWrapper.scrollWidth,
+            clientWidth = scrollWrapper.clientWidth;
+        _this7.canScrollLeft = scrollLeft > 2;
+        _this7.canScrollRight = scrollLeft + clientWidth < scrollWidth - 2;
+      });
+    },
+
+    /**
+     * Scroll tab strip horizontally by step (YouTube style)
+     */
+    scrollTabStrip: function scrollTabStrip(direction) {
+      var _this8 = this;
+
+      var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (this.$el && this.$el.querySelector ? this.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+      if (!scrollWrapper) return;
+      var scrollAmount = Math.max(200, Math.floor(scrollWrapper.clientWidth * 0.5));
+
+      if (direction === 'left') {
+        scrollWrapper.scrollBy({
+          left: -scrollAmount,
+          behavior: 'smooth'
+        });
+      } else {
+        scrollWrapper.scrollBy({
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+
+      setTimeout(function () {
+        return _this8.checkScrollState();
+      }, 350);
+    },
+
+    /**
+     * Check if moving to previous tab is possible
+     */
+    canGoPrevious: function canGoPrevious() {
+      var _this9 = this;
+
+      if (!this.tabs || this.tabs.length <= 1) return false;
+      var currentIndex = this.tabs.findIndex(function (t) {
+        return t.key === _this9.activeTabKey;
+      });
+      return currentIndex > 0;
+    },
+
+    /**
+     * Check if moving to next tab is possible
+     */
+    canGoNext: function canGoNext() {
+      var _this10 = this;
+
+      if (!this.tabs || this.tabs.length <= 1) return false;
+      var currentIndex = this.tabs.findIndex(function (t) {
+        return t.key === _this10.activeTabKey;
+      });
+      return currentIndex >= 0 && currentIndex < this.tabs.length - 1;
+    },
+
+    /**
+     * Move to previous tab
+     */
+    goToPreviousTab: function goToPreviousTab() {
+      var _this11 = this;
+
+      if (!this.canGoPrevious()) return;
+      var currentIndex = this.tabs.findIndex(function (t) {
+        return t.key === _this11.activeTabKey;
+      });
+
+      if (currentIndex > 0) {
+        var targetTab = this.tabs[currentIndex - 1];
+        this.switchTab(targetTab);
+      }
+    },
+
+    /**
+     * Move to next tab
+     */
+    goToNextTab: function goToNextTab() {
+      var _this12 = this;
+
+      if (!this.canGoNext()) return;
+      var currentIndex = this.tabs.findIndex(function (t) {
+        return t.key === _this12.activeTabKey;
+      });
+
+      if (currentIndex >= 0 && currentIndex < this.tabs.length - 1) {
+        var targetTab = this.tabs[currentIndex + 1];
+        this.switchTab(targetTab);
       }
     },
 
@@ -23297,7 +23450,7 @@ window.workspaceMdi = function () {
      * Dynamically fetch page HTML and mount into #workspace-viewport
      */
     fetchAndMountTab: function fetchAndMountTab(tab) {
-      var _this6 = this;
+      var _this13 = this;
 
       this.setTabLoading(tab.key, true);
       fetch(tab.url, {
@@ -23318,7 +23471,7 @@ window.workspaceMdi = function () {
 
         if (html === null) return;
 
-        _this6.setTabLoading(tab.key, false);
+        _this13.setTabLoading(tab.key, false);
 
         var parser = new DOMParser();
         var doc = parser.parseFromString(html, 'text/html'); // Extract title and clean any icon ligatures (e.g. "visibility View Details", "arrow-left Create Product")
@@ -23328,12 +23481,12 @@ window.workspaceMdi = function () {
         if (docTitle) {
           docTitle = docTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
 
-          var idx = _this6.tabs.findIndex(function (t) {
+          var idx = _this13.tabs.findIndex(function (t) {
             return t.key === tab.key;
           });
 
           if (idx !== -1 && docTitle) {
-            _this6.tabs[idx].title = docTitle;
+            _this13.tabs[idx].title = docTitle;
           }
         } // Extract external stylesheet and font links (e.g., Google Fonts, ApexCharts)
 
@@ -23368,7 +23521,7 @@ window.workspaceMdi = function () {
 
         var viewport = document.getElementById('workspace-viewport');
         if (!viewport) return;
-        var isActive = _this6.activeTabKey === tab.key; // Create new tab pane container
+        var isActive = _this13.activeTabKey === tab.key; // Create new tab pane container
 
         var newPane = document.createElement('div');
         newPane.id = 'tab-pane-' + tab.key;
@@ -23412,7 +23565,7 @@ window.workspaceMdi = function () {
         // This guarantees Alpine components (Alpine.data) and page functions are registered
         // BEFORE Alpine's DOM mutation observer scans and initializes the new elements.
 
-        _this6.executeScriptsFromDoc(doc, newPane); // 2. Mount newPane into the live DOM
+        _this13.executeScriptsFromDoc(doc, newPane); // 2. Mount newPane into the live DOM
 
 
         if (window.Alpine && typeof window.Alpine.mutateDom === 'function') {
@@ -23451,15 +23604,15 @@ window.workspaceMdi = function () {
           }
         }
 
-        _this6.saveSession();
+        _this13.saveSession();
       })["catch"](function (err) {
-        _this6.setTabLoading(tab.key, false);
+        _this13.setTabLoading(tab.key, false);
 
         console.error('Error loading tab content:', err);
         var viewport = document.getElementById('workspace-viewport');
 
         if (viewport) {
-          var isActive = _this6.activeTabKey === tab.key;
+          var isActive = _this13.activeTabKey === tab.key;
 
           if (isActive) {
             var allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
@@ -23488,7 +23641,7 @@ window.workspaceMdi = function () {
           viewport.appendChild(errorPane);
         }
       })["finally"](function () {
-        _this6.setTabLoading(tab.key, false);
+        _this13.setTabLoading(tab.key, false);
       });
     },
     executeScriptsFromDoc: function executeScriptsFromDoc(doc, targetPane) {
@@ -23568,7 +23721,7 @@ window.workspaceMdi = function () {
     },
     closeTab: function closeTab(tab, event) {
       var _arguments = arguments,
-          _this7 = this;
+          _this14 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
         var shouldSwitch, template, title, safeTitle, message, confirmed, closingIndex, pane, wasActive, nextTab;
@@ -23578,7 +23731,7 @@ window.workspaceMdi = function () {
               case 0:
                 shouldSwitch = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : true;
 
-                _this7.hideTooltip();
+                _this14.hideTooltip();
 
                 if (event) {
                   event.stopPropagation();
@@ -23593,7 +23746,7 @@ window.workspaceMdi = function () {
                 return _context3.abrupt("return");
 
               case 5:
-                if (!(tab.isDirty && event && _this7.isFormTab(tab))) {
+                if (!(tab.isDirty && event && _this14.isFormTab(tab))) {
                   _context3.next = 15;
                   break;
                 }
@@ -23603,7 +23756,7 @@ window.workspaceMdi = function () {
                 safeTitle = (title + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 message = template.replace(':title', safeTitle).replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
                 _context3.next = 12;
-                return _this7.confirmAction(message, {
+                return _this14.confirmAction(message, {
                   confirmText: window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close tab',
                   cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
                 });
@@ -23619,7 +23772,7 @@ window.workspaceMdi = function () {
                 return _context3.abrupt("return");
 
               case 15:
-                closingIndex = _this7.tabs.findIndex(function (t) {
+                closingIndex = _this14.tabs.findIndex(function (t) {
                   return t.key === tab.key;
                 });
 
@@ -23638,26 +23791,30 @@ window.workspaceMdi = function () {
                   pane.remove();
                 }
 
-                wasActive = _this7.activeTabKey === tab.key;
+                wasActive = _this14.activeTabKey === tab.key;
 
-                _this7.tabs.splice(closingIndex, 1);
+                _this14.tabs.splice(closingIndex, 1);
 
                 if (wasActive && shouldSwitch) {
                   // Switch to adjacent tab or dashboard
-                  nextTab = _this7.tabs[Math.max(0, closingIndex - 1)] || _this7.tabs[0];
+                  nextTab = _this14.tabs[Math.max(0, closingIndex - 1)] || _this14.tabs[0];
 
                   if (nextTab) {
-                    _this7.switchTab(nextTab);
+                    _this14.switchTab(nextTab);
                   }
                 } else if (wasActive && !shouldSwitch) {
-                  _this7.activeTabKey = null;
+                  _this14.activeTabKey = null;
 
-                  _this7.saveSession();
+                  _this14.saveSession();
                 } else {
-                  _this7.saveSession();
+                  _this14.saveSession();
                 }
 
-              case 23:
+                _this14.$nextTick(function () {
+                  return _this14.checkScrollState();
+                });
+
+              case 24:
               case "end":
                 return _context3.stop();
             }
@@ -23666,7 +23823,7 @@ window.workspaceMdi = function () {
       }))();
     },
     closeAllTabs: function closeAllTabs() {
-      var _this8 = this;
+      var _this15 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
         var closableTabs, hasDirty, rawMsg, message, confirmed, currentClosable, dashboardUrl, dashboardKey, dashTitle, dashTab;
@@ -23674,7 +23831,7 @@ window.workspaceMdi = function () {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                closableTabs = _this8.tabs.filter(function (t) {
+                closableTabs = _this15.tabs.filter(function (t) {
                   return !t.isPinned;
                 });
 
@@ -23687,7 +23844,7 @@ window.workspaceMdi = function () {
 
               case 3:
                 hasDirty = closableTabs.some(function (t) {
-                  return t.isDirty && _this8.isFormTab(t);
+                  return t.isDirty && _this15.isFormTab(t);
                 });
 
                 if (!hasDirty) {
@@ -23698,7 +23855,7 @@ window.workspaceMdi = function () {
                 rawMsg = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?';
                 message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
                 _context4.next = 9;
-                return _this8.confirmAction(message, {
+                return _this15.confirmAction(message, {
                   confirmText: window.workspaceTranslations && window.workspaceTranslations.closeAllTabs || window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close all tabs',
                   cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
                 });
@@ -23714,7 +23871,7 @@ window.workspaceMdi = function () {
                 return _context4.abrupt("return");
 
               case 12:
-                currentClosable = _this8.tabs.filter(function (t) {
+                currentClosable = _this15.tabs.filter(function (t) {
                   return !t.isPinned;
                 }); // Remove DOM panes of closable tabs
 
@@ -23726,19 +23883,19 @@ window.workspaceMdi = function () {
                   }
                 }); // Retain only pinned tabs
 
-                _this8.tabs = _this8.tabs.filter(function (t) {
+                _this15.tabs = _this15.tabs.filter(function (t) {
                   return t.isPinned;
                 }); // Close dropdowns
 
-                _this8.showOverflowDropdown = false;
-                _this8.showProfileDropdown = false;
-                _this8.showNotificationDropdown = false; // Switch to dashboard or first pinned tab
+                _this15.showOverflowDropdown = false;
+                _this15.showProfileDropdown = false;
+                _this15.showNotificationDropdown = false; // Switch to dashboard or first pinned tab
 
-                if (_this8.tabs.length > 0) {
-                  _this8.switchTab(_this8.tabs[0]);
+                if (_this15.tabs.length > 0) {
+                  _this15.switchTab(_this15.tabs[0]);
                 } else {
                   dashboardUrl = '/admin/dashboard';
-                  dashboardKey = _this8.generateKey(dashboardUrl);
+                  dashboardKey = _this15.generateKey(dashboardUrl);
                   dashTitle = window.workspaceTranslations && window.workspaceTranslations.dashboard || 'Dashboard';
                   dashTab = {
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
@@ -23751,12 +23908,12 @@ window.workspaceMdi = function () {
                     isLoading: false,
                     closable: false
                   };
-                  _this8.tabs = [dashTab];
+                  _this15.tabs = [dashTab];
 
-                  _this8.switchTab(dashTab);
+                  _this15.switchTab(dashTab);
                 }
 
-                _this8.saveSession();
+                _this15.saveSession();
 
               case 20:
               case "end":
@@ -23794,7 +23951,7 @@ window.workspaceMdi = function () {
       } catch (e) {}
     },
     setupLinkInterceptor: function setupLinkInterceptor() {
-      var _this9 = this;
+      var _this16 = this;
 
       document.addEventListener('click', function (e) {
         // 1. Intercept elements with [s-click-link] (buttons, divs, icons, spans)
@@ -23822,13 +23979,13 @@ window.workspaceMdi = function () {
                   e.stopPropagation();
                   var targetPath = url.pathname + url.search;
 
-                  var currentTab = _this9.tabs.find(function (t) {
-                    return t.key === _this9.activeTabKey;
+                  var currentTab = _this16.tabs.find(function (t) {
+                    return t.key === _this16.activeTabKey;
                   }); // Check if reload button for current tab
 
 
                   if (currentTab && (url.href === window.location.href || currentTab.url === targetPath)) {
-                    _this9.refreshTab(_this9.activeTabKey);
+                    _this16.refreshTab(_this16.activeTabKey);
 
                     return;
                   }
@@ -23847,7 +24004,7 @@ window.workspaceMdi = function () {
                     icon = 'bx bx-list-ul';
                   }
 
-                  _this9.openUrlInTab(targetPath, title, icon);
+                  _this16.openUrlInTab(targetPath, title, icon);
 
                   return;
                 }
@@ -23905,13 +24062,13 @@ window.workspaceMdi = function () {
               _icon = 'bx bx-show';
             }
 
-            _this9.openUrlInTab(_url.pathname + _url.search, _title, _icon);
+            _this16.openUrlInTab(_url.pathname + _url.search, _title, _icon);
           }
         } catch (err) {}
       }, false); // Bubble phase ensures custom element click handlers fire first
     },
     setupFormInterceptor: function setupFormInterceptor() {
-      var _this10 = this;
+      var _this17 = this;
 
       document.addEventListener('submit', function (e) {
         // If form submission was already cancelled by client validation, do not intercept
@@ -23942,10 +24099,10 @@ window.workspaceMdi = function () {
           var params = new URLSearchParams(_formData);
           var targetUrl = _action.split('?')[0] + '?' + params.toString();
 
-          var normalizedTarget = _this10.normalizeUrl(targetUrl);
+          var normalizedTarget = _this17.normalizeUrl(targetUrl);
 
-          var _currentTab = _this10.tabs.find(function (t) {
-            return t.key === _this10.activeTabKey;
+          var _currentTab = _this17.tabs.find(function (t) {
+            return t.key === _this17.activeTabKey;
           });
 
           if (_currentTab) {
@@ -23953,11 +24110,11 @@ window.workspaceMdi = function () {
             var existingPane = document.getElementById('tab-pane-' + _currentTab.key);
             if (existingPane) existingPane.remove();
 
-            _this10.setTabLoading(_currentTab.key, true);
+            _this17.setTabLoading(_currentTab.key, true);
 
-            _this10.fetchAndMountTab(_currentTab);
+            _this17.fetchAndMountTab(_currentTab);
           } else {
-            _this10.openUrlInTab(normalizedTarget);
+            _this17.openUrlInTab(normalizedTarget);
           }
 
           return;
@@ -23984,9 +24141,9 @@ window.workspaceMdi = function () {
         }
 
         var formPane = form.closest('.workspace-tab-pane');
-        var currentTabKey = formPane ? formPane.getAttribute('data-tab-key') : _this10.activeTabKey;
+        var currentTabKey = formPane ? formPane.getAttribute('data-tab-key') : _this17.activeTabKey;
 
-        var currentTab = _this10.tabs.find(function (t) {
+        var currentTab = _this17.tabs.find(function (t) {
           return t.key === currentTabKey;
         }); // Capture submitter name/value (e.g. save_opt: 'save_new')
 
@@ -24004,7 +24161,7 @@ window.workspaceMdi = function () {
           submitter.innerHTML = "<span class=\"mdi-tab-loading-spinner\" style=\"width:13px;height:13px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;\"></span> Saving...";
         }
 
-        _this10.setTabLoading(currentTabKey, true);
+        _this17.setTabLoading(currentTabKey, true);
 
         fetch(action, {
           method: form.method || 'POST',
@@ -24028,7 +24185,7 @@ window.workspaceMdi = function () {
                       }
                     }
 
-                    _this10.setTabLoading(currentTabKey, false);
+                    _this17.setTabLoading(currentTabKey, false);
 
                     finalUrl = response.url;
                     _context5.next = 5;
@@ -24066,11 +24223,11 @@ window.workspaceMdi = function () {
                     if (currentTab) {
                       currentTab.isDirty = false;
 
-                      _this10.closeTab(currentTab, null, false);
+                      _this17.closeTab(currentTab, null, false);
                     }
 
                     if (json.redirect || json.url) {
-                      _this10.openUrlInTab(json.redirect || json.url);
+                      _this17.openUrlInTab(json.redirect || json.url);
                     }
 
                     return _context5.abrupt("return");
@@ -24128,7 +24285,7 @@ window.workspaceMdi = function () {
                         } // Execute scripts FIRST so Alpine.data is updated before new DOM is injected
 
 
-                        _this10.executeScriptsFromDoc(doc, currentPane);
+                        _this17.executeScriptsFromDoc(doc, currentPane);
 
                         currentPane.innerHTML = newContent.innerHTML;
 
@@ -24199,7 +24356,7 @@ window.workspaceMdi = function () {
                       break;
                     }
 
-                    _this10.refreshTab(currentTabKey);
+                    _this17.refreshTab(currentTabKey);
 
                     return _context5.abrupt("return");
 
@@ -24212,7 +24369,7 @@ window.workspaceMdi = function () {
                       _targetUrl = "/admin/".concat(modName, "/list/1");
                     }
 
-                    targetPath = _this10.normalizeUrl(_targetUrl); // Broadcast resource saved so open tabs (like Order) can refresh select dropdowns
+                    targetPath = _this17.normalizeUrl(_targetUrl); // Broadcast resource saved so open tabs (like Order) can refresh select dropdowns
 
                     try {
                       window.dispatchEvent(new CustomEvent('workspace:resource-saved', {
@@ -24227,12 +24384,12 @@ window.workspaceMdi = function () {
                     if (currentTab) {
                       currentTab.isDirty = false;
 
-                      _this10.closeTab(currentTab, null, false);
+                      _this17.closeTab(currentTab, null, false);
                     } // Open or refresh the listing tab
 
 
-                    listKey = _this10.generateKey(targetPath);
-                    existingListTab = _this10.tabs.find(function (t) {
+                    listKey = _this17.generateKey(targetPath);
+                    existingListTab = _this17.tabs.find(function (t) {
                       return t.key === listKey;
                     });
 
@@ -24242,7 +24399,7 @@ window.workspaceMdi = function () {
                       if (listPane) listPane.remove();
                     }
 
-                    _this10.openUrlInTab(targetPath);
+                    _this17.openUrlInTab(targetPath);
 
                   case 51:
                   case "end":
@@ -24264,7 +24421,7 @@ window.workspaceMdi = function () {
             }
           }
 
-          _this10.setTabLoading(currentTabKey, false);
+          _this17.setTabLoading(currentTabKey, false);
 
           console.error('Form submission error:', err);
 
@@ -24320,11 +24477,11 @@ window.workspaceMdi = function () {
       return false;
     },
     markTabDirty: function markTabDirty() {
-      var _this11 = this;
+      var _this18 = this;
 
       var isDirty = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
       var current = this.tabs.find(function (t) {
-        return t.key === _this11.activeTabKey;
+        return t.key === _this18.activeTabKey;
       });
 
       if (current) {
@@ -24339,7 +24496,7 @@ window.workspaceMdi = function () {
       }
     },
     setupDirtyTracking: function setupDirtyTracking() {
-      var _this12 = this;
+      var _this19 = this;
 
       var contentArea = document.getElementById('content');
 
@@ -24366,18 +24523,18 @@ window.workspaceMdi = function () {
           } // 2. Active tab must be a form tab (listing pages are NEVER dirty)
 
 
-          var currentTab = _this12.tabs.find(function (t) {
-            return t.key === _this12.activeTabKey;
+          var currentTab = _this19.tabs.find(function (t) {
+            return t.key === _this19.activeTabKey;
           });
 
-          if (!currentTab || !_this12.isFormTab(currentTab)) {
+          if (!currentTab || !_this19.isFormTab(currentTab)) {
             return;
           } // 3. The input must belong to the active tab's pane
 
 
           var pane = target.closest('.workspace-tab-pane');
 
-          if (pane && pane.id !== 'tab-pane-' + _this12.activeTabKey) {
+          if (pane && pane.id !== 'tab-pane-' + _this19.activeTabKey) {
             return;
           } // 4. Must be inside a data form or booking-pos-workspace
 
@@ -24388,7 +24545,7 @@ window.workspaceMdi = function () {
             return;
           }
 
-          _this12.markTabDirty(true);
+          _this19.markTabDirty(true);
         };
 
         contentArea.addEventListener('input', handleDirtyInput, true);
@@ -24400,19 +24557,19 @@ window.workspaceMdi = function () {
             if (!target) return;
             if (target.closest('.InputContainer, .filter, #FilterForm, .filter-form')) return;
 
-            var currentTab = _this12.tabs.find(function (t) {
-              return t.key === _this12.activeTabKey;
+            var currentTab = _this19.tabs.find(function (t) {
+              return t.key === _this19.activeTabKey;
             });
 
-            if (currentTab && _this12.isFormTab(currentTab)) {
-              _this12.markTabDirty(true);
+            if (currentTab && _this19.isFormTab(currentTab)) {
+              _this19.markTabDirty(true);
             }
           });
         }
       }
     },
     setupKeyboardShortcuts: function setupKeyboardShortcuts() {
-      var _this13 = this;
+      var _this20 = this;
 
       document.addEventListener('keydown', /*#__PURE__*/function () {
         var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6(e) {
@@ -24426,8 +24583,8 @@ window.workspaceMdi = function () {
                     break;
                   }
 
-                  activeTab = _this13.tabs.find(function (t) {
-                    return t.key === _this13.activeTabKey;
+                  activeTab = _this20.tabs.find(function (t) {
+                    return t.key === _this20.activeTabKey;
                   });
 
                   if (!(activeTab && !activeTab.isPinned)) {
@@ -24437,20 +24594,31 @@ window.workspaceMdi = function () {
 
                   e.preventDefault();
                   _context6.next = 6;
-                  return _this13.closeTab(activeTab, e);
+                  return _this20.closeTab(activeTab, e);
 
                 case 6:
                   // Ctrl+Tab to cycle tabs forward
                   if (e.ctrlKey && e.key === 'Tab') {
                     e.preventDefault();
-                    currentIndex = _this13.tabs.findIndex(function (t) {
-                      return t.key === _this13.activeTabKey;
+                    currentIndex = _this20.tabs.findIndex(function (t) {
+                      return t.key === _this20.activeTabKey;
                     });
 
                     if (currentIndex >= 0) {
-                      nextIndex = e.shiftKey ? (currentIndex - 1 + _this13.tabs.length) % _this13.tabs.length : (currentIndex + 1) % _this13.tabs.length;
+                      nextIndex = e.shiftKey ? (currentIndex - 1 + _this20.tabs.length) % _this20.tabs.length : (currentIndex + 1) % _this20.tabs.length;
 
-                      _this13.switchTab(_this13.tabs[nextIndex]);
+                      _this20.switchTab(_this20.tabs[nextIndex]);
+                    }
+                  } // Ctrl+PageUp / Ctrl+PageDown to navigate tabs
+
+
+                  if (e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === 'PageUp' || e.key === 'PageDown')) {
+                    e.preventDefault();
+
+                    if (e.key === 'PageUp') {
+                      _this20.goToPreviousTab();
+                    } else {
+                      _this20.goToNextTab();
                     }
                   } // Ctrl+1 through Ctrl+9
 
@@ -24458,14 +24626,14 @@ window.workspaceMdi = function () {
                   if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key >= '1' && e.key <= '9') {
                     targetIndex = parseInt(e.key) - 1;
 
-                    if (targetIndex < _this13.tabs.length) {
+                    if (targetIndex < _this20.tabs.length) {
                       e.preventDefault();
 
-                      _this13.switchTab(_this13.tabs[targetIndex]);
+                      _this20.switchTab(_this20.tabs[targetIndex]);
                     }
                   }
 
-                case 8:
+                case 9:
                 case "end":
                   return _context6.stop();
               }

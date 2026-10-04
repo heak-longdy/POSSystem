@@ -209,6 +209,8 @@ return [
         'close_to_right'         => 'Close Tabs to Right',
         'reload'                 => 'Reload Tab',
         'open_tabs'              => 'Open Tabs',
+        'previous_tab'           => 'Previous Tab',
+        'next_tab'               => 'Next Tab',
         'tab'                    => 'Tab',
         'notifications'          => 'Notifications',
         'new'                    => 'new',

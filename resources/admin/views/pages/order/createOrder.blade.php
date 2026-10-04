@@ -1655,12 +1655,16 @@
                     /* ===================================================
                        Two-Column Scroll & Dynamic Sticky Optimization
                        =================================================== */
+                    .form-admin.booking.booking-order-ui,
                     .form-admin.booking-order-ui,
                     .booking-dashboard.booking-order-ui,
                     .booking-order-ui {
-                        height: calc(100vh - 45px) !important;
-                        overflow-y: auto !important;
-                        overflow-x: hidden !important;
+                        height: auto !important;
+                        min-height: 100% !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        overflow-y: visible !important;
+                        overflow-x: visible !important;
                     }
 
                     .booking-pos-workspace {
@@ -1670,6 +1674,7 @@
                         overflow: visible !important;
                         height: auto !important;
                         min-height: 100% !important;
+                        padding-bottom: 32px !important;
                     }
 
                     /* Left Column: Catalog & Recent Bookings */
@@ -1721,7 +1726,7 @@
                     .booking-pos-sidebar.is-sticky-column {
                         position: -webkit-sticky !important;
                         position: sticky !important;
-                        top: var(--sticky-top, 16px) !important;
+                        top: var(--sticky-top, 60px) !important;
                         align-self: start !important;
                         z-index: 10;
                     }
@@ -2186,7 +2191,6 @@
                 initTwoColumnSticky() {
                     const leftCol = (this.$el ? this.$el.querySelector('.booking-pos-main-col') : null) || document.querySelector('.booking-pos-main-col');
                     const rightCol = (this.$el ? this.$el.querySelector('.booking-pos-sidebar') : null) || document.querySelector('.booking-pos-sidebar');
-                    const scrollContainer = (this.$el ? this.$el.closest('.booking-order-ui') : null) || document.querySelector('.booking-order-ui') || window;
 
                     if (!leftCol || !rightCol) return;
 
@@ -2202,9 +2206,9 @@
 
                         const leftHeight = leftCol.offsetHeight;
                         const rightHeight = rightCol.offsetHeight;
-                        const viewportHeight = scrollContainer === window
-                            ? window.innerHeight
-                            : (scrollContainer.clientHeight || window.innerHeight);
+                        const viewportHeight = window.innerHeight;
+                        const tabBar = document.getElementById('workspace-tab-bar') || document.querySelector('.mdi-workspace-tabs-container');
+                        const topSpacing = (tabBar ? tabBar.offsetHeight : 44) + 16;
 
                         // If the Left Column is shorter than the Right Sidebar, make Left Column sticky
                         if (leftHeight < rightHeight) {
@@ -2212,10 +2216,10 @@
                             rightCol.classList.remove('is-sticky-column');
                             rightCol.style.removeProperty('--sticky-top');
 
-                            if (leftHeight + 32 <= viewportHeight) {
-                                leftCol.style.setProperty('--sticky-top', '16px');
+                            if (leftHeight + topSpacing + 16 <= viewportHeight) {
+                                leftCol.style.setProperty('--sticky-top', `${topSpacing}px`);
                             } else {
-                                const offsetTop = viewportHeight - leftHeight - 16;
+                                const offsetTop = Math.min(topSpacing, viewportHeight - leftHeight - 16);
                                 leftCol.style.setProperty('--sticky-top', `${offsetTop}px`);
                             }
                         // If the Right Sidebar is shorter than the Left Column, make Right Sidebar sticky
@@ -2224,10 +2228,10 @@
                             leftCol.classList.remove('is-sticky-column');
                             leftCol.style.removeProperty('--sticky-top');
 
-                            if (rightHeight + 32 <= viewportHeight) {
-                                rightCol.style.setProperty('--sticky-top', '16px');
+                            if (rightHeight + topSpacing + 16 <= viewportHeight) {
+                                rightCol.style.setProperty('--sticky-top', `${topSpacing}px`);
                             } else {
-                                const offsetTop = viewportHeight - rightHeight - 16;
+                                const offsetTop = Math.min(topSpacing, viewportHeight - rightHeight - 16);
                                 rightCol.style.setProperty('--sticky-top', `${offsetTop}px`);
                             }
                         } else {

@@ -45,6 +45,8 @@ window.workspaceMdi = function () {
         showOverflowDropdown: false,
         showProfileDropdown: false,
         showNotificationDropdown: false,
+        canScrollLeft: false,
+        canScrollRight: false,
         draggedTabKey: null,
         dragOverTabKey: null,
         contextMenu: {
@@ -400,7 +402,7 @@ window.workspaceMdi = function () {
             // 6. Setup form dirty detection
             this.setupDirtyTracking();
 
-            // 7. Setup horizontal mouse wheel scrolling on tab bar
+            // 7. Setup horizontal mouse wheel scrolling and scroll state detection on tab bar
             this.$nextTick(() => {
                 const scrollWrapper = this.$el.querySelector('.mdi-tabs-scroll-wrapper');
                 if (scrollWrapper) {
@@ -408,9 +410,15 @@ window.workspaceMdi = function () {
                         if (e.deltaY !== 0) {
                             e.preventDefault();
                             scrollWrapper.scrollLeft += e.deltaY;
+                            this.checkScrollState();
                         }
                     }, { passive: false });
                 }
+                this.checkScrollState();
+            });
+
+            window.addEventListener('resize', () => {
+                this.checkScrollState();
             });
 
             // 8. Listen to browser Back/Forward (popstate)
@@ -629,6 +637,118 @@ window.workspaceMdi = function () {
             } else {
                 // Fetch and mount tab content
                 this.fetchAndMountTab(tab);
+            }
+
+            // Scroll tab header into view within tab bar
+            this.scrollToTab(tab.key);
+        },
+
+        /**
+         * Smoothly scroll a tab into view within the tab bar
+         */
+        scrollToTab(tabKey) {
+            const key = tabKey || this.activeTabKey;
+            this.$nextTick(() => {
+                const scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper')
+                    || (this.$el && this.$el.querySelector ? this.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+                if (!scrollWrapper) return;
+
+                const activeEl = scrollWrapper.querySelector(`.mdi-tab-item[data-tab-key="${key}"]`)
+                    || scrollWrapper.querySelector('.mdi-tab-item.active');
+
+                if (activeEl) {
+                    const wrapperRect = scrollWrapper.getBoundingClientRect();
+                    const elRect = activeEl.getBoundingClientRect();
+
+                    if (elRect.left < wrapperRect.left) {
+                        scrollWrapper.scrollTo({
+                            left: scrollWrapper.scrollLeft + (elRect.left - wrapperRect.left) - 16,
+                            behavior: 'smooth'
+                        });
+                    } else if (elRect.right > wrapperRect.right) {
+                        scrollWrapper.scrollTo({
+                            left: scrollWrapper.scrollLeft + (elRect.right - wrapperRect.right) + 16,
+                            behavior: 'smooth'
+                        });
+                    }
+                    setTimeout(() => this.checkScrollState(), 350);
+                } else {
+                    this.checkScrollState();
+                }
+            });
+        },
+
+        /**
+         * Update horizontal scroll indicators (canScrollLeft, canScrollRight)
+         */
+        checkScrollState() {
+            this.$nextTick(() => {
+                const scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper')
+                    || (this.$el && this.$el.querySelector ? this.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+                if (!scrollWrapper) return;
+
+                const { scrollLeft, scrollWidth, clientWidth } = scrollWrapper;
+                this.canScrollLeft = scrollLeft > 2;
+                this.canScrollRight = (scrollLeft + clientWidth) < (scrollWidth - 2);
+            });
+        },
+
+        /**
+         * Scroll tab strip horizontally by step (YouTube style)
+         */
+        scrollTabStrip(direction) {
+            const scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper')
+                || (this.$el && this.$el.querySelector ? this.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+            if (!scrollWrapper) return;
+
+            const scrollAmount = Math.max(200, Math.floor(scrollWrapper.clientWidth * 0.5));
+            if (direction === 'left') {
+                scrollWrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                scrollWrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+            setTimeout(() => this.checkScrollState(), 350);
+        },
+
+        /**
+         * Check if moving to previous tab is possible
+         */
+        canGoPrevious() {
+            if (!this.tabs || this.tabs.length <= 1) return false;
+            const currentIndex = this.tabs.findIndex(t => t.key === this.activeTabKey);
+            return currentIndex > 0;
+        },
+
+        /**
+         * Check if moving to next tab is possible
+         */
+        canGoNext() {
+            if (!this.tabs || this.tabs.length <= 1) return false;
+            const currentIndex = this.tabs.findIndex(t => t.key === this.activeTabKey);
+            return currentIndex >= 0 && currentIndex < this.tabs.length - 1;
+        },
+
+        /**
+         * Move to previous tab
+         */
+        goToPreviousTab() {
+            if (!this.canGoPrevious()) return;
+            const currentIndex = this.tabs.findIndex(t => t.key === this.activeTabKey);
+            if (currentIndex > 0) {
+                const targetTab = this.tabs[currentIndex - 1];
+                this.switchTab(targetTab);
+            }
+        },
+
+        /**
+         * Move to next tab
+         */
+        goToNextTab() {
+            if (!this.canGoNext()) return;
+            const currentIndex = this.tabs.findIndex(t => t.key === this.activeTabKey);
+            if (currentIndex >= 0 && currentIndex < this.tabs.length - 1) {
+                const targetTab = this.tabs[currentIndex + 1];
+                this.switchTab(targetTab);
             }
         },
 
@@ -959,6 +1079,7 @@ window.workspaceMdi = function () {
             } else {
                 this.saveSession();
             }
+            this.$nextTick(() => this.checkScrollState());
         },
 
         async closeAllTabs() {
@@ -1610,6 +1731,16 @@ window.workspaceMdi = function () {
                             ? (currentIndex - 1 + this.tabs.length) % this.tabs.length
                             : (currentIndex + 1) % this.tabs.length;
                         this.switchTab(this.tabs[nextIndex]);
+                    }
+                }
+
+                // Ctrl+PageUp / Ctrl+PageDown to navigate tabs
+                if (e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === 'PageUp' || e.key === 'PageDown')) {
+                    e.preventDefault();
+                    if (e.key === 'PageUp') {
+                        this.goToPreviousTab();
+                    } else {
+                        this.goToNextTab();
                     }
                 }
 

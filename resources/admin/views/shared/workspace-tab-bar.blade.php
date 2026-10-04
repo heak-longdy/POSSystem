@@ -9,6 +9,8 @@
         closeAllTabs: @json(__('global.workspace.close_all_tabs')),
         closeAll: @json(__('global.workspace.close_all')),
         openTabs: @json(__('global.workspace.open_tabs')),
+        previousTab: @json(__('global.workspace.previous_tab') ?? 'Previous Tab'),
+        nextTab: @json(__('global.workspace.next_tab') ?? 'Next Tab'),
         reload: @json(__('global.workspace.reload') ?? 'Reload Tab'),
         closeOthers: @json(__('global.workspace.close_others') ?? 'Close Other Tabs'),
         closeToRight: @json(__('global.workspace.close_to_right') ?? 'Close Tabs to Right'),
@@ -26,10 +28,28 @@
 </script>
 
 <div id="workspace-tab-bar" class="mdi-workspace-tabs-container" x-data="workspaceMdi()" x-cloak>
-    <!-- Scrollable Tab List -->
-    <div class="mdi-tabs-scroll-wrapper" @scroll.passive="hideTooltip()">
+    <!-- Scrollable Tab List Wrapper with Left/Right Nav Buttons (YouTube Style) -->
+    <div class="mdi-tabs-carousel-wrapper">
+        <!-- Previous Button (<) on Left -->
+        <div class="mdi-tab-nav-overlay left" 
+             x-show="canScrollLeft" 
+             x-cloak
+             x-transition.opacity.duration.150ms
+             style="display: none;">
+            <button type="button" 
+                    class="mdi-tab-nav-btn" 
+                    @click="scrollTabStrip('left')"
+                    title="{{ __('global.workspace.previous_tab') ?? 'Previous Tab' }}"
+                    aria-label="{{ __('global.workspace.previous_tab') ?? 'Previous Tab' }}">
+                <i class='bx bx-chevron-left'></i>
+            </button>
+        </div>
+
+        <!-- Scrollable Tab List -->
+        <div class="mdi-tabs-scroll-wrapper" @scroll.passive="hideTooltip(); checkScrollState()">
         <template x-for="tab in tabs" :key="tab.key">
             <div class="mdi-tab-item" 
+                 :data-tab-key="tab.key"
                  :class="{ 'active': activeTabKey === tab.key, 'pinned': tab.isPinned, 'drag-over': dragOverTabKey === tab.key }"
                  @click="switchTab(tab); hideTooltip(); closeContextMenu()"
                  @contextmenu.prevent="openContextMenu($event, tab); hideTooltip()"
@@ -71,16 +91,24 @@
         </template>
     </div>
 
+        <!-- Next Button (>) on Right -->
+        <div class="mdi-tab-nav-overlay right" 
+             x-show="canScrollRight"
+             x-cloak
+             x-transition.opacity.duration.150ms
+             style="display: none;">
+            <button type="button" 
+                    class="mdi-tab-nav-btn" 
+                    @click="scrollTabStrip('right')"
+                    title="{{ __('global.workspace.next_tab') ?? 'Next Tab' }}"
+                    aria-label="{{ __('global.workspace.next_tab') ?? 'Next Tab' }}">
+                <i class='bx bx-chevron-right'></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Right Controls -->
     <div class="mdi-tabs-actions">
-        <!-- New Tab / Quick Search (+) -->
-        <!-- <button type="button" 
-                class="mdi-action-btn" 
-                @click="openNewTabLauncher()" 
-                title="Search / Open Tab (⌘K)">
-            <i class='bx bx-plus'></i>
-        </button> -->
-
         <!-- Overflow Dropdown Button (⌄) -->
         <div class="mdi-overflow-action-wrapper" @click.outside="showOverflowDropdown = false">
             <button type="button" 
