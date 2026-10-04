@@ -498,12 +498,13 @@
                             message: rejectTemplate.replace('__INVOICE__', '<b>' + (item?.invoice_title || '') + '</b>'),
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: '{{ __('order.action.reject_order') }}',
+                            btnSaveClass: 'bg-danger',
                             item: item,
                             url: `{{ url('admin/order/cancel') }}/${item.id}`,
                             typeAction: 'cancel',
                             digPosition: "posTop",
                             class: "deleteDialog",
-                            width: "18rem"
+                            width: "20rem"
                         },
                         afterClosed: (result) => {
                             if (result) {

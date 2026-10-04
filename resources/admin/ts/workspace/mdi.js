@@ -97,6 +97,37 @@ window.workspaceMdi = function () {
             this.contextMenu.tab = null;
         },
 
+        confirmAction(message, options = {}) {
+            return new Promise((resolve) => {
+                const store = (this.$store && this.$store.confirmDialog)
+                    || (window.Alpine && typeof window.Alpine.store === 'function' ? window.Alpine.store('confirmDialog') : null);
+
+                if (store && typeof store.open === 'function') {
+                    store.open({
+                        data: {
+                            message: message,
+                            btnClose: options.cancelText || (window.workspaceTranslations && window.workspaceTranslations.cancel) || 'Cancel',
+                            btnSave: options.confirmText || (window.workspaceTranslations && window.workspaceTranslations.closeTab) || 'Close tab',
+                            btnSaveClass: options.btnSaveClass || '',
+                            typeAction: 'manual',
+                            digPosition: 'posTop',
+                            class: 'deleteDialog',
+                            width: options.width || '18rem',
+                            ...(options.data || {})
+                        },
+                        afterClosed: (result) => {
+                            resolve(!!result);
+                        }
+                    });
+                    return;
+                }
+
+                // Fallback to native confirm if confirmDialog store not available
+                const plainMessage = (message || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+                resolve(window.confirm(plainMessage));
+            });
+        },
+
         canCloseTabsToRight(tab) {
             if (!tab) return false;
             const idx = this.tabs.findIndex(t => t.key === tab.key);
@@ -104,7 +135,7 @@ window.workspaceMdi = function () {
             return this.tabs.slice(idx + 1).some(t => !t.isPinned);
         },
 
-        closeOtherTabs(targetTab) {
+        async closeOtherTabs(targetTab) {
             const keepTab = targetTab || this.contextMenu.tab || this.tabs.find(t => t.key === this.activeTabKey);
             if (!keepTab) return;
 
@@ -113,12 +144,18 @@ window.workspaceMdi = function () {
 
             const hasDirty = toClose.some(t => t.isDirty && this.isFormTab(t));
             if (hasDirty) {
-                const message = (window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll)
+                const rawMsg = (window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll)
                     || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
-                if (!confirm(message)) return;
+                const message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                const confirmed = await this.confirmAction(message, {
+                    confirmText: (window.workspaceTranslations && window.workspaceTranslations.closeOthers) || (window.workspaceTranslations && window.workspaceTranslations.closeTab) || 'Close other tabs',
+                    cancelText: (window.workspaceTranslations && window.workspaceTranslations.cancel) || 'Cancel'
+                });
+                if (!confirmed) return;
             }
 
-            toClose.forEach(tab => {
+            const currentToClose = this.tabs.filter(t => !t.isPinned && t.key !== keepTab.key);
+            currentToClose.forEach(tab => {
                 const pane = document.getElementById('tab-pane-' + tab.key);
                 if (pane) pane.remove();
             });
@@ -128,7 +165,7 @@ window.workspaceMdi = function () {
             this.switchTab(keepTab);
         },
 
-        closeTabsToRight(targetTab) {
+        async closeTabsToRight(targetTab) {
             const pivotTab = targetTab || this.contextMenu.tab || this.tabs.find(t => t.key === this.activeTabKey);
             if (!pivotTab) return;
 
@@ -140,17 +177,26 @@ window.workspaceMdi = function () {
 
             const hasDirty = toClose.some(t => t.isDirty && this.isFormTab(t));
             if (hasDirty) {
-                const message = (window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll)
+                const rawMsg = (window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll)
                     || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
-                if (!confirm(message)) return;
+                const message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                const confirmed = await this.confirmAction(message, {
+                    confirmText: (window.workspaceTranslations && window.workspaceTranslations.closeToRight) || (window.workspaceTranslations && window.workspaceTranslations.closeTab) || 'Close tabs to right',
+                    cancelText: (window.workspaceTranslations && window.workspaceTranslations.cancel) || 'Cancel'
+                });
+                if (!confirmed) return;
             }
 
-            toClose.forEach(tab => {
+            const currentIdx = this.tabs.findIndex(t => t.key === pivotTab.key);
+            if (currentIdx === -1) return;
+
+            const currentToClose = this.tabs.slice(currentIdx + 1).filter(t => !t.isPinned);
+            currentToClose.forEach(tab => {
                 const pane = document.getElementById('tab-pane-' + tab.key);
                 if (pane) pane.remove();
             });
 
-            const keepKeys = new Set(this.tabs.slice(0, idx + 1).map(t => t.key));
+            const keepKeys = new Set(this.tabs.slice(0, currentIdx + 1).map(t => t.key));
             this.tabs = this.tabs.filter(t => keepKeys.has(t.key) || t.isPinned);
             this.saveSession();
 
@@ -865,14 +911,14 @@ window.workspaceMdi = function () {
             } catch (e) {}
         },
 
-        closeTab(tab, event, shouldSwitch = true) {
+        async closeTab(tab, event, shouldSwitch = true) {
             this.hideTooltip();
             if (event) {
                 event.stopPropagation();
                 event.preventDefault();
             }
 
-            if (tab.isPinned) return;
+            if (!tab || tab.isPinned) return;
 
             // Dirty confirmation only if user clicked close button manually (event is provided)
             // and the tab is actually an editable form tab with unsaved changes
@@ -880,7 +926,12 @@ window.workspaceMdi = function () {
                 const template = (window.workspaceTranslations && window.workspaceTranslations.confirmCloseTab)
                     || 'You have unsaved changes in ":title". Do you want to close without saving?';
                 const title = tab.title || (window.workspaceTranslations && window.workspaceTranslations.tab) || 'Tab';
-                const confirmed = confirm(template.replace(':title', title));
+                const safeTitle = (title + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                const message = template.replace(':title', safeTitle).replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                const confirmed = await this.confirmAction(message, {
+                    confirmText: (window.workspaceTranslations && window.workspaceTranslations.closeTab) || 'Close tab',
+                    cancelText: (window.workspaceTranslations && window.workspaceTranslations.cancel) || 'Cancel'
+                });
                 if (!confirmed) return;
             }
 
@@ -910,20 +961,25 @@ window.workspaceMdi = function () {
             }
         },
 
-        closeAllTabs() {
+        async closeAllTabs() {
             const closableTabs = this.tabs.filter(t => !t.isPinned);
             if (closableTabs.length === 0) return;
 
             const hasDirty = closableTabs.some(t => t.isDirty && this.isFormTab(t));
             if (hasDirty) {
-                const message = (window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll)
+                const rawMsg = (window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll)
                     || 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?';
-                const confirmed = confirm(message);
+                const message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                const confirmed = await this.confirmAction(message, {
+                    confirmText: (window.workspaceTranslations && window.workspaceTranslations.closeAllTabs) || (window.workspaceTranslations && window.workspaceTranslations.closeTab) || 'Close all tabs',
+                    cancelText: (window.workspaceTranslations && window.workspaceTranslations.cancel) || 'Cancel'
+                });
                 if (!confirmed) return;
             }
 
+            const currentClosable = this.tabs.filter(t => !t.isPinned);
             // Remove DOM panes of closable tabs
-            closableTabs.forEach(tab => {
+            currentClosable.forEach(tab => {
                 const pane = document.getElementById('tab-pane-' + tab.key);
                 if (pane) {
                     pane.remove();
@@ -1535,13 +1591,13 @@ window.workspaceMdi = function () {
         },
 
         setupKeyboardShortcuts() {
-            document.addEventListener('keydown', (e) => {
+            document.addEventListener('keydown', async (e) => {
                 // Ctrl+W or Cmd+W
                 if ((e.ctrlKey || e.metaKey) && e.key === 'w' && !e.shiftKey) {
                     const activeTab = this.tabs.find(t => t.key === this.activeTabKey);
                     if (activeTab && !activeTab.isPinned) {
                         e.preventDefault();
-                        this.closeTab(activeTab, e);
+                        await this.closeTab(activeTab, e);
                     }
                 }
 

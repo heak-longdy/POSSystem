@@ -38,7 +38,7 @@
                                 $statusLabel = match ($paymentStatus) {
                                     'Paid' => __('order.status.paid'),
                                     'Partial' => __('order.status.partial'),
-                                    'Cancel' => __('order.status.canceled'),
+                                    'Cancel' => __('order.status.rejected'),
                                     default => __('order.status.pending'),
                                 };
 
@@ -119,10 +119,10 @@
                             <span>{{ __('order.detail.print_slip') }}</span>
                         </button>
 
-                        @if ($canCancel)
-                            <button type="button" class="btn btn-create bg-danger btn-system btn-system-danger" @click="confirmCancel()">
+                        @if ($canReject ?? $canCancel)
+                            <button type="button" class="btn btn-create bg-danger btn-system btn-system-danger" @click="rejectOrder()">
                                 <i data-feather="x-circle"></i>
-                                <span>{{ __('order.detail.cancel_order') }}</span>
+                                <span>{{ __('order.action.reject_order') }}</span>
                             </button>
                         @endif
 
@@ -2395,30 +2395,31 @@
                         }, 60);
                     });
                 },
-                confirmCancel() {
+                rejectOrder() {
+                    const rejectTemplate = "{{ __('order.confirm.reject', ['invoice' => '__INVOICE__']) }}";
                     const invoiceName = '{{ $order->invoice_number ?: '#' . $order->id }}';
-                    if (!confirm(`Are you sure you want to cancel order ${invoiceName}?`)) {
-                        return;
-                    }
-
-                    const url = '{{ route('admin-order-cancel', $order->id) }}';
-                    Axios.post(url, {
-                        _token: '{{ csrf_token() }}'
-                    }).then((res) => {
-                        if (res.data.message === 'success' || res.status === 200) {
-                            if (window.toastr) {
-                                toastr.success('{{ __('order.message.reject_success') }}');
-                            }
-                            setTimeout(() => {
+                    this.$store.confirmDialog.open({
+                        data: {
+                            message: rejectTemplate.replace('__INVOICE__', '<b>' + invoiceName + '</b>'),
+                            btnClose: `{{ __('action_button.cancel') }}`,
+                            btnSave: '{{ __('order.action.reject_order') }}',
+                            btnSaveClass: 'bg-danger',
+                            item: { id: {{ $order->id }} },
+                            url: '{{ route('admin-order-cancel', $order->id) }}',
+                            typeAction: 'cancel',
+                            digPosition: "posTop",
+                            class: "deleteDialog",
+                            width: "20rem"
+                        },
+                        afterClosed: (result) => {
+                            if (result) {
                                 window.location.reload();
-                            }, 400);
+                            }
                         }
-                    }).catch((err) => {
-                        const message = err.response?.data?.error ||
-                            Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-                            'Failed to cancel order.';
-                        alert(message);
                     });
+                },
+                confirmCancel() {
+                    this.rejectOrder();
                 },
                 deletePaymentRecord(paymentId, amount, method) {
                     const template = @json(__('remaining_amount.confirm.delete_payment_record'));

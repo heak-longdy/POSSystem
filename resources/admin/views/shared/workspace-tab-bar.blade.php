@@ -19,6 +19,9 @@
         success: @json(__('global.workspace.success') ?? 'Success'),
         warning: @json(__('global.workspace.warning') ?? 'Warning'),
         error: @json(__('global.workspace.error') ?? 'Error'),
+        cancel: @json(__('action_button.cancel') ?? __('global.cancel') ?? 'Cancel'),
+        confirm: @json(__('global.confirm') ?? __('dialog.button.confirm') ?? 'Confirm'),
+        discardAndClose: @json(__('global.workspace.close_tab') ?? __('dialog.button.close') ?? 'Close Tab'),
     };
 </script>
 

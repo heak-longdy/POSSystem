@@ -22559,6 +22559,37 @@ window.workspaceMdi = function () {
       this.contextMenu.show = false;
       this.contextMenu.tab = null;
     },
+    confirmAction: function confirmAction(message) {
+      var _this = this;
+
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      return new Promise(function (resolve) {
+        var store = _this.$store && _this.$store.confirmDialog || (window.Alpine && typeof window.Alpine.store === 'function' ? window.Alpine.store('confirmDialog') : null);
+
+        if (store && typeof store.open === 'function') {
+          store.open({
+            data: _objectSpread({
+              message: message,
+              btnClose: options.cancelText || window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel',
+              btnSave: options.confirmText || window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close tab',
+              btnSaveClass: options.btnSaveClass || '',
+              typeAction: 'manual',
+              digPosition: 'posTop',
+              "class": 'deleteDialog',
+              width: options.width || '18rem'
+            }, options.data || {}),
+            afterClosed: function afterClosed(result) {
+              resolve(!!result);
+            }
+          });
+          return;
+        } // Fallback to native confirm if confirmDialog store not available
+
+
+        var plainMessage = (message || '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '');
+        resolve(window.confirm(plainMessage));
+      });
+    },
     canCloseTabsToRight: function canCloseTabsToRight(tab) {
       if (!tab) return false;
       var idx = this.tabs.findIndex(function (t) {
@@ -22570,76 +22601,203 @@ window.workspaceMdi = function () {
       });
     },
     closeOtherTabs: function closeOtherTabs(targetTab) {
-      var _this = this;
-
-      var keepTab = targetTab || this.contextMenu.tab || this.tabs.find(function (t) {
-        return t.key === _this.activeTabKey;
-      });
-      if (!keepTab) return;
-      var toClose = this.tabs.filter(function (t) {
-        return !t.isPinned && t.key !== keepTab.key;
-      });
-      if (toClose.length === 0) return;
-      var hasDirty = toClose.some(function (t) {
-        return t.isDirty && _this.isFormTab(t);
-      });
-
-      if (hasDirty) {
-        var message = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
-        if (!confirm(message)) return;
-      }
-
-      toClose.forEach(function (tab) {
-        var pane = document.getElementById('tab-pane-' + tab.key);
-        if (pane) pane.remove();
-      });
-      this.tabs = this.tabs.filter(function (t) {
-        return t.isPinned || t.key === keepTab.key;
-      });
-      this.saveSession();
-      this.switchTab(keepTab);
-    },
-    closeTabsToRight: function closeTabsToRight(targetTab) {
       var _this2 = this;
 
-      var pivotTab = targetTab || this.contextMenu.tab || this.tabs.find(function (t) {
-        return t.key === _this2.activeTabKey;
-      });
-      if (!pivotTab) return;
-      var idx = this.tabs.findIndex(function (t) {
-        return t.key === pivotTab.key;
-      });
-      if (idx === -1) return;
-      var toClose = this.tabs.slice(idx + 1).filter(function (t) {
-        return !t.isPinned;
-      });
-      if (toClose.length === 0) return;
-      var hasDirty = toClose.some(function (t) {
-        return t.isDirty && _this2.isFormTab(t);
-      });
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var keepTab, toClose, hasDirty, rawMsg, message, confirmed, currentToClose;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                keepTab = targetTab || _this2.contextMenu.tab || _this2.tabs.find(function (t) {
+                  return t.key === _this2.activeTabKey;
+                });
 
-      if (hasDirty) {
-        var message = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
-        if (!confirm(message)) return;
-      }
+                if (keepTab) {
+                  _context.next = 3;
+                  break;
+                }
 
-      toClose.forEach(function (tab) {
-        var pane = document.getElementById('tab-pane-' + tab.key);
-        if (pane) pane.remove();
-      });
-      var keepKeys = new Set(this.tabs.slice(0, idx + 1).map(function (t) {
-        return t.key;
-      }));
-      this.tabs = this.tabs.filter(function (t) {
-        return keepKeys.has(t.key) || t.isPinned;
-      });
-      this.saveSession();
+                return _context.abrupt("return");
 
-      if (!this.tabs.some(function (t) {
-        return t.key === _this2.activeTabKey;
-      })) {
-        this.switchTab(pivotTab);
-      }
+              case 3:
+                toClose = _this2.tabs.filter(function (t) {
+                  return !t.isPinned && t.key !== keepTab.key;
+                });
+
+                if (!(toClose.length === 0)) {
+                  _context.next = 6;
+                  break;
+                }
+
+                return _context.abrupt("return");
+
+              case 6:
+                hasDirty = toClose.some(function (t) {
+                  return t.isDirty && _this2.isFormTab(t);
+                });
+
+                if (!hasDirty) {
+                  _context.next = 15;
+                  break;
+                }
+
+                rawMsg = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
+                message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                _context.next = 12;
+                return _this2.confirmAction(message, {
+                  confirmText: window.workspaceTranslations && window.workspaceTranslations.closeOthers || window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close other tabs',
+                  cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
+                });
+
+              case 12:
+                confirmed = _context.sent;
+
+                if (confirmed) {
+                  _context.next = 15;
+                  break;
+                }
+
+                return _context.abrupt("return");
+
+              case 15:
+                currentToClose = _this2.tabs.filter(function (t) {
+                  return !t.isPinned && t.key !== keepTab.key;
+                });
+                currentToClose.forEach(function (tab) {
+                  var pane = document.getElementById('tab-pane-' + tab.key);
+                  if (pane) pane.remove();
+                });
+                _this2.tabs = _this2.tabs.filter(function (t) {
+                  return t.isPinned || t.key === keepTab.key;
+                });
+
+                _this2.saveSession();
+
+                _this2.switchTab(keepTab);
+
+              case 20:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    closeTabsToRight: function closeTabsToRight(targetTab) {
+      var _this3 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        var pivotTab, idx, toClose, hasDirty, rawMsg, message, confirmed, currentIdx, currentToClose, keepKeys;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                pivotTab = targetTab || _this3.contextMenu.tab || _this3.tabs.find(function (t) {
+                  return t.key === _this3.activeTabKey;
+                });
+
+                if (pivotTab) {
+                  _context2.next = 3;
+                  break;
+                }
+
+                return _context2.abrupt("return");
+
+              case 3:
+                idx = _this3.tabs.findIndex(function (t) {
+                  return t.key === pivotTab.key;
+                });
+
+                if (!(idx === -1)) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                return _context2.abrupt("return");
+
+              case 6:
+                toClose = _this3.tabs.slice(idx + 1).filter(function (t) {
+                  return !t.isPinned;
+                });
+
+                if (!(toClose.length === 0)) {
+                  _context2.next = 9;
+                  break;
+                }
+
+                return _context2.abrupt("return");
+
+              case 9:
+                hasDirty = toClose.some(function (t) {
+                  return t.isDirty && _this3.isFormTab(t);
+                });
+
+                if (!hasDirty) {
+                  _context2.next = 18;
+                  break;
+                }
+
+                rawMsg = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
+                message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                _context2.next = 15;
+                return _this3.confirmAction(message, {
+                  confirmText: window.workspaceTranslations && window.workspaceTranslations.closeToRight || window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close tabs to right',
+                  cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
+                });
+
+              case 15:
+                confirmed = _context2.sent;
+
+                if (confirmed) {
+                  _context2.next = 18;
+                  break;
+                }
+
+                return _context2.abrupt("return");
+
+              case 18:
+                currentIdx = _this3.tabs.findIndex(function (t) {
+                  return t.key === pivotTab.key;
+                });
+
+                if (!(currentIdx === -1)) {
+                  _context2.next = 21;
+                  break;
+                }
+
+                return _context2.abrupt("return");
+
+              case 21:
+                currentToClose = _this3.tabs.slice(currentIdx + 1).filter(function (t) {
+                  return !t.isPinned;
+                });
+                currentToClose.forEach(function (tab) {
+                  var pane = document.getElementById('tab-pane-' + tab.key);
+                  if (pane) pane.remove();
+                });
+                keepKeys = new Set(_this3.tabs.slice(0, currentIdx + 1).map(function (t) {
+                  return t.key;
+                }));
+                _this3.tabs = _this3.tabs.filter(function (t) {
+                  return keepKeys.has(t.key) || t.isPinned;
+                });
+
+                _this3.saveSession();
+
+                if (!_this3.tabs.some(function (t) {
+                  return t.key === _this3.activeTabKey;
+                })) {
+                  _this3.switchTab(pivotTab);
+                }
+
+              case 27:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }))();
     },
     onTabDragStart: function onTabDragStart(e, tab) {
       if (tab.isPinned) {
@@ -22668,7 +22826,7 @@ window.workspaceMdi = function () {
       }
     },
     onTabDrop: function onTabDrop(e, targetTab) {
-      var _this3 = this;
+      var _this4 = this;
 
       e.preventDefault();
 
@@ -22679,7 +22837,7 @@ window.workspaceMdi = function () {
       }
 
       var fromIndex = this.tabs.findIndex(function (t) {
-        return t.key === _this3.draggedTabKey;
+        return t.key === _this4.draggedTabKey;
       });
       var toIndex = this.tabs.findIndex(function (t) {
         return t.key === targetTab.key;
@@ -22705,7 +22863,7 @@ window.workspaceMdi = function () {
           _document$querySelect4,
           _document$querySelect5,
           _document$querySelect6,
-          _this4 = this;
+          _this5 = this;
 
       // 1. Detect current page information
       var currentPath = window.location.pathname;
@@ -22773,9 +22931,9 @@ window.workspaceMdi = function () {
         });
         savedTabs.forEach(function (t) {
           t.isLoading = false;
-          t.url = _this4.normalizeUrl(t.url); // Ensure listing tabs are NEVER dirty
+          t.url = _this5.normalizeUrl(t.url); // Ensure listing tabs are NEVER dirty
 
-          if (!_this4.isFormTab(t)) {
+          if (!_this5.isFormTab(t)) {
             t.isDirty = false;
           }
         });
@@ -22863,7 +23021,7 @@ window.workspaceMdi = function () {
       this.setupDirtyTracking(); // 7. Setup horizontal mouse wheel scrolling on tab bar
 
       this.$nextTick(function () {
-        var scrollWrapper = _this4.$el.querySelector('.mdi-tabs-scroll-wrapper');
+        var scrollWrapper = _this5.$el.querySelector('.mdi-tabs-scroll-wrapper');
 
         if (scrollWrapper) {
           scrollWrapper.addEventListener('wheel', function (e) {
@@ -22880,16 +23038,16 @@ window.workspaceMdi = function () {
       window.addEventListener('popstate', function (e) {
         var targetPath = window.location.pathname + window.location.search;
 
-        var targetKey = _this4.generateKey(targetPath);
+        var targetKey = _this5.generateKey(targetPath);
 
-        var targetTab = _this4.tabs.find(function (t) {
+        var targetTab = _this5.tabs.find(function (t) {
           return t.key === targetKey;
         });
 
         if (targetTab) {
-          _this4.switchTab(targetTab, false);
+          _this5.switchTab(targetTab, false);
         } else {
-          _this4.openUrlInTab(targetPath);
+          _this5.openUrlInTab(targetPath);
         }
       }); // 9. Intercept internal links and s-click-link buttons inside viewport
 
@@ -23139,7 +23297,7 @@ window.workspaceMdi = function () {
      * Dynamically fetch page HTML and mount into #workspace-viewport
      */
     fetchAndMountTab: function fetchAndMountTab(tab) {
-      var _this5 = this;
+      var _this6 = this;
 
       this.setTabLoading(tab.key, true);
       fetch(tab.url, {
@@ -23160,7 +23318,7 @@ window.workspaceMdi = function () {
 
         if (html === null) return;
 
-        _this5.setTabLoading(tab.key, false);
+        _this6.setTabLoading(tab.key, false);
 
         var parser = new DOMParser();
         var doc = parser.parseFromString(html, 'text/html'); // Extract title and clean any icon ligatures (e.g. "visibility View Details", "arrow-left Create Product")
@@ -23170,12 +23328,12 @@ window.workspaceMdi = function () {
         if (docTitle) {
           docTitle = docTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
 
-          var idx = _this5.tabs.findIndex(function (t) {
+          var idx = _this6.tabs.findIndex(function (t) {
             return t.key === tab.key;
           });
 
           if (idx !== -1 && docTitle) {
-            _this5.tabs[idx].title = docTitle;
+            _this6.tabs[idx].title = docTitle;
           }
         } // Extract external stylesheet and font links (e.g., Google Fonts, ApexCharts)
 
@@ -23210,7 +23368,7 @@ window.workspaceMdi = function () {
 
         var viewport = document.getElementById('workspace-viewport');
         if (!viewport) return;
-        var isActive = _this5.activeTabKey === tab.key; // Create new tab pane container
+        var isActive = _this6.activeTabKey === tab.key; // Create new tab pane container
 
         var newPane = document.createElement('div');
         newPane.id = 'tab-pane-' + tab.key;
@@ -23254,7 +23412,7 @@ window.workspaceMdi = function () {
         // This guarantees Alpine components (Alpine.data) and page functions are registered
         // BEFORE Alpine's DOM mutation observer scans and initializes the new elements.
 
-        _this5.executeScriptsFromDoc(doc, newPane); // 2. Mount newPane into the live DOM
+        _this6.executeScriptsFromDoc(doc, newPane); // 2. Mount newPane into the live DOM
 
 
         if (window.Alpine && typeof window.Alpine.mutateDom === 'function') {
@@ -23293,15 +23451,15 @@ window.workspaceMdi = function () {
           }
         }
 
-        _this5.saveSession();
+        _this6.saveSession();
       })["catch"](function (err) {
-        _this5.setTabLoading(tab.key, false);
+        _this6.setTabLoading(tab.key, false);
 
         console.error('Error loading tab content:', err);
         var viewport = document.getElementById('workspace-viewport');
 
         if (viewport) {
-          var isActive = _this5.activeTabKey === tab.key;
+          var isActive = _this6.activeTabKey === tab.key;
 
           if (isActive) {
             var allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
@@ -23330,7 +23488,7 @@ window.workspaceMdi = function () {
           viewport.appendChild(errorPane);
         }
       })["finally"](function () {
-        _this5.setTabLoading(tab.key, false);
+        _this6.setTabLoading(tab.key, false);
       });
     },
     executeScriptsFromDoc: function executeScriptsFromDoc(doc, targetPane) {
@@ -23409,108 +23567,204 @@ window.workspaceMdi = function () {
       } catch (e) {}
     },
     closeTab: function closeTab(tab, event) {
-      var shouldSwitch = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-      this.hideTooltip();
+      var _arguments = arguments,
+          _this7 = this;
 
-      if (event) {
-        event.stopPropagation();
-        event.preventDefault();
-      }
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+        var shouldSwitch, template, title, safeTitle, message, confirmed, closingIndex, pane, wasActive, nextTab;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                shouldSwitch = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : true;
 
-      if (tab.isPinned) return; // Dirty confirmation only if user clicked close button manually (event is provided)
-      // and the tab is actually an editable form tab with unsaved changes
+                _this7.hideTooltip();
 
-      if (tab.isDirty && event && this.isFormTab(tab)) {
-        var template = window.workspaceTranslations && window.workspaceTranslations.confirmCloseTab || 'You have unsaved changes in ":title". Do you want to close without saving?';
-        var title = tab.title || window.workspaceTranslations && window.workspaceTranslations.tab || 'Tab';
-        var confirmed = confirm(template.replace(':title', title));
-        if (!confirmed) return;
-      }
+                if (event) {
+                  event.stopPropagation();
+                  event.preventDefault();
+                }
 
-      var closingIndex = this.tabs.findIndex(function (t) {
-        return t.key === tab.key;
-      });
-      if (closingIndex < 0) return; // Remove DOM pane
+                if (!(!tab || tab.isPinned)) {
+                  _context3.next = 5;
+                  break;
+                }
 
-      var pane = document.getElementById('tab-pane-' + tab.key);
+                return _context3.abrupt("return");
 
-      if (pane) {
-        pane.remove();
-      }
+              case 5:
+                if (!(tab.isDirty && event && _this7.isFormTab(tab))) {
+                  _context3.next = 15;
+                  break;
+                }
 
-      var wasActive = this.activeTabKey === tab.key;
-      this.tabs.splice(closingIndex, 1);
+                template = window.workspaceTranslations && window.workspaceTranslations.confirmCloseTab || 'You have unsaved changes in ":title". Do you want to close without saving?';
+                title = tab.title || window.workspaceTranslations && window.workspaceTranslations.tab || 'Tab';
+                safeTitle = (title + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                message = template.replace(':title', safeTitle).replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                _context3.next = 12;
+                return _this7.confirmAction(message, {
+                  confirmText: window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close tab',
+                  cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
+                });
 
-      if (wasActive && shouldSwitch) {
-        // Switch to adjacent tab or dashboard
-        var nextTab = this.tabs[Math.max(0, closingIndex - 1)] || this.tabs[0];
+              case 12:
+                confirmed = _context3.sent;
 
-        if (nextTab) {
-          this.switchTab(nextTab);
-        }
-      } else if (wasActive && !shouldSwitch) {
-        this.activeTabKey = null;
-        this.saveSession();
-      } else {
-        this.saveSession();
-      }
+                if (confirmed) {
+                  _context3.next = 15;
+                  break;
+                }
+
+                return _context3.abrupt("return");
+
+              case 15:
+                closingIndex = _this7.tabs.findIndex(function (t) {
+                  return t.key === tab.key;
+                });
+
+                if (!(closingIndex < 0)) {
+                  _context3.next = 18;
+                  break;
+                }
+
+                return _context3.abrupt("return");
+
+              case 18:
+                // Remove DOM pane
+                pane = document.getElementById('tab-pane-' + tab.key);
+
+                if (pane) {
+                  pane.remove();
+                }
+
+                wasActive = _this7.activeTabKey === tab.key;
+
+                _this7.tabs.splice(closingIndex, 1);
+
+                if (wasActive && shouldSwitch) {
+                  // Switch to adjacent tab or dashboard
+                  nextTab = _this7.tabs[Math.max(0, closingIndex - 1)] || _this7.tabs[0];
+
+                  if (nextTab) {
+                    _this7.switchTab(nextTab);
+                  }
+                } else if (wasActive && !shouldSwitch) {
+                  _this7.activeTabKey = null;
+
+                  _this7.saveSession();
+                } else {
+                  _this7.saveSession();
+                }
+
+              case 23:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
     },
     closeAllTabs: function closeAllTabs() {
-      var _this6 = this;
+      var _this8 = this;
 
-      var closableTabs = this.tabs.filter(function (t) {
-        return !t.isPinned;
-      });
-      if (closableTabs.length === 0) return;
-      var hasDirty = closableTabs.some(function (t) {
-        return t.isDirty && _this6.isFormTab(t);
-      });
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
+        var closableTabs, hasDirty, rawMsg, message, confirmed, currentClosable, dashboardUrl, dashboardKey, dashTitle, dashTab;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                closableTabs = _this8.tabs.filter(function (t) {
+                  return !t.isPinned;
+                });
 
-      if (hasDirty) {
-        var message = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?';
-        var confirmed = confirm(message);
-        if (!confirmed) return;
-      } // Remove DOM panes of closable tabs
+                if (!(closableTabs.length === 0)) {
+                  _context4.next = 3;
+                  break;
+                }
 
+                return _context4.abrupt("return");
 
-      closableTabs.forEach(function (tab) {
-        var pane = document.getElementById('tab-pane-' + tab.key);
+              case 3:
+                hasDirty = closableTabs.some(function (t) {
+                  return t.isDirty && _this8.isFormTab(t);
+                });
 
-        if (pane) {
-          pane.remove();
-        }
-      }); // Retain only pinned tabs
+                if (!hasDirty) {
+                  _context4.next = 12;
+                  break;
+                }
 
-      this.tabs = this.tabs.filter(function (t) {
-        return t.isPinned;
-      }); // Close dropdowns
+                rawMsg = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?';
+                message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
+                _context4.next = 9;
+                return _this8.confirmAction(message, {
+                  confirmText: window.workspaceTranslations && window.workspaceTranslations.closeAllTabs || window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close all tabs',
+                  cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
+                });
 
-      this.showOverflowDropdown = false;
-      this.showProfileDropdown = false;
-      this.showNotificationDropdown = false; // Switch to dashboard or first pinned tab
+              case 9:
+                confirmed = _context4.sent;
 
-      if (this.tabs.length > 0) {
-        this.switchTab(this.tabs[0]);
-      } else {
-        var dashboardUrl = '/admin/dashboard';
-        var dashboardKey = this.generateKey(dashboardUrl);
-        var dashTitle = window.workspaceTranslations && window.workspaceTranslations.dashboard || 'Dashboard';
-        var dashTab = {
-          id: 'tab-' + Math.random().toString(36).substr(2, 9),
-          key: dashboardKey,
-          title: dashTitle,
-          url: dashboardUrl,
-          icon: 'bx bx-tachometer',
-          isPinned: true,
-          isDirty: false,
-          isLoading: false,
-          closable: false
-        };
-        this.tabs = [dashTab];
-        this.switchTab(dashTab);
-      }
+                if (confirmed) {
+                  _context4.next = 12;
+                  break;
+                }
 
-      this.saveSession();
+                return _context4.abrupt("return");
+
+              case 12:
+                currentClosable = _this8.tabs.filter(function (t) {
+                  return !t.isPinned;
+                }); // Remove DOM panes of closable tabs
+
+                currentClosable.forEach(function (tab) {
+                  var pane = document.getElementById('tab-pane-' + tab.key);
+
+                  if (pane) {
+                    pane.remove();
+                  }
+                }); // Retain only pinned tabs
+
+                _this8.tabs = _this8.tabs.filter(function (t) {
+                  return t.isPinned;
+                }); // Close dropdowns
+
+                _this8.showOverflowDropdown = false;
+                _this8.showProfileDropdown = false;
+                _this8.showNotificationDropdown = false; // Switch to dashboard or first pinned tab
+
+                if (_this8.tabs.length > 0) {
+                  _this8.switchTab(_this8.tabs[0]);
+                } else {
+                  dashboardUrl = '/admin/dashboard';
+                  dashboardKey = _this8.generateKey(dashboardUrl);
+                  dashTitle = window.workspaceTranslations && window.workspaceTranslations.dashboard || 'Dashboard';
+                  dashTab = {
+                    id: 'tab-' + Math.random().toString(36).substr(2, 9),
+                    key: dashboardKey,
+                    title: dashTitle,
+                    url: dashboardUrl,
+                    icon: 'bx bx-tachometer',
+                    isPinned: true,
+                    isDirty: false,
+                    isLoading: false,
+                    closable: false
+                  };
+                  _this8.tabs = [dashTab];
+
+                  _this8.switchTab(dashTab);
+                }
+
+                _this8.saveSession();
+
+              case 20:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }))();
     },
     updateSidebarActive: function updateSidebarActive(url) {
       if (!url) return;
@@ -23540,7 +23794,7 @@ window.workspaceMdi = function () {
       } catch (e) {}
     },
     setupLinkInterceptor: function setupLinkInterceptor() {
-      var _this7 = this;
+      var _this9 = this;
 
       document.addEventListener('click', function (e) {
         // 1. Intercept elements with [s-click-link] (buttons, divs, icons, spans)
@@ -23568,13 +23822,13 @@ window.workspaceMdi = function () {
                   e.stopPropagation();
                   var targetPath = url.pathname + url.search;
 
-                  var currentTab = _this7.tabs.find(function (t) {
-                    return t.key === _this7.activeTabKey;
+                  var currentTab = _this9.tabs.find(function (t) {
+                    return t.key === _this9.activeTabKey;
                   }); // Check if reload button for current tab
 
 
                   if (currentTab && (url.href === window.location.href || currentTab.url === targetPath)) {
-                    _this7.refreshTab(_this7.activeTabKey);
+                    _this9.refreshTab(_this9.activeTabKey);
 
                     return;
                   }
@@ -23593,7 +23847,7 @@ window.workspaceMdi = function () {
                     icon = 'bx bx-list-ul';
                   }
 
-                  _this7.openUrlInTab(targetPath, title, icon);
+                  _this9.openUrlInTab(targetPath, title, icon);
 
                   return;
                 }
@@ -23651,13 +23905,13 @@ window.workspaceMdi = function () {
               _icon = 'bx bx-show';
             }
 
-            _this7.openUrlInTab(_url.pathname + _url.search, _title, _icon);
+            _this9.openUrlInTab(_url.pathname + _url.search, _title, _icon);
           }
         } catch (err) {}
       }, false); // Bubble phase ensures custom element click handlers fire first
     },
     setupFormInterceptor: function setupFormInterceptor() {
-      var _this8 = this;
+      var _this10 = this;
 
       document.addEventListener('submit', function (e) {
         // If form submission was already cancelled by client validation, do not intercept
@@ -23688,10 +23942,10 @@ window.workspaceMdi = function () {
           var params = new URLSearchParams(_formData);
           var targetUrl = _action.split('?')[0] + '?' + params.toString();
 
-          var normalizedTarget = _this8.normalizeUrl(targetUrl);
+          var normalizedTarget = _this10.normalizeUrl(targetUrl);
 
-          var _currentTab = _this8.tabs.find(function (t) {
-            return t.key === _this8.activeTabKey;
+          var _currentTab = _this10.tabs.find(function (t) {
+            return t.key === _this10.activeTabKey;
           });
 
           if (_currentTab) {
@@ -23699,11 +23953,11 @@ window.workspaceMdi = function () {
             var existingPane = document.getElementById('tab-pane-' + _currentTab.key);
             if (existingPane) existingPane.remove();
 
-            _this8.setTabLoading(_currentTab.key, true);
+            _this10.setTabLoading(_currentTab.key, true);
 
-            _this8.fetchAndMountTab(_currentTab);
+            _this10.fetchAndMountTab(_currentTab);
           } else {
-            _this8.openUrlInTab(normalizedTarget);
+            _this10.openUrlInTab(normalizedTarget);
           }
 
           return;
@@ -23730,9 +23984,9 @@ window.workspaceMdi = function () {
         }
 
         var formPane = form.closest('.workspace-tab-pane');
-        var currentTabKey = formPane ? formPane.getAttribute('data-tab-key') : _this8.activeTabKey;
+        var currentTabKey = formPane ? formPane.getAttribute('data-tab-key') : _this10.activeTabKey;
 
-        var currentTab = _this8.tabs.find(function (t) {
+        var currentTab = _this10.tabs.find(function (t) {
           return t.key === currentTabKey;
         }); // Capture submitter name/value (e.g. save_opt: 'save_new')
 
@@ -23750,7 +24004,7 @@ window.workspaceMdi = function () {
           submitter.innerHTML = "<span class=\"mdi-tab-loading-spinner\" style=\"width:13px;height:13px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;\"></span> Saving...";
         }
 
-        _this8.setTabLoading(currentTabKey, true);
+        _this10.setTabLoading(currentTabKey, true);
 
         fetch(action, {
           method: form.method || 'POST',
@@ -23759,12 +24013,12 @@ window.workspaceMdi = function () {
             'X-MDI-Form': '1'
           }
         }).then( /*#__PURE__*/function () {
-          var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee(response) {
+          var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5(response) {
             var finalUrl, responseText, json, title, msg, parser, doc, hasSuccessToast, isRedirectedToList, renderedFormErrors, hasServerValidationErrors, isValidationError, currentPane, newContent, _title2, _msg, _title3, _msg2, _targetUrl, modName, targetPath, listKey, existingListTab, listPane;
 
-            return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+            return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
               while (1) {
-                switch (_context.prev = _context.next) {
+                switch (_context5.prev = _context5.next) {
                   case 0:
                     if (submitter) {
                       submitter.disabled = false;
@@ -23774,29 +24028,29 @@ window.workspaceMdi = function () {
                       }
                     }
 
-                    _this8.setTabLoading(currentTabKey, false);
+                    _this10.setTabLoading(currentTabKey, false);
 
                     finalUrl = response.url;
-                    _context.next = 5;
+                    _context5.next = 5;
                     return response.text();
 
                   case 5:
-                    responseText = _context.sent;
+                    responseText = _context5.sent;
 
                     if (!(finalUrl.includes('/login') || finalUrl.includes('/auth'))) {
-                      _context.next = 9;
+                      _context5.next = 9;
                       break;
                     }
 
                     window.location.href = finalUrl;
-                    return _context.abrupt("return");
+                    return _context5.abrupt("return");
 
                   case 9:
-                    _context.prev = 9;
+                    _context5.prev = 9;
                     json = JSON.parse(responseText);
 
                     if (!(json.status === 'success' || json.message === 'success' || json.status === 200)) {
-                      _context.next = 16;
+                      _context5.next = 16;
                       break;
                     }
 
@@ -23812,22 +24066,22 @@ window.workspaceMdi = function () {
                     if (currentTab) {
                       currentTab.isDirty = false;
 
-                      _this8.closeTab(currentTab, null, false);
+                      _this10.closeTab(currentTab, null, false);
                     }
 
                     if (json.redirect || json.url) {
-                      _this8.openUrlInTab(json.redirect || json.url);
+                      _this10.openUrlInTab(json.redirect || json.url);
                     }
 
-                    return _context.abrupt("return");
+                    return _context5.abrupt("return");
 
                   case 16:
-                    _context.next = 20;
+                    _context5.next = 20;
                     break;
 
                   case 18:
-                    _context.prev = 18;
-                    _context.t0 = _context["catch"](9);
+                    _context5.prev = 18;
+                    _context5.t0 = _context5["catch"](9);
 
                   case 20:
                     // Parse HTML response
@@ -23835,12 +24089,12 @@ window.workspaceMdi = function () {
                     doc = parser.parseFromString(responseText, 'text/html'); // Check if redirected to login page in document
 
                     if (!doc.querySelector('form[action*="login"]')) {
-                      _context.next = 25;
+                      _context5.next = 25;
                       break;
                     }
 
                     window.location.href = finalUrl;
-                    return _context.abrupt("return");
+                    return _context5.abrupt("return");
 
                   case 25:
                     // Success indicators:
@@ -23855,7 +24109,7 @@ window.workspaceMdi = function () {
                     isValidationError = !response.ok || hasServerValidationErrors && !hasSuccessToast;
 
                     if (!isValidationError) {
-                      _context.next = 36;
+                      _context5.next = 36;
                       break;
                     }
 
@@ -23874,7 +24128,7 @@ window.workspaceMdi = function () {
                         } // Execute scripts FIRST so Alpine.data is updated before new DOM is injected
 
 
-                        _this8.executeScriptsFromDoc(doc, currentPane);
+                        _this10.executeScriptsFromDoc(doc, currentPane);
 
                         currentPane.innerHTML = newContent.innerHTML;
 
@@ -23915,7 +24169,7 @@ window.workspaceMdi = function () {
                       });
                     }
 
-                    _context.next = 51;
+                    _context5.next = 51;
                     break;
 
                   case 36:
@@ -23941,13 +24195,13 @@ window.workspaceMdi = function () {
 
 
                     if (!(submitter && submitter.value === 'save_new')) {
-                      _context.next = 41;
+                      _context5.next = 41;
                       break;
                     }
 
-                    _this8.refreshTab(currentTabKey);
+                    _this10.refreshTab(currentTabKey);
 
-                    return _context.abrupt("return");
+                    return _context5.abrupt("return");
 
                   case 41:
                     // Determine target list URL
@@ -23958,7 +24212,7 @@ window.workspaceMdi = function () {
                       _targetUrl = "/admin/".concat(modName, "/list/1");
                     }
 
-                    targetPath = _this8.normalizeUrl(_targetUrl); // Broadcast resource saved so open tabs (like Order) can refresh select dropdowns
+                    targetPath = _this10.normalizeUrl(_targetUrl); // Broadcast resource saved so open tabs (like Order) can refresh select dropdowns
 
                     try {
                       window.dispatchEvent(new CustomEvent('workspace:resource-saved', {
@@ -23973,12 +24227,12 @@ window.workspaceMdi = function () {
                     if (currentTab) {
                       currentTab.isDirty = false;
 
-                      _this8.closeTab(currentTab, null, false);
+                      _this10.closeTab(currentTab, null, false);
                     } // Open or refresh the listing tab
 
 
-                    listKey = _this8.generateKey(targetPath);
-                    existingListTab = _this8.tabs.find(function (t) {
+                    listKey = _this10.generateKey(targetPath);
+                    existingListTab = _this10.tabs.find(function (t) {
                       return t.key === listKey;
                     });
 
@@ -23988,14 +24242,14 @@ window.workspaceMdi = function () {
                       if (listPane) listPane.remove();
                     }
 
-                    _this8.openUrlInTab(targetPath);
+                    _this10.openUrlInTab(targetPath);
 
                   case 51:
                   case "end":
-                    return _context.stop();
+                    return _context5.stop();
                 }
               }
-            }, _callee, null, [[9, 18]]);
+            }, _callee5, null, [[9, 18]]);
           }));
 
           return function (_x) {
@@ -24010,7 +24264,7 @@ window.workspaceMdi = function () {
             }
           }
 
-          _this8.setTabLoading(currentTabKey, false);
+          _this10.setTabLoading(currentTabKey, false);
 
           console.error('Form submission error:', err);
 
@@ -24066,11 +24320,11 @@ window.workspaceMdi = function () {
       return false;
     },
     markTabDirty: function markTabDirty() {
-      var _this9 = this;
+      var _this11 = this;
 
       var isDirty = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
       var current = this.tabs.find(function (t) {
-        return t.key === _this9.activeTabKey;
+        return t.key === _this11.activeTabKey;
       });
 
       if (current) {
@@ -24085,7 +24339,7 @@ window.workspaceMdi = function () {
       }
     },
     setupDirtyTracking: function setupDirtyTracking() {
-      var _this10 = this;
+      var _this12 = this;
 
       var contentArea = document.getElementById('content');
 
@@ -24112,18 +24366,18 @@ window.workspaceMdi = function () {
           } // 2. Active tab must be a form tab (listing pages are NEVER dirty)
 
 
-          var currentTab = _this10.tabs.find(function (t) {
-            return t.key === _this10.activeTabKey;
+          var currentTab = _this12.tabs.find(function (t) {
+            return t.key === _this12.activeTabKey;
           });
 
-          if (!currentTab || !_this10.isFormTab(currentTab)) {
+          if (!currentTab || !_this12.isFormTab(currentTab)) {
             return;
           } // 3. The input must belong to the active tab's pane
 
 
           var pane = target.closest('.workspace-tab-pane');
 
-          if (pane && pane.id !== 'tab-pane-' + _this10.activeTabKey) {
+          if (pane && pane.id !== 'tab-pane-' + _this12.activeTabKey) {
             return;
           } // 4. Must be inside a data form or booking-pos-workspace
 
@@ -24134,7 +24388,7 @@ window.workspaceMdi = function () {
             return;
           }
 
-          _this10.markTabDirty(true);
+          _this12.markTabDirty(true);
         };
 
         contentArea.addEventListener('input', handleDirtyInput, true);
@@ -24146,60 +24400,83 @@ window.workspaceMdi = function () {
             if (!target) return;
             if (target.closest('.InputContainer, .filter, #FilterForm, .filter-form')) return;
 
-            var currentTab = _this10.tabs.find(function (t) {
-              return t.key === _this10.activeTabKey;
+            var currentTab = _this12.tabs.find(function (t) {
+              return t.key === _this12.activeTabKey;
             });
 
-            if (currentTab && _this10.isFormTab(currentTab)) {
-              _this10.markTabDirty(true);
+            if (currentTab && _this12.isFormTab(currentTab)) {
+              _this12.markTabDirty(true);
             }
           });
         }
       }
     },
     setupKeyboardShortcuts: function setupKeyboardShortcuts() {
-      var _this11 = this;
+      var _this13 = this;
 
-      document.addEventListener('keydown', function (e) {
-        // Ctrl+W or Cmd+W
-        if ((e.ctrlKey || e.metaKey) && e.key === 'w' && !e.shiftKey) {
-          var activeTab = _this11.tabs.find(function (t) {
-            return t.key === _this11.activeTabKey;
-          });
+      document.addEventListener('keydown', /*#__PURE__*/function () {
+        var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6(e) {
+          var activeTab, currentIndex, nextIndex, targetIndex;
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
+            while (1) {
+              switch (_context6.prev = _context6.next) {
+                case 0:
+                  if (!((e.ctrlKey || e.metaKey) && e.key === 'w' && !e.shiftKey)) {
+                    _context6.next = 6;
+                    break;
+                  }
 
-          if (activeTab && !activeTab.isPinned) {
-            e.preventDefault();
+                  activeTab = _this13.tabs.find(function (t) {
+                    return t.key === _this13.activeTabKey;
+                  });
 
-            _this11.closeTab(activeTab, e);
-          }
-        } // Ctrl+Tab to cycle tabs forward
+                  if (!(activeTab && !activeTab.isPinned)) {
+                    _context6.next = 6;
+                    break;
+                  }
+
+                  e.preventDefault();
+                  _context6.next = 6;
+                  return _this13.closeTab(activeTab, e);
+
+                case 6:
+                  // Ctrl+Tab to cycle tabs forward
+                  if (e.ctrlKey && e.key === 'Tab') {
+                    e.preventDefault();
+                    currentIndex = _this13.tabs.findIndex(function (t) {
+                      return t.key === _this13.activeTabKey;
+                    });
+
+                    if (currentIndex >= 0) {
+                      nextIndex = e.shiftKey ? (currentIndex - 1 + _this13.tabs.length) % _this13.tabs.length : (currentIndex + 1) % _this13.tabs.length;
+
+                      _this13.switchTab(_this13.tabs[nextIndex]);
+                    }
+                  } // Ctrl+1 through Ctrl+9
 
 
-        if (e.ctrlKey && e.key === 'Tab') {
-          e.preventDefault();
+                  if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key >= '1' && e.key <= '9') {
+                    targetIndex = parseInt(e.key) - 1;
 
-          var currentIndex = _this11.tabs.findIndex(function (t) {
-            return t.key === _this11.activeTabKey;
-          });
+                    if (targetIndex < _this13.tabs.length) {
+                      e.preventDefault();
 
-          if (currentIndex >= 0) {
-            var nextIndex = e.shiftKey ? (currentIndex - 1 + _this11.tabs.length) % _this11.tabs.length : (currentIndex + 1) % _this11.tabs.length;
+                      _this13.switchTab(_this13.tabs[targetIndex]);
+                    }
+                  }
 
-            _this11.switchTab(_this11.tabs[nextIndex]);
-          }
-        } // Ctrl+1 through Ctrl+9
+                case 8:
+                case "end":
+                  return _context6.stop();
+              }
+            }
+          }, _callee6);
+        }));
 
-
-        if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key >= '1' && e.key <= '9') {
-          var targetIndex = parseInt(e.key) - 1;
-
-          if (targetIndex < _this11.tabs.length) {
-            e.preventDefault();
-
-            _this11.switchTab(_this11.tabs[targetIndex]);
-          }
-        }
-      });
+        return function (_x2) {
+          return _ref2.apply(this, arguments);
+        };
+      }());
     },
     openNewTabLauncher: function openNewTabLauncher() {
       this.openQuickSearch();

@@ -189,6 +189,7 @@ class OrderController extends Controller
         $data['canEdit'] = $order->payment_status === 'Pending' && !$order->trashed();
         $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && (float) $order->remaining_amount > 0;
         $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0;
+        $data['canReject'] = $data['canCancel'];
 
         return view($this->layout . 'detail', $data);
     }
