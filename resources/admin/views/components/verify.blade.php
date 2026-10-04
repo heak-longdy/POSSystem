@@ -1,5 +1,7 @@
+@if(!defined('ADMIN_VERIFY_POPUP_LOADED'))
+@php define('ADMIN_VERIFY_POPUP_LOADED', true); @endphp
 @component('admin::components.dialog', ['dialog' => 'confirmDialog'])
-    <div x-data="confirmDialog" class="dialog-form" x-bind:style="{ width: data?.width }"
+    <div x-data="verifyConfirmDialog" class="dialog-form" x-bind:style="{ width: data?.width }"
         style="text-align: center;align-items: center;">
         <div class="dialog-form-header" style="justify-content: center;">
             <template x-if="data?.icon">
@@ -26,7 +28,7 @@
             </template>
         </div>
         <div class="dialog-form-footer" style="padding: 0px 30px 15px;width: 100%;">
-            <button type="button" class="close" @click="$store.confirmDialog.close(false)"
+            <button type="button" class="close" @click="$store?.confirmDialog?.close(false)"
                 x-text="data?.btnClose || 'Close'" x-bind:disabled="disabled || loading"
                 style="margin-right: 10px;background: none !important;"></button>
             <button type="button" @click="onConfirm" x-bind:disabled="disabled || loading" :class="data?.btnSaveClass || ''" style="border-radius: 25px;">
@@ -37,7 +39,7 @@
         </div>
     </div>
     <script>
-        Alpine.data("confirmDialog", () => ({
+        var verifyConfirmDialogDefinition = () => ({
             data: null,
             disabled: false,
             loading: false,
@@ -45,23 +47,26 @@
             urlRute: "#",
             typeAction: "",
             init() {
-                this.data = this.$store.confirmDialog.data;
-                console.log(this.data,'data----');
-                this.typeAction = this.data?.typeAction;
-                console.log(this.typeAction,' this.typeAction');
-                this.funStatusTrash(url=>{ this.urlRute = url });
-                console.log( this.urlRute,' this.urlRute');
+                this.data = this.$store?.confirmDialog?.data ?? null;
+                this.typeAction = this.data?.typeAction || '';
+                this.funStatusTrash(url => { this.urlRute = url });
             },
             funStatusTrash(cb) {
+                this.data = this.$store?.confirmDialog?.data ?? this.data;
+                this.typeAction = this.data?.typeAction || this.typeAction;
+                if (!this.data) {
+                    if (cb) cb('#');
+                    return;
+                }
                 if (this.data?.url) {
                     cb(this.data.url);
                     return;
                 }
                 let Status = this.data?.item?.status == 1 ? 2 : 1;
-                const urlDelete = `/admin/${this.data.urlName}/delete/${this.data?.item?.id}`;
-                const urlDestory = `/admin/${this.data.urlName}/destroy/${this.data?.item?.id}`;
-                const urlRestore = `/admin/${this.data.urlName}/restore/${this.data?.item?.id}`;
-                const urlStatus = `/admin/${this.data.urlName}/status/${this.data?.item?.id}/${Status}`;
+                const urlDelete = `/admin/${this.data?.urlName || ''}/delete/${this.data?.item?.id || ''}`;
+                const urlDestory = `/admin/${this.data?.urlName || ''}/destroy/${this.data?.item?.id || ''}`;
+                const urlRestore = `/admin/${this.data?.urlName || ''}/restore/${this.data?.item?.id || ''}`;
+                const urlStatus = `/admin/${this.data?.urlName || ''}/status/${this.data?.item?.id || ''}/${Status}`;
                 let urlRute = "";
                 if (this.typeAction == 'restore') {
                     urlRute = urlRestore;
@@ -75,12 +80,19 @@
                 cb(urlRute);
             },
             onConfirm() {
-                if (this.typeAction == 'manual') {
-                    this.$store.confirmDialog.close(true);
+                this.data = this.$store?.confirmDialog?.data ?? this.data;
+                this.typeAction = this.data?.typeAction || this.typeAction;
+                if (this.typeAction == 'manual' || (!this.data?.url && !this.data?.item && !this.data?.urlName)) {
+                    this.$store?.confirmDialog?.close(true);
                     return;
                 }
 
                 this.funStatusTrash(url => {
+                    if (!url || url === '#' || url === '') {
+                        this.$store?.confirmDialog?.close(true);
+                        return;
+                    }
+
                     this.disabled = true;
                     this.loading = true;
 
@@ -95,8 +107,10 @@
                             }
                         }).then((res) => {
                             if (res.data.message == "success" || res.data.status == 200) {
-                                this.$store.confirmDialog.close(true);
+                                this.$store?.confirmDialog?.close(true);
                             } else {
+                                const message = res.data?.error || res.data?.message || 'Request failed.';
+                                alert(message);
                                 this.disabled = false;
                                 this.loading = false;
                             }
@@ -115,6 +129,16 @@
                     }, 500);
                 });
             }
-        }))
+        });
+        if (window.Alpine) {
+            Alpine.data("verifyConfirmDialog", verifyConfirmDialogDefinition);
+            Alpine.data("confirmDialog", verifyConfirmDialogDefinition);
+        } else {
+            document.addEventListener('alpine:init', () => {
+                Alpine.data("verifyConfirmDialog", verifyConfirmDialogDefinition);
+                Alpine.data("confirmDialog", verifyConfirmDialogDefinition);
+            });
+        }
     </script>
 @endcomponent
+@endif

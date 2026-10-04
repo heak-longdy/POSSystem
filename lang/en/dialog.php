@@ -28,6 +28,8 @@ return [
         'copy' => 'Are you sure to copy <b>:name</b> ?',
         'carReport' => 'Are you sure view report.',
         'assignGarage' => 'Are you sure want assign to ',
+        'unsaved_changes_tab' => 'You have unsaved changes in ":title". Do you want to close without saving?',
+        'unsaved_changes_all' => 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?',
     ],
     'button' => [
         'ok' => 'OK',

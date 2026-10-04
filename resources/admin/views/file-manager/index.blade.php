@@ -9,6 +9,7 @@
     <template x-data="{}" x-if="$store.page.active == 'settings'">
         @include('admin::file-manager.settings')
     </template>
+    @include('admin::file-manager.scripts')
     <script>
         Alpine.store('page', {
             active: 'all_files',

@@ -11,591 +11,537 @@ return [
     //     ],
     //     'icon' => 'bxs-dashboard',
     // ],
-    // Booking
+    // user
+    // [
+    //     'type'  => 'single',
+    //     'active' => 'admin/customer/*',
+    //     'path' => 'admin/customer/list/1',
+    //     'permission' => ['user-view'],
+    //     'name' => [
+    //         'en' => 'Users',
+    //     ],
+    //     'icon' => 'bx-user',
+    // ],
+    
+    // admin
+    // [
+    //     'type'  => 'single',
+    //     'active' => 'admin/internships/*',
+    //     'path' => 'admin/internships/list/1',
+    //     'permission' => ['internships-view'],
+    //     'name' => [
+    //         'en' => 'Internship',
+    //     ],
+    //     'icon' => 'bxs-graduation',
+    // ],
+    // [
+    //     'type'  => 'single',
+    //     'active' => 'admin/blog/*',
+    //     'path' => 'admin/blog/list/1',
+    //     'permission' => ['blog-view'],
+    //     'name' => [
+    //         'en' => 'Blog',
+    //     ],
+    //     'icon' => 'bx-briefcase',
+    // ],
     [
-        'path' => 'admin/booking/list/1',
-        'active' => 'admin/booking*',
-        'permission' => 'booking-view',
+        'type'  => 'single',
+        'active' => 'admin/product/*',
+        'path' => 'admin/product/list/1',
+        'permission' => ['product-view'],
+        'name' => [
+            'en' => 'Product',
+            'km' => 'ផលិតផល',
+        ],
+        'icon' => 'bx-package',
+    ],
+    [
+        'type'  => 'single',
+        'active' => 'admin/order/*',
+        'path' => 'admin/order/list/1',
+        'permission' => ['order-view'],
         'name' => [
             'en' => 'Orders',
+            'km' => 'ការបញ្ជាទិញ',
         ],
-        'icon' => 'bxs-book',
+        'icon' => 'bx-calendar',
     ],
-    // Customer
-    // [
-    //     'path' => 'admin/customer/list/1',
-    //     'active' => 'admin/customer/*',
-    //     'permission' => 'customer-view',
-    //     'name' => [
-    //         'en' => 'Customer',
-    //     ],
-    //     'icon' => 'bxs-user',
-    // ],
-    // CustomerPoint
-    // [
-    //     'path' => 'admin/customer-point/list',
-    //     'active' => 'admin/customer-point/*',
-    //     'permission' => 'customer-point-view',
-    //     'name' => [
-    //         'en' => 'Customer Point',
-    //     ],
-    //     'icon' => 'bxs-cube-alt',
-    // ],
-    // Report Transaction
-    // [
-    //     'path' => 'admin/report-transaction/list',
-    //     'active' => 'admin/report-transaction/*',
-    //     'permission' => 'report-transaction-view',
-    //     'name' => [
-    //         'en' => 'Transaction Report',
-    //     ],
-    //     'icon' => 'bx-transfer-alt',
-    // ],
-    // Report Summary
-    // [
-    //     'path' => 'admin/report-summary/list',
-    //     'active' => 'admin/report-summary/*',
-    //     'permission' => 'report-summary-view',
-    //     'name' => [
-    //         'en' => 'Summary Report',
-    //     ],
-    //     'icon' => 'bxs-report',
-    // ],
-    // Shop
-    // [
-    //     'path' => 'admin/shop/list/1',
-    //     'active' => 'admin/shop*',
-    //     'permission' => 'shop-view',
-    //     'name' => [
-    //         'en' => 'Shops',
-    //     ],
-    //     'icon' => 'bxs-store',
-    // ],
-    // Barber
-    // [
-    //     'path' => 'admin/barber/list/1',
-    //     'active' => 'admin/barber*',
-    //     'permission' => 'barber-view',
-    //     'name' => [
-    //         'en' => 'Barbers',
-    //     ],
-    //     'icon' => 'bxs-universal-access',
-    // ],
-    // Wallet
-    // [
-    //     'path' => 'admin/wallet/list/1',
-    //     'active' => 'admin/wallet*',
-    //     'permission' => 'wallet-view',
-    //     'name' => [
-    //         'en' => 'Wallet Request',
-    //     ],
-    //     'icon' => 'bxs-wallet',
-    // ],
-    // Product
-    // [
-    //     'path' => 'admin/product/list/1',
-    //     'active' => 'admin/product*',
-    //     'permission' => 'product-view',
-    //     'name' => [
-    //         'en' => 'Products',
-    //     ],
-    //     'icon' => 'bxl-product-hunt',
-    // ],
-
-
-    // Service
-    // [
-    //     'path' => 'admin/service/list/1',
-    //     'active' => 'admin/service*',
-    //     'permission' => 'service-view',
-    //     'name' => [
-    //         'en' => 'Services',
-    //     ],
-    //     'icon' => 'bxs-server',
-    // ],
-    // Promotion
-    // [
-    //     'path' => 'admin/promotion/list/1',
-    //     'active' => 'admin/promotion*',
-    //     'permission' => 'promotion-view',
-    //     'name' => [
-    //         'en' => 'Promotion',
-    //     ],
-    //     'icon' => 'bxs-info-square',
-    // ],
-    // Slide
-    // [
-    //     'path' => 'admin/slide/list/1',
-    //     'active' => 'admin/slide*',
-    //     'permission' => 'slide-view',
-    //     'name' => [
-    //         'en' => 'Banner',
-    //     ],
-    //     'icon' => 'bxs-image',
-    // ],
-    // user
     [
         'type'  => 'single',
-        'active' => 'admin/user/*,admin/member/*,admin/garage/*',
-        'permission' => 'user-view',
-        'permission' => ['user-view', 'garage-view', 'member-view'],
-        'path' => 'admin/user/list/1',
+        'active' => 'admin/remaining-amount/*',
+        'path' => 'admin/remaining-amount/list/all',
+        'permission' => 'order-view',
         'name' => [
-            'en' => 'Users',
+            'en' => 'Remaining Amount',
+            'km' => 'គ្រប់គ្រងទឹកប្រាក់នៅសល់',
         ],
-        'icon' => 'bxs-user-plus',
+        'icon' => 'bx-wallet',
     ],
-    // admin
     [
         'type'  => 'single',
-        'active' => 'admin/user/*',
-        'path' => 'admin/user/list/1',
-        'permission' => ['admin-view'],
+        'active' => 'admin/shop/*',
+        'path' => 'admin/shop/list/1',
+        'permission' => ['shop-view'],
         'name' => [
-            'en' => 'Admin',
+            'en' => 'Shop',
+            'km' => 'ហាង',
         ],
-        'icon' => 'bxs-user',
+        'icon' => 'bx-store-alt',
     ],
+    [
+        'type'  => 'single',
+        'active' => 'admin/customer/*',
+        'path' => 'admin/customer/list/1',
+        'permission' => ['customer-view'],
+        'name' => [
+            'en' => 'Customer',
+            'km' => 'អតិថិជន',
+        ],
+        'icon' => 'bx-user',
+    ],
+    // [
+    //     'type'  => 'single',
+    //     'active' => 'admin/customer-paid/*',
+    //     'path' => 'admin/customer-paid/list/1',
+    //     'permission' => ['customer-paid-view'],
+    //     'name' => [
+    //         'en' => 'Pay Note',
+    //         'km' => 'កំណត់ត្រាបង់ប្រាក់',
+    //     ],
+    //     'icon' => 'bx-dollar',
+    // ],
+    // [
+    //     'type'  => 'single',
+    //     'active' => 'admin/testimonial/*',
+    //     'path' => 'admin/testimonial/list/1',
+    //     'permission' => ['testimonial-view'],
+    //     'name' => [
+    //         'en' => 'Testimonial',
+    //         'km' => 'មតិយោបល់',
+    //     ],
+    //     'icon' => 'bx-network-chart',
+    //     'dropDown' => 'disable',
+    // ],
+    // [
+    //     'type'  => 'single',
+    //     'active' => 'admin/position/*',
+    //     'path' => 'admin/position/list/1',
+    //     'permission' => ['position-view'],
+    //     'name' => [
+    //         'en' => 'Position',
+    //     ],
+    //     'icon' => 'bxl-ok-ru',
+    // ],
+    
+    // [
+    //     'type'  => 'single',
+    //     'active' => 'admin/user/*',
+    //     'path' => 'admin/user/list/1',
+    //     'permission' => ['admin-view'],
+    //     'name' => [
+    //         'en' => 'User',
+    //     ],
+    //     'icon' => 'bx-user',
+    // ],
+    // Setting
+    // [
+    //     'type'  => 'dropdown-multiple',
+    //     'label' => 'Administrator',
+    //     'list-menu' => [
+    //         [
+    //             'active' => 'admin/user/*',
+    //             'path' => 'admin/user/list/1',
+    //             'permission' => 'user-view',
+    //             'name' => [
+    //                 'en' => 'User',
+    //             ],
+    //             'icon' => 'bx-user',
+    //             'dropDown'=>'disable',
+    //             'children' => [],
+    //         ]
+    //     ]
+    // ],
+    // [
+    //     'type'  => 'dropdown-single',
+    //     'label' => 'Administrator',
+    //     'active' => 'admin/user/*',
+    //     'permission' => ['user-view'],
+    //     'name' => [
+    //         'en' => 'Setting',
+    //     ],
+    //     'icon' => 'bx-wrench',
+    //     'children' => [
+    //         [
+    //             'active' => 'admin/user/*',
+    //             'path' => 'admin/user/list/1',
+    //             'permission' => 'user-view',
+    //             'name' => [
+    //                 'en' => 'User',
+    //             ],
+    //             'icon' => 'bx-user',
+    //         ],
+    //     ],
+    // ],
+    // [
+    //     'type'  => 'dropdown-single',
+    //     'label' => 'Application',
+    //     'active' => 'admin/contact/*,admin/about/privacy*,admin/OurService*,admin/aboutUs*',
+    //     'permission' => ['contact-view', 'about-view'],
+    //     'name' => [
+    //         'en' => 'Setting',
+    //     ],
+    //     'icon' => 'bx-wrench',
+    //     'children' => [
+    //         [
+    //             'path' => 'admin/OurService',
+    //             'active' => 'admin/OurService',
+    //             'permission' => 'our-service-view',
+    //             'name' => [
+    //                 'en' => 'Our Service',
+    //             ],
+    //             'icon' => 'bx-help-circle',
+    //         ],
+    //         [
+    //             'path' => '#',
+    //             'active' => '#',
+    //             'permission' => 'contact-view',
+    //             'name' => [
+    //                 'en' => 'Contact',
+    //             ],
+    //             'icon' => 'bx-book',
+    //         ],
+    //         [
+    //             'path' => 'admin/aboutUs',
+    //             'active' => 'admin/aboutUs',
+    //             'permission' => 'about-view',
+    //             'name' => [
+    //                 'en' => 'About',
+    //             ],
+    //             'icon' => 'bx-help-circle',
+    //         ],
+    //     ],
+    // ],
+
+    // Inventory Management
+    [
+        'type'  => 'dropdown-multiple',
+        'label' => [
+            'en' => 'Inventory Management',
+            'km' => 'ការគ្រប់គ្រងស្តុក',
+        ],
+        'listMenu' => [
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-in/*',
+                'path' => 'admin/stock-in/list/1',
+                'permission' => ['stock-in-view'],
+                'name' => [
+                    'en' => 'Stock In',
+                    'km' => 'ការបញ្ចូលស្តុក',
+                ],
+                'icon' => 'bx-universal-access',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-out/*',
+                'path' => 'admin/stock-out/list/1',
+                'permission' => ['stock-out-view'],
+                'name' => [
+                    'en' => 'Stock Out',
+                    'km' => 'ការដកស្តុក',
+                ],
+                'icon' => 'bx-universal-access',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-transfer/*',
+                'path' => 'admin/stock-transfer/list/1',
+                'permission' => ['stock-transfer-view'],
+                'name' => [
+                    'en' => 'Stock Transfer',
+                    'km' => 'ការផ្ទេរស្តុក',
+                ],
+                'icon' => 'bxl-redux',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/stock-on-hand/*',
+                'path' => 'admin/stock-on-hand/list/1',
+                'permission' => ['stock-on-hand-view'],
+                'name' => [
+                    'en' => 'Stock On Hand',
+                    'km' => 'ស្តុកដែលមាន',
+                ],
+                'icon' => 'bx-infinite',
+                'dropDown' => 'disable',
+            ],
+            [
+                'active' => 'admin/stock-movement/*',
+                'path' => 'admin/stock-movement/list/1',
+                'permission' => ['stock-movement-view'],
+                'name' => [
+                    'en' => 'Stock Movement',
+                    'km' => 'ការផ្លាស់ប្ដូរស្តុក',
+                ],
+                'icon' => 'bx-user',
+                'dropDown' => 'disable',
+                'children' => [],
+            ]
+        ]
+    ],
+
+    // Report Management
+    [
+        'type'  => 'dropdown-multiple',
+        'label' => [
+            'en' => 'Report Management',
+            'km' => 'ការគ្រប់គ្រងរបាយការណ៍',
+        ],
+        'listMenu' => [
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/order-transaction*',
+                'path' => 'admin/report/order-transaction/daily',
+                'permission' => ['report-transaction-view', 'report-sales-view', 'order-view'],
+                'name' => [
+                    'en' => 'Order Transaction Report',
+                    'km' => 'របាយការណ៍ប្រតិបត្តិការបញ្ជាទិញ',
+                ],
+                'icon' => 'bx-receipt',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/sales*',
+                'path' => 'admin/report/sales/daily',
+                'permission' => ['report-sales-view', 'order-view'],
+                'name' => [
+                    'en' => 'Sales Report',
+                    'km' => 'របាយការណ៍ការលក់',
+                ],
+                'icon' => 'bx-bar-chart-alt-2',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/inventory-movement*',
+                'path' => 'admin/report/inventory-movement/daily',
+                'permission' => ['report-inventory-view', 'stock-movement-view', 'report-sales-view'],
+                'name' => [
+                    'en' => 'Inventory Movement Report',
+                    'km' => 'របាយការណ៍បម្រែបម្រួលស្តុក',
+                ],
+                'icon' => 'bx-transfer-alt',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/staff-expense*',
+                'path' => 'admin/report/staff-expense/daily',
+                'permission' => ['staff-expense-view', 'report-sales-view'],
+                'name' => [
+                    'en' => 'Staff Expense Report',
+                    'km' => 'របាយការណ៍ចំណាយបុគ្គលិក',
+                ],
+                'icon' => 'bx-wallet-alt',
+                'dropDown' => 'disable',
+            ],
+        ]
+    ],
+
     // Setting
     [
         'type'  => 'dropdown-multiple',
-        'label' => 'Setting & Application',
-        'list-menu' => [
+        'label' => [
+            'en' => 'Setting & Application',
+            'km' => 'ការកំណត់ និងកម្មវិធី',
+        ],
+        'listMenu' => [
+            // [
+            //     'path' => 'admin/OurService',
+            //     'active' => 'admin/OurService*',
+            //     'permission' => ['currency-view', 'page-view'],
+            //     'name' => [
+            //         'en' => 'Setting',
+            //     ],
+            //     'icon' => 'bx-cog',
+            //     'dropDown' => 'disable',
+            //     'children' => [],
+            // ],
             [
-                'active' => 'admin/currency/*,admin/page/privacy*',
-                'permission' => ['currency-view', 'page-view'],
+                'type'  => 'single',
+                'active' => 'admin/position/*',
+                'path' => 'admin/position/list/1',
+                'permission' => ['position-view'],
                 'name' => [
-                    'en' => 'Setting',
+                    'en' => 'Position',
+                    'km' => 'មុខតំណែង',
                 ],
-                'icon' => 'archive',
-                'children' => [
-                    [
-                        'path' => 'admin/currency/list/1',
-                        'active' => 'admin/currency/*',
-                        'permission' => 'currency-view',
-                        'name' => [
-                            'en' => 'Currencies',
-                        ],
-                        'icon' => 'bxs-check-shield',
-                    ],
-                    [
-                        'path' => 'admin/page/privacy',
-                        'active' => 'admin/page/privacy',
-                        'permission' => 'page-view',
-                        'name' => [
-                            'en' => 'Privacy',
-                        ],
-                        'icon' => 'bxs-check-shield',
-                    ],
-                ],
+                'icon' => 'bx-universal-access',
+                'dropDown' => 'disable',
             ],
             [
-                'active' => 'admin/report/revenue/*,admin/report/expense/*',
-                'permission' => ['report-view', 'report-revenue', 'report-expense'],
+                'type'  => 'single',
+                'active' => 'admin/staff/*',
+                'path' => 'admin/staff/list/1',
+                'permission' => ['staff-view'],
                 'name' => [
-                    'en' => 'Reports',
+                    'en' => 'Staff Management',
+                    'km' => 'ការគ្រប់គ្រងបុគ្គលិក',
                 ],
-                'icon' => 'archive',
+                'icon' => 'bx-group',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/staff-expense*',
+                'path' => 'admin/staff-expense/list/1',
+                'permission' => ['staff-expense-view', 'staff-view'],
+                'name' => [
+                    'en' => 'Staff Expenses',
+                    'km' => 'ចំណាយបុគ្គលិក',
+                ],
+                'icon' => 'bx-dollar-circle',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/sector/*',
+                'path' => 'admin/sector/list/1',
+                'permission' => ['sector-view'],
+                'name' => [
+                    'en' => 'Sector',
+                    'km' => 'ផ្នែក',
+                ],
+                'icon' => 'bx-compass',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/partner/*',
+                'path' => 'admin/partner/list/1',
+                'permission' => ['partner-view'],
+                'name' => [
+                    'en' => 'Partner',
+                    'km' => 'ដៃគូ',
+                ],
+                'icon' => 'bxl-redux',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/placement-type/*',
+                'path' => 'admin/placement-type/list/1',
+                'permission' => ['placement-type-view'],
+                'name' => [
+                    'en' => 'Placement Type',
+                    'km' => 'ប្រភេទការដាក់ទីតាំង',
+                ],
+                'icon' => 'bx-badge-check',
+                'dropDown' => 'disable',
+            ],
+            [
+                'active' => 'admin/user/*',
+                'path' => 'admin/user/list/1',
+                'permission' => 'user-view',
+                'name' => [
+                    'en' => 'User Management',
+                    'km' => 'ការគ្រប់គ្រងអ្នកប្រើប្រាស់',
+                ],
+                'icon' => 'bx-user',
+                'dropDown' => 'disable',
+                'children' => [],
+            ],
+            [
+                // 'active' => 'admin/report/revenue/*,admin/report/expense/*',
+                // 'permission' => ['report-view', 'report-revenue', 'report-expense'],
+                // 'name' => [
+                //     'en' => 'Reports',
+                // ],
+                // 'icon' => 'bxs-report',
+                'active' => 'admin/contact*,admin/about/privacy*,admin/OurService*,admin/aboutUs*,admin/uom/*,admin/category/*,admin/supplier/*,admin/setting/invoice*',
+                'permission' => ['contact-view', 'about-view', 'uom-view'],
+                'name' => [
+                    'en' => 'Setting',
+                    'km' => 'ការកំណត់',
+                ],
+                'icon' => 'bx-wrench',
                 'children' => [
                     [
-                        'path' => 'admin/report/revenue/list/1',
-                        'active' => 'admin/report/revenue/*',
-                        'permission' => 'report-revenue',
+                        'path' => 'admin/OurService',
+                        'active' => 'admin/OurService',
+                        'permission' => 'our-service-view',
                         'name' => [
-                            'en' => 'Revenue',
+                            'en' => 'Our Service',
+                            'km' => 'សេវាកម្មរបស់យើង',
                         ],
-                        'icon' => 'bxl-xing',
+                        'icon' => 'bx-server',
                     ],
                     [
-                        'path' => 'admin/report/expense/list/1',
-                        'active' => 'admin/report/expense/*',
-                        'permission' => 'report-expense',
+                        'path' => 'admin/contact',
+                        'active' => 'admin/contact',
+                        'permission' => 'contact-view',
                         'name' => [
-                            'en' => 'Expense',
+                            'en' => 'Contact',
+                            'km' => 'ទំនាក់ទំនង',
                         ],
-                        'icon' => 'bxl-xing',
+                        'icon' => 'bx-book',
                     ],
+                    [
+                        'path' => 'admin/aboutUs',
+                        'active' => 'admin/aboutUs',
+                        'permission' => 'about-view',
+                        'name' => [
+                            'en' => 'About',
+                            'km' => 'អំពីយើង',
+                        ],
+                        'icon' => 'bx-help-circle',
+                    ],
+                    [
+                        'active' => 'admin/category/*',
+                        'path' => 'admin/category/list/1',
+                        'permission' => 'category-view',
+                        'name' => [
+                            'en' => 'Category',
+                            'km' => 'ប្រភេទ',
+                        ],
+                        'icon' => 'bx-category',
+                    ],
+                    [
+                        'active' => 'admin/supplier/*',
+                        'path' => 'admin/supplier/list/1',
+                        'permission' => 'supplier-view',
+                        'name' => [
+                            'en' => 'Supplier',
+                            'km' => 'អ្នកផ្គត់ផ្គង់',
+                        ],
+                        'icon' => 'bx-ruler',
+                    ],
+                    [
+                        'active' => 'admin/uom/*',
+                        'path' => 'admin/uom/list/1',
+                        'permission' => 'uom-view',
+                        'name' => [
+                            'en' => 'Unit of Measure',
+                            'km' => 'ខ្នាត',
+                        ],
+                        'icon' => 'bx-ruler',
+                    ],
+                    [
+                        'active' => 'admin/setting/invoice*',
+                        'path' => 'admin/setting/invoice',
+                        'name' => [
+                            'en' => 'Invoice Setting',
+                            'km' => 'ការកំណត់វិក្កយបត្រ',
+                        ],
+                        'icon' => 'bx-receipt',
+                    ]
                 ],
             ],
         ]
     ],
     // endSetting
-
-    // [
-    //     'type'  => 'dropdown-multiple',
-    //     'label' => 'Application',
-    //     'list-menu' => [
-    //         [
-    //             'active' => 'admin/stock-in/*,admin/stock-out/*,admin/stock-transfer/*,admin/stock-on-hand/*,admin/stock-movement/*',
-    //             'permission' => ['stock-in-view', 'stock-out-view', 'stock-transfer-view', 'stock-on-hand-view', 'stock-movement-view'],
-    //             'name' => [
-    //                 'en' => 'Build',
-    //             ],
-    //             'icon' => 'archive',
-    //             'children' => [
-    //                 [
-    //                     'path' => 'admin/stock-in/list',
-    //                     'active' => 'admin/stock-in/*',
-    //                     'permission' => 'stock-in-view',
-    //                     'name' => [
-    //                         'en' => 'Authentication',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-out/list',
-    //                     'active' => 'admin/stock-out/*',
-    //                     'permission' => 'stock-out-view',
-    //                     'name' => [
-    //                         'en' => 'App Check',
-    //                     ],
-    //                     'icon' => 'bxs-check-shield',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-transfer/list',
-    //                     'active' => 'admin/stock-transfer/*',
-    //                     'permission' => 'stock-transfer-view',
-    //                     'name' => [
-    //                         'en' => 'Storage',
-    //                     ],
-    //                     'icon' => 'bxs-folder',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-on-hand/list',
-    //                     'active' => 'admin/stock-on-hand/*',
-    //                     'permission' => 'stock-on-hand-view',
-    //                     'name' => [
-    //                         'en' => 'Extensions',
-    //                     ],
-    //                     'icon' => 'bxs-extension',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Hosting',
-    //                     ],
-    //                     'icon' => 'bx-world',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Remote Config',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //             ],
-    //         ],
-    //         [
-    //             'active' => 'admin/stock-in/*,admin/stock-out/*,admin/stock-transfer/*,admin/stock-on-hand/*,admin/stock-movement/*',
-    //             'permission' => ['stock-in-view', 'stock-out-view', 'stock-transfer-view', 'stock-on-hand-view', 'stock-movement-view'],
-    //             'name' => [
-    //                 'en' => 'Release & Monitor',
-    //             ],
-    //             'icon' => 'archive',
-    //             'children' => [
-    //                 [
-    //                     'path' => 'admin/stock-in/list',
-    //                     'active' => 'admin/stock-in/*',
-    //                     'permission' => 'stock-in-view',
-    //                     'name' => [
-    //                         'en' => 'Authentication',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-out/list',
-    //                     'active' => 'admin/stock-out/*',
-    //                     'permission' => 'stock-out-view',
-    //                     'name' => [
-    //                         'en' => 'App Check',
-    //                     ],
-    //                     'icon' => 'bxs-check-shield',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-transfer/list',
-    //                     'active' => 'admin/stock-transfer/*',
-    //                     'permission' => 'stock-transfer-view',
-    //                     'name' => [
-    //                         'en' => 'Storage',
-    //                     ],
-    //                     'icon' => 'bxs-folder',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-on-hand/list',
-    //                     'active' => 'admin/stock-on-hand/*',
-    //                     'permission' => 'stock-on-hand-view',
-    //                     'name' => [
-    //                         'en' => 'Extensions',
-    //                     ],
-    //                     'icon' => 'bxs-extension',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Hosting',
-    //                     ],
-    //                     'icon' => 'bx-world',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Remote Config',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //             ],
-    //         ],
-    //         [
-    //             'active' => 'admin/stock-in/*,admin/stock-out/*,admin/stock-transfer/*,admin/stock-on-hand/*,admin/stock-movement/*',
-    //             'permission' => ['stock-in-view', 'stock-out-view', 'stock-transfer-view', 'stock-on-hand-view', 'stock-movement-view'],
-    //             'name' => [
-    //                 'en' => 'Analytics',
-    //             ],
-    //             'icon' => 'archive',
-    //             'children' => [
-    //                 [
-    //                     'path' => 'admin/stock-in/list',
-    //                     'active' => 'admin/stock-in/*',
-    //                     'permission' => 'stock-in-view',
-    //                     'name' => [
-    //                         'en' => 'Authentication',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-out/list',
-    //                     'active' => 'admin/stock-out/*',
-    //                     'permission' => 'stock-out-view',
-    //                     'name' => [
-    //                         'en' => 'App Check',
-    //                     ],
-    //                     'icon' => 'bxs-check-shield',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-transfer/list',
-    //                     'active' => 'admin/stock-transfer/*',
-    //                     'permission' => 'stock-transfer-view',
-    //                     'name' => [
-    //                         'en' => 'Storage',
-    //                     ],
-    //                     'icon' => 'bxs-folder',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-on-hand/list',
-    //                     'active' => 'admin/stock-on-hand/*',
-    //                     'permission' => 'stock-on-hand-view',
-    //                     'name' => [
-    //                         'en' => 'Extensions',
-    //                     ],
-    //                     'icon' => 'bxs-extension',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Hosting',
-    //                     ],
-    //                     'icon' => 'bx-world',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Remote Config',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //             ],
-    //         ],
-    //         [
-    //             'active' => 'admin/stock-in/*,admin/stock-out/*,admin/stock-transfer/*,admin/stock-on-hand/*,admin/stock-movement/*',
-    //             'permission' => ['stock-in-view', 'stock-out-view', 'stock-transfer-view', 'stock-on-hand-view', 'stock-movement-view'],
-    //             'name' => [
-    //                 'en' => ' Engage ',
-    //             ],
-    //             'icon' => 'archive',
-    //             'children' => [
-    //                 [
-    //                     'path' => 'admin/stock-in/list',
-    //                     'active' => 'admin/stock-in/*',
-    //                     'permission' => 'stock-in-view',
-    //                     'name' => [
-    //                         'en' => 'Authentication',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-out/list',
-    //                     'active' => 'admin/stock-out/*',
-    //                     'permission' => 'stock-out-view',
-    //                     'name' => [
-    //                         'en' => 'App Check',
-    //                     ],
-    //                     'icon' => 'bxs-check-shield',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-transfer/list',
-    //                     'active' => 'admin/stock-transfer/*',
-    //                     'permission' => 'stock-transfer-view',
-    //                     'name' => [
-    //                         'en' => 'Storage',
-    //                     ],
-    //                     'icon' => 'bxs-folder',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-on-hand/list',
-    //                     'active' => 'admin/stock-on-hand/*',
-    //                     'permission' => 'stock-on-hand-view',
-    //                     'name' => [
-    //                         'en' => 'Extensions',
-    //                     ],
-    //                     'icon' => 'bxs-extension',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Hosting',
-    //                     ],
-    //                     'icon' => 'bx-world',
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/stock-movement/list',
-    //                     'active' => 'admin/stock-movement/*',
-    //                     'permission' => 'stock-movement-view',
-    //                     'name' => [
-    //                         'en' => 'Remote Config',
-    //                     ],
-    //                     'icon' => 'bxl-xing',
-    //                 ],
-    //             ],
-    //         ],
-    //     ]
-    // ],
-
-    // [
-    //     'type'  => 'dropdown-multiple',
-    //     'label' => 'Page',
-    //     'list-menu' => [
-    //         [
-    //             'type'  => 'dropdown-multiple',
-    //             'active' => 'admin/page/*,admin/contact/*',
-    //             'permission' => ['about-view', 'privacy-view', 'term-condition-view', 'contact-view'],
-    //             'name' => [
-    //                 'en' => 'Pages',
-    //             ],
-    //             'icon' => 'book-open',
-    //             'children' => [
-    //                 [
-    //                     'path' => 'admin/page/about',
-    //                     'active' => 'admin/page/about',
-    //                     'permission' => 'about-view',
-    //                     'name' => [
-    //                         'en' => 'About',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/contact/privacy',
-    //                     'active' => 'admin/contact/privacy',
-    //                     'permission' => 'privacy-view',
-    //                     'name' => [
-    //                         'en' => 'Privacy',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/contact/contact',
-    //                     'active' => 'admin/contact/contact',
-    //                     'permission' => 'contact-view',
-    //                     'name' => [
-    //                         'en' => 'Contact',
-    //                     ],
-    //                 ],
-    //             ],
-    //         ],
-    //         // Setting children about and contact
-    //         [
-    //             'type'  => 'dropdown-single',
-    //             'active' => 'admin/category/*,admin/supplier/*,admin/uom/*,admin/setting/data,admin/reward/*,admin/pointSetting/*,admin/brand/*,admin/brandSetting/*',
-    //             'permission' => ['category-view', 'supplier-view', 'uom-view', 'reward-view', 'data-view', 'pointSetting-view', 'brand-view', 'brandSetting-view'],
-    //             'name' => [
-    //                 'en' => 'Settings',
-    //             ],
-    //             'icon' => 'settings',
-    //             'children' => [
-    //                 [
-    //                     'path' => 'admin/category/list/1',
-    //                     'active' => 'admin/category/*',
-    //                     'permission' => 'category-view',
-    //                     'name' => [
-    //                         'en' => 'Category3333',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/supplier/list/1',
-    //                     'active' => 'admin/supplier/*',
-    //                     'permission' => 'supplier-view',
-    //                     'name' => [
-    //                         'en' => 'Supplier',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/uom/list/1',
-    //                     'active' => 'admin/uom/*',
-    //                     'permission' => 'uom-view',
-    //                     'name' => [
-    //                         'en' => 'UOM',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/brand/list/1',
-    //                     'active' => 'admin/brand/*',
-    //                     'permission' => 'brand-view',
-    //                     'name' => [
-    //                         'en' => 'Brand',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/brandSetting/list/1',
-    //                     'active' => 'admin/brandSetting/*',
-    //                     'permission' => 'brand-setting-view',
-    //                     'name' => [
-    //                         'en' => 'Brand Setting',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/reward/list/1',
-    //                     'active' => 'admin/reward/*',
-    //                     'permission' => 'reward-view',
-    //                     'name' => [
-    //                         'en' => 'Point',
-    //                     ],
-    //                 ],
-    //                 [
-    //                     'path' => 'admin/setting/data',
-    //                     'active' => 'admin/setting/data',
-    //                     'permission' => 'top-up-rate-view',
-    //                     'name' => [
-    //                         'en' => 'Top Up Rate',
-    //                     ],
-    //                 ],
-
-    //             ],
-    //         ],
-    //     ]
-
-    // ],
-
-
-
 ];

@@ -32,6 +32,10 @@ class StockInRequest extends FormRequest
             $rules['items'] = 'required|array|min:1';
             $rules['items.*.product_id'] = [
                 'required',
+                Rule::exists('shop_products', 'product_id')
+                    ->where('shop_id', $this->shop_id)
+                    ->where('status', 1)
+                    ->whereNull('deleted_at'),
                 Rule::exists('products', 'id')->where('status', 1),
             ];
             $rules['items.*.qty'] = 'required|integer|min:1';
@@ -39,6 +43,10 @@ class StockInRequest extends FormRequest
         } else {
             $rules['product_id'] = [
                 'required',
+                Rule::exists('shop_products', 'product_id')
+                    ->where('shop_id', $this->shop_id)
+                    ->where('status', 1)
+                    ->whereNull('deleted_at'),
                 Rule::exists('products', 'id')->where('status', 1),
             ];
             $rules['qty'] = 'required|integer|min:1';

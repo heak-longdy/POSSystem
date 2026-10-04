@@ -149,7 +149,7 @@
     <template x-if="dialog.component.uploadFileDialog">
         @include('admin::file-manager.upload-file')
     </template>
-    <template x-if="dialog.component.confirmDialog">
+    <template x-if="dialog.component.trashConfirmDialog">
         @include('admin::file-manager.trash-dialog')
     </template>
     <template x-if="contentMenu.show">
@@ -174,7 +174,7 @@
                         <i data-feather="link"></i>
                     </div>
                 </template>
-                <div class="context-menu-item danger" @click="dialog.open('confirmDialog')"
+                <div class="context-menu-item danger" @click="dialog.open('trashConfirmDialog')"
                     @click.away="closeContextMenu">
                     <span>@lang('file-manager.button.delete')</span>
                     <i data-feather="trash-2"></i>
@@ -474,13 +474,13 @@
                     createFolderDialog: false,
                     uploadFileDialog: false,
                     renameFolderDialog: false,
-                    confirmDialog: false
+                    trashConfirmDialog: false
                 },
                 data: {
                     createFolderDialog: {},
                     uploadFileDialog: {},
                     renameFolderDialog: {},
-                    confirmDialog: {}
+                    trashConfirmDialog: {}
                 },
                 open(dialogRef) {
                     this.component[dialogRef] = true;

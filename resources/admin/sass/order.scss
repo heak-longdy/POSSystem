@@ -5956,9 +5956,9 @@ span.error {
     --pos-accent: #2563eb;
     background: #f8fafc;
     width: 100%;
-    height: calc(100vh - 80px);
-    min-height: calc(100vh - 80px);
-    max-height: calc(100vh - 80px);
+    height: calc(100vh - 45px);
+    min-height: calc(100vh - 45px);
+    max-height: calc(100vh - 45px);
     overflow: auto !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -5975,6 +5975,55 @@ span.error {
         margin: 0 70px;
         button:not(.text-gray-400):not(.fancybox-button){
             line-height: 0 !important;
+        }
+
+        .booking-pos-header {
+            grid-column: 1 / -1;
+            width: 100%;
+            padding: 30px 20px 4px 20px;
+            background: unset;
+            border: 0;
+
+            .form-header {
+                width: 100%;
+                display: flex;
+                align-items: center;
+
+                h3 {
+                    display: flex;
+                    align-items: center;
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #1e293b;
+                    line-height: 1.2;
+
+                    .back-link-icon {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #1e293b;
+                        margin-right: 10px;
+                        cursor: pointer;
+                        text-decoration: none;
+                        transition: transform 0.15s ease, color 0.15s ease;
+
+                        svg, i {
+                            width: 22px;
+                            height: 22px;
+                            color: #1e293b;
+                            stroke: currentColor;
+                            stroke-width: 2;
+                            background-color: transparent !important;
+                        }
+
+                        &:hover {
+                            color: #2563eb;
+                            transform: translateX(-3px);
+                        }
+                    }
+                }
+            }
         }
     }
 

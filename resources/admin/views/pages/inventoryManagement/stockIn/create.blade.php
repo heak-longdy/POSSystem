@@ -22,7 +22,7 @@
                 {{-- Header Information: Supplier & Shop --}}
                 <div class="stock-in-header-card">
                     <div class="stock-in-card-title">
-                        <i class='bx bx-building-house'></i>
+                        <span class="stock-in-card-icon"><i class='bx bx-building-house'></i></span>
                         <span>{{ __('stock_in.table.supplier') }} & {{ __('stock_in.table.shop') }}</span>
                     </div>
 
@@ -30,11 +30,14 @@
                         <div class="form-row">
                             <label>{{ __('stock_in.form.supplier') }}<span>*</span></label>
                             <div class="select2Group">
-                                <select name="supplier_id" class="SelectSupplier" id="supplier_id" x-init="fetchSelectSupplier()" {!! $readonly ? 'disabled' : '' !!}>
+                                <select name="supplier_id" class="SelectSupplier" id="supplier_id" {!! $readonly ? 'disabled' : '' !!}>
                                     <option value=""> {{ __('stock_in.form.select_supplier') }}</option>
+                                    @if (isset($selectedSupplier) && $selectedSupplier)
+                                        <option value="{{ $selectedSupplier->id }}" selected>{{ $selectedSupplier->name }}</option>
+                                    @endif
                                 </select>
                                 @if (!$readonly)
-                                    <div class="select2Reset" x-show="supplier?.id" @click="$select2Data('#supplier_id'); supplier = { id: '', text: '' }">
+                                    <div class="select2Reset" x-show="supplier?.id" @click="resetSupplier()">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                             <path
                                                 d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -47,15 +50,21 @@
                             @error('supplier_id')
                                 <label class="error">{{ $message }}</label>
                             @enderror
+                            <template x-if="errors?.supplier_id?.[0]">
+                                <label class="error" x-text="errors.supplier_id[0]"></label>
+                            </template>
                         </div>
                         <div class="form-row">
                             <label>{{ __('stock_in.form.shop') }}<span>*</span></label>
                             <div class="select2Group">
-                                <select name="shop_id" class="SelectShop" id="shop_id" x-init="fetchSelectShop()" {!! $readonly ? 'disabled' : '' !!}>
+                                <select name="shop_id" class="SelectShop" id="shop_id" {!! $readonly ? 'disabled' : '' !!}>
                                     <option value=""> {{ __('stock_in.form.select_shop') }}</option>
+                                    @if (isset($selectedShop) && $selectedShop)
+                                        <option value="{{ $selectedShop->id }}" selected>{{ $selectedShop->name }}</option>
+                                    @endif
                                 </select>
                                 @if (!$readonly)
-                                    <div class="select2Reset" x-show="shop?.id" @click="$select2Data('#shop_id'); shop = { id: '', text: '' }">
+                                    <div class="select2Reset" x-show="shop?.id" @click="resetShop()">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                             <path
                                                 d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -68,6 +77,9 @@
                             @error('shop_id')
                                 <label class="error">{{ $message }}</label>
                             @enderror
+                            <template x-if="errors?.shop_id?.[0]">
+                                <label class="error" x-text="errors.shop_id[0]"></label>
+                            </template>
                         </div>
                     </div>
 
@@ -94,26 +106,34 @@
                                 <span>{{ $message }}</span>
                             </div>
                         @enderror
+                        <template x-if="errors?.items?.[0]">
+                            <div class="stock-in-alert stock-in-alert--error">
+                                <i class='bx bx-error-circle'></i>
+                                <span x-text="errors.items[0]"></span>
+                            </div>
+                        </template>
 
                         <div class="stock-in-items-toolbar">
                             <div class="stock-in-toolbar-left">
-                                <div class="stock-in-section-heading">
-                                    <i class='bx bx-list-plus'></i>
-                                    <h4>{{ __('stock_in.form.records_title') }}</h4>
+                                <div class="stock-in-heading-icon">
+                                    <i class='bx bx-layer-plus'></i>
                                 </div>
-                                <span class="stock-in-section-subtitle">{{ __('stock_in.form.records_desc') }}</span>
+                                <div class="stock-in-heading-content">
+                                    <h4>{{ __('stock_in.form.records_title') }}</h4>
+                                    <span class="stock-in-section-subtitle">{{ __('stock_in.form.records_desc') }}</span>
+                                </div>
                             </div>
 
                             <div class="stock-in-toolbar-right">
-                                <div class="stock-in-badge">
-                                    <i class='bx bx-file'></i>
-                                    <span class="badge-label">{{ __('stock_in.form.total_records') }}:</span>
-                                    <strong class="badge-num" x-text="items.length"></strong>
+                                <div class="stock-in-stat-pill">
+                                    <i class='bx bx-list-ol'></i>
+                                    <span class="stat-pill-label">{{ __('stock_in.form.total_records') }}:</span>
+                                    <strong class="stat-pill-value" x-text="items.length"></strong>
                                 </div>
-                                <div class="stock-in-badge badge-primary">
-                                    <i class='bx bx-layer'></i>
-                                    <span class="badge-label">{{ __('stock_in.form.total_qty') }}:</span>
-                                    <strong class="badge-num" x-text="totalQty()"></strong>
+                                <div class="stock-in-stat-pill stat-pill--primary">
+                                    <i class='bx bx-package'></i>
+                                    <span class="stat-pill-label">{{ __('stock_in.form.total_qty') }}:</span>
+                                    <strong class="stat-pill-value" x-text="totalQty()"></strong>
                                 </div>
                                 <button type="button" class="btn-stock-add" @click="addRow()">
                                     <i class='bx bx-plus'></i>
@@ -144,10 +164,18 @@
                                     <template x-for="(row, index) in items" :key="row.uid">
                                         <tr class="stock-in-row" :class="{'dropdown-open': row.dropdownOpen}">
                                             <td class="td-num">
-                                                <span class="row-num" x-text="index + 1"></span>
+                                                <div class="row-num-wrapper">
+                                                    <span class="row-num" x-text="index + 1"></span>
+                                                    <span class="mobile-row-title">Item #<span x-text="index + 1"></span></span>
+                                                </div>
                                             </td>
 
                                             <td class="td-product">
+                                                <label class="mobile-field-label">
+                                                    <i class='bx bx-purchase-tag-alt'></i>
+                                                    <span>{{ __('stock_in.table.product') }}</span>
+                                                    <span class="req">*</span>
+                                                </label>
                                                 <input type="hidden" :name="`items[${index}][product_id]`" :value="row.product_id">
 
                                                 {{-- When Product is Selected --}}
@@ -228,6 +256,10 @@
                                             </td>
 
                                             <td class="td-stock">
+                                                <label class="mobile-field-label">
+                                                    <i class='bx bx-archive'></i>
+                                                    <span>{{ __('stock_in.form.current_stock') }}</span>
+                                                </label>
                                                 <div class="current-stock-badge" :class="{'is-zero': !row.current_stock || row.current_stock === 0}">
                                                     <i class='bx bx-archive'></i>
                                                     <span x-text="shopId ? (row.current_stock ?? 0) : '-'"></span>
@@ -235,6 +267,11 @@
                                             </td>
 
                                             <td class="td-qty">
+                                                <label class="mobile-field-label">
+                                                    <i class='bx bx-calculator'></i>
+                                                    <span>{{ __('stock_in.table.qty') }}</span>
+                                                    <span class="req">*</span>
+                                                </label>
                                                 <div class="qty-control-wrapper">
                                                     <button type="button" class="btn-qty-step" @click="row.qty = Math.max(1, (parseInt(row.qty, 10) || 1) - 1)" title="Decrease">
                                                         <i class='bx bx-minus'></i>
@@ -255,6 +292,10 @@
                                             </td>
 
                                             <td class="td-remark">
+                                                <label class="mobile-field-label">
+                                                    <i class='bx bx-note'></i>
+                                                    <span>{{ __('stock_in.table.remark') }}</span>
+                                                </label>
                                                 <div class="remark-input-wrapper">
                                                     <i class='bx bx-note'></i>
                                                     <input type="text"
@@ -286,18 +327,9 @@
                                     <i class='bx bx-plus-circle'></i>
                                     <span>{{ __('stock_in.button.add_row') }}</span>
                                 </button>
-
-                                <div class="stock-in-footer-summary">
-                                    <div class="footer-stat">
-                                        <i class='bx bx-file'></i>
-                                        <span class="stat-title">{{ __('stock_in.form.total_records') }}:</span>
-                                        <strong class="stat-number" x-text="items.length"></strong>
-                                    </div>
-                                    <div class="footer-stat stat-primary">
-                                        <i class='bx bx-layer'></i>
-                                        <span class="stat-title">{{ __('stock_in.form.total_qty') }}:</span>
-                                        <strong class="stat-number" x-text="totalQty()"></strong>
-                                    </div>
+                                <div class="stock-in-footer-hint">
+                                    <i class='bx bx-info-circle'></i>
+                                    <span>{{ __('stock_in.form.records_desc') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -308,11 +340,14 @@
                         <div class="form-row">
                             <label>{{ __('stock_in.form.product') }}<span>*</span></label>
                             <div class="select2Group">
-                                <select name="product_id" id="product_id" class="SelectProduct" x-init="fetchSelectProduct()" {!! $readonly ? 'disabled' : '' !!}>
+                                <select name="product_id" id="product_id" class="SelectProduct" {!! $readonly ? 'disabled' : '' !!}>
                                     <option value="">{{ __('stock_in.form.select_product') }}</option>
+                                    @if (isset($selectedProduct) && $selectedProduct)
+                                        <option value="{{ $selectedProduct->id }}" selected>{{ $selectedProduct->name }}</option>
+                                    @endif
                                 </select>
                                 @if (!$readonly)
-                                    <div class="select2Reset" x-show="product?.id" @click="$select2Data('#product_id'); product = { id: '', text: '' }">
+                                    <div class="select2Reset" x-show="product?.id" @click="resetProduct()">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                             <path
                                                 d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -394,43 +429,67 @@
     <style>
         /* Form wrapper sizing */
         .form-wrapper.stock-in-form {
-            max-width: 82rem;
-            padding-left: 45px;
-            padding-right: 45px;
+            max-width: 73rem !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding-left: 32px !important;
+            padding-right: 32px !important;
+            box-sizing: border-box !important;
         }
 
         /* Supplier & Shop Header Card */
         .stock-in-header-card {
             background: #ffffff;
-            border: 1px solid rgba(152, 152, 152, 0.22);
-            border-radius: 10px;
-            padding: 20px 22px 14px 22px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px 24px 16px 24px;
             margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .stock-in-header-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
         }
 
         .stock-in-card-title {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             font-size: 14.5px;
             font-weight: 600;
-            color: #231f20;
-            margin-bottom: 16px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(152, 152, 152, 0.15);
+            color: #1e293b;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .stock-in-card-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #024de3;
+            font-size: 17px;
+            flex-shrink: 0;
+            border: 1px solid #dbeafe;
         }
 
         .stock-in-card-title i {
-            font-size: 19px;
+            font-size: 18px;
             color: #024de3;
         }
 
         /* Items Section */
         .stock-in-items-section {
-            margin-bottom: 22px;
+            margin-bottom: 24px;
         }
 
+        /* Toolbar */
         .stock-in-items-toolbar {
             display: flex;
             align-items: center;
@@ -440,110 +499,147 @@
             flex-wrap: wrap;
         }
 
-        .stock-in-section-heading {
+        .stock-in-toolbar-left {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
 
-        .stock-in-section-heading i {
-            font-size: 20px;
+        .stock-in-heading-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
             color: #024de3;
+            font-size: 22px;
+            flex-shrink: 0;
+            border: 1px solid #bfdbfe;
+            box-shadow: 0 2px 5px rgba(2, 77, 227, 0.08);
         }
 
-        .stock-in-section-heading h4 {
+        .stock-in-heading-content h4 {
             margin: 0;
             font-size: 16px;
-            font-weight: 600;
-            color: #231f20;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.01em;
+            line-height: 1.25;
         }
 
         .stock-in-section-subtitle {
             font-size: 12.5px;
-            color: #7a7f89;
-            margin-top: 3px;
+            color: #64748b;
+            margin: 2px 0 0 0;
             display: block;
+            line-height: 1.35;
         }
 
         .stock-in-toolbar-right {
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .stock-in-badge {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 7px 14px;
-            font-size: 13px;
-            color: #475569;
+        /* Modern Metric Stat Pills */
+        .stock-in-stat-pill {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            font-weight: 500;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            gap: 8px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            padding: 6px 12px;
+            font-size: 12.5px;
+            color: #475569;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            height: 38px;
+            box-sizing: border-box;
             transition: all 0.15s ease;
         }
 
-        .stock-in-badge i {
-            font-size: 16px;
-            color: #64748b;
+        .stock-in-stat-pill:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
         }
 
-        .stock-in-badge.badge-primary {
-            background: #eff6ff;
+        .stock-in-stat-pill i {
+            font-size: 16px;
+            color: #64748b;
+            flex-shrink: 0;
+        }
+
+        .stock-in-stat-pill .stat-pill-label {
+            font-weight: 500;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .stock-in-stat-pill .stat-pill-value {
+            font-weight: 700;
+            color: #0f172a;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .stock-in-stat-pill.stat-pill--primary {
+            background: #f8faff;
             border-color: #bfdbfe;
             color: #024de3;
         }
 
-        .stock-in-badge.badge-primary i {
+        .stock-in-stat-pill.stat-pill--primary:hover {
+            background: #eff6ff;
+            border-color: #93c5fd;
+        }
+
+        .stock-in-stat-pill.stat-pill--primary i {
             color: #024de3;
         }
 
-        .stock-in-badge .badge-label {
-            color: inherit;
+        .stock-in-stat-pill.stat-pill--primary .stat-pill-label {
+            color: #024de3;
+            font-weight: 600;
         }
 
-        .stock-in-badge .badge-num {
-            font-weight: 700;
-            color: #0f172a;
-            background: rgba(0, 0, 0, 0.05);
-            padding: 2px 7px;
-            border-radius: 5px;
-            font-size: 12.5px;
-        }
-
-        .stock-in-badge.badge-primary .badge-num {
+        .stock-in-stat-pill.stat-pill--primary .stat-pill-value {
             color: #024de3;
             background: rgba(2, 77, 227, 0.1);
         }
 
+        /* Primary Add Button */
         .btn-stock-add {
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             gap: 6px !important;
-            background: linear-gradient(180deg, #0b57ea 0%, #024de3 100%) !important;
+            background: linear-gradient(180deg, #0d5df5 0%, #024de3 100%) !important;
             color: #ffffff !important;
-            border: 1px solid #0244cb !important;
+            border: 1px solid #0245cb !important;
             border-radius: 8px !important;
             padding: 0 16px !important;
             height: 38px !important;
             min-height: 38px !important;
-            min-width: auto !important;
             line-height: 38px !important;
             font-size: 13px !important;
             font-weight: 600 !important;
             cursor: pointer !important;
-            box-shadow: 0 2px 6px rgba(2, 77, 227, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 2px 6px rgba(2, 77, 227, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
             outline: none !important;
+            white-space: nowrap !important;
         }
 
         .btn-stock-add:hover {
             background: linear-gradient(180deg, #024de3 0%, #003dbd 100%) !important;
-            box-shadow: 0 4px 14px rgba(2, 77, 227, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+            box-shadow: 0 4px 12px rgba(2, 77, 227, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
             transform: translateY(-1px) !important;
         }
 
@@ -553,7 +649,7 @@
         }
 
         .btn-stock-add i {
-            font-size: 17px !important;
+            font-size: 16px !important;
             color: #ffffff !important;
             line-height: 1 !important;
         }
@@ -569,10 +665,11 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 11px 16px;
-            border-radius: 8px;
-            font-size: 13.5px;
+            padding: 12px 16px;
+            border-radius: 9px;
+            font-size: 13px;
             margin-bottom: 14px;
+            font-weight: 500;
         }
 
         .stock-in-alert i {
@@ -598,9 +695,10 @@
             justify-content: center;
             gap: 10px;
             padding: 24px;
-            background: #f9fafb;
-            color: #6b7280;
+            background: #f8fafc;
+            color: #64748b;
             font-size: 13.5px;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .stock-in-loading-shimmer i {
@@ -610,44 +708,53 @@
 
         /* Table Container & Table */
         .stock-in-table-container {
-            border: 1px solid rgba(152, 152, 152, 0.22);
-            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
             background: #ffffff;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
             overflow: visible !important;
             position: relative;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         .stock-in-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 13.5px;
+            width: 100% !important;
+            max-width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 13px;
+            box-sizing: border-box !important;
         }
 
         .stock-in-table thead tr {
-            background: #f8f9fb;
+            background: #f8fafc;
         }
 
         .stock-in-table th {
-            padding: 12px 14px;
-            font-size: 12px;
+            padding: 10px 8px;
+            font-size: 11px;
             font-weight: 600;
-            color: #475569;
+            color: #64748b;
             text-transform: uppercase;
             letter-spacing: 0.04em;
             text-align: left;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
             white-space: nowrap !important;
+            box-sizing: border-box !important;
         }
 
         .stock-in-table th:first-child {
-            border-top-left-radius: 9px;
+            border-top-left-radius: 11px;
         }
 
         .stock-in-table th:last-child {
-            border-top-right-radius: 9px;
+            border-top-right-radius: 11px;
         }
 
         .stock-in-table th.th-num,
@@ -660,13 +767,15 @@
         .stock-in-table th .req {
             color: #ef4444;
             font-weight: 700;
+            margin-left: 2px;
         }
 
         .stock-in-table td {
-            padding: 10px 14px;
-            border-bottom: 1px solid #f0f2f5;
+            padding: 8px 8px;
+            border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             background: #ffffff;
+            box-sizing: border-box !important;
         }
 
         .stock-in-row {
@@ -675,7 +784,7 @@
         }
 
         .stock-in-row:hover td {
-            background: #fafbfc;
+            background: #f8faff;
         }
 
         .stock-in-row.dropdown-open {
@@ -687,9 +796,13 @@
             background: #f8faff;
         }
 
+        /* Fixed Column Width Distribution (Strictly fits 100% container) */
         .th-num, .td-num {
-            width: 48px;
-            text-align: center;
+            width: 44px !important;
+            min-width: 44px !important;
+            max-width: 44px !important;
+            text-align: center !important;
+            padding: 8px 4px !important;
         }
 
         .row-num {
@@ -698,36 +811,58 @@
             justify-content: center;
             width: 24px;
             height: 24px;
-            border-radius: 50%;
-            background: #e9ecef;
-            color: #5a5e66;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #64748b;
             font-weight: 600;
-            font-size: 11.5px;
+            font-size: 11px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s ease;
+        }
+
+        .stock-in-row:hover .row-num {
+            background: #e2e8f0;
+            color: #334155;
+            border-color: #cbd5e1;
         }
 
         .th-product, .td-product {
-            min-width: 330px;
+            width: 33% !important;
+            min-width: 160px !important;
             position: relative;
+            padding: 8px 8px !important;
         }
 
         .th-stock, .td-stock {
-            width: 135px;
-            white-space: nowrap;
-            text-align: center;
+            width: 100px !important;
+            min-width: 100px !important;
+            max-width: 100px !important;
+            white-space: nowrap !important;
+            text-align: center !important;
+            padding: 8px 4px !important;
         }
 
         .th-qty, .td-qty {
-            width: 140px;
-            text-align: center;
+            width: 114px !important;
+            min-width: 114px !important;
+            max-width: 114px !important;
+            text-align: center !important;
+            padding: 8px 4px !important;
         }
 
         .th-remark, .td-remark {
-            min-width: 200px;
+            width: auto !important;
+            min-width: 110px !important;
+            padding: 8px 8px !important;
         }
 
         .th-action, .td-action {
-            width: 64px;
-            text-align: center;
+            width: 68px !important;
+            min-width: 68px !important;
+            max-width: 68px !important;
+            text-align: center !important;
+            white-space: nowrap !important;
+            padding: 8px 4px !important;
         }
 
         /* Selected Product Card */
@@ -737,22 +872,25 @@
             gap: 10px;
             padding: 6px 10px;
             background: #f8fafc;
-            border: 1px solid #d8dce5;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
         }
 
         .selected-product-card:hover {
             border-color: #cbd5e1;
+            background: #ffffff;
+            box-shadow: 0 2px 5px rgba(15, 23, 42, 0.05);
         }
 
         .selected-product-img {
             width: 38px;
             height: 38px;
-            border-radius: 6px;
+            border-radius: 7px;
             overflow: hidden;
             background: #ffffff;
-            border: 1px solid rgba(152, 152, 152, 0.2);
+            border: 1px solid #e2e8f0;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -772,8 +910,8 @@
 
         .selected-product-name {
             font-weight: 600;
-            color: #231f20;
-            font-size: 13.5px;
+            color: #0f172a;
+            font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -783,32 +921,33 @@
         .selected-product-meta {
             display: flex;
             gap: 6px;
-            margin-top: 2px;
+            margin-top: 3px;
             flex-wrap: wrap;
         }
 
         .meta-tag {
-            font-size: 11px;
-            font-weight: 500;
-            padding: 2px 7px;
+            font-size: 10.5px;
+            font-weight: 600;
+            padding: 1.5px 7px;
             border-radius: 4px;
             display: inline-block;
-            line-height: 1.3;
+            line-height: 1.35;
+            letter-spacing: 0.01em;
         }
 
         .meta-category {
             background: #eff6ff;
-            color: #024de3;
+            color: #1d4ed8;
             border: 1px solid #dbeafe;
         }
 
         .meta-uom {
             background: #f5f3ff;
-            color: #7c3aed;
+            color: #6d28d9;
             border: 1px solid #ede9fe;
         }
 
-        /* Change Product Button (Overrides global button styles) */
+        /* Change Product Button */
         .btn-change-product {
             display: inline-flex !important;
             align-items: center !important;
@@ -817,20 +956,19 @@
             width: auto !important;
             min-width: auto !important;
             max-width: none !important;
-            height: 30px !important;
-            min-height: 30px !important;
-            padding: 0 11px !important;
-            line-height: 30px !important;
+            height: 28px !important;
+            min-height: 28px !important;
+            padding: 0 10px !important;
+            line-height: 28px !important;
             background: #eff6ff !important;
             border: 1px solid #bfdbfe !important;
-            border-radius: 7px !important;
+            border-radius: 6px !important;
             color: #024de3 !important;
-            font-size: 12px !important;
+            font-size: 11.5px !important;
             font-weight: 600 !important;
             cursor: pointer !important;
             flex-shrink: 0 !important;
             margin: 0 0 0 auto !important;
-            box-shadow: 0 1px 2px rgba(2, 77, 227, 0.05) !important;
             transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
             outline: none !important;
         }
@@ -839,7 +977,7 @@
             color: #ffffff !important;
             border-color: #024de3 !important;
             background: #024de3 !important;
-            box-shadow: 0 3px 8px rgba(2, 77, 227, 0.28) !important;
+            box-shadow: 0 2px 7px rgba(2, 77, 227, 0.25) !important;
             transform: translateY(-1px) !important;
         }
 
@@ -848,7 +986,7 @@
         }
 
         .btn-change-product i {
-            font-size: 15px !important;
+            font-size: 14px !important;
             color: #024de3 !important;
             line-height: 1 !important;
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease !important;
@@ -861,7 +999,7 @@
 
         .btn-change-product span {
             color: inherit !important;
-            font-size: 12px !important;
+            font-size: 11.5px !important;
             font-weight: 600 !important;
             line-height: 1 !important;
         }
@@ -876,24 +1014,26 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 12px;
-            border: 1px solid #d8dce5;
-            border-radius: 7px;
+            padding: 0 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             background: #ffffff;
-            color: #231f20;
+            color: #0f172a;
             cursor: pointer;
             transition: all 0.15s ease;
-            height: 40px;
+            height: 38px;
             box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
         }
 
         .product-dropdown-trigger:hover {
             border-color: #024de3;
-            background: #fafcff;
+            background: #fafbff;
         }
 
         .product-dropdown-trigger.is-active {
             border-color: #024de3;
+            background: #ffffff;
             box-shadow: 0 0 0 3px rgba(2, 77, 227, 0.12);
         }
 
@@ -902,7 +1042,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 500;
         }
 
@@ -912,16 +1052,21 @@
         }
 
         .product-dropdown-trigger i.bx-search {
-            font-size: 17px;
+            font-size: 16px;
             color: #94a3b8;
             flex-shrink: 0;
         }
 
         .product-dropdown-trigger i.bx-chevron-down {
             font-size: 18px;
-            color: #64748b;
-            transition: transform 0.2s ease;
+            color: #94a3b8;
+            transition: transform 0.2s ease, color 0.15s ease;
             flex-shrink: 0;
+        }
+
+        .product-dropdown-trigger.is-active i.bx-chevron-down,
+        .product-dropdown-trigger:hover i.bx-chevron-down {
+            color: #024de3;
         }
 
         .product-dropdown-trigger i.bx-chevron-down.is-rotated {
@@ -930,15 +1075,15 @@
 
         .product-dropdown-menu {
             position: absolute;
-            top: calc(100% + 5px);
+            top: calc(100% + 6px);
             left: 0;
             width: 100%;
             min-width: 360px;
             max-width: 500px;
             background: #ffffff;
             border: 1px solid #cbd5e1;
-            border-radius: 9px;
-            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16), 0 4px 10px rgba(15, 23, 42, 0.06);
+            border-radius: 10px;
+            box-shadow: 0 14px 34px rgba(15, 23, 42, 0.14), 0 4px 12px rgba(15, 23, 42, 0.06);
             z-index: 1050;
             overflow: hidden;
             animation: dropdownSlideDown 0.15s ease-out;
@@ -946,8 +1091,8 @@
 
         .product-dropdown-menu.dropup-menu {
             top: auto;
-            bottom: calc(100% + 5px);
-            box-shadow: 0 -12px 32px rgba(15, 23, 42, 0.16), 0 -4px 10px rgba(15, 23, 42, 0.06);
+            bottom: calc(100% + 6px);
+            box-shadow: 0 -14px 34px rgba(15, 23, 42, 0.14), 0 -4px 12px rgba(15, 23, 42, 0.06);
             animation: dropdownSlideUp 0.15s ease-out;
         }
 
@@ -993,11 +1138,11 @@
             background: transparent !important;
             outline: none !important;
             box-shadow: none !important;
-            padding: 3px 0 !important;
+            padding: 4px 0 !important;
             font-size: 13px !important;
             font-family: inherit !important;
             width: 100% !important;
-            color: #1e293b !important;
+            color: #0f172a !important;
             height: auto !important;
             min-height: auto !important;
         }
@@ -1012,7 +1157,7 @@
             background: transparent !important;
             color: #94a3b8 !important;
             cursor: pointer !important;
-            padding: 3px !important;
+            padding: 2px !important;
             width: 20px !important;
             height: 20px !important;
             min-width: 20px !important;
@@ -1037,12 +1182,11 @@
         }
 
         .product-dropdown-list {
-            max-height: 210px;
+            max-height: 220px;
             overflow-y: auto;
             overscroll-behavior: contain;
         }
 
-        /* Custom sleek scrollbar for dropdown list */
         .product-dropdown-list::-webkit-scrollbar {
             width: 5px;
         }
@@ -1078,7 +1222,7 @@
         .product-option-img {
             width: 34px;
             height: 34px;
-            border-radius: 5px;
+            border-radius: 6px;
             overflow: hidden;
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -1101,7 +1245,7 @@
 
         .product-option-name {
             font-weight: 600;
-            color: #1e293b;
+            color: #0f172a;
             font-size: 13px;
             white-space: nowrap;
             overflow: hidden;
@@ -1158,31 +1302,36 @@
             color: #94a3b8;
         }
 
-        /* Current Stock Badge */
+        /* Current Stock Badge (Clean Read-Only Indicator) */
         .current-stock-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 5px;
             background: #ecfdf5;
-            color: #059669;
+            color: #047857;
             border: 1px solid #a7f3d0;
-            padding: 5px 12px;
+            padding: 0 8px;
+            height: 32px;
             border-radius: 7px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
-            min-width: 64px;
+            min-width: 58px;
+            max-width: 86px;
+            margin: 0 auto;
             letter-spacing: 0.01em;
-            box-shadow: 0 1px 2px rgba(5, 150, 105, 0.06);
+            box-shadow: 0 1px 2px rgba(5, 150, 105, 0.05);
+            user-select: none;
+            box-sizing: border-box;
         }
 
         .current-stock-badge i {
-            font-size: 15px;
+            font-size: 13px;
             color: #059669;
         }
 
         .current-stock-badge.is-zero {
-            background: #f1f5f9;
+            background: #f8fafc;
             color: #64748b;
             border-color: #e2e8f0;
             box-shadow: none;
@@ -1198,18 +1347,19 @@
             align-items: center;
             justify-content: center;
             background: #ffffff;
-            border: 1px solid #d1d5db;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-            transition: all 0.18s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+            transition: all 0.15s ease;
             overflow: hidden;
-            height: 38px;
-            width: 116px;
+            height: 34px;
+            width: 104px;
             margin: 0 auto;
+            box-sizing: border-box;
         }
 
         .qty-control-wrapper:hover {
-            border-color: #9ca3af;
+            border-color: #cbd5e1;
         }
 
         .qty-control-wrapper:focus-within {
@@ -1221,28 +1371,28 @@
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            width: 32px !important;
-            min-width: 32px !important;
-            max-width: 32px !important;
-            height: 38px !important;
-            min-height: 38px !important;
+            width: 29px !important;
+            min-width: 29px !important;
+            max-width: 29px !important;
+            height: 34px !important;
+            min-height: 34px !important;
             padding: 0 !important;
             line-height: 1 !important;
             background: #f8fafc !important;
             border: none !important;
             color: #64748b !important;
             cursor: pointer !important;
-            transition: all 0.15s ease !important;
+            transition: all 0.12s ease !important;
             outline: none !important;
             user-select: none !important;
         }
 
         .btn-qty-step:first-child {
-            border-right: 1px solid #e5e7eb !important;
+            border-right: 1px solid #e2e8f0 !important;
         }
 
         .btn-qty-step:last-child {
-            border-left: 1px solid #e5e7eb !important;
+            border-left: 1px solid #e2e8f0 !important;
         }
 
         .btn-qty-step:hover {
@@ -1256,20 +1406,20 @@
         }
 
         .btn-qty-step i {
-            font-size: 15px !important;
+            font-size: 14px !important;
             color: inherit !important;
             line-height: 1 !important;
             pointer-events: none !important;
         }
 
         .input-qty {
-            width: 52px !important;
-            min-width: 52px !important;
-            height: 38px !important;
+            width: 44px !important;
+            min-width: 32px !important;
+            height: 34px !important;
             padding: 0 !important;
             border: none !important;
             background: transparent !important;
-            font-size: 14px !important;
+            font-size: 13.5px !important;
             font-weight: 700 !important;
             color: #0f172a !important;
             text-align: center !important;
@@ -1291,16 +1441,18 @@
             display: flex;
             align-items: center;
             width: 100%;
+            min-width: 0 !important;
             background: #ffffff;
-            border: 1px solid #d1d5db;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-            transition: all 0.18s ease;
-            height: 38px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+            transition: all 0.15s ease;
+            height: 34px;
+            box-sizing: border-box;
         }
 
         .remark-input-wrapper:hover {
-            border-color: #9ca3af;
+            border-color: #cbd5e1;
         }
 
         .remark-input-wrapper:focus-within {
@@ -1311,11 +1463,11 @@
 
         .remark-input-wrapper i {
             position: absolute;
-            left: 11px;
-            font-size: 16px;
+            left: 10px;
+            font-size: 14px;
             color: #94a3b8;
             pointer-events: none;
-            transition: color 0.18s ease;
+            transition: color 0.15s ease;
             line-height: 1;
         }
 
@@ -1325,12 +1477,13 @@
 
         .input-remark {
             width: 100% !important;
+            min-width: 0 !important;
             height: 100% !important;
-            padding: 0 12px 0 34px !important;
+            padding: 0 10px 0 28px !important;
             border: none !important;
             border-radius: 8px !important;
-            font-size: 13.5px !important;
-            color: #1e293b !important;
+            font-size: 12.5px !important;
+            color: #0f172a !important;
             box-sizing: border-box !important;
             background: transparent !important;
             outline: none !important;
@@ -1340,18 +1493,18 @@
         .input-remark::placeholder {
             color: #94a3b8 !important;
             font-weight: 400 !important;
-            font-size: 13px !important;
+            font-size: 12px !important;
         }
 
         /* Remove Row Button */
         .btn-row-remove {
-            width: 34px !important;
-            height: 34px !important;
-            min-width: 34px !important;
-            max-width: 34px !important;
-            min-height: 34px !important;
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            max-width: 32px !important;
+            min-height: 32px !important;
             padding: 0 !important;
-            line-height: 34px !important;
+            line-height: 32px !important;
             border-radius: 8px !important;
             border: 1px solid #fee2e2 !important;
             background: #fef2f2 !important;
@@ -1363,18 +1516,19 @@
             transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
             box-shadow: 0 1px 2px rgba(239, 68, 68, 0.05) !important;
             outline: none !important;
+            margin: 0 auto !important;
         }
 
         .btn-row-remove:hover {
             background: #ef4444 !important;
             color: #ffffff !important;
             border-color: #ef4444 !important;
-            transform: translateY(-1px) scale(1.06) !important;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3) !important;
+            transform: translateY(-1px) scale(1.05) !important;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.25) !important;
         }
 
         .btn-row-remove i {
-            font-size: 17px !important;
+            font-size: 16px !important;
             color: #ef4444 !important;
             line-height: 1 !important;
             transition: color 0.15s ease !important;
@@ -1392,7 +1546,7 @@
             padding: 12px 18px;
             background: #f8fafc;
             border-top: 1px solid #e2e8f0;
-            border-radius: 0 0 9px 9px;
+            border-radius: 0 0 11px 11px;
             flex-wrap: wrap;
             gap: 12px;
         }
@@ -1402,15 +1556,15 @@
             align-items: center !important;
             justify-content: center !important;
             gap: 7px !important;
-            background: #f8faff !important;
+            background: #ffffff !important;
             border: 1.5px dashed #93c5fd !important;
             color: #024de3 !important;
             border-radius: 8px !important;
             padding: 0 18px !important;
-            height: 38px !important;
-            min-height: 38px !important;
+            height: 36px !important;
+            min-height: 36px !important;
             min-width: auto !important;
-            line-height: 38px !important;
+            line-height: 36px !important;
             font-size: 13px !important;
             font-weight: 600 !important;
             cursor: pointer !important;
@@ -1425,11 +1579,11 @@
             border-style: solid !important;
             color: #ffffff !important;
             transform: translateY(-1px) !important;
-            box-shadow: 0 4px 12px rgba(2, 77, 227, 0.28) !important;
+            box-shadow: 0 4px 12px rgba(2, 77, 227, 0.25) !important;
         }
 
         .btn-stock-add-bottom i {
-            font-size: 18px !important;
+            font-size: 17px !important;
             color: #024de3 !important;
             line-height: 1 !important;
             transition: color 0.15s ease !important;
@@ -1446,86 +1600,329 @@
             line-height: 1 !important;
         }
 
-        .stock-in-footer-summary {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .footer-stat {
+        .stock-in-footer-hint {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            font-size: 13px;
-            color: #475569;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            padding: 6px 14px;
-            border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-            transition: all 0.15s ease;
-        }
-
-        .footer-stat i {
-            font-size: 16px;
+            gap: 6px;
+            font-size: 12.5px;
             color: #64748b;
         }
 
-        .footer-stat .stat-number {
+        .stock-in-footer-hint i {
+            font-size: 16px;
+            color: #94a3b8;
+        }
+
+        /* Mobile Field Labels & Row Title (Hidden on Desktop) */
+        .mobile-field-label {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .mobile-field-label i {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .mobile-field-label .req {
+            color: #ef4444;
+            font-weight: 700;
+            margin-left: 1px;
+        }
+
+        .row-num-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mobile-row-title {
+            display: none;
+            font-size: 13.5px;
             font-weight: 700;
             color: #0f172a;
-            background: rgba(0, 0, 0, 0.05);
-            padding: 2px 7px;
-            border-radius: 5px;
-            font-size: 12.5px;
-        }
-
-        .footer-stat.stat-primary {
-            background: #eff6ff;
-            border-color: #bfdbfe;
-            color: #024de3;
-        }
-
-        .footer-stat.stat-primary i {
-            color: #024de3;
-        }
-
-        .footer-stat.stat-primary .stat-number {
-            color: #024de3;
-            background: rgba(2, 77, 227, 0.1);
-            font-size: 13px;
+            letter-spacing: -0.01em;
         }
 
         /* Responsive adjustments */
         @media (max-width: 1200px) {
             .form-wrapper.stock-in-form {
-                padding-left: 25px;
-                padding-right: 25px;
+                padding-left: 20px !important;
+                padding-right: 20px !important;
             }
         }
 
-        @media (max-width: 900px) {
-            .stock-in-table-container {
-                overflow-x: auto;
-            }
-            .stock-in-table {
-                min-width: 780px;
-            }
-        }
-
+        /* ==========================================================
+           Responsive Tablet & Mobile Transformations (<= 768px)
+           ========================================================== */
         @media (max-width: 768px) {
+            .mobile-field-label {
+                display: flex !important;
+            }
+
+            .mobile-row-title {
+                display: inline-block !important;
+            }
+
             .form-wrapper.stock-in-form {
-                padding-left: 15px;
-                padding-right: 15px;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
             }
+
+            /* Toolbar Stacking */
             .stock-in-items-toolbar {
-                flex-direction: column;
-                align-items: stretch;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 12px !important;
+                margin-bottom: 16px !important;
             }
+
+            .stock-in-toolbar-left {
+                width: 100% !important;
+            }
+
             .stock-in-toolbar-right {
-                justify-content: space-between;
-                flex-wrap: wrap;
+                width: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 8px !important;
+                flex-wrap: wrap !important;
             }
+
+            .stock-in-stat-pill {
+                flex: 1 1 auto !important;
+                justify-content: center !important;
+                height: 36px !important;
+                padding: 4px 10px !important;
+                font-size: 12px !important;
+            }
+
+            .btn-stock-add {
+                flex-shrink: 0 !important;
+                height: 36px !important;
+                line-height: 36px !important;
+                padding: 0 14px !important;
+                font-size: 12.5px !important;
+            }
+
+            /* Container and Table as Modern Card Stack */
+            .stock-in-table-container {
+                border: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                overflow: visible !important;
+            }
+
+            .stock-in-table {
+                display: block !important;
+                width: 100% !important;
+                border: none !important;
+            }
+
+            .stock-in-table thead {
+                display: none !important;
+            }
+
+            .stock-in-table tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+                width: 100% !important;
+            }
+
+            /* Each table row transforms into a clean, modern card */
+            .stock-in-row {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-areas:
+                    "num action"
+                    "product product"
+                    "stock qty"
+                    "remark remark" !important;
+                gap: 12px 14px !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 12px !important;
+                padding: 16px !important;
+                box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+                position: relative !important;
+                box-sizing: border-box !important;
+                transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+            }
+
+            .stock-in-row:hover {
+                border-color: #cbd5e1 !important;
+                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06) !important;
+            }
+
+            .stock-in-row.dropdown-open {
+                z-index: 1050 !important;
+                border-color: #93c5fd !important;
+                box-shadow: 0 8px 24px rgba(2, 77, 227, 0.12) !important;
+            }
+
+            .stock-in-row td {
+                display: block !important;
+                padding: 0 !important;
+                border: none !important;
+                background: transparent !important;
+                width: auto !important;
+                min-width: 0 !important;
+                max-width: none !important;
+            }
+
+            .td-num {
+                grid-area: num !important;
+                display: flex !important;
+                align-items: center !important;
+                text-align: left !important;
+            }
+
+            .td-action {
+                grid-area: action !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                text-align: right !important;
+            }
+
+            .btn-row-remove {
+                margin: 0 0 0 auto !important;
+            }
+
+            .td-product {
+                grid-area: product !important;
+                width: 100% !important;
+            }
+
+            .td-stock {
+                grid-area: stock !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                text-align: left !important;
+            }
+
+            .td-stock .current-stock-badge {
+                width: 100% !important;
+                max-width: 140px !important;
+                box-sizing: border-box !important;
+                height: 38px !important;
+                justify-content: flex-start !important;
+                padding: 0 12px !important;
+            }
+
+            .td-qty {
+                grid-area: qty !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+
+            .td-qty .qty-control-wrapper {
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 130px !important;
+            }
+
+            .td-remark {
+                grid-area: remark !important;
+                width: 100% !important;
+            }
+
+            /* Product Dropdown on Mobile: Full width without clipping */
+            .product-dropdown-menu {
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                left: 0 !important;
+                right: 0 !important;
+                box-shadow: 0 14px 34px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+            }
+
+            /* Table Footer on Mobile */
+            .stock-in-table-footer {
+                background: #ffffff !important;
+                border: 1.5px dashed #bfdbfe !important;
+                border-radius: 12px !important;
+                padding: 16px !important;
+                margin-top: 16px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+            }
+
+            .btn-stock-add-bottom {
+                width: 100% !important;
+                height: 40px !important;
+                line-height: 40px !important;
+                font-size: 13.5px !important;
+                justify-content: center !important;
+            }
+
+            .stock-in-footer-hint {
+                font-size: 12px !important;
+                color: #64748b !important;
+                text-align: center !important;
+            }
+        }
+
+        /* Responsive adjustments for phones (<= 480px) */
+        @media (max-width: 480px) {
+            .form-wrapper.stock-in-form {
+                padding-left: 12px !important;
+                padding-right: 12px !important;
+            }
+
+            .stock-in-header-card {
+                padding: 14px !important;
+                border-radius: 10px !important;
+                margin-bottom: 16px !important;
+            }
+
+            .stock-in-toolbar-right {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+
+            .stock-in-stat-pill {
+                width: 100% !important;
+                padding: 4px 8px !important;
+                font-size: 11.5px !important;
+            }
+
+            .btn-stock-add {
+                grid-column: 1 / -1 !important;
+                width: 100% !important;
+                height: 38px !important;
+                line-height: 38px !important;
+            }
+
+            .stock-in-row {
+                padding: 14px 12px !important;
+                gap: 12px !important;
+            }
+        }
+
+        /* Error styles */
+        .stock-in-table td label.error {
+            display: block;
+            color: #ef4444 !important;
+            font-size: 11.5px;
+            margin-top: 4px;
+            line-height: 1.2;
         }
     </style>
 
@@ -1553,6 +1950,57 @@
                 items: [],
                 errors: @json($errors->toArray()),
 
+                getScopeEl(selector) {
+                    if (this.$el && $(this.$el).is(selector)) {
+                        return $(this.$el);
+                    }
+                    if (this.$root && $(this.$root).find(selector).length) {
+                        return $(this.$root).find(selector);
+                    }
+                    const $active = $('.workspace-tab-pane.active ' + selector);
+                    if ($active.length) {
+                        return $active;
+                    }
+                    return $(selector);
+                },
+
+                setSelect2Value(selector, value, text) {
+                    if (!value) return;
+                    const $select = this.getScopeEl(selector);
+                    if (!$select.length || !$select.is('select')) return;
+                    $select.find('option').filter((index, option) => String(option.value) === String(value)).remove();
+                    $select.append(new Option(text || value, value, true, true)).trigger('change');
+                },
+
+                resetShop() {
+                    const $shop = this.getScopeEl('#shop_id');
+                    $shop.val(null).trigger('change');
+                    this.shop = { id: '', text: '' };
+                    this.shopId = '';
+                    this.products = [];
+                    this.items.forEach(row => {
+                        row.product_id = '';
+                        row.product_name = '';
+                        row.product_category = '';
+                        row.product_uom = '';
+                        row.product_image = '';
+                        row.current_stock = 0;
+                    });
+                },
+
+                resetSupplier() {
+                    const $supplier = this.getScopeEl('#supplier_id');
+                    $supplier.val(null).trigger('change');
+                    this.supplier = { id: '', text: '' };
+                },
+
+                resetProduct() {
+                    const $prod = this.getScopeEl('#product_id');
+                    $prod.empty().append(new Option(@json(__('stock_in.form.select_product')), '', true, true)).trigger('change');
+                    this.product = { id: '', text: '' };
+                    this.getScopeEl('#current_stock').val(0);
+                },
+
                 init() {
                     const data = @json($data ?? '');
                     this.supplier.id = data?.supplier_id ?? `{{ old('supplier_id', $selectedSupplier->id ?? '') }}`;
@@ -1566,11 +2014,11 @@
                     this.fetchSelectShop();
 
                     if (this.supplier.id) {
-                        $select2Data('#supplier_id', this.supplier.id, this.supplier.text);
+                        this.setSelect2Value('#supplier_id', this.supplier.id, this.supplier.text);
                     }
 
                     if (this.shop.id) {
-                        $select2Data('#shop_id', this.shop.id, this.shop.text);
+                        this.setSelect2Value('#shop_id', this.shop.id, this.shop.text);
                     }
 
                     if (this.isCreate) {
@@ -1580,7 +2028,10 @@
                         this.product.id = data?.product_id ?? `{{ old('product_id', $selectedProduct->id ?? '') }}`;
                         this.product.text = data?.product?.name ?? `{{ old('product_text', $selectedProduct->name ?? '') }}`;
                         if (this.product.id) {
-                            $select2Data('#product_id', this.product.id, this.product.text);
+                            this.setSelect2Value('#product_id', this.product.id, this.product.text);
+                        }
+                        if (!this.shop.id && !this.getScopeEl('#shop_id').val()) {
+                            this.getScopeEl('#product_id').prop('disabled', true);
                         }
                         if (!this.isReadonly) {
                             this.fetchCurrentStock();
@@ -1589,155 +2040,170 @@
                 },
 
                 fetchSelectSupplier() {
-                    if ($('#supplier_id').hasClass('select2-hidden-accessible')) {
+                    const $supplier = this.getScopeEl('#supplier_id');
+                    if (!$supplier.length) return;
+                    if ($supplier.hasClass('select2-hidden-accessible')) {
                         return;
                     }
 
-                    $('#supplier_id').select2({
+                    $supplier.select2({
                         placeholder: `{{ __('stock_in.form.select_supplier') }}`,
+                        width: '100%',
                         ajax: this.isReadonly ? null : {
-                            url: '{{ route('admin-select-supplier') }}',
+                            url: '{{ route('admin-select-supplier', [], false) }}',
                             dataType: 'json',
                             type: 'GET',
                             quietMillis: 50,
-                            data: (param) => {
-                                return {
-                                    search: param.term
-                                };
-                            },
-                            processResults: (data) => {
-                                return {
-                                    results: $.map(data.data, (item) => {
-                                        return {
-                                            text: item?.name || '',
-                                            id: item.id
-                                        };
-                                    })
-                                };
-                            },
+                            data: (param) => ({
+                                search: param.term
+                            }),
+                            processResults: (data) => ({
+                                results: $.map(data.data, (item) => ({
+                                    text: item?.name || item?.phone || '',
+                                    id: item.id
+                                }))
+                            }),
                             error: (xhr, status, error) => {
                                 console.error('Error fetching suppliers:', error);
                             }
                         }
                     }).on('select2:select', (event) => {
-                        const selectedId = event.params.data.id;
+                        const selectedId = String(event.params.data.id);
                         const selectedText = event.params.data.text;
-                        const Obj = {
-                            "id": selectedId,
-                            "text": selectedText
+                        this.supplier = {
+                            id: selectedId,
+                            text: selectedText
                         };
-                        this.supplier = Obj;
+                        if (this.errors?.supplier_id) {
+                            delete this.errors.supplier_id;
+                            this.errors = { ...this.errors };
+                        }
                     }).on('select2:open', (e) => {
                         $select2FocusInputSearch();
                     });
 
-                    $('#supplier_id').on('change', () => {
-                        const val = $('#supplier_id').val();
+                    $supplier.on('change', () => {
+                        const val = $supplier.val();
                         if (!val) {
                             this.supplier = { id: '', text: '' };
+                        } else if (this.errors?.supplier_id) {
+                            delete this.errors.supplier_id;
+                            this.errors = { ...this.errors };
                         }
                     });
                 },
 
                 fetchSelectShop() {
-                    if ($('#shop_id').hasClass('select2-hidden-accessible')) {
+                    const $shop = this.getScopeEl('#shop_id');
+                    if (!$shop.length) return;
+                    if ($shop.hasClass('select2-hidden-accessible')) {
                         return;
                     }
 
-                    $('#shop_id').select2({
+                    $shop.select2({
                         placeholder: `{{ __('stock_in.form.select_shop') }}`,
+                        width: '100%',
                         ajax: this.isReadonly ? null : {
-                            url: '{{ route('admin-select-stock-shop') }}',
+                            url: '{{ route('admin-select-stock-shop', [], false) }}',
                             dataType: 'json',
                             type: 'GET',
                             quietMillis: 50,
-                            data: (param) => {
-                                return {
-                                    search: param.term
-                                };
-                            },
-                            processResults: (data) => {
-                                return {
-                                    results: $.map(data.data, (item) => {
-                                        return {
-                                            text: item?.name || '',
-                                            id: item.id
-                                        };
-                                    })
-                                };
-                            },
+                            data: (param) => ({
+                                search: param.term
+                            }),
+                            processResults: (data) => ({
+                                results: $.map(data.data, (item) => ({
+                                    text: item?.name || item?.phone || '',
+                                    id: item.id
+                                }))
+                            }),
                             error: (xhr, status, error) => {
                                 console.error('Error fetching shops:', error);
                             }
                         }
                     }).on('select2:select', (event) => {
-                        const selectedId = event.params.data.id;
+                        const selectedId = String(event.params.data.id);
                         const selectedText = event.params.data.text;
-                        const Obj = {
-                            "id": selectedId,
-                            "text": selectedText
+                        this.shop = {
+                            id: selectedId,
+                            text: selectedText
                         };
-                        this.shop = Obj;
+                        this.shopId = selectedId;
+                        if (this.errors?.shop_id) {
+                            delete this.errors.shop_id;
+                            this.errors = { ...this.errors };
+                        }
+                        if (this.isCreate) {
+                            this.fetchShopProducts(selectedId);
+                        }
                     }).on('select2:open', (e) => {
                         $select2FocusInputSearch();
                     });
 
-                    $('#shop_id').on('change', () => {
-                        const newShopId = $('#shop_id').val();
+                    $shop.on('change', () => {
+                        const newShopId = $shop.val() ? String($shop.val()) : '';
                         this.shopId = newShopId;
                         if (!newShopId) {
                             this.shop = { id: '', text: '' };
+                        } else if (this.errors?.shop_id) {
+                            delete this.errors.shop_id;
+                            this.errors = { ...this.errors };
                         }
 
                         if (this.isCreate) {
                             if (newShopId) {
                                 this.fetchShopProducts(newShopId);
                             } else {
+                                this.products = [];
                                 this.items.forEach(row => {
+                                    row.product_id = '';
+                                    row.product_name = '';
+                                    row.product_category = '';
+                                    row.product_uom = '';
+                                    row.product_image = '';
                                     row.current_stock = 0;
                                 });
                             }
                         } else {
-                            if (typeof $select2Data === 'function') {
-                                $select2Data('#product_id');
-                            } else {
-                                $('#product_id').val(null).trigger('change');
-                            }
+                            const $prod = this.getScopeEl('#product_id');
+                            $prod.empty().append(new Option(@json(__('stock_in.form.select_product')), '', true, true)).trigger('change');
                             this.product = { id: '', text: '' };
-                            $('#current_stock').val(0);
+                            this.getScopeEl('#current_stock').val(0);
+                            if (!newShopId) {
+                                $prod.prop('disabled', true);
+                            } else if (!this.isReadonly) {
+                                $prod.prop('disabled', false);
+                            }
                         }
                     });
                 },
 
                 fetchSelectProduct() {
-                    if ($('#product_id').hasClass('select2-hidden-accessible')) {
+                    const $prod = this.getScopeEl('#product_id');
+                    if (!$prod.length) return;
+                    if ($prod.hasClass('select2-hidden-accessible')) {
                         return;
                     }
 
-                    $('#product_id').select2({
+                    $prod.select2({
                         placeholder: `{{ __('stock_in.form.select_product') }}`,
+                        width: '100%',
                         ajax: this.isReadonly ? null : {
-                            url: '{{ route('admin-select-shop-product') }}',
+                            url: '{{ route('admin-select-shop-product', [], false) }}',
                             dataType: 'json',
                             type: 'GET',
                             quietMillis: 50,
-                            data: (param) => {
-                                return {
-                                    search: param.term,
-                                    shop_id: $('#shop_id').val() || this.shop.id,
-                                    product_id: JSON.stringify([]),
-                                };
-                            },
-                            processResults: (data) => {
-                                return {
-                                    results: $.map(data.data, (item) => {
-                                        return {
-                                            text: item?.product?.name || '',
-                                            id: item?.product?.id
-                                        };
-                                    })
-                                };
-                            },
+                            data: (param) => ({
+                                search: param.term,
+                                shop_id: this.getScopeEl('#shop_id').val() || this.shop.id,
+                                product_id: JSON.stringify([]),
+                            }),
+                            processResults: (data) => ({
+                                results: $.map(data.data, (item) => ({
+                                    text: item?.product?.name || '',
+                                    id: item?.product?.id
+                                }))
+                            }),
                             error: (xhr, status, error) => {
                                 console.error('Error fetching products:', error);
                             }
@@ -1745,18 +2211,22 @@
                     }).on('select2:select', (event) => {
                         const selectedId = event.params.data.id;
                         const selectedText = event.params.data.text;
-                        const Obj = {
-                            "id": selectedId,
-                            "text": selectedText
+                        this.product = {
+                            id: selectedId,
+                            text: selectedText
                         };
-                        this.product = Obj;
                     }).on('select2:open', (e) => {
+                        const currentShopId = this.getScopeEl('#shop_id').val() || this.shop.id;
+                        if (!currentShopId) {
+                            $prod.select2('close');
+                            return;
+                        }
                         $select2FocusInputSearch();
                     });
 
                     if (!this.isReadonly) {
-                        $('#product_id').on('change', () => {
-                            const val = $('#product_id').val();
+                        $prod.on('change', () => {
+                            const val = $prod.val();
                             if (!val) {
                                 this.product = { id: '', text: '' };
                             }
@@ -1818,8 +2288,7 @@
                     if (!shopId) return;
                     this.loadingProducts = true;
                     try {
-                        const baseUrl = @json(url('admin/stock-in/products'));
-                        const url = `${baseUrl}/${shopId}`;
+                        const url = `/admin/stock-in/products/${shopId}`;
                         const response = await fetch(url, {
                             headers: {
                                 'Accept': 'application/json',
@@ -1839,6 +2308,13 @@
                                     row.product_uom = found.uom;
                                     row.product_image = found.image;
                                     row.current_stock = found.current_stock;
+                                } else {
+                                    row.product_id = '';
+                                    row.product_name = '';
+                                    row.product_category = '';
+                                    row.product_uom = '';
+                                    row.product_image = '';
+                                    row.current_stock = 0;
                                 }
                             }
                         });
@@ -1937,6 +2413,15 @@
                     row.current_stock = product.current_stock ?? 0;
                     row.dropdownOpen = false;
                     row.searchQuery = '';
+                    const idx = this.items.indexOf(row);
+                    if (idx !== -1 && this.errors && this.errors[`items.${idx}.product_id`]) {
+                        delete this.errors[`items.${idx}.product_id`];
+                        this.errors = { ...this.errors };
+                    }
+                    if (this.errors && this.errors.items) {
+                        delete this.errors.items;
+                        this.errors = { ...this.errors };
+                    }
                 },
 
                 addRow() {
@@ -1968,50 +2453,78 @@
                         return true;
                     }
 
-                    const supplierId = $('#supplier_id').val();
-                    const shopId = $('#shop_id').val();
+                    const supplierId = this.getScopeEl('#supplier_id').val() || this.supplier.id;
+                    const shopId = this.getScopeEl('#shop_id').val() || this.shopId || this.shop.id;
+                    const newErrors = {};
+                    let isValid = true;
+                    let firstErrorTarget = null;
 
                     if (!supplierId) {
-                        alert(@json(__('stock_in.validation.supplier_required')));
-                        e.preventDefault();
-                        return false;
+                        newErrors['supplier_id'] = [@json(__('stock_in.validation.supplier_required'))];
+                        isValid = false;
+                        if (!firstErrorTarget) {
+                            firstErrorTarget = this.getScopeEl('#supplier_id')[0] || this.getScopeEl('.SelectSupplier')[0];
+                        }
                     }
 
                     if (!shopId) {
-                        alert(@json(__('stock_in.validation.shop_required')));
-                        e.preventDefault();
-                        return false;
+                        newErrors['shop_id'] = [@json(__('stock_in.validation.shop_required'))];
+                        isValid = false;
+                        if (!firstErrorTarget) {
+                            firstErrorTarget = this.getScopeEl('#shop_id')[0] || this.getScopeEl('.SelectShop')[0];
+                        }
                     }
 
                     const validItems = this.items.filter(item => item.product_id);
                     if (validItems.length === 0) {
-                        alert(@json(__('stock_in.validation.items_required')));
-                        e.preventDefault();
-                        return false;
+                        newErrors['items'] = [@json(__('stock_in.validation.items_required'))];
+                        isValid = false;
+                        if (!firstErrorTarget) {
+                            firstErrorTarget = document.querySelector('.stock-in-items-section');
+                        }
                     }
 
                     for (let i = 0; i < this.items.length; i++) {
                         const item = this.items[i];
                         if (!item.product_id) {
-                            alert(`Row ${i + 1}: ${@json(__('stock_in.validation.product_required'))}`);
-                            e.preventDefault();
-                            return false;
+                            newErrors[`items.${i}.product_id`] = [@json(__('stock_in.validation.product_required'))];
+                            isValid = false;
+                            if (!firstErrorTarget) {
+                                firstErrorTarget = document.querySelector(`input[name="items[${i}][qty]"]`);
+                            }
                         }
                         if (!item.qty || parseInt(item.qty, 10) < 1) {
-                            alert(`Row ${i + 1}: ${@json(__('stock_in.validation.qty_min'))}`);
-                            e.preventDefault();
-                            return false;
+                            newErrors[`items.${i}.qty`] = [@json(__('stock_in.validation.qty_min'))];
+                            isValid = false;
+                            if (!firstErrorTarget) {
+                                firstErrorTarget = document.querySelector(`input[name="items[${i}][qty]"]`);
+                            }
                         }
+                    }
+
+                    this.errors = newErrors;
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof e.stopImmediatePropagation === 'function') {
+                            e.stopImmediatePropagation();
+                        }
+                        if (firstErrorTarget) {
+                            firstErrorTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        return false;
                     }
 
                     return true;
                 },
 
                 async fetchCurrentStock() {
-                    const productId = $('#product_id').val();
-                    const shopId = $('#shop_id').val();
+                    const productId = this.getScopeEl('#product_id').val() || this.product.id;
+                    const shopId = this.getScopeEl('#shop_id').val() || this.shop.id;
+                    const $currentStock = this.getScopeEl('#current_stock');
                     if (!productId || !shopId) {
-                        $('#current_stock').val(0);
+                        $currentStock.val(0);
                         return;
                     }
 
@@ -2023,8 +2536,8 @@
                         }
                     })
                         .then((response) => response.json())
-                        .then((response) => $('#current_stock').val(response?.current_stock ?? 0))
-                        .catch(() => $('#current_stock').val(0));
+                        .then((response) => $currentStock.val(response?.current_stock ?? 0))
+                        .catch(() => $currentStock.val(0));
                 },
             }));
         });

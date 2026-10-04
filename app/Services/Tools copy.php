@@ -16,7 +16,14 @@ class Tools
         DB::beginTransaction();
         try {
             $item = $req->all();
-            $item["user"] = Auth::user()->id;
+            if (Auth::check()) {
+                $tableName = (new $table)->getTable();
+                if (Schema::hasColumn($tableName, 'user')) {
+                    $item['user'] = Auth::user()->id;
+                } elseif (Schema::hasColumn($tableName, 'user_id')) {
+                    $item['user_id'] = Auth::user()->id;
+                }
+            }
             $table::updateOrCreate(['id' => $id], $item);
             DB::commit();
             Session::flash('success', $status);
@@ -33,14 +40,21 @@ class Tools
     public function onUpdateStatus($table, $id, $status){
         DB::beginTransaction();
         try {
+            $tableName = (new $table)->getTable();
             $item = [
-                "status" => $status,
-                "user"=>Auth::user()->id
+                "status" => (int)$status,
             ];
-            $status = $status == 2 ? "Disable successful!" : "Enable successful!";
+            if (Auth::check()) {
+                if (Schema::hasColumn($tableName, 'user')) {
+                    $item['user'] = Auth::user()->id;
+                } elseif (Schema::hasColumn($tableName, 'user_id')) {
+                    $item['user_id'] = Auth::user()->id;
+                }
+            }
+            $statusMessage = ((int)$status === 2) ? "Disable successful!" : "Enable successful!";
             $table::where("id", $id)->update($item);
             DB::commit();
-            Session::flash('success', $status);
+            Session::flash('success', $statusMessage);
             return response()->json([
                 'message'=>'success',
                 'status'=>200

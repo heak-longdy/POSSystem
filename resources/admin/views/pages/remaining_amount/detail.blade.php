@@ -2096,6 +2096,13 @@
             .sidebar,
             .header,
             #content > .header,
+            #workspace-tab-bar,
+            .mdi-workspace-tabs-container,
+            .workspace-tab-bar,
+            .mdi-tooltip-popup,
+            .mdi-context-menu,
+            .mdi-overflow-dropdown,
+            .mdi-tab-launcher-modal,
             .detail-breadcrumb,
             .detail-header-card,
             .detail-kpi-grid,
@@ -2124,7 +2131,11 @@
             #bookingDetailApp,
             .content-body,
             #bookingDetailContentBody,
-            .booking-detail-page-wrapper {
+            .booking-detail-page-wrapper,
+            .workspace-viewport,
+            #workspace-viewport,
+            .workspace-tab-pane,
+            #tab-pane-initial {
                 display: block !important;
                 position: static !important;
                 width: 100% !important;

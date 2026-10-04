@@ -1,3 +1,5 @@
+@if(!defined('ADMIN_SELECT_OPTION_LOADED'))
+@php define('ADMIN_SELECT_OPTION_LOADED', true); @endphp
 <style>
     /* body {
         font-family: Arial, sans-serif;
@@ -339,3 +341,4 @@
         });
     };
 </script>
+@endif

@@ -21,6 +21,17 @@ class CustomerSeeder extends Seeder
 
         $customers = [
             [
+                'name'        => 'ហៀក ឡងឌី (Heak Longdy)',
+                'ordering'    => 16,
+                'phone'       => '012787802',
+                'address'     => 'ផ្ទះលេខ ១០៨ ផ្លូវ ២០០២ សង្កាត់ទឹកថ្លា ខណ្ឌសែនសុខ ភ្នំពេញ',
+                'profile'     => null,
+                'password'    => bcrypt('12345678'),
+                'total_point' => 1452,
+                'user'        => 1,
+                'status'      => 1,
+            ],
+            [
                 'name'        => 'សុខ ដារ៉ា (Sok Dara)',
                 'ordering'    => 1,
                 'phone'       => '012888999',

@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{-- <link rel="shortcut icon" href="{!! asset('images/logo/ISEA_webicon.png') !!}"/> --}}
-    <title>ADMIN</title>
+    <title>ADMIN @yield('title')</title>
     <link rel="stylesheet" href="{{ mix('admin-public/css/app.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-public/css/materialIcon.css') }}">
     <link rel="stylesheet" href="{{ asset('admin-public/css/select2.min.css') }}">

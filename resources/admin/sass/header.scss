@@ -370,15 +370,17 @@ nav .divider {
 
 .header {
     background            : $rightBgHeader;
-    padding               : 0 20px;
+    padding               : 20px 20px 0 20px;
     // z-index            : 1;
     //2
     position        : -webkit-sticky;
     position        : sticky;
-    top             : 0;
+    // top             : 0;
+    top: 30px;
     // left            : 0;
     transition            : all 0.3s ease;
     
+    z-index: 99;
     &.main-header-navbar {
         z-index: 1000 !important;
     }

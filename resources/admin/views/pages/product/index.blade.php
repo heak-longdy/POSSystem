@@ -96,62 +96,69 @@
 
 @section('script')
     <script lang="ts">
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('xIndex', () => ({
-                loading: null,
-                selected_id: null,
-                groupClassList: [],
-                professionList: [],
-                async init() {
-                    this.loading = true;
-                    this.loading = false;
-                },
-                async fetchData(url, callback) {
-                    await fetch(url, {
-                            method: "GET",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "Accept": "application/json",
+        (function() {
+            const registerXIndex = () => {
+                Alpine.data('xIndex', () => ({
+                    loading: null,
+                    selected_id: null,
+                    groupClassList: [],
+                    professionList: [],
+                    async init() {
+                        this.loading = true;
+                        this.loading = false;
+                    },
+                    async fetchData(url, callback) {
+                        await fetch(url, {
+                                method: "GET",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Accept": "application/json",
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(response => {
+                                callback(response);
+                            })
+                            .catch((e) => {})
+                            .finally(async (res) => {});
+                    },
+                    storeDialog(data = null, type = null) {
+                        this.$store?.store?.open({
+                            data: data,
+                            type: type
+                        });
+                    },
+                    verifyDialog(data, typeAction, btn) {
+                        const confirmTemplate = `{{ __('global.dialog.confirm_action', ['action' => '__ACTION__']) }}`;
+                        const confirmMsg = confirmTemplate.replace('__ACTION__', btn);
+                        this.$store?.confirmDialog?.open({
+                            data: {
+                                message: confirmMsg,
+                                btnClose: `{{ __('action_button.cancel') }}`,
+                                btnSave: btn,
+                                item: data,
+                                urlName:`{{$routeName}}`,
+                                typeAction: typeAction,
+                                digPosition: "posTop",
+                                class: "deleteDialog",
+                                width: "18rem"
+                            },
+                            afterClosed: (result) => {
+                                if (result) {
+                                    let Url = `{{ url()->full() }}`;
+                                    reloadData(Url);
+                                }
                             }
-                        })
-                        .then(response => response.json())
-                        .then(response => {
-                            callback(response);
-                        })
-                        .catch((e) => {})
-                        .finally(async (res) => {});
-                },
-                storeDialog(data = null, type = null) {
-                    this.$store.store.open({
-                        data: data,
-                        type: type
-                    });
-                },
-                verifyDialog(data, typeAction, btn) {
-                    const confirmTemplate = `{{ __('global.dialog.confirm_action', ['action' => '__ACTION__']) }}`;
-                    const confirmMsg = confirmTemplate.replace('__ACTION__', btn);
-                    this.$store.confirmDialog.open({
-                        data: {
-                            message: confirmMsg,
-                            btnClose: `{{ __('action_button.cancel') }}`,
-                            btnSave: btn,
-                            item: data,
-                            urlName:`{{$routeName}}`,
-                            typeAction: typeAction,
-                            digPosition: "posTop",
-                            class: "deleteDialog",
-                            width: "18rem"
-                        },
-                        afterClosed: (result) => {
-                            if (result) {
-                                let Url = `{{ url()->full() }}`;
-                                reloadData(Url)
-                            }
-                        }
-                    });
-                },
-                
-            }))
-        });
+                        });
+                    },
+                }));
+            };
+
+            if (window.Alpine) {
+                registerXIndex();
+            } else {
+                document.addEventListener('alpine:init', registerXIndex);
+            }
+        })();
     </script>
 @stop

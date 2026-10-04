@@ -32,7 +32,7 @@
                 </div>
                 <div class="form-row">
                     <label>{{ __('shop.form.address.label') }}<span>*</span></label>
-                    <textarea type="text" rows="8" name="address" placeholder="{{ __('shop.form.address.placeholder') }}" id="address">{!! isset($data) ? $data?->address : old('address') !!}</textarea>
+                    <textarea rows="5" name="address" placeholder="{{ __('shop.form.address.placeholder') }}" id="address">{!! request('id') ? ($data?->address ?? '') : old('address') !!}</textarea>
                     @error('address')
                         <label class="error">{{ $message }}</label>
                     @enderror

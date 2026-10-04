@@ -277,10 +277,6 @@
 
                     this.monthList = @json(config('dummy.months'));
 
-                    await $fetchData('/admin/select/placement-type', (res) => {
-                        this.placement_typeL_list = res?.data;
-                    });
-
                     $(`#start_month`).select2();
                     $(`#to_month`).select2();
                     $(`#placement_type_id`).select2();

@@ -1,3 +1,5 @@
+@if(!defined('ADMIN_SEARCH_MENU_LOADED'))
+@php define('ADMIN_SEARCH_MENU_LOADED', true); @endphp
 @php
     $rawMenu = config('menu', []);
     $allAdminMenuItems = [];
@@ -197,19 +199,20 @@
     }
 
     .cp-close-btn {
-        background: transparent;
-        border: none;
-        color: #94a3b8;
-        cursor: pointer;
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.15s ease;
-        padding: 0;
-        font-size: 18px;
+        background: transparent !important;
+        border: none !important;
+        color: #94a3b8 !important;
+        cursor: pointer !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        border-radius: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.15s ease !important;
+        padding: 0 !important;
+        font-size: 18px !important;
     }
 
     .cp-close-btn:hover {
@@ -775,6 +778,13 @@
                 navigateTo(item) {
                     if (!item || !item.url || item.url === '#') return;
                     this.close();
+                    if (window.MDI && typeof window.MDI.openUrlInTab === 'function' && (item.url.startsWith('/') || item.url.startsWith(window.location.origin))) {
+                        try {
+                            const urlObj = new URL(item.url, window.location.origin);
+                            window.MDI.openUrlInTab(urlObj.pathname + urlObj.search, item.title, 'bx ' + (item.icon || 'bx-file'));
+                            return;
+                        } catch (e) {}
+                    }
                     window.location.href = item.url;
                 },
 
@@ -810,3 +820,4 @@
         });
     };
 </script>
+@endif

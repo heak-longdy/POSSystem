@@ -1,3 +1,5 @@
+@if(!defined('ADMIN_LOGOUT_LOADED'))
+@php define('ADMIN_LOGOUT_LOADED', true); @endphp
 <template x-data="{}" x-if="$store.logOut.active">
     <div class="dialog confirmDialogLayout" x-data="selectOption"
         x-bind:style="{ zIndex: $store.libs.getLastIndex() + 1 }" :class="$store.logOut.active ? 'dialogAnimation':''">
@@ -112,3 +114,4 @@
         });
     };
 </script>
+@endif

@@ -38,6 +38,20 @@ sidebarLinks.forEach(function (link) {
       if (url && url !== "#") {
         if (e.ctrlKey || e.metaKey) {
           window.open(url, "_blank");
+        } else if (window.MDI && typeof window.MDI.openUrlInTab === "function") {
+          e.preventDefault();
+          var title = this.textContent.trim();
+          var iconEl = this.querySelector("i.icon");
+          var icon = "bx bx-file";
+
+          if (iconEl) {
+            var iconClasses = Array.from(iconEl.classList).filter(function (c) {
+              return c !== "icon";
+            });
+            if (iconClasses.length > 0) icon = iconClasses.join(" ");
+          }
+
+          window.MDI.openUrlInTab(url, title, icon);
         } else {
           window.location.href = url;
         }
@@ -182,20 +196,27 @@ if (profile && !profile.hasAttribute("x-data") && !profile.closest("[x-data]")) 
 // Notification DROPDOWN
 
 
-var notification = document.querySelector(".notificationGp");
-var eventNotification = notification.querySelector(".notification");
-var dropdownNotification = notification.querySelector(".notification-body");
-eventNotification.addEventListener("click", function (e) {
-  e.preventDefault();
-  dropdownNotification.classList.toggle("show");
-});
-window.addEventListener("click", function (e) {
-  if (!e.target.closest(".notificationGp")) {
-    if (dropdownNotification.classList.contains("show")) {
-      dropdownNotification.classList.remove("show");
-    }
+var notification = document.querySelector(".header.main-header-navbar .notificationGp");
+
+if (notification) {
+  var eventNotification = notification.querySelector(".notification");
+  var dropdownNotification = notification.querySelector(".notification-body");
+
+  if (eventNotification && dropdownNotification) {
+    eventNotification.addEventListener("click", function (e) {
+      e.preventDefault();
+      dropdownNotification.classList.toggle("show");
+    });
+    window.addEventListener("click", function (e) {
+      if (!e.target.closest(".notificationGp")) {
+        if (dropdownNotification.classList.contains("show")) {
+          dropdownNotification.classList.remove("show");
+        }
+      }
+    });
   }
-}); // MENU
+} // MENU
+
 
 var allMenu = document.querySelectorAll("main .content-data .head .menu");
 allMenu.forEach(function (item) {
@@ -245,105 +266,186 @@ menu_listDom === null || menu_listDom === void 0 ? void 0 : menu_listDom.scrollT
 
 /***/ }),
 
-/***/ "./node_modules/s-event.js/index.min.js":
-/*!**********************************************!*\
-  !*** ./node_modules/s-event.js/index.min.js ***!
-  \**********************************************/
-/***/ (() => {
+/***/ "./resources/admin/ts/workspace/s-events.js":
+/*!**************************************************!*\
+  !*** ./resources/admin/ts/workspace/s-events.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
-// author : LY SARI
-// s-event version: 1.0.0
-// release date: 2022-02-09
-(function () {
-  const PREFIX = "s";
-  const EVENT = [
-    "click",
-    "mouseover",
-    "mouseout",
-    "mousedown",
-    "mouseup",
-    "mousemove",
-    "focus",
-    "Keydown",
-    "Keyup",
-  ];
-  const TYPE = ["fn", "link", "open"];
-  let FULL_EVENT_ATTRIBUTES = [];
-  EVENT.map((event) => {
-    TYPE.map((type) => {
-      FULL_EVENT_ATTRIBUTES.push(`${PREFIX}-${event}-${type}`);
-    });
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "initSEvents": () => (/* binding */ initSEvents),
+/* harmony export */   "initSMask": () => (/* binding */ initSMask)
+/* harmony export */ });
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+/**
+ * POS Enterprise MDI - s-event & s-mask handler
+ * Enhanced replacement for s-event.js and s-mask.js with full MDI tab support.
+ */
+var PREFIX = "s";
+var EVENT = ["click", "mouseover", "mouseout", "mousedown", "mouseup", "mousemove", "focus", "Keydown", "Keyup"];
+var TYPE = ["fn", "link", "open"];
+var FULL_EVENT_ATTRIBUTES = [];
+EVENT.forEach(function (event) {
+  TYPE.forEach(function (type) {
+    FULL_EVENT_ATTRIBUTES.push("".concat(PREFIX, "-").concat(event, "-").concat(type));
   });
-  const elements = document.querySelectorAll("*");
-  elements.forEach((item) => {
-    item.getAttributeNames().map((attr) => {
+});
+function initSEvents() {
+  var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!container) return;
+  var elements = container.querySelectorAll ? container.querySelectorAll("*") : [];
+  elements.forEach(function (item) {
+    if (item._s_event_initialized) return;
+    var attrNames = item.getAttributeNames ? item.getAttributeNames() : [];
+    attrNames.forEach(function (attr) {
       if (FULL_EVENT_ATTRIBUTES.includes(attr)) {
-        const [prefix, event, type] = attr.split("-");
-        const value = item.getAttribute(attr);
-        item.addEventListener(event, () => {
+        item._s_event_initialized = true;
+
+        var _attr$split = attr.split("-"),
+            _attr$split2 = _slicedToArray(_attr$split, 3),
+            prefix = _attr$split2[0],
+            event = _attr$split2[1],
+            type = _attr$split2[2];
+
+        var value = item.getAttribute(attr);
+        item.addEventListener(event, function (e) {
           switch (type) {
             case "fn":
-              value ? Function(value)() : false;
+              if (value) {
+                try {
+                  Function(value)();
+                } catch (err) {
+                  console.error("s-event fn error:", err);
+                }
+              }
+
               break;
+
             case "link":
-              value ? (window.location.href = value) : false;
+              if (value && value !== "#" && !value.startsWith("javascript:")) {
+                // If MDI is active, route internal admin links into MDI tabs!
+                try {
+                  var url = new URL(value, window.location.origin);
+
+                  if (window.MDI && url.origin === window.location.origin && url.pathname.startsWith("/admin") && !url.pathname.includes("logout") && !url.pathname.includes("auth")) {
+                    var _item$innerText;
+
+                    e.preventDefault();
+                    e.stopPropagation(); // Check if it's an export / download / destructive action
+
+                    var lowerVal = value.toLowerCase();
+
+                    if (lowerVal.includes("/export") || lowerVal.includes("/download") || lowerVal.includes("/print") || lowerVal.endsWith(".xlsx") || lowerVal.endsWith(".pdf") || lowerVal.endsWith(".csv") || lowerVal.includes("delete") || lowerVal.includes("destroy") || item.classList.contains("delete") || item.classList.contains("text-danger")) {
+                      window.location.href = value;
+                      return;
+                    }
+
+                    var targetPath = url.pathname + url.search;
+                    var currentTab = window.MDI.tabs.find(function (t) {
+                      return t.key === window.MDI.activeTabKey;
+                    }); // If reload button on current active tab
+
+                    if (currentTab && (url.href === window.location.href || currentTab.url === targetPath)) {
+                      window.MDI.refreshTab(window.MDI.activeTabKey);
+                      return;
+                    } // Extract title
+
+
+                    var title = item.getAttribute("title") || ((_item$innerText = item.innerText) === null || _item$innerText === void 0 ? void 0 : _item$innerText.trim()) || "";
+
+                    if (!title) {
+                      if (item.classList.contains("head-icon") || item.querySelector('[data-feather="arrow-left"]') || item.getAttribute("data-feather") === "arrow-left") {
+                        title = "Back";
+                      }
+                    } // Extract icon
+
+
+                    var icon = "bx bx-file";
+
+                    if (item.classList.contains("btn-create") || lowerVal.includes("/create")) {
+                      icon = "bx bx-plus-circle";
+                    } else if (lowerVal.includes("/list")) {
+                      icon = "bx bx-list-ul";
+                    }
+
+                    window.MDI.openUrlInTab(targetPath, title, icon);
+                    return;
+                  }
+                } catch (err) {} // Default external or non-admin behavior
+
+
+                window.location.href = value;
+              }
+
               break;
+
             case "open":
-              value ? window.open(value, "_blank") : false;
+              if (value) {
+                window.open(value, "_blank");
+              }
+
               break;
           }
-        });
-        item.removeAttribute(attr);
+        }); // NOTE: We do NOT remove the attribute so inspection and delegation work reliably
       }
     });
   });
-})();
+}
+function initSMask() {
+  var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!container) return;
+  var elements = container.querySelectorAll ? container.querySelectorAll("[s-mask]") : [];
 
-
-/***/ }),
-
-/***/ "./node_modules/s-mask.js/index.min.js":
-/*!*********************************************!*\
-  !*** ./node_modules/s-mask.js/index.min.js ***!
-  \*********************************************/
-/***/ (() => {
-
-// author : LY SARI
-// s-event version: 1.0.0
-// release date: 2022-03-07
-(function () {
-  "use strict";
-  const element = document.querySelectorAll("[s-mask]");
-  const maskConvert = (value, arg) => {
+  var maskConvert = function maskConvert(value, arg) {
     if (value && value.length > 0 && isFinite(value)) {
-      let mask = value.toString();
-      let mask_result = "";
-      let mask_index = 0;
-      let arg_mask = arg.match(/#/gm);
-      let mask_symbol =
-        mask.length >= arg_mask.length ? mask.length : arg_mask.length;
-      for (let i = 0; i < mask_symbol; i++) {
-        if (arg[i].toLowerCase() == "#") {
+      var mask = value.toString();
+      var mask_result = "";
+      var mask_index = 0;
+      var arg_mask = arg.match(/#/gm);
+      var mask_symbol = mask.length >= (arg_mask ? arg_mask.length : 0) ? mask.length : arg_mask.length;
+
+      for (var i = 0; i < mask_symbol; i++) {
+        var _arg$i;
+
+        if (((_arg$i = arg[i]) === null || _arg$i === void 0 ? void 0 : _arg$i.toLowerCase()) === "#") {
           if (mask[i - mask_index]) {
             mask_result += mask[i - mask_index];
           }
-        } else {
+        } else if (arg[i]) {
           mask_symbol++;
           mask_index++;
           mask_result += arg[i];
         }
       }
+
       return mask_result;
     }
+
     return value;
   };
-  element.forEach((el) => {
-    const value = el.innerHTML;
-    const mask = el.getAttribute("s-mask");
-    el.innerHTML = maskConvert(value, mask);
-  });
-})();
 
+  elements.forEach(function (el) {
+    var value = el.innerHTML;
+    var mask = el.getAttribute("s-mask");
+
+    if (mask) {
+      el.innerHTML = maskConvert(value, mask);
+    }
+  });
+}
 
 /***/ })
 
@@ -374,6 +476,35 @@ menu_listDom === null || menu_listDom === void 0 ? void 0 : menu_listDom.scrollT
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
@@ -382,6 +513,16 @@ var __webpack_exports__ = {};
   \************************************/
 feather.replace();
 Alpine.start();
+window.AlpineStarted = true;
+
+var _require = __webpack_require__(/*! ./workspace/s-events */ "./resources/admin/ts/workspace/s-events.js"),
+    initSEvents = _require.initSEvents,
+    initSMask = _require.initSMask;
+
+window.initSEvents = initSEvents;
+window.initSMask = initSMask;
+initSEvents(document);
+initSMask(document);
 $(document).ready(function () {
   var _menu_active$;
 
@@ -444,10 +585,6 @@ el === null || el === void 0 ? void 0 : el.addEventListener("click", function ()
     behavior: "smooth"
   });
 });
-
-__webpack_require__(/*! s-event.js */ "./node_modules/s-event.js/index.min.js");
-
-__webpack_require__(/*! s-mask.js */ "./node_modules/s-mask.js/index.min.js");
 
 __webpack_require__(/*! ./package/sliderBar */ "./resources/admin/ts/package/sliderBar.js");
 })();

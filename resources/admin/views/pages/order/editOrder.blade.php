@@ -330,8 +330,8 @@
 @stop
 @section('script')
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('XDatacreateorder', () => ({
+        function XDatacreateorder() {
+            return {
                 loading: false,
                 dataError: null,
                 member: Object(),
@@ -483,6 +483,7 @@
                                     message: "Are you sure to save?",
                                     btnClose: "Close",
                                     btnSave: "Yes",
+                                    typeAction: 'manual',
                                 },
                                 afterClosed: (result) => {
                                     if (result) {
@@ -520,10 +521,31 @@
                                                         false;
                                                     setTimeout(
                                                         () => {
-                                                            window
-                                                                .location
-                                                                .href =
-                                                                '{{ route('admin-' . ($routeName ?? 'order') . '-list', 1) }}';
+                                                            const targetUrl = '{{ route('admin-' . ($routeName ?? 'order') . '-list', 1) }}';
+                                                            if (window.MDI) {
+                                                                const editTab = window.MDI.tabs.find(t => (t.url && t.url.includes('/admin/order/edit')) || t.key === window.MDI.activeTabKey);
+                                                                if (editTab) {
+                                                                    editTab.isDirty = false;
+                                                                    window.MDI.closeTab(editTab, null, false);
+                                                                }
+                                                                const listKey = window.MDI.generateKey(targetUrl);
+                                                                const existingListTab = window.MDI.tabs.find(t => t.key === listKey);
+                                                                if (existingListTab) {
+                                                                    existingListTab.url = targetUrl;
+                                                                    const listPane = document.getElementById('tab-pane-' + existingListTab.key);
+                                                                    if (listPane) {
+                                                                        listPane.remove();
+                                                                    }
+                                                                }
+                                                                if (window.iziToast) {
+                                                                    const title = (window.workspaceTranslations && window.workspaceTranslations.success) || 'Success';
+                                                                    const msg = @json(__('order.message.update_success')) || 'Order updated successfully!';
+                                                                    window.iziToast.success({ title: title, message: msg });
+                                                                }
+                                                                window.MDI.openUrlInTab(targetUrl, 'Order Management');
+                                                            } else {
+                                                                window.location.href = targetUrl;
+                                                            }
                                                         }, 100);
                                                 }
                                             }).catch((e) => {
@@ -779,6 +801,17 @@
                     $cb(error);
                     this.submitLoading = false;
                 }
-            }));
+            };
+        }
+
+        window.XDatacreateorder = XDatacreateorder;
+
+        if (window.Alpine && typeof window.Alpine.data === 'function') {
+            window.Alpine.data('XDatacreateorder', XDatacreateorder);
+        }
+        document.addEventListener('alpine:init', () => {
+            if (window.Alpine && typeof window.Alpine.data === 'function') {
+                window.Alpine.data('XDatacreateorder', XDatacreateorder);
+            }
         });
     </script>

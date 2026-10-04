@@ -1,5 +1,12 @@
 feather.replace();
 Alpine.start();
+window.AlpineStarted = true;
+
+const { initSEvents, initSMask } = require("./workspace/s-events");
+window.initSEvents = initSEvents;
+window.initSMask = initSMask;
+initSEvents(document);
+initSMask(document);
 
 $(document).ready(function () {
   // Scroll To Active
@@ -66,6 +73,4 @@ el?.addEventListener("click", function () {
   });
 });
 
-require("s-event.js");
-require("s-mask.js");
 require("./package/sliderBar");

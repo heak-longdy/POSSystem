@@ -20,6 +20,7 @@ return [
     'cancel'                 => 'បោះបង់',
     'confirm'                => 'បញ្ជាក់',
     'ordering'               => 'លំដាប់',
+    'unsaved_changes'        => 'ទិន្នន័យមិនទាន់រក្សាទុក',
 
     // Table headers
     'table' => [
@@ -154,6 +155,7 @@ return [
     'message' => [
         'delete_success'     => 'លុបបានជោគជ័យ!',
         'restore_success'    => 'ស្តារឡើងវិញបានជោគជ័យ!',
+        'save_success'       => 'រក្សាទុកបានជោគជ័យ!',
     ],
 
     // Validations
@@ -191,6 +193,42 @@ return [
         'general'               => 'ទូទៅ',
         'item'                  => 'ម៉ឺនុយ',
         'items'                 => 'ម៉ឺនុយ',
+    ],
+
+    // Workspace / Tabs
+    'workspace' => [
+        'unsaved'                => 'មិនទាន់រក្សាទុក',
+        'unsaved_changes'        => 'ទិន្នន័យមិនទាន់រក្សាទុក',
+        'confirm_close_tab'      => 'អ្នកមានការផ្លាស់ប្តូរមិនទាន់រក្សាទុកក្នុង ":title"។ តើអ្នកចង់បិទដោយមិនរក្សាទុកមែនទេ?',
+        'confirm_close_all'      => 'អ្នកមានការផ្លាស់ប្តូរមិនទាន់រក្សាទុកនៅក្នុងផ្ទាំងមួយចំនួន។ តើអ្នកពិតជាចង់បិទផ្ទាំងទាំងអស់មែនទេ?',
+        'close_tab'              => 'បិទផ្ទាំង',
+        'close_tab_shortcut'     => 'បិទផ្ទាំង (Ctrl+W)',
+        'close_all_tabs'         => 'បិទផ្ទាំងទាំងអស់',
+        'close_all'              => 'បិទទាំងអស់',
+        'close_others'           => 'បិទផ្ទាំងផ្សេងទៀត',
+        'close_to_right'         => 'បិទផ្ទាំងទៅខាងស្តាំ',
+        'reload'                 => 'ផ្ទុកផ្ទាំងឡើងវិញ',
+        'open_tabs'              => 'ផ្ទាំងដែលបើក',
+        'tab'                    => 'ផ្ទាំង',
+        'notifications'          => 'ការជូនដំណឹង',
+        'new'                    => 'ថ្មី',
+        'coming_soon'            => 'នឹងមកដល់ឆាប់ៗនេះ...',
+        'coming_soon_desc'       => 'មុខងារនេះនឹងមកដល់ឆាប់ៗនេះ។',
+        'see_all_notifications'  => 'មើលការជូនដំណឹងទាំងអស់',
+        'administrator'          => 'អ្នកគ្រប់គ្រងទូទៅ',
+        'my_profile'             => 'គណនីរបស់ខ្ញុំ',
+        'account_settings'       => 'ការកំណត់គណនី',
+        'my_inbox'               => 'សារប្រអប់សំបុត្រ',
+        'messages_emails'        => 'សារ និងអ៊ីមែល',
+        'my_tasks'               => 'ភារកិច្ចរបស់ខ្ញុំ',
+        'todo_daily_tasks'       => 'កិច្ចការប្រចាំថ្ងៃ',
+        'logout'                 => 'ចាកចេញ',
+        'saved_successfully'     => 'រក្សាទុកបានជោគជ័យ!',
+        'check_required_fields'  => 'សូមពិនិត្យមើលព័ត៌មានដែលតម្រូវឱ្យបំពេញ។',
+        'submit_error'           => 'មិនអាចរក្សាទុកទិន្នន័យបានទេ។ សូមព្យាយាមម្តងទៀត។',
+        'success'                => 'ជោគជ័យ',
+        'warning'                => 'ការព្រមាន',
+        'error'                  => 'កំហុស',
     ],
 
     // Page

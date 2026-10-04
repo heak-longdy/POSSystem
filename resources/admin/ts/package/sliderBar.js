@@ -32,6 +32,16 @@ sidebarLinks.forEach((link) => {
             if (url && url !== "#") {
                 if (e.ctrlKey || e.metaKey) {
                     window.open(url, "_blank");
+                } else if (window.MDI && typeof window.MDI.openUrlInTab === "function") {
+                    e.preventDefault();
+                    const title = this.textContent.trim();
+                    const iconEl = this.querySelector("i.icon");
+                    let icon = "bx bx-file";
+                    if (iconEl) {
+                        const iconClasses = Array.from(iconEl.classList).filter(c => c !== "icon");
+                        if (iconClasses.length > 0) icon = iconClasses.join(" ");
+                    }
+                    window.MDI.openUrlInTab(url, title, icon);
                 } else {
                     window.location.href = url;
                 }
@@ -183,21 +193,25 @@ if (profile && !profile.hasAttribute("x-data") && !profile.closest("[x-data]")) 
     // });
 
 // Notification DROPDOWN
-const notification = document.querySelector(".notificationGp");
-const eventNotification = notification.querySelector(".notification");
-const dropdownNotification = notification.querySelector(".notification-body");
+const notification = document.querySelector(".header.main-header-navbar .notificationGp");
+if (notification) {
+    const eventNotification = notification.querySelector(".notification");
+    const dropdownNotification = notification.querySelector(".notification-body");
 
-eventNotification.addEventListener("click", function (e) {
-    e.preventDefault();
-    dropdownNotification.classList.toggle("show");
-});
-window.addEventListener("click", function (e) {
-    if (!e.target.closest(".notificationGp")) {
-        if (dropdownNotification.classList.contains("show")) {
-            dropdownNotification.classList.remove("show");
-        }
+    if (eventNotification && dropdownNotification) {
+        eventNotification.addEventListener("click", function (e) {
+            e.preventDefault();
+            dropdownNotification.classList.toggle("show");
+        });
+        window.addEventListener("click", function (e) {
+            if (!e.target.closest(".notificationGp")) {
+                if (dropdownNotification.classList.contains("show")) {
+                    dropdownNotification.classList.remove("show");
+                }
+            }
+        });
     }
-});
+}
 
 // MENU
 const allMenu = document.querySelectorAll("main .content-data .head .menu");

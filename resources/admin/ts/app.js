@@ -94,6 +94,14 @@ window.$select2FocusInputSearch = function () {
 };
 
 window.reloadData = function (url) {
+  if (window.MDI && typeof window.MDI.refreshTab === "function") {
+    const currentTab = window.MDI.tabs.find((t) => t.key === window.MDI.activeTabKey);
+    if (currentTab && url) {
+      currentTab.url = window.MDI.normalizeUrl(url);
+    }
+    window.MDI.refreshTab();
+    return;
+  }
   window.location.href = url;
 };
 
@@ -124,3 +132,5 @@ window.$fetchData = async function (url, callback) {
     .catch((e) => {})
     .finally(async (res) => {});
 };
+
+require("./workspace/mdi");

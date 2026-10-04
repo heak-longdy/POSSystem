@@ -339,16 +339,12 @@ class StockInController extends Controller
 
         $shopProducts = ShopProduct::where('shop_id', $shopId)
             ->where('status', 1)
+            ->whereHas('product', function ($query) {
+                $query->where('status', 1);
+            })
             ->with(['product.category', 'product.uom'])
-            ->get();
-
-        $attachedProductIds = $shopProducts->pluck('product_id')->filter()->toArray();
-
-        $otherProducts = Product::where('status', 1)
-            ->whereNotIn('id', $attachedProductIds)
-            ->with(['category', 'uom'])
-            ->orderBy('name', 'asc')
-            ->get();
+            ->get()
+            ->unique('product_id');
 
         $stockOnHands = StockOnHand::where('shop_id', $shopId)
             ->pluck('current_stock', 'product_id');
@@ -369,17 +365,9 @@ class StockInController extends Controller
             }
         }
 
-        foreach ($otherProducts as $product) {
-            $list[] = [
-                'id'            => (string) $product->id,
-                'name'          => $product->name,
-                'category'      => $product->category?->name ?? '---',
-                'uom'           => $product->uom?->name ?? '---',
-                'image'         => $product->image_url ?? asset('images/logo/default.png'),
-                'current_stock' => (int) ($stockOnHands[$product->id] ?? 0),
-                'is_assigned'   => false,
-            ];
-        }
+        usort($list, function ($a, $b) {
+            return strcasecmp($a['name'], $b['name']);
+        });
 
         return $list;
     }

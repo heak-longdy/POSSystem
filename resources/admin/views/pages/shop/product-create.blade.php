@@ -3,7 +3,7 @@
     @include('admin::shared.header', ['header_name' => '', 'customClass' => 'headerInForm'])
     <div class="form-admin" x-data="xShopProduct">
         <div class="form-bg"></div>
-        <form id="form" class="form-wrapper shop-product-form" action="{!! route('admin-' . $routeName . '-product-save', $id) !!}" method="POST">
+        <form id="form" class="form-wrapper shop-product-form" action="{!! route('admin-' . $routeName . '-product-save', $id) !!}" method="POST" @submit="handleSubmit($event)">
             <div class="form-header">
                 <h3 class="shop-product-page-title">
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-product', $id) !!}"></i>
@@ -19,6 +19,9 @@
                 @error('products')
                     <label class="error">{{ $message }}</label>
                 @enderror
+                <template x-if="errors?.products?.[0]">
+                    <label class="error" x-text="errors.products[0]"></label>
+                </template>
 
                 <div class="shop-product-toolbar">
                     <div class="shop-product-toolbar-text">
@@ -35,9 +38,8 @@
                     {{ __('shop.product.all_assigned_alert') }}
                 </div>
 
-                <template x-if="productRows.length > 0">
-                    <template x-for="(row,index) in productRows" :key="row.uid">
-                        <div class="shop-product-row">
+                <template x-for="(row,index) in productRows" :key="row.uid">
+                    <div class="shop-product-row">
                             <input type="hidden" :name="`products[${index}][id]`" x-model="row.id">
                             <input type="hidden" :name="`products[${index}][product_name]`" x-model="row.product_name">
                             <input type="hidden" :name="`products[${index}][product_image]`" x-model="row.product_image">
@@ -46,6 +48,7 @@
                             <input type="hidden" :name="`products[${index}][point]`" x-model="row.point">
                             <input type="hidden" :name="`products[${index}][commission]`" x-model="row.commission">
                             <input type="hidden" :name="`products[${index}][commission_type]`" x-model="row.commission_type">
+                            <input type="hidden" :name="`products[${index}][max_qty]`" x-model="row.max_qty">
 
                             <div class="shop-product-row-header">
                                 <div>
@@ -74,7 +77,8 @@
                                     </template>
                                     <template x-if="!row.id">
                                         <select :name="`products[${index}][product_id]`" x-model="row.product_id"
-                                            @change="syncProduct(row)">
+                                            :class="{ 'is-invalid': !!fieldError(index, 'product_id') }"
+                                            @change="syncProduct(row); clearFieldError(index, 'product_id')">
                                             <option value="">{{ __('shop.product.select_product') }}</option>
                                             <template x-for="product in availableProducts(row)" :key="product.id">
                                                 <option :value="product.id" x-text="product.name"></option>
@@ -95,26 +99,22 @@
                                 <div class="form-row iconInput">
                                     <label>{{ __('shop.table.price') }} <span>*</span></label>
                                     <input type="number" step="0.01" :name="`products[${index}][price]`"
-                                        x-model="row.price" placeholder="{{ __('shop.placeholder.enter_price') }}">
+                                        x-model="row.price"
+                                        :class="{ 'is-invalid': !!fieldError(index, 'price') }"
+                                        @input="clearFieldError(index, 'price')"
+                                        placeholder="{{ __('shop.placeholder.enter_price') }}">
                                     <i class='bx bx-dollar'></i>
                                     <template x-if="fieldError(index, 'price')">
                                         <label class="error" x-text="fieldError(index, 'price')"></label>
                                     </template>
                                 </div>
 
-                                <div class="form-row iconInput">
-                                    <label>{{ __('shop.table.max_qty') }}</label>
-                                    <input type="number" step="1" :name="`products[${index}][max_qty]`"
-                                        x-model="row.max_qty" placeholder="{{ __('shop.placeholder.enter_max_qty') }}">
-                                    <i class='bx bx-package'></i>
-                                    <template x-if="fieldError(index, 'max_qty')">
-                                        <label class="error" x-text="fieldError(index, 'max_qty')"></label>
-                                    </template>
-                                </div>
 
                                 <div class="form-row">
                                     <label>{{ __('shop.table.status') }} <span>*</span></label>
-                                    <select :name="`products[${index}][status]`" x-model="row.status">
+                                    <select :name="`products[${index}][status]`" x-model="row.status"
+                                        :class="{ 'is-invalid': !!fieldError(index, 'status') }"
+                                        @change="clearFieldError(index, 'status')">
                                         @foreach (config('dummy.status') as $key => $item)
                                             <option value="{{ $key }}">
                                                 {{ $key == 1 ? __('global.form.status.active') : __('global.form.status.disable') }}
@@ -128,7 +128,6 @@
                             </div>
                         </div>
                     </template>
-                </template>
                 <div style="margin-bottom: 40px;">
                     <button type="button" class="add_button" color="primary" @click="addRow" :disabled="!canAddRow()" x-show="!isEditMode()" style="display: none;">
                         <i class="material-symbols-outlined">add</i>
@@ -355,7 +354,7 @@
 
         .shop-product-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(180px, 1fr));
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
             column-gap: 16px;
             row-gap: 20px;
             align-items: end;
@@ -365,6 +364,21 @@
         .shop-product-main .form-row {
             margin-bottom: 0 !important;
             min-width: 0;
+        }
+
+        .shop-product-form .error {
+            position: static !important;
+            display: block !important;
+            color: #ff9d9d !important;
+            font-size: 12px !important;
+            margin-top: 5px !important;
+            line-height: 1.3 !important;
+        }
+
+        .shop-product-form select.is-invalid,
+        .shop-product-form input.is-invalid {
+            border-color: #ff9d9d !important;
+            box-shadow: 0 0 0 1px rgba(255, 157, 157, 0.25) !important;
         }
 
         .shop-product-meta {
@@ -551,6 +565,95 @@
                 fieldError(index, field) {
                     const key = `products.${index}.${field}`;
                     return this.errors?.[key]?.[0] ?? '';
+                },
+                validateForm() {
+                    const newErrors = {};
+                    let isValid = true;
+                    let firstErrorElement = null;
+
+                    if (!this.productRows || this.productRows.length === 0) {
+                        newErrors['products'] = ['{{ __('shop.validation.products_required') }}'];
+                        isValid = false;
+                    }
+
+                    const seenProductIds = new Set();
+
+                    this.productRows.forEach((row, index) => {
+                        // 1. Validate Product selection
+                        if (!row.product_id) {
+                            newErrors[`products.${index}.product_id`] = ['{{ __('shop.validation.product_id_required') }}'];
+                            isValid = false;
+                            if (!firstErrorElement) {
+                                firstErrorElement = document.querySelector(`select[name="products[${index}][product_id]"]`);
+                            }
+                        } else if (seenProductIds.has(String(row.product_id))) {
+                            newErrors[`products.${index}.product_id`] = ['{{ __('shop.validation.product_id_distinct') }}'];
+                            isValid = false;
+                            if (!firstErrorElement) {
+                                firstErrorElement = document.querySelector(`select[name="products[${index}][product_id]"]`);
+                            }
+                        } else {
+                            seenProductIds.add(String(row.product_id));
+                        }
+
+                        // 2. Validate Price
+                        const priceVal = row.price !== null && row.price !== undefined ? String(row.price).trim() : '';
+                        if (priceVal === '') {
+                            newErrors[`products.${index}.price`] = ['{{ __('shop.validation.price_required') }}'];
+                            isValid = false;
+                            if (!firstErrorElement) {
+                                firstErrorElement = document.querySelector(`input[name="products[${index}][price]"]`);
+                            }
+                        } else if (isNaN(Number(priceVal)) || Number(priceVal) < 0) {
+                            newErrors[`products.${index}.price`] = ['{{ __('shop.validation.price_min') }}'];
+                            isValid = false;
+                            if (!firstErrorElement) {
+                                firstErrorElement = document.querySelector(`input[name="products[${index}][price]"]`);
+                            }
+                        }
+
+                        // 3. Validate Status
+                        const statusVal = row.status !== null && row.status !== undefined ? String(row.status).trim() : '';
+                        if (statusVal === '' || !['1', '2'].includes(statusVal)) {
+                            newErrors[`products.${index}.status`] = ['{{ __('shop.validation.status_invalid') }}'];
+                            isValid = false;
+                        }
+
+                    });
+
+                    this.errors = newErrors;
+
+                    if (!isValid) {
+                        if (firstErrorElement) {
+                            firstErrorElement.focus();
+                            firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        if (window.iziToast) {
+                            window.iziToast.warning({
+                                title: 'Warning',
+                                message: '{{ __('shop.validation.product_id_required') ? __('shop.validation.product_id_required') : 'Please check required fields.' }}'
+                            });
+                        }
+                    }
+
+                    return isValid;
+                },
+                handleSubmit(event) {
+                    if (!this.validateForm()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (typeof event.stopImmediatePropagation === 'function') {
+                            event.stopImmediatePropagation();
+                        }
+                        return false;
+                    }
+                },
+                clearFieldError(index, field) {
+                    const key = `products.${index}.${field}`;
+                    if (this.errors && this.errors[key]) {
+                        delete this.errors[key];
+                        this.errors = { ...this.errors };
+                    }
                 },
             }));
         });

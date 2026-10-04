@@ -17295,6 +17295,19 @@ window.$select2FocusInputSearch = function () {
 };
 
 window.reloadData = function (url) {
+  if (window.MDI && typeof window.MDI.refreshTab === "function") {
+    var currentTab = window.MDI.tabs.find(function (t) {
+      return t.key === window.MDI.activeTabKey;
+    });
+
+    if (currentTab && url) {
+      currentTab.url = window.MDI.normalizeUrl(url);
+    }
+
+    window.MDI.refreshTab();
+    return;
+  }
+
   window.location.href = url;
 };
 
@@ -17363,6 +17376,8 @@ window.$fetchData = /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }();
+
+__webpack_require__(/*! ./workspace/mdi */ "./resources/admin/ts/workspace/mdi.js");
 
 /***/ }),
 
@@ -22419,6 +22434,2016 @@ window.$validatorOption = function (selector, validator, lang, callback) {
     callback(result);
   }
 };
+
+/***/ }),
+
+/***/ "./resources/admin/ts/workspace/mdi.js":
+/*!*********************************************!*\
+  !*** ./resources/admin/ts/workspace/mdi.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _s_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./s-events */ "./resources/admin/ts/workspace/s-events.js");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+/**
+ * Enterprise Multiple Document Interface (MDI) Workspace Manager
+ * Powering persistent tabs, zero-reload tab switching, dirty state tracking, and keyboard navigation.
+ */
+ // Global Alpine lifecycle hook:
+// If a component registers via document.addEventListener('alpine:init', cb) or window.addEventListener('alpine:init', cb),
+// and Alpine has already initialized/started, invoke cb() synchronously!
+
+var originalDocumentAddEventListener = document.addEventListener.bind(document);
+
+document.addEventListener = function (type, listener, options) {
+  if (type === 'alpine:init') {
+    if (window.AlpineStarted || window.Alpine && (window.Alpine.initialized || window.Alpine.version)) {
+      try {
+        listener();
+      } catch (err) {
+        console.error('Error executing alpine:init listener:', err);
+      }
+
+      return;
+    }
+  }
+
+  return originalDocumentAddEventListener(type, listener, options);
+};
+
+var originalWindowAddEventListener = window.addEventListener.bind(window);
+
+window.addEventListener = function (type, listener, options) {
+  if (type === 'alpine:init') {
+    if (window.AlpineStarted || window.Alpine && (window.Alpine.initialized || window.Alpine.version)) {
+      try {
+        listener();
+      } catch (err) {
+        console.error('Error executing alpine:init listener on window:', err);
+      }
+
+      return;
+    }
+  }
+
+  return originalWindowAddEventListener(type, listener, options);
+};
+
+window.workspaceMdi = function () {
+  return {
+    tabs: [],
+    activeTabKey: '',
+    showOverflowDropdown: false,
+    showProfileDropdown: false,
+    showNotificationDropdown: false,
+    draggedTabKey: null,
+    dragOverTabKey: null,
+    contextMenu: {
+      show: false,
+      x: 0,
+      y: 0,
+      tab: null
+    },
+    tooltip: {
+      show: false,
+      text: '',
+      top: 0,
+      left: 0,
+      timer: null
+    },
+    showTooltip: function showTooltip(el, text) {
+      if (!text || !el) return;
+      clearTimeout(this.tooltip.timer);
+      var rect = el.getBoundingClientRect();
+      var centerX = rect.left + rect.width / 2;
+      this.tooltip.text = text;
+      this.tooltip.top = rect.bottom + 6;
+      this.tooltip.left = Math.max(50, Math.min(window.innerWidth - 50, centerX));
+      this.tooltip.show = true;
+    },
+    hideTooltip: function hideTooltip() {
+      this.tooltip.show = false;
+      clearTimeout(this.tooltip.timer);
+    },
+    openContextMenu: function openContextMenu(e, tab) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      this.hideTooltip();
+      this.showOverflowDropdown = false;
+      this.showProfileDropdown = false;
+      this.showNotificationDropdown = false;
+      this.contextMenu.tab = tab;
+      this.contextMenu.x = Math.max(10, Math.min(window.innerWidth - 210, e.clientX));
+      this.contextMenu.y = Math.min(window.innerHeight - 200, e.clientY + 5);
+      this.contextMenu.show = true;
+    },
+    closeContextMenu: function closeContextMenu() {
+      this.contextMenu.show = false;
+      this.contextMenu.tab = null;
+    },
+    canCloseTabsToRight: function canCloseTabsToRight(tab) {
+      if (!tab) return false;
+      var idx = this.tabs.findIndex(function (t) {
+        return t.key === tab.key;
+      });
+      if (idx === -1) return false;
+      return this.tabs.slice(idx + 1).some(function (t) {
+        return !t.isPinned;
+      });
+    },
+    closeOtherTabs: function closeOtherTabs(targetTab) {
+      var _this = this;
+
+      var keepTab = targetTab || this.contextMenu.tab || this.tabs.find(function (t) {
+        return t.key === _this.activeTabKey;
+      });
+      if (!keepTab) return;
+      var toClose = this.tabs.filter(function (t) {
+        return !t.isPinned && t.key !== keepTab.key;
+      });
+      if (toClose.length === 0) return;
+      var hasDirty = toClose.some(function (t) {
+        return t.isDirty && _this.isFormTab(t);
+      });
+
+      if (hasDirty) {
+        var message = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
+        if (!confirm(message)) return;
+      }
+
+      toClose.forEach(function (tab) {
+        var pane = document.getElementById('tab-pane-' + tab.key);
+        if (pane) pane.remove();
+      });
+      this.tabs = this.tabs.filter(function (t) {
+        return t.isPinned || t.key === keepTab.key;
+      });
+      this.saveSession();
+      this.switchTab(keepTab);
+    },
+    closeTabsToRight: function closeTabsToRight(targetTab) {
+      var _this2 = this;
+
+      var pivotTab = targetTab || this.contextMenu.tab || this.tabs.find(function (t) {
+        return t.key === _this2.activeTabKey;
+      });
+      if (!pivotTab) return;
+      var idx = this.tabs.findIndex(function (t) {
+        return t.key === pivotTab.key;
+      });
+      if (idx === -1) return;
+      var toClose = this.tabs.slice(idx + 1).filter(function (t) {
+        return !t.isPinned;
+      });
+      if (toClose.length === 0) return;
+      var hasDirty = toClose.some(function (t) {
+        return t.isDirty && _this2.isFormTab(t);
+      });
+
+      if (hasDirty) {
+        var message = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close them?';
+        if (!confirm(message)) return;
+      }
+
+      toClose.forEach(function (tab) {
+        var pane = document.getElementById('tab-pane-' + tab.key);
+        if (pane) pane.remove();
+      });
+      var keepKeys = new Set(this.tabs.slice(0, idx + 1).map(function (t) {
+        return t.key;
+      }));
+      this.tabs = this.tabs.filter(function (t) {
+        return keepKeys.has(t.key) || t.isPinned;
+      });
+      this.saveSession();
+
+      if (!this.tabs.some(function (t) {
+        return t.key === _this2.activeTabKey;
+      })) {
+        this.switchTab(pivotTab);
+      }
+    },
+    onTabDragStart: function onTabDragStart(e, tab) {
+      if (tab.isPinned) {
+        e.preventDefault();
+        return;
+      }
+
+      this.hideTooltip();
+      this.closeContextMenu();
+      this.draggedTabKey = tab.key;
+      e.dataTransfer.effectAllowed = 'move';
+
+      try {
+        e.dataTransfer.setData('text/plain', tab.key);
+      } catch (err) {}
+    },
+    onTabDragOver: function onTabDragOver(e, tab) {
+      if (!this.draggedTabKey || this.draggedTabKey === tab.key || tab.isPinned) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      this.dragOverTabKey = tab.key;
+    },
+    onTabDragLeave: function onTabDragLeave(e, tab) {
+      if (this.dragOverTabKey === tab.key) {
+        this.dragOverTabKey = null;
+      }
+    },
+    onTabDrop: function onTabDrop(e, targetTab) {
+      var _this3 = this;
+
+      e.preventDefault();
+
+      if (!this.draggedTabKey || this.draggedTabKey === targetTab.key || targetTab.isPinned) {
+        this.draggedTabKey = null;
+        this.dragOverTabKey = null;
+        return;
+      }
+
+      var fromIndex = this.tabs.findIndex(function (t) {
+        return t.key === _this3.draggedTabKey;
+      });
+      var toIndex = this.tabs.findIndex(function (t) {
+        return t.key === targetTab.key;
+      });
+
+      if (fromIndex !== -1 && toIndex !== -1) {
+        var movedTab = this.tabs.splice(fromIndex, 1)[0];
+        this.tabs.splice(toIndex, 0, movedTab);
+        this.saveSession();
+      }
+
+      this.draggedTabKey = null;
+      this.dragOverTabKey = null;
+    },
+    onTabDragEnd: function onTabDragEnd(e) {
+      this.draggedTabKey = null;
+      this.dragOverTabKey = null;
+    },
+    init: function init() {
+      var _document$querySelect,
+          _document$querySelect2,
+          _document$querySelect3,
+          _document$querySelect4,
+          _document$querySelect5,
+          _document$querySelect6,
+          _this4 = this;
+
+      // 1. Detect current page information
+      var currentPath = window.location.pathname;
+      var currentFullUrl = this.normalizeUrl(window.location.href); // Extract page title from header metadata, header, form header, or document title
+
+      var currentTitle = ((_document$querySelect = document.querySelector('.header-name-meta')) === null || _document$querySelect === void 0 ? void 0 : (_document$querySelect2 = _document$querySelect.getAttribute('data-header-name')) === null || _document$querySelect2 === void 0 ? void 0 : _document$querySelect2.trim()) || ((_document$querySelect3 = document.querySelector('.navHeaderRight')) === null || _document$querySelect3 === void 0 ? void 0 : (_document$querySelect4 = _document$querySelect3.innerText) === null || _document$querySelect4 === void 0 ? void 0 : _document$querySelect4.trim()) || ((_document$querySelect5 = document.querySelector('.form-header h3')) === null || _document$querySelect5 === void 0 ? void 0 : (_document$querySelect6 = _document$querySelect5.innerText) === null || _document$querySelect6 === void 0 ? void 0 : _document$querySelect6.trim()) || document.title.replace('ADMIN |', '').replace('ADMIN', '').trim() || 'Workspace';
+      currentTitle = currentTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
+      if (!currentTitle) currentTitle = 'Workspace'; // Find active sidebar icon if available
+
+      var activeSidebarItem = document.querySelector('#sidebar .side-menu a.active');
+      var currentIcon = 'bx bx-file';
+
+      if (activeSidebarItem) {
+        var iconEl = activeSidebarItem.querySelector('i.icon');
+
+        if (iconEl) {
+          var iconClasses = Array.from(iconEl.classList).filter(function (c) {
+            return c !== 'icon';
+          });
+
+          if (iconClasses.length > 0) {
+            currentIcon = iconClasses.join(' ');
+          }
+        }
+      } else if (currentPath.includes('dashboard')) {
+        currentIcon = 'bx bx-tachometer';
+      } else if (currentPath.includes('product')) {
+        currentIcon = 'bx bx-package';
+      } else if (currentPath.includes('order')) {
+        currentIcon = 'bx bx-receipt';
+      } else if (currentPath.includes('customer')) {
+        currentIcon = 'bx bx-user';
+      } else if (currentPath.includes('shop')) {
+        currentIcon = 'bx bx-store';
+      }
+
+      var currentKey = this.generateKey(currentPath); // 2. Associate the server-rendered initial pane with current tab key
+
+      var initialPane = document.getElementById('tab-pane-initial');
+
+      if (initialPane) {
+        initialPane.id = 'tab-pane-' + currentKey;
+        initialPane.setAttribute('data-tab-key', currentKey);
+        initialPane.classList.add('active');
+        initialPane.style.display = 'flex';
+      } // 3. Load stored tabs from sessionStorage
+
+
+      var savedTabs = [];
+
+      try {
+        var stored = sessionStorage.getItem('pos_workspace_tabs');
+
+        if (stored) {
+          savedTabs = JSON.parse(stored);
+        }
+      } catch (e) {
+        savedTabs = [];
+      } // Always ensure all restored tabs are NOT loading, have normalized URLs, and remove legacy malformed keys
+
+
+      if (Array.isArray(savedTabs)) {
+        savedTabs = savedTabs.filter(function (t) {
+          return t.key !== '-admin-dashboard';
+        });
+        savedTabs.forEach(function (t) {
+          t.isLoading = false;
+          t.url = _this4.normalizeUrl(t.url); // Ensure listing tabs are NEVER dirty
+
+          if (!_this4.isFormTab(t)) {
+            t.isDirty = false;
+          }
+        });
+      } else {
+        savedTabs = [];
+      } // If we landed on a listing page (e.g. after saving in a create tab), clean up the create tab
+
+
+      if (currentKey.endsWith('-list')) {
+        var modulePrefix = currentKey.replace(/-list$/, '');
+        savedTabs = savedTabs.filter(function (t) {
+          return t.key !== modulePrefix + '-create';
+        });
+      } // Ensure Dashboard tab is always pinned
+
+
+      var dashboardUrl = '/admin/dashboard';
+      var dashboardKey = this.generateKey(dashboardUrl);
+      var hasDashboard = savedTabs.some(function (t) {
+        return t.key === dashboardKey;
+      });
+
+      if (!hasDashboard) {
+        savedTabs.unshift({
+          id: 'tab-' + Math.random().toString(36).substr(2, 9),
+          key: dashboardKey,
+          title: 'Dashboard',
+          url: dashboardUrl,
+          icon: 'bx bx-tachometer',
+          isPinned: true,
+          isDirty: false,
+          isLoading: false,
+          closable: false
+        });
+      } else {
+        var dash = savedTabs.find(function (t) {
+          return t.key === dashboardKey;
+        });
+
+        if (dash) {
+          dash.isPinned = true;
+          dash.isLoading = false;
+        }
+      } // Register or update current page tab
+
+
+      var existingCurrentIndex = savedTabs.findIndex(function (t) {
+        return t.key === currentKey;
+      });
+
+      if (existingCurrentIndex >= 0) {
+        savedTabs[existingCurrentIndex].title = currentKey === dashboardKey ? 'Dashboard' : currentTitle;
+        savedTabs[existingCurrentIndex].icon = currentIcon;
+        savedTabs[existingCurrentIndex].url = currentFullUrl;
+        savedTabs[existingCurrentIndex].isLoading = false;
+      } else {
+        savedTabs.push({
+          id: 'tab-' + Math.random().toString(36).substr(2, 9),
+          key: currentKey,
+          title: currentTitle,
+          url: currentFullUrl,
+          icon: currentIcon,
+          isPinned: currentKey === dashboardKey,
+          isDirty: false,
+          isLoading: false,
+          closable: currentKey !== dashboardKey
+        });
+      }
+
+      this.tabs = savedTabs;
+      this.activeTabKey = currentKey;
+      this.saveSession(); // 4. Initialize s-event and s-mask on the initial page
+
+      if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
+        (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents)(document);
+      }
+
+      if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask === 'function') {
+        (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask)(document);
+      } // 5. Register global keyboard shortcuts
+
+
+      this.setupKeyboardShortcuts(); // 6. Setup form dirty detection
+
+      this.setupDirtyTracking(); // 7. Setup horizontal mouse wheel scrolling on tab bar
+
+      this.$nextTick(function () {
+        var scrollWrapper = _this4.$el.querySelector('.mdi-tabs-scroll-wrapper');
+
+        if (scrollWrapper) {
+          scrollWrapper.addEventListener('wheel', function (e) {
+            if (e.deltaY !== 0) {
+              e.preventDefault();
+              scrollWrapper.scrollLeft += e.deltaY;
+            }
+          }, {
+            passive: false
+          });
+        }
+      }); // 8. Listen to browser Back/Forward (popstate)
+
+      window.addEventListener('popstate', function (e) {
+        var targetPath = window.location.pathname + window.location.search;
+
+        var targetKey = _this4.generateKey(targetPath);
+
+        var targetTab = _this4.tabs.find(function (t) {
+          return t.key === targetKey;
+        });
+
+        if (targetTab) {
+          _this4.switchTab(targetTab, false);
+        } else {
+          _this4.openUrlInTab(targetPath);
+        }
+      }); // 9. Intercept internal links and s-click-link buttons inside viewport
+
+      this.setupLinkInterceptor(); // 10. Intercept form submissions inside workspace tabs (zero-reload saves)
+
+      this.setupFormInterceptor(); // Make instance accessible globally
+
+      window.MDI = this;
+    },
+    normalizeUrl: function normalizeUrl(url) {
+      if (!url) return '';
+
+      try {
+        var parsed = new URL(url, window.location.origin);
+        return parsed.pathname + parsed.search;
+      } catch (e) {
+        return url;
+      }
+    },
+    generateKey: function generateKey(url) {
+      if (!url) return 'home';
+      var clean = url.replace(/^https?:\/\/[^\/]+/, '').split('?')[0];
+      clean = clean.replace(/^\/+|\/+$/g, '');
+
+      if (!clean || clean === 'admin' || clean === 'admin/dashboard') {
+        return 'admin-dashboard';
+      } // For listing views with status tabs (e.g., admin/product/list/1, admin/product/list/trash),
+      // group them under the module list tab (admin-product-list) so switching Active/Disable/Trash
+      // updates the current listing tab rather than opening duplicate listing tabs
+
+
+      var listMatch = clean.match(/^admin\/([a-zA-Z0-9_-]+)\/list\/(.+)$/);
+
+      if (listMatch) {
+        return 'admin-' + listMatch[1] + '-list';
+      }
+
+      return clean.replace(/[^a-zA-Z0-9]/g, '-') || 'home';
+    },
+    setTabLoading: function setTabLoading(key, isLoading) {
+      var index = this.tabs.findIndex(function (t) {
+        return t.key === key;
+      });
+
+      if (index !== -1) {
+        this.tabs[index].isLoading = isLoading;
+      }
+    },
+    saveSession: function saveSession() {
+      try {
+        // Ensure ephemeral isLoading state is never saved as true
+        var sanitized = this.tabs.map(function (t) {
+          return _objectSpread(_objectSpread({}, t), {}, {
+            isLoading: false
+          });
+        });
+        sessionStorage.setItem('pos_workspace_tabs', JSON.stringify(sanitized));
+        sessionStorage.setItem('pos_workspace_active_tab', this.activeTabKey);
+      } catch (e) {}
+    },
+
+    /**
+     * Open a URL in a tab without reloading the page
+     */
+    openUrlInTab: function openUrlInTab(url) {
+      var title = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+      var icon = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
+      var normalizedUrl = this.normalizeUrl(url);
+      var targetKey = this.generateKey(normalizedUrl);
+      var existingTab = this.tabs.find(function (t) {
+        return t.key === targetKey;
+      }); // Determine icon if not provided
+
+      var defaultIcon = icon || 'bx bx-file';
+      var lowerUrl = normalizedUrl.toLowerCase();
+
+      if (!icon) {
+        if (lowerUrl.includes('/create')) {
+          defaultIcon = 'bx bx-plus-circle';
+        } else if (lowerUrl.includes('/edit')) {
+          defaultIcon = 'bx bx-edit';
+        } else if (lowerUrl.includes('/detail') || lowerUrl.includes('/view')) {
+          defaultIcon = 'bx bx-show';
+        } else if (lowerUrl.includes('/list')) {
+          defaultIcon = 'bx bx-list-ul';
+        }
+      } // Determine initial title if not provided
+
+
+      var initialTitle = title;
+
+      if (!initialTitle) {
+        var parts = lowerUrl.split('/');
+        var modIdx = parts.indexOf('admin') + 1;
+        var modName = modIdx > 0 && parts[modIdx] ? parts[modIdx].charAt(0).toUpperCase() + parts[modIdx].slice(1) : '';
+
+        if (lowerUrl.includes('/create')) {
+          initialTitle = modName ? "Create ".concat(modName) : 'Create';
+        } else if (lowerUrl.includes('/edit')) {
+          initialTitle = modName ? "Edit ".concat(modName) : 'Edit';
+        } else if (lowerUrl.includes('/detail') || lowerUrl.includes('/view')) {
+          initialTitle = modName ? "".concat(modName, " Details") : 'Details';
+        } else if (lowerUrl.includes('/list')) {
+          initialTitle = modName ? "".concat(modName, " List") : 'List';
+        } else {
+          initialTitle = 'Loading...';
+        }
+      }
+
+      if (existingTab) {
+        if (title && (!existingTab.title || existingTab.title === 'Workspace' || existingTab.title === 'Loading...')) {
+          existingTab.title = title;
+        }
+
+        if (defaultIcon) {
+          existingTab.icon = defaultIcon;
+        } // If URL has changed (e.g., pagination ?page=2 or filters or sub-tab switch), reload pane content
+        // BUT NEVER destroy or discard create/edit tabs or tabs with unsaved data!
+
+
+        var isFormTab = existingTab.key.includes('-create') || existingTab.key.includes('-edit') || existingTab.isDirty;
+
+        if (!isFormTab && existingTab.url !== normalizedUrl) {
+          existingTab.url = normalizedUrl;
+          var existingPane = document.getElementById('tab-pane-' + existingTab.key);
+
+          if (existingPane) {
+            existingPane.remove();
+          }
+        }
+
+        this.switchTab(existingTab);
+      } else {
+        var newTab = {
+          id: 'tab-' + Math.random().toString(36).substr(2, 9),
+          key: targetKey,
+          title: initialTitle,
+          url: normalizedUrl,
+          icon: defaultIcon,
+          isPinned: false,
+          isDirty: false,
+          isLoading: true,
+          closable: true
+        };
+        this.tabs.push(newTab);
+        this.saveSession();
+        this.switchTab(newTab);
+      }
+    },
+
+    /**
+     * Switch active tab and toggle pane visibility (0ms DOM swap)
+     */
+    switchTab: function switchTab(tab) {
+      var updateHistory = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      this.hideTooltip();
+      var existingPaneCheck = document.getElementById('tab-pane-' + tab.key);
+
+      if (tab.key === this.activeTabKey && existingPaneCheck && existingPaneCheck.style.display !== 'none') {
+        return;
+      } // Notify components that tab is about to change (e.g. save drafts)
+
+
+      try {
+        window.dispatchEvent(new CustomEvent('workspace:tab-change', {
+          detail: {
+            previousKey: this.activeTabKey,
+            nextKey: tab.key
+          }
+        }));
+      } catch (e) {} // Hide all tab panes
+
+
+      var allPanes = document.querySelectorAll('#workspace-viewport .workspace-tab-pane, #workspace-viewport > [id^="tab-pane-"]');
+      allPanes.forEach(function (pane) {
+        pane.classList.remove('active');
+        pane.style.setProperty('display', 'none', 'important');
+      });
+      this.activeTabKey = tab.key;
+      this.showOverflowDropdown = false;
+      this.showProfileDropdown = false;
+      this.showNotificationDropdown = false;
+      this.saveSession(); // Update browser URL & title
+
+      if (updateHistory && tab.url) {
+        history.pushState({
+          tabKey: tab.key
+        }, tab.title, tab.url);
+      }
+
+      if (tab.title) {
+        document.title = 'ADMIN | ' + tab.title;
+      } // Update sidebar active highlights
+
+
+      this.updateSidebarActive(tab.url); // Check if pane already exists in DOM
+
+      var targetPane = document.getElementById('tab-pane-' + tab.key);
+
+      if (targetPane) {
+        targetPane.style.setProperty('display', 'flex', 'important');
+        targetPane.classList.add('active');
+        this.setTabLoading(tab.key, false); // Notify components that pane has become visible again
+
+        try {
+          window.dispatchEvent(new CustomEvent('workspace:tab-activated', {
+            detail: {
+              key: tab.key
+            }
+          }));
+        } catch (e) {} // Refresh feather icons and trigger resize for responsive sticky columns & charts
+
+
+        if (window.feather && typeof window.feather.replace === 'function') {
+          try {
+            window.feather.replace();
+          } catch (e) {}
+        }
+
+        window.dispatchEvent(new Event('resize'));
+      } else {
+        // Fetch and mount tab content
+        this.fetchAndMountTab(tab);
+      }
+    },
+
+    /**
+     * Reload/refresh active tab pane cleanly
+     */
+    refreshTab: function refreshTab(key) {
+      var tabKey = key || this.activeTabKey;
+      var tab = this.tabs.find(function (t) {
+        return t.key === tabKey;
+      });
+      if (!tab) return;
+      var existingPane = document.getElementById('tab-pane-' + tab.key);
+
+      if (existingPane) {
+        existingPane.remove();
+      }
+
+      this.setTabLoading(tab.key, true);
+      this.fetchAndMountTab(tab);
+    },
+
+    /**
+     * Dynamically fetch page HTML and mount into #workspace-viewport
+     */
+    fetchAndMountTab: function fetchAndMountTab(tab) {
+      var _this5 = this;
+
+      this.setTabLoading(tab.key, true);
+      fetch(tab.url, {
+        headers: {
+          'X-MDI-Partial': '1'
+        }
+      }).then(function (res) {
+        if (!res.ok) throw new Error('HTTP error ' + res.status); // Check if redirected to login/auth
+
+        if (res.url && (res.url.includes('/login') || res.url.includes('/auth'))) {
+          window.location.href = res.url;
+          return null;
+        }
+
+        return res.text();
+      }).then(function (html) {
+        var _doc$querySelector, _doc$querySelector$ge, _doc$querySelector2, _doc$querySelector2$i, _doc$querySelector3, _doc$querySelector3$i;
+
+        if (html === null) return;
+
+        _this5.setTabLoading(tab.key, false);
+
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, 'text/html'); // Extract title and clean any icon ligatures (e.g. "visibility View Details", "arrow-left Create Product")
+
+        var docTitle = ((_doc$querySelector = doc.querySelector('.header-name-meta')) === null || _doc$querySelector === void 0 ? void 0 : (_doc$querySelector$ge = _doc$querySelector.getAttribute('data-header-name')) === null || _doc$querySelector$ge === void 0 ? void 0 : _doc$querySelector$ge.trim()) || ((_doc$querySelector2 = doc.querySelector('.navHeaderRight')) === null || _doc$querySelector2 === void 0 ? void 0 : (_doc$querySelector2$i = _doc$querySelector2.innerText) === null || _doc$querySelector2$i === void 0 ? void 0 : _doc$querySelector2$i.trim()) || ((_doc$querySelector3 = doc.querySelector('.form-header h3')) === null || _doc$querySelector3 === void 0 ? void 0 : (_doc$querySelector3$i = _doc$querySelector3.innerText) === null || _doc$querySelector3$i === void 0 ? void 0 : _doc$querySelector3$i.trim()) || doc.title.replace('ADMIN |', '').replace('ADMIN', '').trim();
+
+        if (docTitle) {
+          docTitle = docTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
+
+          var idx = _this5.tabs.findIndex(function (t) {
+            return t.key === tab.key;
+          });
+
+          if (idx !== -1 && docTitle) {
+            _this5.tabs[idx].title = docTitle;
+          }
+        } // Extract external stylesheet and font links (e.g., Google Fonts, ApexCharts)
+
+
+        doc.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(function (linkEl) {
+          var href = linkEl.getAttribute('href');
+
+          if (href && !document.querySelector("link[href=\"".concat(href, "\"]"))) {
+            document.head.appendChild(linkEl.cloneNode(true));
+          }
+        }); // Extract content: prefer #workspace-viewport .workspace-tab-pane or #content
+
+        var contentHtml = '';
+        var initialPane = doc.querySelector('#workspace-viewport .workspace-tab-pane');
+
+        if (initialPane) {
+          contentHtml = initialPane.innerHTML;
+        } else {
+          var fetchedContent = doc.querySelector('#content');
+
+          if (fetchedContent) {
+            fetchedContent.querySelectorAll('.mdi-workspace-tabs-container, #jsScroll, .scroll').forEach(function (el) {
+              return el.remove();
+            });
+            contentHtml = fetchedContent.innerHTML;
+          }
+        }
+
+        if (!contentHtml || !contentHtml.trim()) {
+          throw new Error('Could not parse tab content');
+        }
+
+        var viewport = document.getElementById('workspace-viewport');
+        if (!viewport) return;
+        var isActive = _this5.activeTabKey === tab.key; // Create new tab pane container
+
+        var newPane = document.createElement('div');
+        newPane.id = 'tab-pane-' + tab.key;
+        newPane.className = 'workspace-tab-pane' + (isActive ? ' active' : '');
+        newPane.setAttribute('data-tab-key', tab.key);
+        newPane.style.width = '100%';
+        newPane.style.flex = '1';
+        newPane.style.flexDirection = 'column';
+        newPane.style.setProperty('display', isActive ? 'flex' : 'none', 'important');
+        newPane.innerHTML = contentHtml; // Strip any duplicate global singletons inside the pane
+
+        newPane.querySelectorAll('#file-manager-popup-container, [data-file-manager-popup], [x-data*="confirmDialog"], [x-data*="verifyConfirmDialog"], template[x-if*="confirmDialog"], template[x-if*="componentSearchMenu"], template[x-if*="page?.active"]').forEach(function (el) {
+          var _el$closest;
+
+          ((_el$closest = el.closest('.dialog')) === null || _el$closest === void 0 ? void 0 : _el$closest.remove()) || el.remove();
+        }); // Extract and attach all <style> tags (including page-specific styles in @section('script'))
+
+        doc.querySelectorAll('style').forEach(function (styleEl) {
+          newPane.appendChild(styleEl.cloneNode(true));
+        }); // If this tab IS active, ensure all other panes are hidden
+
+        if (isActive) {
+          var allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
+          allPanes.forEach(function (pane) {
+            pane.classList.remove('active');
+            pane.style.setProperty('display', 'none', 'important');
+          });
+        } // Remove any existing stale pane for this tab key
+
+
+        var existingSamePane = document.getElementById('tab-pane-' + tab.key);
+
+        if (existingSamePane) {
+          existingSamePane.remove();
+        } // Strip dormant <script> tags from newPane so inert script elements don't clutter the DOM
+
+
+        newPane.querySelectorAll('script').forEach(function (s) {
+          return s.remove();
+        }); // 1. Extract and execute scripts from fetched document BEFORE mounting newPane to the DOM!
+        // This guarantees Alpine components (Alpine.data) and page functions are registered
+        // BEFORE Alpine's DOM mutation observer scans and initializes the new elements.
+
+        _this5.executeScriptsFromDoc(doc, newPane); // 2. Mount newPane into the live DOM
+
+
+        if (window.Alpine && typeof window.Alpine.mutateDom === 'function') {
+          window.Alpine.mutateDom(function () {
+            viewport.appendChild(newPane);
+          });
+        } else {
+          viewport.appendChild(newPane);
+        } // Initialize s-event and s-mask on the newly mounted pane
+
+
+        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
+          try {
+            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents)(newPane);
+          } catch (e) {}
+        }
+
+        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask === 'function') {
+          try {
+            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask)(newPane);
+          } catch (e) {}
+        } // Initialize Feather icons & Alpine
+
+
+        if (window.feather && typeof window.feather.replace === 'function') {
+          try {
+            window.feather.replace();
+          } catch (e) {}
+        }
+
+        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+          try {
+            window.Alpine.initTree(newPane);
+          } catch (e) {
+            console.warn('Alpine.initTree warning:', e);
+          }
+        }
+
+        _this5.saveSession();
+      })["catch"](function (err) {
+        _this5.setTabLoading(tab.key, false);
+
+        console.error('Error loading tab content:', err);
+        var viewport = document.getElementById('workspace-viewport');
+
+        if (viewport) {
+          var isActive = _this5.activeTabKey === tab.key;
+
+          if (isActive) {
+            var allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
+            allPanes.forEach(function (pane) {
+              pane.classList.remove('active');
+              pane.style.setProperty('display', 'none', 'important');
+            });
+          }
+
+          var errorPane = document.createElement('div');
+          errorPane.id = 'tab-pane-' + tab.key;
+          errorPane.className = 'workspace-tab-pane' + (isActive ? ' active' : '');
+          errorPane.style.width = '100%';
+          errorPane.style.flex = '1';
+          errorPane.style.flexDirection = 'column';
+          errorPane.style.setProperty('display', isActive ? 'flex' : 'none', 'important');
+          errorPane.style.padding = '40px';
+          errorPane.style.textAlign = 'center';
+          errorPane.innerHTML = "\n                        <div style=\"font-size: 40px; margin-bottom: 12px;\">\u26A0\uFE0F</div>\n                        <h4 style=\"color: #1e293b;\">Could not load ".concat(tab.title, "</h4>\n                        <p style=\"color: #64748b; font-size: 14px;\">An error occurred while fetching the tab content.</p>\n                        <button type=\"button\" class=\"btn btn-primary\" onclick=\"window.MDI.fetchAndMountTab(window.MDI.tabs.find(t => t.key === '").concat(tab.key, "'))\" style=\"margin-top: 15px; border-radius: 20px;\">Retry</button>\n                    ");
+          var existingSameErrorPane = document.getElementById('tab-pane-' + tab.key);
+
+          if (existingSameErrorPane) {
+            existingSameErrorPane.remove();
+          }
+
+          viewport.appendChild(errorPane);
+        }
+      })["finally"](function () {
+        _this5.setTabLoading(tab.key, false);
+      });
+    },
+    executeScriptsFromDoc: function executeScriptsFromDoc(doc, targetPane) {
+      if (!doc) return;
+      var allScripts = []; // 1. Collect scripts from the tab's content container
+
+      var contentContainer = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
+
+      if (contentContainer) {
+        contentContainer.querySelectorAll('script').forEach(function (s) {
+          return allScripts.push(s);
+        });
+      } // 2. Also collect page-specific scripts that were in @section('script') at the end of body or elsewhere
+
+
+      doc.querySelectorAll('body script').forEach(function (s) {
+        if (allScripts.includes(s)) return;
+        var text = s.textContent || '';
+        var src = s.getAttribute('src') || '';
+        if (src.includes('app.js') || src.includes('body.js') || src.includes('jquery') || src.includes('feather') || src.includes('tinymce') || src.includes('select2')) return; // Page-specific Alpine component definitions must NEVER be skipped!
+
+        var isPageComponent = (text.includes('Alpine.data(') || text.includes('Alpine.data("') || text.includes('XDatacreateorder') || text.includes('xIndex') || text.includes('xComponent')) && !text.includes('xHeader') && !text.includes('componentSearchMenu');
+
+        if (!isPageComponent) {
+          // Only filter out the specific global layout/framework scripts from index.blade.php / layout components
+          if (/^\s*window\.workspaceTranslations\s*=/m.test(text)) return;
+          if (text.includes('Global Keyboard Shortcuts')) return;
+          if (text.includes('var notifications =') || text.includes('let notifications =') || text.includes('const notifications =')) return;
+          if (text.includes("Alpine.store('componentSearchMenu'") || text.includes('Alpine.store("componentSearchMenu"')) return;
+          if (text.includes("Alpine.data('xHeader'") || text.includes('Alpine.data("xHeader"')) return;
+          if (text.includes('localStorage.getItem("menu")') && text.includes('sidebar')) return;
+        }
+
+        allScripts.push(s);
+      }); // 3. Also check head for page-specific scripts (e.g. pushed scripts)
+
+      doc.querySelectorAll('head script').forEach(function (s) {
+        if (allScripts.includes(s)) return;
+        var src = s.getAttribute('src') || '';
+        if (src.includes('app.js') || src.includes('body.js') || src.includes('jquery') || src.includes('feather') || src.includes('tinymce') || src.includes('select2') || src.includes('toastr') || src.includes('iziToast') || src.includes('icheck') || src.includes('jqueryUi')) return;
+        allScripts.push(s);
+      });
+      allScripts.forEach(function (scriptEl) {
+        var src = scriptEl.getAttribute('src');
+
+        if (src) {
+          // Skip core bundles already loaded in index.blade.php
+          if (!src.includes('app.js') && !src.includes('body.js') && !src.includes('jquery') && !document.querySelector("script[src=\"".concat(src, "\"]"))) {
+            var extScript = document.createElement('script');
+            Array.from(scriptEl.attributes).forEach(function (attr) {
+              return extScript.setAttribute(attr.name, attr.value);
+            });
+            document.head.appendChild(extScript);
+          }
+        } else if (scriptEl.textContent.trim()) {
+          // Inline script (Alpine components, xIndex, xComponent, etc.)
+          // Execute in document.head so it runs synchronously in global scope BEFORE newPane is attached to DOM
+          try {
+            var inlineScript = document.createElement('script');
+            inlineScript.textContent = scriptEl.textContent;
+            document.head.appendChild(inlineScript);
+            inlineScript.remove();
+          } catch (err) {
+            try {
+              (1, eval)(scriptEl.textContent);
+            } catch (e) {
+              console.warn('Script execution warning:', e);
+            }
+          }
+        }
+      }); // Dispatch alpine:init so any lingering listeners fire
+
+      try {
+        document.dispatchEvent(new CustomEvent('alpine:init'));
+        window.dispatchEvent(new CustomEvent('alpine:init'));
+      } catch (e) {}
+    },
+    closeTab: function closeTab(tab, event) {
+      var shouldSwitch = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      this.hideTooltip();
+
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+
+      if (tab.isPinned) return; // Dirty confirmation only if user clicked close button manually (event is provided)
+      // and the tab is actually an editable form tab with unsaved changes
+
+      if (tab.isDirty && event && this.isFormTab(tab)) {
+        var template = window.workspaceTranslations && window.workspaceTranslations.confirmCloseTab || 'You have unsaved changes in ":title". Do you want to close without saving?';
+        var title = tab.title || window.workspaceTranslations && window.workspaceTranslations.tab || 'Tab';
+        var confirmed = confirm(template.replace(':title', title));
+        if (!confirmed) return;
+      }
+
+      var closingIndex = this.tabs.findIndex(function (t) {
+        return t.key === tab.key;
+      });
+      if (closingIndex < 0) return; // Remove DOM pane
+
+      var pane = document.getElementById('tab-pane-' + tab.key);
+
+      if (pane) {
+        pane.remove();
+      }
+
+      var wasActive = this.activeTabKey === tab.key;
+      this.tabs.splice(closingIndex, 1);
+
+      if (wasActive && shouldSwitch) {
+        // Switch to adjacent tab or dashboard
+        var nextTab = this.tabs[Math.max(0, closingIndex - 1)] || this.tabs[0];
+
+        if (nextTab) {
+          this.switchTab(nextTab);
+        }
+      } else if (wasActive && !shouldSwitch) {
+        this.activeTabKey = null;
+        this.saveSession();
+      } else {
+        this.saveSession();
+      }
+    },
+    closeAllTabs: function closeAllTabs() {
+      var _this6 = this;
+
+      var closableTabs = this.tabs.filter(function (t) {
+        return !t.isPinned;
+      });
+      if (closableTabs.length === 0) return;
+      var hasDirty = closableTabs.some(function (t) {
+        return t.isDirty && _this6.isFormTab(t);
+      });
+
+      if (hasDirty) {
+        var message = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?';
+        var confirmed = confirm(message);
+        if (!confirmed) return;
+      } // Remove DOM panes of closable tabs
+
+
+      closableTabs.forEach(function (tab) {
+        var pane = document.getElementById('tab-pane-' + tab.key);
+
+        if (pane) {
+          pane.remove();
+        }
+      }); // Retain only pinned tabs
+
+      this.tabs = this.tabs.filter(function (t) {
+        return t.isPinned;
+      }); // Close dropdowns
+
+      this.showOverflowDropdown = false;
+      this.showProfileDropdown = false;
+      this.showNotificationDropdown = false; // Switch to dashboard or first pinned tab
+
+      if (this.tabs.length > 0) {
+        this.switchTab(this.tabs[0]);
+      } else {
+        var dashboardUrl = '/admin/dashboard';
+        var dashboardKey = this.generateKey(dashboardUrl);
+        var dashTitle = window.workspaceTranslations && window.workspaceTranslations.dashboard || 'Dashboard';
+        var dashTab = {
+          id: 'tab-' + Math.random().toString(36).substr(2, 9),
+          key: dashboardKey,
+          title: dashTitle,
+          url: dashboardUrl,
+          icon: 'bx bx-tachometer',
+          isPinned: true,
+          isDirty: false,
+          isLoading: false,
+          closable: false
+        };
+        this.tabs = [dashTab];
+        this.switchTab(dashTab);
+      }
+
+      this.saveSession();
+    },
+    updateSidebarActive: function updateSidebarActive(url) {
+      if (!url) return;
+
+      try {
+        var currentPath = new URL(url, window.location.origin).pathname;
+        document.querySelectorAll('#sidebar .side-menu a').forEach(function (a) {
+          var linkUrl = a.getAttribute('data-url');
+
+          if (linkUrl) {
+            var linkPath = new URL(linkUrl, window.location.origin).pathname;
+
+            if (linkPath === currentPath) {
+              a.classList.add('active');
+              var parentDropdown = a.closest('.side-dropdown');
+
+              if (parentDropdown) {
+                parentDropdown.classList.add('show');
+                var parentA = parentDropdown.parentElement.querySelector('a:first-child');
+                if (parentA) parentA.classList.add('active');
+              }
+            } else {
+              a.classList.remove('active');
+            }
+          }
+        });
+      } catch (e) {}
+    },
+    setupLinkInterceptor: function setupLinkInterceptor() {
+      var _this7 = this;
+
+      document.addEventListener('click', function (e) {
+        // 1. Intercept elements with [s-click-link] (buttons, divs, icons, spans)
+        var sClickEl = e.target.closest('[s-click-link]');
+
+        if (sClickEl) {
+          if (sClickEl.classList.contains('disabled') || sClickEl.hasAttribute('disabled')) {
+            e.preventDefault();
+            return;
+          }
+
+          var rawUrl = sClickEl.getAttribute('s-click-link');
+
+          if (rawUrl && !rawUrl.startsWith('#') && !rawUrl.startsWith('javascript:')) {
+            var lowerUrl = rawUrl.toLowerCase();
+
+            if (!lowerUrl.includes('/export') && !lowerUrl.includes('/download') && !lowerUrl.includes('/print') && !lowerUrl.endsWith('.xlsx') && !lowerUrl.endsWith('.pdf') && !lowerUrl.endsWith('.csv') && !lowerUrl.includes('delete') && !lowerUrl.includes('destroy') && !sClickEl.classList.contains('delete') && !sClickEl.classList.contains('text-danger') && !sClickEl.classList.contains('sign-out-btn') && !sClickEl.hasAttribute('onclick')) {
+              try {
+                var url = new URL(rawUrl, window.location.origin);
+
+                if (url.origin === window.location.origin && url.pathname.startsWith('/admin') && !url.pathname.includes('logout') && !url.pathname.includes('auth')) {
+                  var _sClickEl$innerText;
+
+                  e.preventDefault();
+                  e.stopPropagation();
+                  var targetPath = url.pathname + url.search;
+
+                  var currentTab = _this7.tabs.find(function (t) {
+                    return t.key === _this7.activeTabKey;
+                  }); // Check if reload button for current tab
+
+
+                  if (currentTab && (url.href === window.location.href || currentTab.url === targetPath)) {
+                    _this7.refreshTab(_this7.activeTabKey);
+
+                    return;
+                  }
+
+                  var title = sClickEl.getAttribute('title') || ((_sClickEl$innerText = sClickEl.innerText) === null || _sClickEl$innerText === void 0 ? void 0 : _sClickEl$innerText.trim()) || '';
+
+                  if (!title && (sClickEl.classList.contains('head-icon') || sClickEl.querySelector('[data-feather="arrow-left"]') || sClickEl.getAttribute('data-feather') === 'arrow-left')) {
+                    title = 'Back';
+                  }
+
+                  var icon = 'bx bx-file';
+
+                  if (sClickEl.classList.contains('btn-create') || lowerUrl.includes('/create')) {
+                    icon = 'bx bx-plus-circle';
+                  } else if (lowerUrl.includes('/list')) {
+                    icon = 'bx bx-list-ul';
+                  }
+
+                  _this7.openUrlInTab(targetPath, title, icon);
+
+                  return;
+                }
+              } catch (err) {}
+            }
+          }
+        } // 2. Intercept anchor <a> tags
+
+
+        var link = e.target.closest('a[href]');
+        if (!link) return; // Skip disabled links
+
+        if (link.classList.contains('disabled') || link.getAttribute('aria-disabled') === 'true' || link.hasAttribute('disabled')) {
+          e.preventDefault();
+          return;
+        } // Skip if default already prevented or modified click
+
+
+        if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return; // Skip external targets, download attributes, or empty/hash href
+
+        if (link.target === '_blank' || link.hasAttribute('download')) return;
+        var href = link.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('javascript:') || href === '') return; // Skip Fancybox image lightboxes
+
+        if (link.hasAttribute('data-fancybox') || link.closest('[data-fancybox]')) return; // Skip Bootstrap / MDB dropdown and modal toggles
+
+        if (link.hasAttribute('data-toggle') || link.hasAttribute('data-bs-toggle') || link.hasAttribute('data-mdb-toggle') || link.classList.contains('dropdown-toggle')) return; // Skip explicit opt-out attributes
+
+        if (link.hasAttribute('data-no-tab') || link.hasAttribute('data-no-mdi')) return; // Skip export, download, print, or destructive actions
+
+        var lowerHref = href.toLowerCase();
+
+        if (lowerHref.includes('/export') || lowerHref.includes('/download') || lowerHref.includes('/print') || lowerHref.endsWith('.xlsx') || lowerHref.endsWith('.pdf') || lowerHref.endsWith('.csv') || lowerHref.includes('delete') || lowerHref.includes('destroy') || link.classList.contains('delete') || link.classList.contains('text-danger') || link.classList.contains('sign-out-btn') || link.hasAttribute('onclick')) {
+          return;
+        } // Route internal admin links through MDI tab manager
+
+
+        try {
+          var _url = new URL(href, window.location.origin);
+
+          if (_url.origin === window.location.origin && _url.pathname.startsWith('/admin') && !_url.pathname.includes('logout') && !_url.pathname.includes('auth')) {
+            var _link$innerText;
+
+            e.preventDefault();
+
+            var _title = link.getAttribute('title') || ((_link$innerText = link.innerText) === null || _link$innerText === void 0 ? void 0 : _link$innerText.trim()) || '';
+
+            var _icon = 'bx bx-file';
+
+            if (lowerHref.includes('/create')) {
+              _icon = 'bx bx-plus-circle';
+            } else if (lowerHref.includes('/edit')) {
+              _icon = 'bx bx-edit';
+            } else if (lowerHref.includes('/detail') || lowerHref.includes('/view')) {
+              _icon = 'bx bx-show';
+            }
+
+            _this7.openUrlInTab(_url.pathname + _url.search, _title, _icon);
+          }
+        } catch (err) {}
+      }, false); // Bubble phase ensures custom element click handlers fire first
+    },
+    setupFormInterceptor: function setupFormInterceptor() {
+      var _this8 = this;
+
+      document.addEventListener('submit', function (e) {
+        // If form submission was already cancelled by client validation, do not intercept
+        if (e.defaultPrevented) {
+          return;
+        }
+
+        var form = e.target.closest('form');
+        if (!form) return; // 1. Skip explicit opt-outs or new-tab targets
+
+        if (form.hasAttribute('data-no-mdi') || form.target === '_blank') {
+          return;
+        } // Native constraint validation check
+
+
+        if (typeof form.checkValidity === 'function' && !form.checkValidity()) {
+          return;
+        } // 2. Handle GET filter/search forms inside active tab
+
+
+        if (form.method.toUpperCase() === 'GET' || form.classList.contains('filter')) {
+          e.preventDefault();
+
+          var _action = form.getAttribute('action') || window.location.href;
+
+          var _formData = new FormData(form);
+
+          var params = new URLSearchParams(_formData);
+          var targetUrl = _action.split('?')[0] + '?' + params.toString();
+
+          var normalizedTarget = _this8.normalizeUrl(targetUrl);
+
+          var _currentTab = _this8.tabs.find(function (t) {
+            return t.key === _this8.activeTabKey;
+          });
+
+          if (_currentTab) {
+            _currentTab.url = normalizedTarget;
+            var existingPane = document.getElementById('tab-pane-' + _currentTab.key);
+            if (existingPane) existingPane.remove();
+
+            _this8.setTabLoading(_currentTab.key, true);
+
+            _this8.fetchAndMountTab(_currentTab);
+          } else {
+            _this8.openUrlInTab(normalizedTarget);
+          }
+
+          return;
+        } // 3. For POST/PUT forms: ensure action is an internal admin route
+
+
+        var action = form.getAttribute('action') || window.location.href;
+
+        try {
+          var url = new URL(action, window.location.origin);
+
+          if (url.origin !== window.location.origin || !url.pathname.startsWith('/admin') || url.pathname.includes('logout') || url.pathname.includes('auth')) {
+            return;
+          }
+        } catch (err) {
+          return;
+        } // Intercept standard CRUD form submission to avoid destroying open tabs
+
+
+        e.preventDefault(); // Save TinyMCE editor contents if active
+
+        if (window.tinymce && typeof window.tinymce.triggerSave === 'function') {
+          window.tinymce.triggerSave();
+        }
+
+        var formPane = form.closest('.workspace-tab-pane');
+        var currentTabKey = formPane ? formPane.getAttribute('data-tab-key') : _this8.activeTabKey;
+
+        var currentTab = _this8.tabs.find(function (t) {
+          return t.key === currentTabKey;
+        }); // Capture submitter name/value (e.g. save_opt: 'save_new')
+
+
+        var submitter = e.submitter;
+        var formData = new FormData(form);
+
+        if (submitter && submitter.name) {
+          formData.set(submitter.name, submitter.value);
+        }
+
+        if (submitter) {
+          submitter.disabled = true;
+          submitter.dataset.originalText = submitter.innerHTML;
+          submitter.innerHTML = "<span class=\"mdi-tab-loading-spinner\" style=\"width:13px;height:13px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;\"></span> Saving...";
+        }
+
+        _this8.setTabLoading(currentTabKey, true);
+
+        fetch(action, {
+          method: form.method || 'POST',
+          body: formData,
+          headers: {
+            'X-MDI-Form': '1'
+          }
+        }).then( /*#__PURE__*/function () {
+          var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee(response) {
+            var finalUrl, responseText, json, title, msg, parser, doc, hasSuccessToast, isRedirectedToList, renderedFormErrors, hasServerValidationErrors, isValidationError, currentPane, newContent, _title2, _msg, _title3, _msg2, _targetUrl, modName, targetPath, listKey, existingListTab, listPane;
+
+            return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+              while (1) {
+                switch (_context.prev = _context.next) {
+                  case 0:
+                    if (submitter) {
+                      submitter.disabled = false;
+
+                      if (submitter.dataset.originalText) {
+                        submitter.innerHTML = submitter.dataset.originalText;
+                      }
+                    }
+
+                    _this8.setTabLoading(currentTabKey, false);
+
+                    finalUrl = response.url;
+                    _context.next = 5;
+                    return response.text();
+
+                  case 5:
+                    responseText = _context.sent;
+
+                    if (!(finalUrl.includes('/login') || finalUrl.includes('/auth'))) {
+                      _context.next = 9;
+                      break;
+                    }
+
+                    window.location.href = finalUrl;
+                    return _context.abrupt("return");
+
+                  case 9:
+                    _context.prev = 9;
+                    json = JSON.parse(responseText);
+
+                    if (!(json.status === 'success' || json.message === 'success' || json.status === 200)) {
+                      _context.next = 16;
+                      break;
+                    }
+
+                    if (window.iziToast) {
+                      title = window.workspaceTranslations && window.workspaceTranslations.success || 'Success';
+                      msg = json.message || window.workspaceTranslations && window.workspaceTranslations.savedSuccessfully || 'Saved successfully!';
+                      window.iziToast.success({
+                        title: title,
+                        message: msg
+                      });
+                    }
+
+                    if (currentTab) {
+                      currentTab.isDirty = false;
+
+                      _this8.closeTab(currentTab, null, false);
+                    }
+
+                    if (json.redirect || json.url) {
+                      _this8.openUrlInTab(json.redirect || json.url);
+                    }
+
+                    return _context.abrupt("return");
+
+                  case 16:
+                    _context.next = 20;
+                    break;
+
+                  case 18:
+                    _context.prev = 18;
+                    _context.t0 = _context["catch"](9);
+
+                  case 20:
+                    // Parse HTML response
+                    parser = new DOMParser();
+                    doc = parser.parseFromString(responseText, 'text/html'); // Check if redirected to login page in document
+
+                    if (!doc.querySelector('form[action*="login"]')) {
+                      _context.next = 25;
+                      break;
+                    }
+
+                    window.location.href = finalUrl;
+                    return _context.abrupt("return");
+
+                  case 25:
+                    // Success indicators:
+                    // 1. Flashed session success message in iziToast config
+                    hasSuccessToast = responseText.includes("type: 'success'") && !responseText.includes("type: 'success', title: 'Success', method: 'success', message: null"); // 2. Redirected to a listing URL
+
+                    isRedirectedToList = finalUrl.includes('/list'); // Error indicators:
+                    // Rendered error elements outside of template tags
+
+                    renderedFormErrors = doc.querySelectorAll('form .form-row > label.error, form .form-group > label.error, form .invalid-feedback:not(:empty), .alert-danger:not(:empty)');
+                    hasServerValidationErrors = renderedFormErrors.length > 0;
+                    isValidationError = !response.ok || hasServerValidationErrors && !hasSuccessToast;
+
+                    if (!isValidationError) {
+                      _context.next = 36;
+                      break;
+                    }
+
+                    // Re-render form with error highlights in active pane
+                    currentPane = document.getElementById('tab-pane-' + currentTabKey);
+
+                    if (currentPane) {
+                      newContent = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
+
+                      if (newContent) {
+                        // Destroy old Alpine tree first to prevent corrupted state
+                        if (window.Alpine && typeof window.Alpine.destroyTree === 'function') {
+                          try {
+                            window.Alpine.destroyTree(currentPane);
+                          } catch (e) {}
+                        } // Execute scripts FIRST so Alpine.data is updated before new DOM is injected
+
+
+                        _this8.executeScriptsFromDoc(doc, currentPane);
+
+                        currentPane.innerHTML = newContent.innerHTML;
+
+                        if (window.feather && typeof window.feather.replace === 'function') {
+                          try {
+                            window.feather.replace();
+                          } catch (e) {}
+                        }
+
+                        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
+                          try {
+                            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents)(currentPane);
+                          } catch (e) {}
+                        }
+
+                        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask === 'function') {
+                          try {
+                            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask)(currentPane);
+                          } catch (e) {}
+                        }
+
+                        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                          try {
+                            window.Alpine.initTree(currentPane);
+                          } catch (e) {
+                            console.warn('Alpine.initTree warning on error re-render:', e);
+                          }
+                        }
+                      }
+                    }
+
+                    if (window.iziToast) {
+                      _title2 = window.workspaceTranslations && window.workspaceTranslations.warning || 'Warning';
+                      _msg = window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields || 'Please check the required fields.';
+                      window.iziToast.warning({
+                        title: _title2,
+                        message: _msg
+                      });
+                    }
+
+                    _context.next = 51;
+                    break;
+
+                  case 36:
+                    // Success!
+                    doc.querySelectorAll('script').forEach(function (sc) {
+                      var text = sc.textContent || '';
+
+                      if (text.includes('iziToast') || text.includes('toastr')) {
+                        try {
+                          Function(text)();
+                        } catch (e) {}
+                      }
+                    });
+
+                    if (window.iziToast && !document.querySelector('.iziToast-wrapper .iziToast')) {
+                      _title3 = window.workspaceTranslations && window.workspaceTranslations.success || 'Success';
+                      _msg2 = window.workspaceTranslations && window.workspaceTranslations.savedSuccessfully || 'Saved successfully!';
+                      window.iziToast.success({
+                        title: _title3,
+                        message: _msg2
+                      });
+                    } // If user chose "Save & New"
+
+
+                    if (!(submitter && submitter.value === 'save_new')) {
+                      _context.next = 41;
+                      break;
+                    }
+
+                    _this8.refreshTab(currentTabKey);
+
+                    return _context.abrupt("return");
+
+                  case 41:
+                    // Determine target list URL
+                    _targetUrl = finalUrl;
+                    modName = currentTabKey ? currentTabKey.replace(/^admin-/, '').replace(/-create$/, '').replace(/-edit.*$/, '') : '';
+
+                    if (!_targetUrl || _targetUrl.includes('/save') || _targetUrl.includes('/store')) {
+                      _targetUrl = "/admin/".concat(modName, "/list/1");
+                    }
+
+                    targetPath = _this8.normalizeUrl(_targetUrl); // Broadcast resource saved so open tabs (like Order) can refresh select dropdowns
+
+                    try {
+                      window.dispatchEvent(new CustomEvent('workspace:resource-saved', {
+                        detail: {
+                          module: modName,
+                          url: targetPath
+                        }
+                      }));
+                    } catch (e) {} // Mark clean and close create/edit tab WITHOUT switching to adjacent tab
+
+
+                    if (currentTab) {
+                      currentTab.isDirty = false;
+
+                      _this8.closeTab(currentTab, null, false);
+                    } // Open or refresh the listing tab
+
+
+                    listKey = _this8.generateKey(targetPath);
+                    existingListTab = _this8.tabs.find(function (t) {
+                      return t.key === listKey;
+                    });
+
+                    if (existingListTab) {
+                      existingListTab.url = targetPath;
+                      listPane = document.getElementById('tab-pane-' + existingListTab.key);
+                      if (listPane) listPane.remove();
+                    }
+
+                    _this8.openUrlInTab(targetPath);
+
+                  case 51:
+                  case "end":
+                    return _context.stop();
+                }
+              }
+            }, _callee, null, [[9, 18]]);
+          }));
+
+          return function (_x) {
+            return _ref.apply(this, arguments);
+          };
+        }())["catch"](function (err) {
+          if (submitter) {
+            submitter.disabled = false;
+
+            if (submitter.dataset.originalText) {
+              submitter.innerHTML = submitter.dataset.originalText;
+            }
+          }
+
+          _this8.setTabLoading(currentTabKey, false);
+
+          console.error('Form submission error:', err);
+
+          if (window.iziToast) {
+            var title = window.workspaceTranslations && window.workspaceTranslations.error || 'Error';
+            var msg = window.workspaceTranslations && window.workspaceTranslations.submitError || 'Could not submit form. Please try again.';
+            window.iziToast.error({
+              title: title,
+              message: msg
+            });
+          }
+        });
+      });
+    },
+
+    /**
+     * Determine if a tab is an editable form tab (e.g. Create Order, Create Shop, Edit Product).
+     * Listing pages, reports, dashboards, logs, and transaction tables are NEVER form tabs.
+     */
+    isFormTab: function isFormTab(tab) {
+      if (!tab) return false;
+      var key = (tab.key || '').toLowerCase();
+      var url = (tab.url || '').toLowerCase(); // 1. Explicitly check if it is a listing / report / dashboard page
+
+      var isExplicitListing = key.includes('-list') || key.includes('dashboard') || key.includes('report') || key.includes('history') || key.includes('transaction') || key.includes('movement') || key.endsWith('-index') || url.includes('/list') || url.includes('/report') || url.includes('/dashboard') || url.includes('/history') || url.includes('/transaction'); // If it matches a listing and has NO create/edit indicators, it is definitely a listing page
+
+      if (isExplicitListing && !key.includes('-create') && !key.includes('-edit') && !url.includes('/create') && !url.includes('/edit')) {
+        return false;
+      } // 2. Identify known form patterns
+
+
+      if (key.includes('-create') || key.includes('-edit') || key.includes('-store') || key.includes('createorder') || key.includes('create-order') || key.includes('-password') || key.includes('-top-up') || url.includes('/create') || url.includes('/edit') || url.includes('/store') || url.includes('createorder')) {
+        return true;
+      } // 3. Fallback: inspect DOM pane for an actual entity form (POST/PUT/PATCH form, not a GET filter)
+
+
+      var pane = document.getElementById('tab-pane-' + tab.key);
+
+      if (pane) {
+        var _form$getAttribute;
+
+        if (pane.querySelector('.booking-pos-workspace')) {
+          return true;
+        }
+
+        var form = pane.querySelector('form:not(.filter):not(#FilterForm):not([id*="filter"]):not([id*="Filter"]):not([method="GET"]):not([method="get"])');
+
+        if (form && (form.classList.contains('form-wrapper') || ((_form$getAttribute = form.getAttribute('method')) === null || _form$getAttribute === void 0 ? void 0 : _form$getAttribute.toUpperCase()) === 'POST')) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+    markTabDirty: function markTabDirty() {
+      var _this9 = this;
+
+      var isDirty = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+      var current = this.tabs.find(function (t) {
+        return t.key === _this9.activeTabKey;
+      });
+
+      if (current) {
+        // Listing pages cannot be dirty
+        if (isDirty && !this.isFormTab(current)) {
+          current.isDirty = false;
+          return;
+        }
+
+        current.isDirty = isDirty;
+        this.saveSession();
+      }
+    },
+    setupDirtyTracking: function setupDirtyTracking() {
+      var _this10 = this;
+
+      var contentArea = document.getElementById('content');
+
+      if (contentArea) {
+        var handleDirtyInput = function handleDirtyInput(e) {
+          // Only track real user interactions (ignore programmatic plugin dispatches)
+          if (e.isTrusted === false) return;
+          var target = e.target;
+          if (!target) return; // Automatically clear validation error message when user starts typing
+
+          var formRow = target.closest('.form-row, .form-group');
+
+          if (formRow) {
+            var errLabel = formRow.querySelector('label.error, span.error, .invalid-feedback');
+
+            if (errLabel) {
+              errLabel.remove();
+            }
+          } // 1. Ignore if target is a search/filter input or in a filter form
+
+
+          if (target.closest('.InputContainer') || target.closest('.filter') || target.closest('#FilterForm') || target.closest('.filter-form') || target.closest('[id*="Filter"]') || target.closest('[id*="filter"]') || target.closest('.dataTables_filter') || target.closest('.table-filter') || target.closest('form[method="GET"]') || target.closest('form[method="get"]') || target.type === 'search' || target.classList.contains('inputSearch') || target.classList.contains('form-search') || target.name === 'search' || target.name === 'filter' || target.name === 'keyword') {
+            return;
+          } // 2. Active tab must be a form tab (listing pages are NEVER dirty)
+
+
+          var currentTab = _this10.tabs.find(function (t) {
+            return t.key === _this10.activeTabKey;
+          });
+
+          if (!currentTab || !_this10.isFormTab(currentTab)) {
+            return;
+          } // 3. The input must belong to the active tab's pane
+
+
+          var pane = target.closest('.workspace-tab-pane');
+
+          if (pane && pane.id !== 'tab-pane-' + _this10.activeTabKey) {
+            return;
+          } // 4. Must be inside a data form or booking-pos-workspace
+
+
+          var isInDataForm = target.closest('form:not([method="GET"]):not([method="get"]):not(.filter)') || target.closest('.booking-pos-workspace') || target.closest('.form-wrapper');
+
+          if (!isInDataForm) {
+            return;
+          }
+
+          _this10.markTabDirty(true);
+        };
+
+        contentArea.addEventListener('input', handleDirtyInput, true);
+        contentArea.addEventListener('change', handleDirtyInput, true);
+
+        if (window.jQuery) {
+          $(contentArea).on('select2:select select2:unselect', function (e) {
+            var target = e.target;
+            if (!target) return;
+            if (target.closest('.InputContainer, .filter, #FilterForm, .filter-form')) return;
+
+            var currentTab = _this10.tabs.find(function (t) {
+              return t.key === _this10.activeTabKey;
+            });
+
+            if (currentTab && _this10.isFormTab(currentTab)) {
+              _this10.markTabDirty(true);
+            }
+          });
+        }
+      }
+    },
+    setupKeyboardShortcuts: function setupKeyboardShortcuts() {
+      var _this11 = this;
+
+      document.addEventListener('keydown', function (e) {
+        // Ctrl+W or Cmd+W
+        if ((e.ctrlKey || e.metaKey) && e.key === 'w' && !e.shiftKey) {
+          var activeTab = _this11.tabs.find(function (t) {
+            return t.key === _this11.activeTabKey;
+          });
+
+          if (activeTab && !activeTab.isPinned) {
+            e.preventDefault();
+
+            _this11.closeTab(activeTab, e);
+          }
+        } // Ctrl+Tab to cycle tabs forward
+
+
+        if (e.ctrlKey && e.key === 'Tab') {
+          e.preventDefault();
+
+          var currentIndex = _this11.tabs.findIndex(function (t) {
+            return t.key === _this11.activeTabKey;
+          });
+
+          if (currentIndex >= 0) {
+            var nextIndex = e.shiftKey ? (currentIndex - 1 + _this11.tabs.length) % _this11.tabs.length : (currentIndex + 1) % _this11.tabs.length;
+
+            _this11.switchTab(_this11.tabs[nextIndex]);
+          }
+        } // Ctrl+1 through Ctrl+9
+
+
+        if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key >= '1' && e.key <= '9') {
+          var targetIndex = parseInt(e.key) - 1;
+
+          if (targetIndex < _this11.tabs.length) {
+            e.preventDefault();
+
+            _this11.switchTab(_this11.tabs[targetIndex]);
+          }
+        }
+      });
+    },
+    openNewTabLauncher: function openNewTabLauncher() {
+      this.openQuickSearch();
+    },
+    openQuickSearch: function openQuickSearch() {
+      if (typeof window.SearchMenu === 'function') {
+        window.SearchMenu();
+      } else if (Alpine.store('componentSearchMenu')) {
+        Alpine.store('componentSearchMenu').active = true;
+      } else if (typeof window.openQuickSearch === 'function') {
+        window.openQuickSearch();
+      }
+    },
+    toggleOverflowDropdown: function toggleOverflowDropdown() {
+      this.showOverflowDropdown = !this.showOverflowDropdown;
+
+      if (this.showOverflowDropdown) {
+        this.showProfileDropdown = false;
+        this.showNotificationDropdown = false;
+      }
+    },
+    toggleProfileDropdown: function toggleProfileDropdown() {
+      this.showProfileDropdown = !this.showProfileDropdown;
+
+      if (this.showProfileDropdown) {
+        this.showOverflowDropdown = false;
+        this.showNotificationDropdown = false;
+      }
+    },
+    toggleNotificationDropdown: function toggleNotificationDropdown() {
+      this.showNotificationDropdown = !this.showNotificationDropdown;
+
+      if (this.showNotificationDropdown) {
+        this.showOverflowDropdown = false;
+        this.showProfileDropdown = false;
+      }
+    },
+    openUserProfile: function openUserProfile(userId) {
+      this.showProfileDropdown = false;
+
+      if (userId) {
+        this.openUrlInTab("/admin/user/edit/".concat(userId), 'My Profile', 'bx bx-user');
+      }
+    },
+    signOut: function signOut() {
+      this.showProfileDropdown = false;
+
+      if (typeof window.logOut === 'function') {
+        window.logOut({});
+      } else {
+        var signOutLink = document.querySelector('a[href*="sign-out"]');
+
+        if (signOutLink) {
+          signOutLink.click();
+        } else {
+          window.location.href = '/admin/sign-out';
+        }
+      }
+    }
+  };
+};
+
+/***/ }),
+
+/***/ "./resources/admin/ts/workspace/s-events.js":
+/*!**************************************************!*\
+  !*** ./resources/admin/ts/workspace/s-events.js ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "initSEvents": () => (/* binding */ initSEvents),
+/* harmony export */   "initSMask": () => (/* binding */ initSMask)
+/* harmony export */ });
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+/**
+ * POS Enterprise MDI - s-event & s-mask handler
+ * Enhanced replacement for s-event.js and s-mask.js with full MDI tab support.
+ */
+var PREFIX = "s";
+var EVENT = ["click", "mouseover", "mouseout", "mousedown", "mouseup", "mousemove", "focus", "Keydown", "Keyup"];
+var TYPE = ["fn", "link", "open"];
+var FULL_EVENT_ATTRIBUTES = [];
+EVENT.forEach(function (event) {
+  TYPE.forEach(function (type) {
+    FULL_EVENT_ATTRIBUTES.push("".concat(PREFIX, "-").concat(event, "-").concat(type));
+  });
+});
+function initSEvents() {
+  var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!container) return;
+  var elements = container.querySelectorAll ? container.querySelectorAll("*") : [];
+  elements.forEach(function (item) {
+    if (item._s_event_initialized) return;
+    var attrNames = item.getAttributeNames ? item.getAttributeNames() : [];
+    attrNames.forEach(function (attr) {
+      if (FULL_EVENT_ATTRIBUTES.includes(attr)) {
+        item._s_event_initialized = true;
+
+        var _attr$split = attr.split("-"),
+            _attr$split2 = _slicedToArray(_attr$split, 3),
+            prefix = _attr$split2[0],
+            event = _attr$split2[1],
+            type = _attr$split2[2];
+
+        var value = item.getAttribute(attr);
+        item.addEventListener(event, function (e) {
+          switch (type) {
+            case "fn":
+              if (value) {
+                try {
+                  Function(value)();
+                } catch (err) {
+                  console.error("s-event fn error:", err);
+                }
+              }
+
+              break;
+
+            case "link":
+              if (value && value !== "#" && !value.startsWith("javascript:")) {
+                // If MDI is active, route internal admin links into MDI tabs!
+                try {
+                  var url = new URL(value, window.location.origin);
+
+                  if (window.MDI && url.origin === window.location.origin && url.pathname.startsWith("/admin") && !url.pathname.includes("logout") && !url.pathname.includes("auth")) {
+                    var _item$innerText;
+
+                    e.preventDefault();
+                    e.stopPropagation(); // Check if it's an export / download / destructive action
+
+                    var lowerVal = value.toLowerCase();
+
+                    if (lowerVal.includes("/export") || lowerVal.includes("/download") || lowerVal.includes("/print") || lowerVal.endsWith(".xlsx") || lowerVal.endsWith(".pdf") || lowerVal.endsWith(".csv") || lowerVal.includes("delete") || lowerVal.includes("destroy") || item.classList.contains("delete") || item.classList.contains("text-danger")) {
+                      window.location.href = value;
+                      return;
+                    }
+
+                    var targetPath = url.pathname + url.search;
+                    var currentTab = window.MDI.tabs.find(function (t) {
+                      return t.key === window.MDI.activeTabKey;
+                    }); // If reload button on current active tab
+
+                    if (currentTab && (url.href === window.location.href || currentTab.url === targetPath)) {
+                      window.MDI.refreshTab(window.MDI.activeTabKey);
+                      return;
+                    } // Extract title
+
+
+                    var title = item.getAttribute("title") || ((_item$innerText = item.innerText) === null || _item$innerText === void 0 ? void 0 : _item$innerText.trim()) || "";
+
+                    if (!title) {
+                      if (item.classList.contains("head-icon") || item.querySelector('[data-feather="arrow-left"]') || item.getAttribute("data-feather") === "arrow-left") {
+                        title = "Back";
+                      }
+                    } // Extract icon
+
+
+                    var icon = "bx bx-file";
+
+                    if (item.classList.contains("btn-create") || lowerVal.includes("/create")) {
+                      icon = "bx bx-plus-circle";
+                    } else if (lowerVal.includes("/list")) {
+                      icon = "bx bx-list-ul";
+                    }
+
+                    window.MDI.openUrlInTab(targetPath, title, icon);
+                    return;
+                  }
+                } catch (err) {} // Default external or non-admin behavior
+
+
+                window.location.href = value;
+              }
+
+              break;
+
+            case "open":
+              if (value) {
+                window.open(value, "_blank");
+              }
+
+              break;
+          }
+        }); // NOTE: We do NOT remove the attribute so inspection and delegation work reliably
+      }
+    });
+  });
+}
+function initSMask() {
+  var container = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+  if (!container) return;
+  var elements = container.querySelectorAll ? container.querySelectorAll("[s-mask]") : [];
+
+  var maskConvert = function maskConvert(value, arg) {
+    if (value && value.length > 0 && isFinite(value)) {
+      var mask = value.toString();
+      var mask_result = "";
+      var mask_index = 0;
+      var arg_mask = arg.match(/#/gm);
+      var mask_symbol = mask.length >= (arg_mask ? arg_mask.length : 0) ? mask.length : arg_mask.length;
+
+      for (var i = 0; i < mask_symbol; i++) {
+        var _arg$i;
+
+        if (((_arg$i = arg[i]) === null || _arg$i === void 0 ? void 0 : _arg$i.toLowerCase()) === "#") {
+          if (mask[i - mask_index]) {
+            mask_result += mask[i - mask_index];
+          }
+        } else if (arg[i]) {
+          mask_symbol++;
+          mask_index++;
+          mask_result += arg[i];
+        }
+      }
+
+      return mask_result;
+    }
+
+    return value;
+  };
+
+  elements.forEach(function (el) {
+    var value = el.innerHTML;
+    var mask = el.getAttribute("s-mask");
+
+    if (mask) {
+      el.innerHTML = maskConvert(value, mask);
+    }
+  });
+}
 
 /***/ }),
 

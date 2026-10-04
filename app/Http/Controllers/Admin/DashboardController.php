@@ -81,7 +81,7 @@ class DashboardController extends Controller
         $data['selectedPerformanceMonth'] = $selectedMonth;
 
         // If AJAX request specifically for product performance filter
-        if ($request->ajax() || $request->get('ajax') === 'product_performance') {
+        if ($request->get('ajax') === 'product_performance') {
             return response()->json([
                 'html' => view('admin::pages.dashboard_product_performance_rows', [
                     'productPerformance' => $data['productPerformance'],

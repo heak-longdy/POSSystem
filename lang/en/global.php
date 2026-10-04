@@ -20,6 +20,7 @@ return [
     'cancel'                 => 'Cancel',
     'confirm'                => 'Confirm',
     'ordering'               => 'Ordering',
+    'unsaved_changes'        => 'Unsaved changes',
 
     // Table headers
     'table' => [
@@ -154,6 +155,7 @@ return [
     'message' => [
         'delete_success'     => 'Deleted successfully!',
         'restore_success'    => 'Restored successfully!',
+        'save_success'       => 'Saved successfully!',
     ],
 
     // Validations
@@ -191,6 +193,42 @@ return [
         'general'               => 'General',
         'item'                  => 'item',
         'items'                 => 'items',
+    ],
+
+    // Workspace / Tabs
+    'workspace' => [
+        'unsaved'                => 'unsaved',
+        'unsaved_changes'        => 'Unsaved changes',
+        'confirm_close_tab'      => 'You have unsaved changes in ":title". Do you want to close without saving?',
+        'confirm_close_all'      => 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?',
+        'close_tab'              => 'Close tab',
+        'close_tab_shortcut'     => 'Close tab (Ctrl+W)',
+        'close_all_tabs'         => 'Close All Tabs',
+        'close_all'              => 'Close All',
+        'close_others'           => 'Close Other Tabs',
+        'close_to_right'         => 'Close Tabs to Right',
+        'reload'                 => 'Reload Tab',
+        'open_tabs'              => 'Open Tabs',
+        'tab'                    => 'Tab',
+        'notifications'          => 'Notifications',
+        'new'                    => 'new',
+        'coming_soon'            => 'Coming Soon...',
+        'coming_soon_desc'       => 'This feature is coming soon.',
+        'see_all_notifications'  => 'See all Notifications',
+        'administrator'          => 'Administrator',
+        'my_profile'             => 'My Profile',
+        'account_settings'       => 'Account Settings',
+        'my_inbox'               => 'My Inbox',
+        'messages_emails'        => 'Messages & Emails',
+        'my_tasks'               => 'My Tasks',
+        'todo_daily_tasks'       => 'To-do and Daily Tasks',
+        'logout'                 => 'Logout',
+        'saved_successfully'     => 'Saved successfully!',
+        'check_required_fields'  => 'Please check the required fields.',
+        'submit_error'           => 'Could not submit form. Please try again.',
+        'success'                => 'Success',
+        'warning'                => 'Warning',
+        'error'                  => 'Error',
     ],
 
     // Page

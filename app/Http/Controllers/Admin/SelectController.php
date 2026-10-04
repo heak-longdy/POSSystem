@@ -147,13 +147,17 @@ class SelectController extends Controller
     }
     public function stockSelectShop(Request $req)
     {
-        $data = Shop::where(function ($q) use ($req) {
-            $q->where('status', 1);
-            if ($req->search) {
-                $q->where('name', 'LIKE', '%' . $req->search . '%');
-                $q->orWhere('nick_name', 'LIKE', '%' . $req->search . '%');
-            }
-        })->orderBy('id', 'asc')->take(12)->get();
+        $data = Shop::where('status', 1)
+            ->when($req->search, function ($q) use ($req) {
+                $q->where(function ($sub) use ($req) {
+                    $sub->where('name', 'LIKE', '%' . $req->search . '%')
+                        ->orWhere('nick_name', 'LIKE', '%' . $req->search . '%')
+                        ->orWhere('phone', 'LIKE', '%' . $req->search . '%');
+                });
+            })
+            ->orderBy('id', 'asc')
+            ->take(50)
+            ->get();
 
         try {
             return response()->json(['data' => $data, 'message' => 200]);
@@ -185,25 +189,31 @@ class SelectController extends Controller
     }
     public function selectShopProduct(Request $req)
     {
-        $productID = $req->product_id ? json_decode($req->product_id) : [];
         $shopID = $req->shop_id;
-        $data = ShopProduct::where(function ($q) use ($req, $shopID, $productID) {
-            $q->where('status', 1);
-            $q->where('shop_id', $shopID);
-            $q->whereHas('product', function ($pro) use ($productID) {
+        if (!$shopID) {
+            return response()->json(['data' => [], 'message' => 200]);
+        }
+
+        $productID = $req->product_id ? json_decode($req->product_id) : [];
+
+        $data = ShopProduct::where('status', 1)
+            ->where('shop_id', $shopID)
+            ->whereHas('product', function ($pro) use ($req, $productID) {
+                $pro->where('status', 1);
                 if (request('search')) {
                     $pro->where('name', 'LIKE', '%' . request('search') . '%');
                 }
-                if (count($productID) > 0) {
+                if (is_array($productID) && count($productID) > 0) {
                     $pro->whereNotIn('id', $productID);
                 }
-            });
-        })->orderBy('id', 'asc')->take(12)->get();
-        if (count($data) > 0) {
-            foreach ($data as $val) {
-                $val->product = Product::with(["uom", "category"])->find($val->product_id);
-            }
-        }
+            })
+            ->with(['product.uom', 'product.category'])
+            ->orderBy('id', 'asc')
+            ->take($req->limit ? (int) $req->limit : 50)
+            ->get()
+            ->unique('product_id')
+            ->values();
+
         try {
             return response()->json(['data' => $data, 'message' => 200]);
         } catch (\Exception $e) {

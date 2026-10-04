@@ -1,4 +1,4 @@
-<div class="dialog" x-data="confirmDialog">
+<div class="dialog" x-data="trashConfirmDialog">
     <div class="dialog-container">
         <form class="dialog-form" id="dialog-form" style="width: 300px" @submit.prevent>
             <div class="dialog-form-header">
@@ -28,7 +28,7 @@
         </form>
     </div>
     <script>
-        Alpine.data('confirmDialog', () => ({
+        Alpine.data('trashConfirmDialog', () => ({
             data: null,
             deleteFiles: [],
             form: {
@@ -40,15 +40,17 @@
                 disabled: false,
             },
             init() {
-                this.data = this.dialog.data['confirmDialog'];
-                this.deleteFiles.push(this.data.contentMenu);
-                Alpine.store('animate').enter(this.$root.children[0], () => {
+                this.data = this.dialog?.data?.['trashConfirmDialog'];
+                if (this.data?.contentMenu) {
+                    this.deleteFiles.push(this.data.contentMenu);
+                }
+                Alpine.store('animate')?.enter(this.$root.children[0], () => {
                     this.closeContextMenu();
                 });
             },
             onClose(data = null) {
-                Alpine.store('animate').leave(this.$root.children[0], () => {
-                    this.dialog.close('confirmDialog', data);
+                Alpine.store('animate')?.leave(this.$root.children[0], () => {
+                    this.dialog?.close('trashConfirmDialog', data);
                 });
             },
             onSave() {

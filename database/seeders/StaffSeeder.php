@@ -50,6 +50,15 @@ class StaffSeeder extends Seeder
         // 15 Pure Khmer Staff Records
         $staffMembers = [
             [
+                'name'         => 'ហៀក ឡងឌី',
+                'position_id'  => $positionIds[0] ?? null,
+                'phone_number' => '012787802',
+                'email'        => 'heak.longdy@pos.com',
+                'address'      => 'ផ្ទះលេខ ៧៧ ផ្លូវ ២៧១ សង្កាត់ទឹកថ្លា ខណ្ឌសែនសុខ ភ្នំពេញ',
+                'status'       => 1,
+                'user'         => 1,
+            ],
+            [
                 'name'         => 'សុខ ចាន់ថា',
                 'position_id'  => $positionIds[0] ?? null,
                 'phone_number' => '012345678',

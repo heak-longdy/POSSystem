@@ -1,35 +1,41 @@
 .form-admin {
   width: 100%;
-  height: calc(100% - 70px);
+  min-height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
+  background: #f8fafc;
+  padding-top: 30px;
 }
 .form-admin .form-bg {
-  width: 100%;
-  height: 200px;
-  background: linear-gradient(135deg, rgba(31, 26, 35, 0.8) 0%, #F9F9F9 100%);
-  background: unset;
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: 0;
+  display: none;
 }
 .form-admin .form-wrapper {
-  padding: 0 100px;
+  padding: 0 40px 24px;
   margin: 0 auto;
   position: relative;
-  height: 100%;
+  width: 100%;
   max-width: 60rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 .form-admin .form-wrapper .form-header {
   width: 100%;
   display: flex;
   font-size: 20px;
-  padding: 10px 0;
+  padding: 16px 0 12px;
+  flex-shrink: 0;
 }
 .form-admin .form-wrapper .form-header h3 {
   display: flex;
   align-items: center;
-  margin: 10px 0;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
 }
 .form-admin .form-wrapper .form-header h3 svg {
   margin-right: 10px;
@@ -37,9 +43,12 @@
 }
 .form-admin .form-wrapper .form-body {
   box-sizing: border-box;
-  padding: 25px;
+  background: #ffffff;
+  padding: 28px;
   border-radius: 10px;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 .form-admin .form-wrapper .form-body .row {
   display: flex;
@@ -636,7 +645,8 @@
   width: 100%;
   display: flex;
   justify-content: flex-start;
-  padding-top: 10px;
+  padding-top: 24px;
+  margin-top: auto;
   grid-gap: 10px;
 }
 .form-admin .form-wrapper .form-body .form-button .left {

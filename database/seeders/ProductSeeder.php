@@ -19,6 +19,7 @@ class ProductSeeder extends Seeder
      */
     public function run()
     {
+        Product::truncate();
         $jsonPath = base_path('khmer_energy_drink_products_with_images.json');
 
         if (!File::exists($jsonPath)) {

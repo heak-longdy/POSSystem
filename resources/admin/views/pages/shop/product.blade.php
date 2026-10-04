@@ -66,12 +66,11 @@
                         <div class="table-header">
                             <div class="row table-row-5"><span>{{ __('shop.table.no') }}</span></div>
                             <div class="row table-row-8 text left"><span>{{ __('shop.table.image') }}</span></div>
-                            <div class="row table-row-20 text left"><span>{{ __('shop.table.product') }}</span></div>
-                            <div class="row table-row-12 text left"><span>{{ __('shop.table.category') }}</span></div>
+                            <div class="row table-row-25 text left"><span>{{ __('shop.table.product') }}</span></div>
+                            <div class="row table-row-14 text left"><span>{{ __('shop.table.category') }}</span></div>
                             <div class="row table-row-8 text left"><span>{{ __('shop.table.uom') }}</span></div>
                             <div class="row table-row-9"><span>{{ __('shop.table.price') }}</span></div>
                             <div class="row table-row-7"><span>{{ __('shop.table.point') }}</span></div>
-                            <div class="row table-row-7"><span>{{ __('shop.table.max_qty') }}</span></div>
                             <div class="row table-row-9"><span>{{ __('shop.table.commission') }}</span></div>
                             <div class="row table-row-10"><span>{{ __('shop.table.status') }}</span></div>
                             <div class="row table-row-5"><span></span></div>
@@ -88,10 +87,10 @@
                                                 onerror="this.src='{{ asset('images/logo/default.png') }}'" alt="">
                                         </div>
                                     </div>
-                                    <div class="row table-row-20 text left">
+                                    <div class="row table-row-25 text left">
                                         <span>{{ $item->product?->name ?? '---' }}</span>
                                     </div>
-                                    <div class="row table-row-12 text left">
+                                    <div class="row table-row-14 text left">
                                         <span>{{ $item->product?->category?->name ?? '---' }}</span>
                                     </div>
                                     <div class="row table-row-8 text left">
@@ -102,9 +101,6 @@
                                     </div>
                                     <div class="row table-row-7">
                                         <span>{{ $item->point ?? '---' }}</span>
-                                    </div>
-                                    <div class="row table-row-7">
-                                        <span>{{ $item->max_qty ?? '---' }}</span>
                                     </div>
                                     <div class="row table-row-9">
                                         <span>

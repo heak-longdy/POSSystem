@@ -13,6 +13,17 @@
     @include('admin::shared.header', ['header_name' => $headerName])
     <div class="form-admin booking booking-dashboard booking-order-ui" x-data="XDatacreateorder">
         <div class="booking-pos-workspace">
+            <div class="booking-pos-header">
+                <div class="form-header">
+                    <h3>
+                        <a href="{!! route('admin-' . ($routeName ?? 'order') . '-list', 'Pending') !!}" s-click-link="{!! route('admin-' . ($routeName ?? 'order') . '-list', 'Pending') !!}" class="back-link-icon" title="Back to listing">
+                            <i data-feather="arrow-left"></i>
+                        </a>
+                        <span>{{ $headerName }}</span>
+                    </h3>
+                </div>
+            </div>
+
             <!-- Left Main Column (Catalog & Recent Bookings) -->
             <div class="booking-pos-main-col">
                 <!-- Recent Bookings Reel -->
@@ -283,22 +294,42 @@
                         <div class="sidebar-form-grid">
                             <div class="form-group form-group--full">
                                 <label><i data-feather="user"></i> {{ __('order.form.customer') }}</label>
-                                <select name="customer_id" id="customer_id" x-model="formData.customer_id"
-                                    :disabled="!canEditOrderItems()"
-                                    class="booking-select booking-select--customer" x-init="fetchSelectCustomer()">
-                                    <option value="">{{ __('order.form.select_customer') }}</option>
-                                </select>
+                                <div class="select2Group">
+                                    <select name="customer_id" class="SelectCustomer" id="customer_id"
+                                        x-ref="customerSelect"
+                                        :disabled="!canEditOrderItems()"
+                                        x-init="fetchSelectCustomer()">
+                                        <option value=""> {{ __('order.form.select_customer') }}</option>
+                                    </select>
+                                    <div class="select2Reset" x-show="(formData?.customer_id || customerData?.id) && canEditOrderItems()" @click.stop="resetCustomer()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                            <path
+                                                d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
                                 <template x-for="item in dataError?.customer_id">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
                             <div class="form-group form-group--full">
                                 <label><i data-feather="home"></i> {{ __('order.form.shop') }}</label>
-                                <select name="shop_id" id="shop_id" x-model="formData.shop_id"
-                                    :disabled="!canEditOrderItems()"
-                                    class="booking-select booking-select--shop" x-init="fetchSelectShop()">
-                                    <option value="">{{ __('order.form.select_shop') }}</option>
-                                </select>
+                                <div class="select2Group">
+                                    <select name="shop_id" class="SelectShop" id="shop_id"
+                                        x-ref="shopSelect"
+                                        :disabled="!canEditOrderItems()"
+                                        x-init="fetchSelectShop()">
+                                        <option value=""> {{ __('order.form.select_shop') }}</option>
+                                    </select>
+                                    <div class="select2Reset" x-show="(formData?.shop_id || shopData?.id) && canEditOrderItems()" @click.stop="resetShop()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                            <path
+                                                d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
                                 <template x-for="item in dataError?.shop_id">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
@@ -744,19 +775,74 @@
                         width: 12px !important;
                         height: 12px !important;
                     }
+                    .sidebar-form-grid .select2Group {
+                        width: 100% !important;
+                        position: relative !important;
+                    }
+                    .sidebar-form-grid .select2Group select,
+                    .sidebar-form-grid .SelectShop,
+                    .sidebar-form-grid .SelectCustomer,
                     .booking-select,
                     .sidebar-date-input {
                         width: 100% !important;
-                        height: 34px !important;
+                        height: 43px !important;
                         border: 1px solid #cbd5e1 !important;
                         border-radius: 7px !important;
                         padding: 0 10px !important;
                         font-size: 12.5px !important;
-                        font-weight: 600 !important;
+                        font-weight: 500 !important;
                         color: #0f172a !important;
                         background: #ffffff !important;
                         outline: none !important;
                         transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2.select2-container {
+                        width: 100% !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2-container .select2-selection--single {
+                        height: 43px !important;
+                        border-radius: 7px !important;
+                        border: 1px solid #cbd5e1 !important;
+                        background-color: #ffffff !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        padding: 0 10px !important;
+                        box-shadow: none !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2-container--default .select2-selection--single .select2-selection__rendered {
+                        color: #334155 !important;
+                        font-size: 12.5px !important;
+                        font-weight: 500 !important;
+                        line-height: normal !important;
+                        padding-left: 0 !important;
+                        padding-right: 28px !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2-container--default .select2-selection--single .select2-selection__arrow {
+                        height: 100% !important;
+                        top: 0 !important;
+                        right: 8px !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2Reset {
+                        position: absolute !important;
+                        top: 50% !important;
+                        right: 26px !important;
+                        transform: translateY(-50%) !important;
+                        cursor: pointer !important;
+                        z-index: 2 !important;
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2Reset svg {
+                        fill: #94a3b8 !important;
+                        width: 18px !important;
+                        height: 18px !important;
+                        background: #ffffff !important;
+                        border-radius: 50% !important;
+                        transition: fill 0.15s ease !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2Reset:hover svg {
+                        fill: #ef4444 !important;
                     }
                     .booking-select:focus,
                     .sidebar-date-input:focus {
@@ -1572,7 +1658,7 @@
                     .form-admin.booking-order-ui,
                     .booking-dashboard.booking-order-ui,
                     .booking-order-ui {
-                        height: calc(100vh - 80px) !important;
+                        height: calc(100vh - 45px) !important;
                         overflow-y: auto !important;
                         overflow-x: hidden !important;
                     }
@@ -1939,8 +2025,8 @@
 
 @section('script')
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('XDatacreateorder', () => ({
+        function XDatacreateorder() {
+            return {
                 loading: false,
                 dataError: {},
                 formData: {
@@ -1991,6 +2077,7 @@
                 editPaymentNote: '',
                 selectType: 'product',
                 shopData: null,
+                customerData: null,
                 orderDeleteId: [],
                 initialOrder: null,
                 initialSelectedShop: null,
@@ -2003,6 +2090,7 @@
                     this.initialSelectedShop = selectedShop;
 
                     this.shopData = order?.shop || selectedShop || null;
+                    this.customerData = order?.customer || null;
                     this.formData.shop_id = order?.shop_id || selectedShop?.id || null;
                     this.formData.customer_id = order?.customer_id || order?.customer?.id || null;
                     const orderDateVal = order?.order_date;
@@ -2047,38 +2135,58 @@
                     this.fiterProduct(this.searchFilter);
                     this.initOrderDatepicker();
                     this.$nextTick(() => {
+                        this.fetchSelectShop();
+                        this.fetchSelectCustomer();
                         this.prefillSelectFields(order, selectedShop);
                         this.initTwoColumnSticky();
+                        this.restoreDraft();
+                    });
+                    this.$watch('formData', () => this.saveDraft(), { deep: true });
+                    this.$watch('dataCart', () => this.saveDraft(), { deep: true });
+                    window.addEventListener('workspace:tab-change', () => this.saveDraft());
+                    window.addEventListener('beforeunload', () => this.saveDraft());
+                    window.addEventListener('workspace:tab-activated', (e) => {
+                        if (e.detail?.key === 'admin-order-create') {
+                            this.fetchSelectShop();
+                            this.fetchSelectCustomer();
+                            this.refreshIcons();
+                        }
                     });
                     this.refreshIcons();
                 },
                 initOrderDatepicker() {
                     const vm = this;
-                    $("#order_date").datepicker({
-                        dateFormat: 'yy-mm-dd',
-                        changeYear: true,
-                        changeMonth: true,
-                        gotoCurrent: true,
-                        yearRange: "-10:+10",
-                        onSelect(selectedDate) {
-                            vm.formData.order_date = selectedDate;
-                        }
-                    });
-                    $("#delivery_date").datepicker({
-                        dateFormat: 'yy-mm-dd',
-                        changeYear: true,
-                        changeMonth: true,
-                        gotoCurrent: true,
-                        yearRange: "-10:+10",
-                        onSelect(selectedDate) {
-                            vm.formData.delivery_date = selectedDate;
-                        }
-                    });
+                    const $orderDate = this.getScopeEl("#order_date");
+                    const $deliveryDate = this.getScopeEl("#delivery_date");
+                    if ($orderDate.length) {
+                        $orderDate.datepicker({
+                            dateFormat: 'yy-mm-dd',
+                            changeYear: true,
+                            changeMonth: true,
+                            gotoCurrent: true,
+                            yearRange: "-10:+10",
+                            onSelect(selectedDate) {
+                                vm.formData.order_date = selectedDate;
+                            }
+                        });
+                    }
+                    if ($deliveryDate.length) {
+                        $deliveryDate.datepicker({
+                            dateFormat: 'yy-mm-dd',
+                            changeYear: true,
+                            changeMonth: true,
+                            gotoCurrent: true,
+                            yearRange: "-10:+10",
+                            onSelect(selectedDate) {
+                                vm.formData.delivery_date = selectedDate;
+                            }
+                        });
+                    }
                 },
                 initTwoColumnSticky() {
-                    const leftCol = document.querySelector('.booking-pos-main-col');
-                    const rightCol = document.querySelector('.booking-pos-sidebar');
-                    const scrollContainer = document.querySelector('.booking-order-ui') || window;
+                    const leftCol = (this.$el ? this.$el.querySelector('.booking-pos-main-col') : null) || document.querySelector('.booking-pos-main-col');
+                    const rightCol = (this.$el ? this.$el.querySelector('.booking-pos-sidebar') : null) || document.querySelector('.booking-pos-sidebar');
+                    const scrollContainer = (this.$el ? this.$el.closest('.booking-order-ui') : null) || document.querySelector('.booking-order-ui') || window;
 
                     if (!leftCol || !rightCol) return;
 
@@ -2206,22 +2314,62 @@
                     const d = pay?.payment_date || pay?.created_at;
                     return d ? moment(d).format('YYYY-MM-DD HH:mm') : '--';
                 },
+                getScopeEl(selector) {
+                    if (this.$refs && selector === '#shop_id' && this.$refs.shopSelect) {
+                        return $(this.$refs.shopSelect);
+                    }
+                    if (this.$refs && selector === '#customer_id' && this.$refs.customerSelect) {
+                        return $(this.$refs.customerSelect);
+                    }
+                    if (this.$el) {
+                        if ($(this.$el).is(selector)) {
+                            return $(this.$el);
+                        }
+                        const $foundInEl = $(this.$el).find(selector);
+                        if ($foundInEl.length) {
+                            return $foundInEl;
+                        }
+                        const $pane = $(this.$el).closest('.workspace-tab-pane, .form-admin');
+                        if ($pane.length) {
+                            const $foundInPane = $pane.find(selector);
+                            if ($foundInPane.length) {
+                                return $foundInPane;
+                            }
+                        }
+                    }
+                    const $active = $('.workspace-tab-pane.active ' + selector);
+                    if ($active.length) {
+                        return $active;
+                    }
+                    return $(selector);
+                },
                 setSelect2Value(selector, value, text) {
+                    const $select = this.getScopeEl(selector);
+                    if (!$select.length || !$select.is('select')) return;
                     if (!value) {
+                        $select.val(null).trigger('change');
                         return;
                     }
-
-                    const $select = $(selector);
-                    if (!$select.is('select')) return;
+                    if (String($select.val()) === String(value) && $select.find('option:selected').text().trim() === String(text || value).trim()) {
+                        return;
+                    }
                     $select.find('option').filter((index, option) => String(option.value) === String(value)).remove();
-                    $select.append(new Option(text || value, value, true, true)).trigger('change');
+                    const option = "<option selected></option>";
+                    const selectOptionHTML = $(option).val(value).text(text || value);
+                    $select.append(selectOptionHTML).trigger('change');
                 },
                 prefillSelectFields(order, selectedShop) {
-                    const shop = order?.shop || selectedShop;
-                    const customer = order?.customer;
+                    const shop = order?.shop || selectedShop || this.shopData;
+                    const customer = order?.customer || this.customerData;
 
-                    this.setSelect2Value('#shop_id', this.formData.shop_id, shop?.name || shop?.phone);
-                    this.setSelect2Value('#customer_id', this.formData.customer_id, customer?.name || customer?.phone);
+                    const shopName = shop?.name || shop?.phone;
+                    if (this.formData.shop_id && shopName) {
+                        this.setSelect2Value('#shop_id', this.formData.shop_id, shopName);
+                    }
+                    const custName = customer?.name || customer?.phone;
+                    if (this.formData.customer_id && custName) {
+                        this.setSelect2Value('#customer_id', this.formData.customer_id, custName);
+                    }
                 },
                 mapDetailToCart(detail) {
                     const type = detail?.type || 'product';
@@ -2263,63 +2411,131 @@
                     this.fiterProduct('');
                 },
                 fetchSelectShop() {
-                    $('#shop_id').select2({
-                        placeholder: @json(__('order.form.select_shop')),
-                        ajax: {
-                            url: '{{ route('admin-select-shop') }}',
-                            dataType: 'json',
-                            type: 'GET',
-                            quietMillis: 50,
-                            data: (param) => ({ search: param.term }),
-                            processResults: (data) => ({
-                                results: $.map(data.data, (item) => ({
-                                    text: item?.name ? item.name : item?.phone,
-                                    id: item.id,
-                                    item: item,
-                                }))
-                            })
-                        }
-                    }).on('select2:open', () => {
-                        document.querySelector('.select2-search__field')?.focus();
-                    }).on('select2:select', (event) => {
-                        const selected = event.params.data;
-                        this.formData.shop_id = selected.id;
-                        this.shopData = selected.item || {
-                            id: selected.id,
-                            name: selected.text
-                        };
-                        this.dataCart = [];
-                        this.orderDeleteId = [];
-                        this.syncCatalogSelection();
-                        this.calculatorProductPrice();
-                        this.fiterProduct(this.searchFilter);
-                    });
-                    this.prefillSelectFields(this.initialOrder, this.initialSelectedShop);
+                    const $shop = this.getScopeEl('#shop_id');
+                    if (!$shop.length) return;
+                    if (!$shop.hasClass('select2-hidden-accessible')) {
+                        $shop.select2({
+                            placeholder: `{{ __('order.form.select_shop') }}`,
+                            width: '100%',
+                            ajax: {
+                                url: '{{ route('admin-select-shop') }}',
+                                dataType: 'json',
+                                type: "GET",
+                                quietMillis: 50,
+                                data: (param) => ({
+                                    search: param.term
+                                }),
+                                processResults: (data) => ({
+                                    results: $.map(data.data, (item) => ({
+                                        text: item?.name ? item.name : item?.phone,
+                                        id: item.id,
+                                        item: item
+                                    }))
+                                }),
+                                error: (xhr, status, error) => {
+                                    console.error('Error fetching shops:', error);
+                                }
+                            }
+                        }).on('select2:select', (event) => {
+                            this.shopData = event.params.data.item || {
+                                id: event.params.data.id,
+                                name: event.params.data.text
+                            };
+                            this.formData.shop_id = event.params.data.id;
+                            delete this.dataError?.shop_id;
+                            this.dataCart = [];
+                            this.orderDeleteId = [];
+                            this.syncCatalogSelection();
+                            this.calculatorProductPrice();
+                            this.fiterProduct(this.searchFilter);
+                            this.saveDraft();
+                        }).on('change', (e) => {
+                            if (!$(e.target).val()) {
+                                this.shopData = null;
+                                this.formData.shop_id = null;
+                                this.dataCart = [];
+                                this.orderDeleteId = [];
+                                this.syncCatalogSelection();
+                                this.calculatorProductPrice();
+                                this.fiterProduct(this.searchFilter);
+                                this.saveDraft();
+                            }
+                        }).on('select2:open', () => {
+                            $select2FocusInputSearch();
+                        });
+                    }
+
+                    const shopName = this.shopData?.name || this.shopData?.phone;
+                    if (this.formData.shop_id && shopName) {
+                        this.setSelect2Value('#shop_id', this.formData.shop_id, shopName);
+                    }
                 },
                 fetchSelectCustomer() {
-                    $('#customer_id').select2({
-                        placeholder: @json(__('order.form.select_customer')),
-                        ajax: {
-                            url: '{{ route('admin-select-customer') }}',
-                            dataType: 'json',
-                            type: 'GET',
-                            quietMillis: 50,
-                            data: (param) => ({ search: param.term }),
-                            processResults: (data) => ({
-                                results: $.map(data.data, (item) => ({
-                                    text: item?.name ? item.name : item?.phone,
-                                    id: item.id
-                                }))
-                            })
-                        }
-                    }).on('select2:open', () => {
-                        document.querySelector('.select2-search__field')?.focus();
-                    }).on('select2:select', (event) => {
-                        this.formData.customer_id = event.params.data.id;
-                    }).on('select2:clear', () => {
-                        this.formData.customer_id = null;
-                    });
-                    this.prefillSelectFields(this.initialOrder, this.initialSelectedShop);
+                    const $customer = this.getScopeEl('#customer_id');
+                    if (!$customer.length) return;
+                    if (!$customer.hasClass('select2-hidden-accessible')) {
+                        $customer.select2({
+                            placeholder: `{{ __('order.form.select_customer') }}`,
+                            width: '100%',
+                            ajax: {
+                                url: '{{ route('admin-select-customer') }}',
+                                dataType: 'json',
+                                type: "GET",
+                                quietMillis: 50,
+                                data: (param) => ({
+                                    search: param.term
+                                }),
+                                processResults: (data) => ({
+                                    results: $.map(data.data, (item) => ({
+                                        text: item?.name ? item.name : item?.phone,
+                                        id: item.id,
+                                        item: item
+                                    }))
+                                }),
+                                error: (xhr, status, error) => {
+                                    console.error('Error fetching customers:', error);
+                                }
+                            }
+                        }).on('select2:select', (event) => {
+                            this.customerData = event.params.data.item || {
+                                id: event.params.data.id,
+                                name: event.params.data.text
+                            };
+                            this.formData.customer_id = event.params.data.id;
+                            delete this.dataError?.customer_id;
+                            this.saveDraft();
+                        }).on('change', (e) => {
+                            if (!$(e.target).val()) {
+                                this.customerData = null;
+                                this.formData.customer_id = null;
+                                this.saveDraft();
+                            }
+                        }).on('select2:open', () => {
+                            $select2FocusInputSearch();
+                        });
+                    }
+
+                    const custName = this.customerData?.name || this.customerData?.phone;
+                    if (this.formData.customer_id && custName) {
+                        this.setSelect2Value('#customer_id', this.formData.customer_id, custName);
+                    }
+                },
+                resetShop() {
+                    this.setSelect2Value('#shop_id', null);
+                    this.shopData = null;
+                    this.formData.shop_id = null;
+                    this.dataCart = [];
+                    this.orderDeleteId = [];
+                    this.syncCatalogSelection();
+                    this.calculatorProductPrice();
+                    this.fiterProduct(this.searchFilter);
+                    this.saveDraft();
+                },
+                resetCustomer() {
+                    this.setSelect2Value('#customer_id', null);
+                    this.customerData = null;
+                    this.formData.customer_id = null;
+                    this.saveDraft();
                 },
                 async fiterProduct(search = this.searchFilter) {
                     const shopId = this.formData.shop_id || this.shopData?.id;
@@ -2653,7 +2869,7 @@
                 },
                 focusCartItem(item) {
                     const selector = `[data-cart-item="${this.catalogKey(item)}"]`;
-                    const cartItem = document.querySelector(selector);
+                    const cartItem = (this.$el ? this.$el.querySelector(selector) : null) || document.querySelector(selector);
                     (cartItem?.querySelector('[data-cart-price]') || cartItem?.querySelector('[data-cart-qty]'))?.focus();
                 },
                 priceRealTimeAction(item) {
@@ -2731,6 +2947,104 @@
                     this.orderDeleteId = [];
                     this.calculatorProductPrice();
                     this.refreshIcons();
+                    this.clearDraft();
+                },
+                saveDraft() {
+                    if (this.orderId) return;
+                    try {
+                        const rawCustomerText = this.getScopeEl('#customer_id').find('option:selected').text()?.trim() || '';
+                        const customerPlaceholder = @json(__('order.form.select_customer'));
+                        const customerText = (rawCustomerText && rawCustomerText !== customerPlaceholder)
+                            ? rawCustomerText
+                            : (this.customerData?.name || this.customerData?.phone || '');
+
+                        const rawShopText = this.getScopeEl('#shop_id').find('option:selected').text()?.trim() || '';
+                        const shopPlaceholder = @json(__('order.form.select_shop'));
+                        const shopText = (rawShopText && rawShopText !== shopPlaceholder)
+                            ? rawShopText
+                            : (this.shopData?.name || this.shopData?.phone || '');
+
+                        const draft = {
+                            formData: JSON.parse(JSON.stringify(this.formData)),
+                            dataCart: JSON.parse(JSON.stringify(this.dataCart)),
+                            shopData: this.shopData ? JSON.parse(JSON.stringify(this.shopData)) : null,
+                            customerData: this.customerData ? JSON.parse(JSON.stringify(this.customerData)) : null,
+                            customerText: customerText,
+                            shopText: shopText,
+                            subTotal: this.subTotal,
+                            total: this.total,
+                            commissionTotal: this.commissionTotal,
+                            savedAt: Date.now()
+                        };
+                        sessionStorage.setItem('pos_order_create_draft', JSON.stringify(draft));
+                        if (window.MDI && (this.dataCart.length > 0 || this.formData.customer_id || this.formData.shop_id)) {
+                            window.MDI.markTabDirty(true);
+                        }
+                    } catch (e) {}
+                },
+                clearDraft() {
+                    try {
+                        sessionStorage.removeItem('pos_order_create_draft');
+                        if (window.MDI) {
+                            window.MDI.markTabDirty(false);
+                        }
+                    } catch (e) {}
+                },
+                restoreDraft() {
+                    if (this.orderId) return;
+                    try {
+                        const stored = sessionStorage.getItem('pos_order_create_draft');
+                        if (!stored) return;
+                        const draft = JSON.parse(stored);
+                        if (!draft) return;
+
+                        if (draft.formData) {
+                            this.formData = Object.assign({}, this.formData, draft.formData);
+                        }
+                        if (draft.shopData) {
+                            this.shopData = draft.shopData;
+                        }
+                        if (draft.customerData) {
+                            this.customerData = draft.customerData;
+                        }
+                        if (Array.isArray(draft.dataCart) && draft.dataCart.length > 0) {
+                            this.dataCart = draft.dataCart;
+                        }
+
+                        this.$nextTick(() => {
+                            const customerPlaceholder = @json(__('order.form.select_customer'));
+                            if (draft.formData?.customer_id) {
+                                const custText = (draft.customerText && draft.customerText !== customerPlaceholder)
+                                    ? draft.customerText
+                                    : (draft.customerData?.name || draft.customerData?.phone || '');
+                                if (custText && this.getScopeEl('#customer_id').val() != draft.formData.customer_id) {
+                                    this.setSelect2Value('#customer_id', draft.formData.customer_id, custText);
+                                }
+                            }
+
+                            const shopPlaceholder = @json(__('order.form.select_shop'));
+                            if (draft.formData?.shop_id) {
+                                const sText = (draft.shopText && draft.shopText !== shopPlaceholder)
+                                    ? draft.shopText
+                                    : (draft.shopData?.name || draft.shopData?.phone || '');
+                                if (sText && this.getScopeEl('#shop_id').val() != draft.formData.shop_id) {
+                                    this.setSelect2Value('#shop_id', draft.formData.shop_id, sText);
+                                }
+                            }
+
+                            if (draft.formData?.order_date) {
+                                this.getScopeEl('#order_date').val(draft.formData.order_date);
+                            }
+                            if (draft.formData?.delivery_date) {
+                                this.getScopeEl('#delivery_date').val(draft.formData.delivery_date);
+                            }
+                            this.fiterProduct(this.searchFilter);
+                            this.calculatorProductPrice();
+                            this.refreshIcons();
+                        });
+                    } catch (e) {
+                        console.error('Error restoring order draft:', e);
+                    }
                 },
                 totalDiscount(type, price, discount) {
                     let amount = 0;
@@ -2773,6 +3087,7 @@
                     }
 
                     this.amountPaid = this.total - this.commissionTotal;
+                    this.saveDraft();
                 },
                 async productValidation($cb) {
                     const errors = [];
@@ -2854,6 +3169,7 @@
                                 message: this.confirmMessage,
                                 btnClose: @json(__('order.button.close')),
                                 btnSave: this.btnSubmit,
+                                typeAction: 'manual',
                             },
                             afterClosed: (result) => {
                                 if (!result) {
@@ -2880,6 +3196,7 @@
                                 message: message,
                                 btnClose: @json(__('order.button.close')),
                                 btnSave: btnSave,
+                                typeAction: 'manual',
                             },
                             afterClosed: (result) => {
                                 if (result) {
@@ -3025,10 +3342,35 @@
                             }
                         }).then((res) => {
                             if (res.data.message === 'success') {
+                                this.clearDraft();
                                 this.submitLoading = false;
                                 setTimeout(() => {
                                     const status = res.data.payment_status || 'Pending';
-                                    window.location.href = `{{ url('admin/' . ($routeName ?? 'order') . '/list') }}/${status}`;
+                                    const targetUrl = `{{ url('admin/' . ($routeName ?? 'order') . '/list') }}/${status}`;
+                                    if (window.MDI) {
+                                        const createTab = window.MDI.tabs.find(t => t.key === 'admin-order-create' || (t.url && t.url.includes('/admin/order/create')) || t.key === window.MDI.activeTabKey);
+                                        if (createTab) {
+                                            createTab.isDirty = false;
+                                            window.MDI.closeTab(createTab, null, false);
+                                        }
+                                        const listKey = window.MDI.generateKey(targetUrl);
+                                        const existingListTab = window.MDI.tabs.find(t => t.key === listKey);
+                                        if (existingListTab) {
+                                            existingListTab.url = targetUrl;
+                                            const listPane = document.getElementById('tab-pane-' + existingListTab.key);
+                                            if (listPane) {
+                                                listPane.remove();
+                                            }
+                                        }
+                                        if (window.iziToast) {
+                                            const title = (window.workspaceTranslations && window.workspaceTranslations.success) || 'Success';
+                                            const msg = @json(__('order.message.create_success')) || 'Order created successfully!';
+                                            window.iziToast.success({ title: title, message: msg });
+                                        }
+                                        window.MDI.openUrlInTab(targetUrl, 'Order Management');
+                                    } else {
+                                        window.location.href = targetUrl;
+                                    }
                                 }, 100);
                             }
                         }).catch((e) => {
@@ -3087,7 +3429,8 @@
                     this.showValidationToast();
                     this.$nextTick(() => {
                         this.refreshIcons();
-                        document.querySelector('.booking-error-summary, .booking-cart-error, .error')
+                        ((this.$el ? this.$el.querySelector('.booking-error-summary, .booking-cart-error, .error') : null)
+                            || document.querySelector('.booking-error-summary, .booking-cart-error, .error'))
                             ?.scrollIntoView({
                                 behavior: 'smooth',
                                 block: 'center'
@@ -3143,7 +3486,18 @@
                         });
                     }
                 }
-            }));
+            };
+        }
+
+        window.XDatacreateorder = XDatacreateorder;
+
+        if (window.Alpine && typeof window.Alpine.data === 'function') {
+            window.Alpine.data('XDatacreateorder', XDatacreateorder);
+        }
+        document.addEventListener('alpine:init', () => {
+            if (window.Alpine && typeof window.Alpine.data === 'function') {
+                window.Alpine.data('XDatacreateorder', XDatacreateorder);
+            }
         });
     </script>
 @stop
