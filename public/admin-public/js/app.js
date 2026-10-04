@@ -23335,8 +23335,14 @@ window.workspaceMdi = function () {
         var scrollLeft = scrollWrapper.scrollLeft,
             scrollWidth = scrollWrapper.scrollWidth,
             clientWidth = scrollWrapper.clientWidth;
+        var wasLeft = _this7.canScrollLeft;
+        var wasRight = _this7.canScrollRight;
         _this7.canScrollLeft = scrollLeft > 2;
         _this7.canScrollRight = scrollLeft + clientWidth < scrollWidth - 2;
+
+        if (wasLeft && !_this7.canScrollLeft || wasRight && !_this7.canScrollRight) {
+          _this7.hideTooltip();
+        }
       });
     },
 
@@ -23346,6 +23352,7 @@ window.workspaceMdi = function () {
     scrollTabStrip: function scrollTabStrip(direction) {
       var _this8 = this;
 
+      this.hideTooltip();
       var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (this.$el && this.$el.querySelector ? this.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
       if (!scrollWrapper) return;
       var scrollAmount = Math.max(200, Math.floor(scrollWrapper.clientWidth * 0.5));

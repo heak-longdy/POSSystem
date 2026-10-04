@@ -688,8 +688,15 @@ window.workspaceMdi = function () {
                 if (!scrollWrapper) return;
 
                 const { scrollLeft, scrollWidth, clientWidth } = scrollWrapper;
+                const wasLeft = this.canScrollLeft;
+                const wasRight = this.canScrollRight;
+
                 this.canScrollLeft = scrollLeft > 2;
                 this.canScrollRight = (scrollLeft + clientWidth) < (scrollWidth - 2);
+
+                if ((wasLeft && !this.canScrollLeft) || (wasRight && !this.canScrollRight)) {
+                    this.hideTooltip();
+                }
             });
         },
 
@@ -697,6 +704,7 @@ window.workspaceMdi = function () {
          * Scroll tab strip horizontally by step (YouTube style)
          */
         scrollTabStrip(direction) {
+            this.hideTooltip();
             const scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper')
                 || (this.$el && this.$el.querySelector ? this.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
             if (!scrollWrapper) return;

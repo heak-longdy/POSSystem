@@ -38,8 +38,9 @@
              style="display: none;">
             <button type="button" 
                     class="mdi-tab-nav-btn" 
-                    @click="scrollTabStrip('left')"
-                    title="{{ __('global.workspace.previous_tab') ?? 'Previous Tab' }}"
+                    @click="scrollTabStrip('left'); hideTooltip()"
+                    @mouseenter="showTooltip($el, window.workspaceTranslations?.previousTab || '{{ __('global.workspace.previous_tab') ?? 'Previous Tab' }}')"
+                    @mouseleave="hideTooltip()"
                     aria-label="{{ __('global.workspace.previous_tab') ?? 'Previous Tab' }}">
                 <i class='bx bx-chevron-left'></i>
             </button>
@@ -99,8 +100,9 @@
              style="display: none;">
             <button type="button" 
                     class="mdi-tab-nav-btn" 
-                    @click="scrollTabStrip('right')"
-                    title="{{ __('global.workspace.next_tab') ?? 'Next Tab' }}"
+                    @click="scrollTabStrip('right'); hideTooltip()"
+                    @mouseenter="showTooltip($el, window.workspaceTranslations?.nextTab || '{{ __('global.workspace.next_tab') ?? 'Next Tab' }}')"
+                    @mouseleave="hideTooltip()"
                     aria-label="{{ __('global.workspace.next_tab') ?? 'Next Tab' }}">
                 <i class='bx bx-chevron-right'></i>
             </button>
