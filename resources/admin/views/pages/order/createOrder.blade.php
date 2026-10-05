@@ -1655,6 +1655,15 @@
                     /* ===================================================
                        Two-Column Scroll & Dynamic Sticky Optimization
                        =================================================== */
+                    @media screen {
+                        /* Keep document scrolling when a detail tab's styles are still loaded. */
+                        #content:has(.workspace-tab-pane.active .booking-order-ui) {
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow: visible !important;
+                        }
+                    }
+
                     .form-admin.booking.booking-order-ui,
                     .form-admin.booking-order-ui,
                     .booking-dashboard.booking-order-ui,
@@ -2025,7 +2034,6 @@
             </aside>
         </div>
     </div>
-    @include('admin::components.confirm-dialog')
 @stop
 
 @section('script')

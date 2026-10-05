@@ -7,7 +7,7 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('order.detail.title')])
 
-    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate + ' print-lang-' + printLanguage" x-cloak>
+    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper order-detail-scroll" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate + ' print-lang-' + printLanguage" x-cloak>
         <div class="content-body" id="bookingDetailContentBody">
             <div class="booking-detail-page-wrapper">
                 <!-- Top Navigation / Breadcrumb -->
@@ -565,18 +565,26 @@
 
 @section('script')
     <style>
-        /* Ensure single scroll container matching system setup (No double scroll, smooth scrolling) */
-        #content {
-            display: flex !important;
-            flex-direction: column !important;
-            height: 100vh !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
-        }
+        @media screen {
+            /* Constrain only the active Order Details tab to its own scroll area. */
+            #content:has(.workspace-tab-pane.active .order-detail-scroll) {
+                display: flex !important;
+                flex-direction: column !important;
+                height: 100vh !important;
+                max-height: 100vh !important;
+                overflow: hidden !important;
+            }
 
-        #content .header {
-            flex-shrink: 0 !important;
-            width: 100% !important;
+            /* Let both flex ancestors shrink so the content body can overflow and scroll. */
+            #workspace-viewport:has(.workspace-tab-pane.active .order-detail-scroll),
+            .workspace-tab-pane.active:has(.order-detail-scroll) {
+                min-height: 0;
+            }
+
+            .workspace-tab-pane:has(.order-detail-scroll) .header {
+                flex-shrink: 0 !important;
+                width: 100% !important;
+            }
         }
 
         .content-wrapper.booking-detail-wrapper {

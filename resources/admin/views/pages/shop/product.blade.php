@@ -172,7 +172,6 @@
                 @endif
             </div>
         </div>
-        @include('admin::components.verify')
     </div>
 @stop
 

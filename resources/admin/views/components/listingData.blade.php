@@ -233,4 +233,3 @@
 
     </div>
 </div>
-@include('admin::components.verify')
