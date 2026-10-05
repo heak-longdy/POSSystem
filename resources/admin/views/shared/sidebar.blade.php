@@ -53,18 +53,20 @@
 
                             </a>
                             @if (isset($itemListMenu['children']) && $itemListMenu['children'])
-                                <ul class="side-dropdown {{ routeActive($itemListMenu['active']) ? 'show' : '' }}">
-                                    @foreach ($itemListMenu['children'] as $child)
-                                        <li>
-                                            <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
-                                                class="{{ routeActive($child['active']) ? 'active' : '' }}">
-                                                <i
-                                                    class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
-                                                {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 25, ' ...') !!}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
+                                <div class="side-dropdown {{ routeActive($itemListMenu['active']) ? 'show' : '' }}">
+                                    <ul class="side-dropdown-items">
+                                        @foreach ($itemListMenu['children'] as $child)
+                                            <li>
+                                                <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
+                                                    class="{{ routeActive($child['active']) ? 'active' : '' }}">
+                                                    <i
+                                                        class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
+                                                    {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 25, ' ...') !!}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
                             @endif
                         </li>
                     @endforeach
@@ -88,18 +90,20 @@
                             {!! \App\Support\Language::translatedValue($item['name']) !!}
                             <i class='bx bx-chevron-right icon-right'></i>
                         </a>
-                        <ul class="side-dropdown {{ routeActive($item['active']) ? 'show' : '' }}">
-                            @foreach ($item['children'] as $child)
-                                <li>
-                                    <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
-                                        class="{{ routeActive($child['active']) ? 'active' : '' }}">
-                                        <i
-                                            class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
-                                        {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 25, ' ...') !!}
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
+                        <div class="side-dropdown {{ routeActive($item['active']) ? 'show' : '' }}">
+                            <ul class="side-dropdown-items">
+                                @foreach ($item['children'] as $child)
+                                    <li>
+                                        <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
+                                            class="{{ routeActive($child['active']) ? 'active' : '' }}">
+                                            <i
+                                                class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
+                                            {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 25, ' ...') !!}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </li>
                 </div>
             </div>

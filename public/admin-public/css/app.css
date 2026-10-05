@@ -31624,7 +31624,7 @@ li {
 
 #sidebar .icon-right {
   margin-left: auto;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease-out, color 0.3s ease;
   font-size: 20px;
 }
 
@@ -31702,14 +31702,23 @@ li {
 }
 
 #sidebar .side-dropdown {
+  display: grid;
+  grid-template-rows: 0fr;
   padding-left: 54px;
-  max-height: 0;
   overflow-y: hidden;
-  transition: all 0.15s ease;
+  transition: grid-template-rows 0.2s ease-out;
+  transition: grid-template-rows 0.2s ease-out, -ms-grid-rows 0.2s ease-out;
+}
+
+#sidebar .side-dropdown > .side-dropdown-items {
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 #sidebar .side-dropdown.show {
-  max-height: 1000px;
+  grid-template-rows: 1fr;
 }
 
 #sidebar .side-dropdown li:hover {
@@ -31864,7 +31873,6 @@ li {
 }
 .side-menu .navItemSiderbarGroup .navSidber li .side-dropdown {
   padding-left: 0 !important;
-  transition: background-color 0.15s ease;
 }
 .side-menu .navItemSiderbarGroup .navSidber li .side-dropdown.show {
   padding: 0 0 0px;

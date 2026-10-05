@@ -222,7 +222,7 @@ li {
 
 #sidebar .icon-right {
     margin-left: auto;
-    transition : all .3s ease;
+    transition : transform .2s ease-out, color .3s ease;
     font-size  : 20px;
 }
 
@@ -313,14 +313,23 @@ li {
 }
 
 #sidebar .side-dropdown {
-    padding-left: 54px;
-    max-height  : 0;
-    overflow-y  : hidden;
-    transition  : all .15s ease;
+    display           : grid;
+    grid-template-rows: 0fr;
+    padding-left      : 54px;
+    overflow-y        : hidden;
+    transition        : grid-template-rows .2s ease-out;
+}
+
+#sidebar .side-dropdown > .side-dropdown-items {
+    // A single grid row animates to the list's natural height without a fixed cap.
+    min-height: 0;
+    overflow  : hidden;
+    margin    : 0;
+    padding   : 0;
 }
 
 #sidebar .side-dropdown.show {
-    max-height: 1000px;
+    grid-template-rows: 1fr;
 }
 
 //hover
@@ -528,7 +537,6 @@ li {
 
                 .side-dropdown {
                     padding-left: 0 !important;
-                    transition  : background-color .15s ease;
 
                     &.show {
                         padding: 0 0 0px;
