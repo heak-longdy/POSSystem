@@ -31498,48 +31498,21 @@ li {
 
 #sidebar.hide {
   max-width: 55px;
+  transition: max-width 0.2s ease-out !important;
 }
-#sidebar.hide .brand {
-  padding: 0 2px;
+#sidebar.hide .brand,
+#sidebar.hide .side-menu {
+  transition: padding 0.2s ease-out;
 }
 #sidebar.hide .side-menu a {
-  padding: 3px 0 !important;
-  margin: 2px 0 !important;
-  height: 35px !important;
+  transition: padding 0.2s ease-out, color 0.3s ease;
 }
-#sidebar.hide .side-menu a.overView {
-  height: 50px !important;
+#sidebar.hide .divider {
+  transition: margin 0.2s ease-out;
 }
-#sidebar.hide .navItemSiderbarGroup .navSidber {
-  margin: 0;
-}
-#sidebar.hide .navItemSiderbarGroup .navSidber li a.active {
-  color: var(--blue) !important;
-}
-#sidebar.hide:hover .side-menu a {
-  height: auto !important;
-  padding: 3px 12px 3px 12px !important;
-}
-#sidebar.hide:hover .side-menu a.overView {
-  height: 50px !important;
-}
-#sidebar.hide:hover .navItemSiderbarGroup .navSidber {
-  margin: 0 12px;
-}
-#sidebar.hide:hover .navItemSiderbarGroup .navSidber li a {
-  padding: 8px 12px 8px 0px !important;
-}
-#sidebar.hide:hover .navItemSiderbarGroup .navSidber .side-dropdown li a {
-  padding: 0 !important;
-}
-#sidebar.hide:hover .navItemSiderbarGroup .navSidber .side-dropdown li a.active {
-  color: var(--blue);
-}
-#sidebar.hide:hover .navItemSiderbarGroup .navSidber .side-dropdown li a.active i {
-  color: var(--blue);
-}
-#sidebar.hide:hover .brand {
-  padding: 0 15px;
+#sidebar.hide:hover .brand,
+#sidebar.hide:hover .side-menu {
+  width: 225px;
 }
 #sidebar.hide:hover .navbar-toggle {
   min-width: auto;
@@ -31556,6 +31529,28 @@ li {
 #sidebar.hide .navbar-toggle mat-icon,
 #sidebar.hide .navbar-toggle i {
   transform: rotateZ(180deg);
+}
+
+#sidebar.hide:not(:hover) .brand {
+  padding: 0 1.5px;
+}
+#sidebar.hide:not(:hover) .side-menu {
+  padding-left: 1.5px;
+  padding-right: 1.5px;
+}
+#sidebar.hide:not(:hover) .side-menu a {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  white-space: nowrap;
+}
+#sidebar.hide:not(:hover) .navItemSiderbarGroup .navSidber {
+  margin-left: 0;
+  margin-right: 0;
+}
+#sidebar.hide:not(:hover) .divider {
+  text-align: center;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 #sidebar.hide:hover {
@@ -31659,14 +31654,6 @@ li {
   border: 1px solid #262f3d;
 }
 
-#sidebar.hide .side-menu {
-  padding: 0px 2px 20px;
-}
-
-#sidebar.hide:hover .side-menu {
-  padding: 0;
-}
-
 #sidebar .side-menu a {
   display: flex;
   align-items: center;
@@ -31712,16 +31699,6 @@ li {
   color: var(--dark-grey);
   transition: all 0.3s ease;
   white-space: nowrap;
-}
-
-#sidebar.hide:hover .divider {
-  text-align: left;
-  margin: 14px 20px 5px 30px !important;
-}
-
-#sidebar.hide .divider {
-  text-align: center;
-  margin: 14px 0 5px 0 !important;
 }
 
 #sidebar .side-dropdown {

@@ -69,82 +69,26 @@ li {
 
 #sidebar.hide {
     max-width: $sideBarHideWidth;
+    transition: max-width .2s ease-out !important;
 
-    .brand {
-        padding: 0 2px;
-    }
-    
-
+    .brand,
     .side-menu {
-        a {
-            padding: 3px 0 !important;
-            margin : 2px 0 !important;
-            height: 35px !important;
-
-            &.overView {
-                height: 50px !important;
-            }
-        }
-
-        &.active {}
+        transition: padding .2s ease-out;
     }
 
-    .navItemSiderbarGroup {
-        .navSidber {
-            margin: 0;
+    .side-menu a {
+        transition: padding .2s ease-out, color .3s ease;
+    }
 
-            li a.active {
-                color: var(--blue) !important;
-            }
-        }
+    .divider {
+        transition: margin .2s ease-out;
     }
 
     &:hover {
+        // Lay out labels at their final width while the sidebar reveals them.
+        .brand,
         .side-menu {
-            a {
-                height: auto !important;
-                padding: 3px 12px 3px 12px !important;
-
-                &.overView {
-                    height: 50px !important;
-                }
-            }
-        }
-
-        .navItemSiderbarGroup {
-            .navSidber {
-                margin: 0 12px;
-            }
-        }
-
-        .navItemSiderbarGroup {
-            .navSidber {
-                li {
-                    a {
-                        padding: 8px 12px 8px 0px !important;
-                    }
-                }
-
-                .side-dropdown {
-                    li {
-                        a {
-                            padding: 0 !important;
-
-                            &.active {
-                                color: var(--blue);
-
-                                i {
-                                    color: var(--blue);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        .brand {
-            padding: 0 15px;
+            width: $widthSlideBar;
         }
 
         .navbar-toggle {
@@ -167,6 +111,35 @@ li {
             transform: rotateZ(180deg);
         }
 
+    }
+}
+
+// Only horizontal spacing changes in the closed rail; hover uses the expanded rules.
+#sidebar.hide:not(:hover) {
+    .brand {
+        padding: 0 1.5px;
+    }
+
+    .side-menu {
+        padding-left : 1.5px;
+        padding-right: 1.5px;
+
+        a {
+            padding-left : 0 !important;
+            padding-right: 0 !important;
+            white-space  : nowrap;
+        }
+    }
+
+    .navItemSiderbarGroup .navSidber {
+        margin-left : 0;
+        margin-right: 0;
+    }
+
+    .divider {
+        text-align  : center;
+        margin-left : 0 !important;
+        margin-right: 0 !important;
     }
 }
 
@@ -286,14 +259,6 @@ li {
     }
 }
 
-#sidebar.hide .side-menu {
-    padding: 0px 2px 20px;
-}
-
-#sidebar.hide:hover .side-menu {
-    padding: 0;
-}
-
 #sidebar .side-menu a {
     display                  : flex;
     align-items              : center;
@@ -345,16 +310,6 @@ li {
     color         : var(--dark-grey);
     transition    : all .3s ease;
     white-space   : nowrap;
-}
-
-#sidebar.hide:hover .divider {
-    text-align: left;
-    margin    : 14px 20px 5px 30px !important;
-}
-
-#sidebar.hide .divider {
-    text-align: center;
-    margin    : 14px 0 5px 0 !important;
 }
 
 #sidebar .side-dropdown {
