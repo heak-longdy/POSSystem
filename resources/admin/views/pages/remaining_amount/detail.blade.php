@@ -7,7 +7,7 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('remaining_amount.detail.title')])
 
-    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate + ' print-lang-' + printLanguage" x-cloak>
+    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper order-detail-scroll order-details-refresh" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate + ' print-lang-' + printLanguage" x-cloak>
         <div class="content-body" id="bookingDetailContentBody">
             <div class="booking-detail-page-wrapper">
                 <!-- Top Navigation / Breadcrumb -->
@@ -24,107 +24,112 @@
 
                 <!-- Main Detail Header Banner -->
                 <header class="detail-header-card">
-                    <div class="header-left">
-                        <div class="invoice-badge-title">
-                            <h1 class="invoice-title">#{{ $order->invoice_number ?: $order->id }}</h1>
-                            @php
-                                $paymentStatus = $order->payment_status ?: 'Pending';
-                                $statusClass = match ($paymentStatus) {
-                                    'Paid' => 'status-paid',
-                                    'Partial' => 'status-partial',
-                                    'Cancel' => 'status-cancel',
-                                    default => 'status-pending',
-                                };
-                                $statusLabel = match ($paymentStatus) {
-                                    'Paid' => __('order.status.paid'),
-                                    'Partial' => __('order.status.partial'),
-                                    'Cancel' => __('order.status.rejected'),
-                                    default => __('order.status.pending'),
-                                };
+                    <div class="detail-header-top">
+                        <div class="header-left">
+                            <p class="detail-eyebrow">{{ __('remaining_amount.detail.title') }}</p>
+                            <div class="invoice-badge-title">
+                                <h1 class="invoice-title">#{{ $order->invoice_number ?: $order->id }}</h1>
+                                @php
+                                    $paymentStatus = $order->payment_status ?: 'Pending';
+                                    $statusClass = match ($paymentStatus) {
+                                        'Paid' => 'status-paid',
+                                        'Partial' => 'status-partial',
+                                        'Cancel' => 'status-cancel',
+                                        default => 'status-pending',
+                                    };
+                                    $statusLabel = match ($paymentStatus) {
+                                        'Paid' => __('order.status.paid'),
+                                        'Partial' => __('order.status.partial'),
+                                        'Cancel' => __('order.status.rejected'),
+                                        default => __('order.status.pending'),
+                                    };
 
-                                $customerName = $order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer'));
-                                $customerPhone = $order->customer?->phone ?: '---';
-                                $customerEmail = $order->customer?->email ?: null;
-                                $customerAddress = $order->customer?->address ?: null;
-                                $customerInitials = strtoupper(substr($customerName, 0, 2));
-                            @endphp
-                            <span class="detail-status-pill {{ $statusClass }}">
-                                <span class="status-dot"></span>
-                                {{ $statusLabel }}
-                            </span>
-
-                            @if ($order->trashed())
-                                <span class="detail-status-pill status-trash">
-                                    <i data-feather="trash-2"></i>
-                                    {{ __('order.tab.trash') }}
+                                    $customerName = $order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer'));
+                                    $customerPhone = $order->customer?->phone ?: '---';
+                                    $customerEmail = $order->customer?->email ?: null;
+                                    $customerAddress = $order->customer?->address ?: null;
+                                    $customerInitials = strtoupper(substr($customerName, 0, 2));
+                                @endphp
+                                <span class="detail-status-pill {{ $statusClass }}">
+                                    <span class="status-dot"></span>
+                                    {{ $statusLabel }}
                                 </span>
+
+                                @if ($order->trashed())
+                                    <span class="detail-status-pill status-trash">
+                                        <i data-feather="trash-2"></i>
+                                        {{ __('order.tab.trash') }}
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="invoice-subtitle">
+                                <span><i data-feather="clock"></i> {{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d M Y, h:i A') : '---' }}</span>
+                                @if ($order->shop)
+                                    <span class="meta-sep">•</span>
+                                    <span><i data-feather="home"></i> {{ $order->shop->name }}</span>
+                                @endif
+                            </p>
+                        </div>
+
+                        <div class="header-right-actions">
+                            @if ($canAddPayment)
+                                <button type="button" class="btn btn-create bg-success btn-system btn-system-success" @click="openPaymentModal = true">
+                                    <i data-feather="plus-circle"></i>
+                                    <span>{{ __('order.detail.add_payment') }}</span>
+                                </button>
+                            @endif
+
+                            @if ($canEdit)
+                                <a href="{{ route('admin-order-edit', $order->id) }}" class="btn btn-create bg-primary btn-system btn-system-primary">
+                                    <i data-feather="edit-2"></i>
+                                    <span>{{ __('order.detail.edit_order') }}</span>
+                                </a>
+                            @endif
+
+                            @if ($canReject ?? $canCancel)
+                                <button type="button" class="btn btn-create bg-danger btn-system btn-system-danger" @click="rejectOrder()">
+                                    <i data-feather="x-circle"></i>
+                                    <span>{{ __('order.action.reject_order') }}</span>
+                                </button>
                             @endif
                         </div>
-                        <p class="invoice-subtitle">
-                            <span><i data-feather="clock"></i> {{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d M Y, h:i A') : '---' }}</span>
-                            @if ($order->shop)
-                                <span class="meta-sep">•</span>
-                                <span><i data-feather="home"></i> {{ $order->shop->name }}</span>
-                            @endif
-                        </p>
                     </div>
 
-                    <!-- Action Buttons aligned with System Style Guide -->
-                    <div class="header-right-actions">
-                        @if ($canAddPayment)
-                            <button type="button" class="btn btn-create bg-success btn-system btn-system-success" @click="openPaymentModal = true">
-                                <i data-feather="plus-circle"></i>
-                                <span>{{ __('order.detail.add_payment') }}</span>
-                            </button>
-                        @endif
-
-                        @if ($canEdit)
-                            <a href="{{ route('admin-order-edit', $order->id) }}" class="btn btn-create bg-primary btn-system btn-system-primary">
-                                <i data-feather="edit-2"></i>
-                                <span>{{ __('order.detail.edit_order') }}</span>
-                            </a>
-                        @endif
-
-                        <!-- Print Language Switcher -->
-                        <div class="print-lang-switch-box" title="{{ __('order.invoice.select_language') }}">
-                            <span class="print-lang-label">
-                                <i data-feather="globe"></i>
-                                <span>{{ __('order.invoice.print_language') }}:</span>
-                            </span>
-                            <div class="print-lang-segmented">
-                                <button type="button" 
-                                        class="print-lang-btn" 
-                                        :class="{ 'is-active': printLanguage === 'km' }" 
-                                        @click="setPrintLanguage('km')">
-                                    <span class="flag">🇰🇭</span>
-                                    <span>{{ __('order.invoice.khmer') }}</span>
-                                </button>
-                                <button type="button" 
-                                        class="print-lang-btn" 
-                                        :class="{ 'is-active': printLanguage === 'en' }" 
-                                        @click="setPrintLanguage('en')">
-                                    <span class="flag">🇬🇧</span>
-                                    <span>{{ __('order.invoice.english') }}</span>
-                                </button>
+                    <div class="detail-header-tools">
+                        <div class="detail-print-actions">
+                            <div class="print-lang-switch-box" title="{{ __('order.invoice.select_language') }}">
+                                <span class="print-lang-label">
+                                    <i data-feather="globe"></i>
+                                    <span>{{ __('order.invoice.print_language') }}:</span>
+                                </span>
+                                <div class="print-lang-segmented">
+                                    <button type="button"
+                                            class="print-lang-btn"
+                                            :class="{ 'is-active': printLanguage === 'km' }"
+                                            @click="setPrintLanguage('km')">
+                                        <span class="flag">🇰🇭</span>
+                                        <span>{{ __('order.invoice.khmer') }}</span>
+                                    </button>
+                                    <button type="button"
+                                            class="print-lang-btn"
+                                            :class="{ 'is-active': printLanguage === 'en' }"
+                                            @click="setPrintLanguage('en')">
+                                        <span class="flag">🇬🇧</span>
+                                        <span>{{ __('order.invoice.english') }}</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
-                        <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate1()">
-                            <i data-feather="printer"></i>
-                            <span>{{ __('order.detail.print_invoice') }}</span>
-                        </button>
-
-                        <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2()">
-                            <i data-feather="printer"></i>
-                            <span>{{ __('order.detail.print_slip') }}</span>
-                        </button>
-
-                        @if ($canReject ?? $canCancel)
-                            <button type="button" class="btn btn-create bg-danger btn-system btn-system-danger" @click="rejectOrder()">
-                                <i data-feather="x-circle"></i>
-                                <span>{{ __('order.action.reject_order') }}</span>
+                            <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate1()">
+                                <i data-feather="printer"></i>
+                                <span>{{ __('order.detail.print_invoice') }}</span>
                             </button>
-                        @endif
+
+                            <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2()">
+                                <i data-feather="printer"></i>
+                                <span>{{ __('order.detail.print_slip') }}</span>
+                            </button>
+                        </div>
 
                         <a href="{{ route('admin-remaining-amount-list', 'all') }}" class="btn btn-system btn-system-outline btn-system-neutral">
                             <i data-feather="arrow-left"></i>
@@ -133,7 +138,7 @@
                     </div>
                 </header>
 
-                <!-- Top 4 KPI Metrics Cards -->
+                <!-- Financial overview -->
                 <section class="detail-kpi-grid">
                     <article class="kpi-card">
                         <div class="kpi-icon-wrap kpi-blue">
@@ -168,7 +173,7 @@
                     </article>
                 </section>
 
-                <!-- Main Content 2-Column Grid (70% Left / 30% Right) -->
+                <!-- Order activity and supporting details -->
                 <div class="detail-columns-layout">
                     <!-- Left Main Column (70%) -->
                     <div class="detail-col-main">
@@ -183,7 +188,7 @@
                             </div>
 
                             <div class="table-responsive">
-                                <table class="detail-data-table">
+                                <table class="detail-data-table detail-products-table">
                                     <thead>
                                         <tr>
                                             <th style="width: 50px;">#</th>
@@ -253,7 +258,7 @@
                             </div>
 
                             <div class="table-responsive">
-                                <table class="detail-data-table">
+                                <table class="detail-data-table detail-payments-table">
                                     <thead>
                                         <tr>
                                             <th style="width: 50px;">#</th>
@@ -308,7 +313,10 @@
                                         @empty
                                             <tr>
                                                 <td colspan="7" class="text-center text-muted py-4">
-                                                    {{ __('order.detail.no_payments') }}
+                                                    <div class="detail-empty-state">
+                                                        <span class="empty-state-icon" aria-hidden="true"><i data-feather="file-text"></i></span>
+                                                        <p>{{ __('order.detail.no_payments') }}</p>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -317,7 +325,7 @@
                             </div>
                         </section>
 
-                        <!-- Remarks / Notes -->
+                        <!-- Order Remarks / Internal Notes -->
                         <section class="detail-card">
                             <div class="detail-card-header">
                                 <div class="card-title-group">
@@ -400,6 +408,10 @@
                                 <div class="appointment-info-row">
                                     <span class="label"><i data-feather="clock"></i> {{ __('order.detail.appointment_time') }}:</span>
                                     <span class="val">{{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d M Y, h:i A') : '---' }}</span>
+                                </div>
+                                <div class="appointment-info-row">
+                                    <span class="label"><i data-feather="truck"></i> {{ __('order.detail.delivery_date') }}:</span>
+                                    <span class="val font-weight-bold">{{ $order->delivery_date ? \Carbon\Carbon::parse($order->delivery_date)->format('d M Y') : ($order->order_date ? \Carbon\Carbon::parse($order->order_date)->addDays(2)->format('d M Y') : '---') }}</span>
                                 </div>
                                 <div class="appointment-info-row">
                                     <span class="label"><i data-feather="plus-square"></i> {{ __('order.detail.created_at') }}:</span>
@@ -561,18 +573,25 @@
 
 @section('script')
     <style>
-        /* Ensure single scroll container matching system setup (No double scroll, smooth scrolling) */
-        #content {
-            display: flex !important;
-            flex-direction: column !important;
-            height: 100vh !important;
-            max-height: 100vh !important;
-            overflow: hidden !important;
-        }
+        @media screen {
+            /* Constrain only the active detail tab to its own scroll area. */
+            #content:has(.workspace-tab-pane.active .order-detail-scroll) {
+                display: flex !important;
+                flex-direction: column !important;
+                height: 100vh !important;
+                max-height: 100vh !important;
+                overflow: hidden !important;
+            }
 
-        #content .header {
-            flex-shrink: 0 !important;
-            width: 100% !important;
+            #workspace-viewport:has(.workspace-tab-pane.active .order-detail-scroll),
+            .workspace-tab-pane.active:has(.order-detail-scroll) {
+                min-height: 0;
+            }
+
+            .workspace-tab-pane:has(.order-detail-scroll) .header {
+                flex-shrink: 0 !important;
+                width: 100% !important;
+            }
         }
 
         .content-wrapper.booking-detail-wrapper {
@@ -775,6 +794,7 @@
             white-space: nowrap !important;
             transition: all 0.2s ease !important;
             line-height: 1 !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
         .header-right-actions .btn svg,
@@ -926,6 +946,7 @@
             color: #ffffff;
             font-weight: 600;
             box-shadow: 0 1px 3px rgba(60, 145, 230, 0.4);
+            border-radius: 20px !important;
         }
 
         .print-lang-btn .flag {
@@ -947,7 +968,7 @@
             height: 40px !important;
             padding: 0 12px !important;
             font-size: 12px !important;
-            border-radius: 16px !important;
+            border-radius: 20px !important;
             display: inline-flex !important;
             align-items: center !important;
             gap: 5px !important;
@@ -1259,7 +1280,7 @@
         .customer-info-list li {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             font-size: 13px;
         }
         .info-label {
@@ -1275,6 +1296,7 @@
         .info-val {
             font-weight: 600;
             color: #1e293b;
+            text-align: right;
         }
         .points-tag {
             background: #eff6ff;
@@ -2268,6 +2290,8 @@
                 flex: 1;
             }
         }
+
+        @include('admin::pages.order.detail-styles')
     </style>
 
     <script>

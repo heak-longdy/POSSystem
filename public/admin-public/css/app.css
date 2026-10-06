@@ -33185,8 +33185,8 @@ nav .divider {
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  padding: 0px 10px;
-  border-radius: 8px;
+  padding: 4px 10px;
+  border-radius: 15px;
   font-size: 13px;
   margin: auto;
 }
@@ -48175,7 +48175,7 @@ span.error {
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   padding: 1px 6px;
-  border-radius: 10px;
+  border-radius: 16px;
   white-space: nowrap;
   flex-shrink: 0;
   line-height: 1.25;
@@ -48210,7 +48210,7 @@ span.error {
   background: #eef2ff;
   border: 1px solid #c7d2fe;
   padding: 2px 8px;
-  border-radius: 12px;
+  border-radius: 19px;
   cursor: pointer;
   transition: all 0.15s ease;
   outline: none;
@@ -48265,6 +48265,91 @@ span.error {
 .order-table-items .order-table-more-wrapper:hover .order-items-hover-popover,
 .booking-table-items .order-table-more-wrapper:hover .order-items-hover-popover {
   display: block;
+}
+
+/* Keep the Products column aligned without changing the shared listing styles. */
+.order-listing-wrapper .order-items-column-wrapper {
+  box-sizing: border-box;
+}
+
+.order-listing-wrapper .order-table-items,
+.order-listing-wrapper .order-table-items-extra {
+  gap: 10px;
+}
+
+.order-listing-wrapper .order-table-items-extra {
+  margin-top: 0;
+}
+
+.order-listing-wrapper .order-table-items .order-table-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.order-listing-wrapper .order-table-items .order-item-icon {
+  width: 16px;
+  font-size: 16px;
+  margin-top: 4px;
+}
+
+.order-listing-wrapper .order-table-items .order-table-item .order-item-name {
+  display: block;
+  flex: 1 1 0%;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.order-listing-wrapper .order-table-items .order-table-item .order-item-qty {
+  display: inline-flex;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  min-width: 36px;
+  min-height: 24px;
+  padding: 2px 8px !important;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  white-space: nowrap !important;
+}
+
+.order-listing-wrapper .order-table-items .order-table-more-wrapper {
+  margin-top: 2px;
+  margin-left: 26px;
+}
+
+.order-listing-wrapper .order-table-items .order-items-more-btn {
+  min-height: 28px;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.order-listing-wrapper .order-table-items .order-items-more-btn span {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap !important;
+}
+
+.order-listing-wrapper .order-table-items .order-items-more-btn:hover {
+  transform: none;
+}
+
+.order-listing-wrapper .order-table-items .order-items-more-btn:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.order-listing-wrapper .order-items-hover-popover .order-table-item + .order-table-item {
+  margin-top: 10px;
 }
 
 .customer-cell {
