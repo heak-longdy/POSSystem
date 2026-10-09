@@ -41,6 +41,7 @@ use App\Http\Controllers\Admin\Report\SalesReportController;
 use App\Http\Controllers\Admin\Report\OrderTransactionReportController;
 use App\Http\Controllers\Admin\Report\InventoryMovementReportController;
 use App\Http\Controllers\Admin\Report\StaffExpenseReportController;
+use App\Http\Controllers\Admin\Report\CustomerRemainingAmountReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -389,6 +390,16 @@ Route::middleware(['AdminGuard'])
             Route::get('monthly', [InventoryMovementReportController::class, 'monthly'])->name('monthly');
             Route::get('report', [InventoryMovementReportController::class, 'report'])->name('report');
             Route::get('details/{period}', [InventoryMovementReportController::class, 'details'])->name('details');
+        });
+
+        // Report Management - Customer Remaining Amount Report
+        Route::group([
+            'prefix' => 'report/customer-remaining-amount',
+            'as' => 'report-customer-remaining-amount-',
+        ], function () {
+            Route::get('/', [CustomerRemainingAmountReportController::class, 'index'])->name('index');
+            Route::get('details/{customer}', [CustomerRemainingAmountReportController::class, 'show'])
+                ->whereNumber('customer')->name('details');
         });
 
         // Report Management - Staff Expense Report

@@ -6,6 +6,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            position: relative;
         }
         .order-listing-wrapper .header .header-action-button .filter .form-row {
             height: 38px;
@@ -38,75 +39,228 @@
         .order-listing-wrapper .header .header-action-button .filter .form-row input::placeholder {
             color: #8892a0 !important;
         }
-        div#ui-datepicker-div {
-            z-index: 9999 !important;
+
+        /* Ensure headers and tabs do not clip the popover */
+        .order-listing-wrapper .header {
+            z-index: 100 !important;
+            overflow: visible !important;
         }
-        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input {
-            position: relative !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            padding: 0 34px 0 14px !important;
+        .order-listing-wrapper .header-tab,
+        .order-listing-wrapper .header-action-button,
+        .order-listing-wrapper .header-action-button .filter {
+            overflow: visible !important;
+        }
+
+        /* Advanced Filter Button */
+        .order-listing-wrapper .advanced-filter-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            z-index: 50;
+        }
+        .order-listing-wrapper .btn-advanced-filter {
+            height: 38px;
+            border-radius: 20px;
+            border: 1px solid rgba(152, 152, 152, 0.35);
+            background: #ffffff;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 12px 0 14px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .order-listing-wrapper .btn-advanced-filter:hover {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            color: #2563eb;
+        }
+        .order-listing-wrapper .btn-advanced-filter.active,
+        .order-listing-wrapper .btn-advanced-filter.open {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #2563eb;
+        }
+        .order-listing-wrapper .btn-advanced-filter .advanced-filter-badge {
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 1px 6px;
+            line-height: 1.2;
+        }
+
+        /* Advanced Filter Popover */
+        .order-listing-wrapper .advanced-filter-popover {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 370px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            z-index: 1050;
+            padding: 16px;
             box-sizing: border-box;
+            text-align: left;
         }
-        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input input {
+        .order-listing-wrapper .filter-popover-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .order-listing-wrapper .filter-popover-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .order-listing-wrapper .filter-popover-title i {
+            font-size: 16px;
+            color: #2563eb;
+        }
+        .order-listing-wrapper .filter-popover-count {
+            font-size: 11px;
+            font-weight: 600;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+        .order-listing-wrapper .filter-popover-close {
+            border: none;
+            background: transparent;
+            color: #94a3b8;
             cursor: pointer;
-            width: 100% !important;
-            height: 100% !important;
-            padding: 0 !important;
-            border: none !important;
-            background: transparent !important;
+            padding: 4px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.15s ease;
         }
-        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input i,
-        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input i.bx,
-        .order-listing-wrapper .header .header-action-button .filter .form-row.date-input i.bx-calendar {
+        .order-listing-wrapper .filter-popover-close:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .order-listing-wrapper .filter-field-group {
+            margin-bottom: 14px;
+        }
+        .order-listing-wrapper .filter-field-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .order-listing-wrapper .filter-dates-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Filter Popover Date Input */
+        .order-listing-wrapper .filter-date-input {
+            position: relative !important;
+            cursor: pointer;
+            width: 100%;
+        }
+        .order-listing-wrapper .filter-date-input input.filter-input {
+            width: 100% !important;
+            height: 43px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 7px !important;
+            padding: 0 34px 0 12px !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            color: #0f172a !important;
+            background: #ffffff !important;
+            box-sizing: border-box !important;
+            outline: none !important;
+            cursor: pointer;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .order-listing-wrapper .filter-date-input input.filter-input:focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+        }
+        .order-listing-wrapper .filter-date-input i.bx-calendar {
             position: absolute !important;
             right: 12px !important;
             top: 50% !important;
-            bottom: auto !important;
-            left: auto !important;
             transform: translateY(-50%) !important;
             font-size: 18px !important;
             color: #64748b !important;
-            margin: 0 !important;
             pointer-events: none !important;
             line-height: 1 !important;
-            display: block !important;
         }
 
-        /* Seamless Select2 styling inside pill form-row */
-        .order-listing-wrapper .header .header-action-button .filter .form-row.shop-select {
-            padding: 0 8px 0 12px;
+        /* Filter Popover Footer */
+        .order-listing-wrapper .filter-popover-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
         }
-        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2.select2-container {
-            width: 100% !important;
+        .order-listing-wrapper .btn-popover-reset {
+            height: 38px;
+            padding: 0 14px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
         }
-        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection--single {
-            border: none !important;
-            background: transparent !important;
-            height: 36px !important;
-            display: flex !important;
-            align-items: center !important;
-            box-shadow: none !important;
-            outline: none !important;
+        .order-listing-wrapper .btn-popover-reset:hover {
+            background: #e2e8f0;
+            color: #0f172a;
         }
-        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__rendered {
-            color: #1e293b !important;
-            font-size: 13px !important;
-            line-height: 36px !important;
-            padding-left: 0 !important;
-            padding-right: 20px !important;
+        .order-listing-wrapper .btn-popover-apply {
+            height: 38px;
+            padding: 0 16px;
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: background 0.15s ease;
         }
-        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__placeholder {
-            color: #8892a0 !important;
+        .order-listing-wrapper .btn-popover-apply:hover {
+            background: #1d4ed8;
         }
-        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__arrow {
-            height: 36px !important;
-            top: 0 !important;
-            right: 4px !important;
-        }
-        .order-listing-wrapper .header .header-action-button .filter .shop-select .select2-selection__arrow b {
-            border-color: #64748b transparent transparent transparent !important;
+
+        /* Datepicker stacking */
+        div#ui-datepicker-div,
+        #ui-datepicker-div.order-listing-datepicker {
+            z-index: 9999 !important;
         }
 
         /* Search submit button */
@@ -184,6 +338,12 @@
             'showSearch' => true,
             'showTabs' => true,
             'tabs' => [
+                [
+                    'label' => __('order.tab.all_outstanding'),
+                    'icon' => 'bx bx-list-ul',
+                    'url' => $orderTabUrl('all'),
+                    'active' => $status === 'all',
+                ],
                 [
                     'label' => __('order.tab.pending'),
                     'icon' => 'bx bx-time-five',
@@ -332,52 +492,69 @@
     <script src="{{ asset('admin-public/js/FileSaver.min.js') }}"></script>
     <script>
         function initOrderDatepickers() {
-            if ($("#from_date").length) {
-                $("#from_date").datepicker({
-                    dateFormat: 'yy-mm-dd',
-                    changeYear: true,
-                    changeMonth: true,
-                    gotoCurrent: true,
-                    yearRange: "-50:+10",
+            const options = {
+                dateFormat: 'yy-mm-dd',
+                changeYear: true,
+                changeMonth: true,
+                gotoCurrent: true,
+                yearRange: "-50:+10",
+                beforeShow: function(input, instance) {
+                    instance.dpDiv.addClass('order-listing-datepicker');
+                },
+                onClose: function(dateText, instance) {
+                    instance.dpDiv.removeClass('order-listing-datepicker');
+                }
+            };
+
+            const $from = $("#from_date");
+            const $to = $("#to_date");
+
+            if ($from.length && $to.length) {
+                if ($from.hasClass('hasDatepicker')) {
+                    $from.datepicker('destroy');
+                }
+                if ($to.hasClass('hasDatepicker')) {
+                    $to.datepicker('destroy');
+                }
+
+                $from.datepicker({
+                    ...options,
                     onSelect: function(selected) {
-                        $("#to_date").datepicker("option", "minDate", selected);
+                        $to.datepicker("option", "minDate", selected);
                     }
+                }).on('change', function() {
+                    $to.datepicker("option", "minDate", $from.datepicker('getDate') || null);
                 });
-            }
-            if ($("#to_date").length) {
-                $("#to_date").datepicker({
-                    dateFormat: 'yy-mm-dd',
-                    changeYear: true,
-                    changeMonth: true,
-                    gotoCurrent: true,
-                    yearRange: "-50:+10",
+
+                $to.datepicker({
+                    ...options,
                     onSelect: function(selected) {
-                        $("#from_date").datepicker("option", "maxDate", selected);
+                        $from.datepicker("option", "maxDate", selected);
                     }
+                }).on('change', function() {
+                    $from.datepicker("option", "maxDate", $to.datepicker('getDate') || null);
                 });
-            }
-            if ($("#from_date").val()) {
-                $("#to_date").datepicker("option", "minDate", $("#from_date").val());
-            }
-            if ($("#to_date").val()) {
-                $("#from_date").datepicker("option", "maxDate", $("#to_date").val());
+
+                if ($from.val()) {
+                    $to.datepicker("option", "minDate", $from.datepicker('getDate'));
+                }
+                if ($to.val()) {
+                    $from.datepicker("option", "maxDate", $to.datepicker('getDate'));
+                }
             }
         }
 
         $(document).ready(function() {
             initOrderDatepickers();
 
-            $(document).on('click', '.form-row.date-input i', function(e) {
-                e.stopPropagation();
-                $(this).siblings('input').focus();
-            });
-            $(document).on('click', '.form-row.date-input', function() {
+            $(document).on('click', '.filter-date-input', function() {
                 $(this).find('input').focus();
             });
         });
     </script>
-    <script lang="ts">
-        document.addEventListener('alpine:init', () => {
+    <script>
+        const registerOrderListingAlpine = () => {
+            if (typeof Alpine === 'undefined') return;
             Alpine.data('xIndex', () => ({
                 exportLoading: false,
                 formData: {
@@ -393,6 +570,7 @@
 
                     if (shop?.id) {
                         $select2Data('#shop_id', shop.id, shop.name || shop.phone);
+                        this.formData.shop_id = shop.id;
                     }
 
                     this.$nextTick(() => {
@@ -400,8 +578,13 @@
                     });
                 },
                 fetchSelectShop() {
-                    $('#shop_id').select2({
+                    const self = this;
+                    const $select = $('#shop_id');
+                    if (!$select.length) return;
+
+                    $select.select2({
                         placeholder: '{{ __('order.select_shop') }}',
+                        width: '100%',
                         ajax: {
                             url: '{{ route('admin-select-shop') }}',
                             dataType: 'json',
@@ -416,8 +599,35 @@
                             })
                         }
                     }).on('select2:open', () => {
-                        document.querySelector('.select2-search__field').focus();
+                        if (typeof window.$select2FocusInputSearch === 'function') {
+                            window.$select2FocusInputSearch();
+                        } else {
+                            const searchField = document.querySelector('.select2-search__field');
+                            if (searchField) searchField.focus();
+                        }
+                    }).on('change select2:select select2:clear select2:unselect', function () {
+                        self.formData.shop_id = $(this).val();
                     });
+                },
+                resetShopField() {
+                    $('#shop_id').val(null).trigger('change');
+                    this.formData.shop_id = null;
+                },
+                resetAdvancedFilters() {
+                    this.resetShopField();
+                    $('#from_date').val('').trigger('change');
+                    $('#to_date').val('').trigger('change');
+                    if ($("#from_date").length && $("#to_date").length) {
+                        $("#to_date").datepicker("option", "minDate", null);
+                        $("#from_date").datepicker("option", "maxDate", null);
+                    }
+                    this.formData.from_date = '';
+                    this.formData.to_date = '';
+                    const hasAppliedAdvanced = @json(request()->filled('shop_id') || request()->filled('from_date') || request()->filled('to_date'));
+                    if (hasAppliedAdvanced) {
+                        const form = document.querySelector('form.filter');
+                        if (form) form.submit();
+                    }
                 },
                 fetchSelectBarber() {
                     $('#barber_id').select2({
@@ -600,6 +810,12 @@
                     return value;
                 },
             }));
-        });
+        };
+
+        if (window.Alpine) {
+            registerOrderListingAlpine();
+        } else {
+            document.addEventListener('alpine:init', registerOrderListingAlpine);
+        }
     </script>
 @stop

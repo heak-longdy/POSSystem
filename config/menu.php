@@ -26,7 +26,7 @@ return [
     [
         'type'  => 'single',
         'active' => 'admin/remaining-amount/*',
-        'path' => 'admin/remaining-amount/list/all',
+        'path' => 'admin/remaining-amount/list/partial',
         'permission' => 'order-view',
         'name' => [
             'en' => 'Remaining Amount',
@@ -161,6 +161,18 @@ return [
             ],
             [
                 'type'  => 'single',
+                'active' => 'admin/report/customer-remaining-amount*',
+                'path' => 'admin/report/customer-remaining-amount',
+                'permission' => ['report-sales-view', 'order-view'],
+                'name' => [
+                    'en' => 'Customer Remaining Amount Report',
+                    'km' => 'របាយការណ៍ទឹកប្រាក់នៅសល់របស់អតិថិជន',
+                ],
+                'icon' => 'bx-wallet',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type' => 'single',
                 'active' => 'admin/report/inventory-movement*',
                 'path' => 'admin/report/inventory-movement/daily',
                 'permission' => ['report-inventory-view', 'stock-movement-view', 'report-sales-view'],

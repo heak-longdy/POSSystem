@@ -151,37 +151,63 @@
 
         .filter-input, .filter-select {
             width: 100%;
-            height: 38px;
+            height: 43px;
             border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            border-radius: 7px;
             padding: 0 10px;
-            font-size: 13px;
-            color: #1e293b;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #0f172a;
             background-color: #ffffff;
             outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
         .filter-input:focus, .filter-select:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+
+        .sales-report-wrapper .filter-date-input {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .sales-report-wrapper .filter-date-input .filter-input {
+            padding-right: 36px;
+            cursor: pointer;
+        }
+
+        .sales-report-wrapper .filter-date-input .bx-calendar {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #64748b;
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        #ui-datepicker-div.sales-report-datepicker {
+            z-index: 9999 !important;
         }
 
         .filter-actions-wrap {
             display: flex;
             align-items: center;
             gap: 8px;
-            height: 38px;
+            height: 43px;
         }
 
         .btn-filter-search {
-            height: 38px;
+            height: 43px;
             padding: 0 16px;
             background: #2563eb;
             color: #ffffff;
             border: none;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: 7px;
+            font-size: 12.5px;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
@@ -195,13 +221,14 @@
         }
 
         .btn-filter-reset {
-            height: 38px;
+            height: 43px;
             padding: 0 14px;
             background: #f1f5f9;
             color: #475569;
             border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 500;
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -213,6 +240,104 @@
         .btn-filter-reset:hover {
             background: #e2e8f0;
             color: #0f172a;
+        }
+
+        /* Select2 Standard Rules */
+        .select2Group {
+            width: 100% !important;
+            position: relative !important;
+        }
+
+        .select2Group select,
+        .select2Group .filter-select {
+            width: 100% !important;
+            height: 43px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 7px !important;
+            padding: 0 10px !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            color: #0f172a !important;
+            background: #ffffff !important;
+            outline: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+        }
+
+        .select2Group .select2.select2-container {
+            width: 100% !important;
+        }
+
+        .select2Group .select2-container .select2-selection--single {
+            height: 43px !important;
+            border-radius: 7px !important;
+            border: 1px solid #cbd5e1 !important;
+            background-color: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 10px !important;
+            box-shadow: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+        }
+
+        .select2Group .select2-container--open .select2-selection--single,
+        .select2Group .select2-container--focus .select2-selection--single {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+        }
+
+        .select2Group .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #334155 !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            line-height: normal !important;
+            padding-left: 0 !important;
+            padding-right: 28px !important;
+        }
+
+        .select2Group .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #94a3b8 !important;
+            font-weight: 400 !important;
+        }
+
+        .select2Group .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100% !important;
+            top: 0 !important;
+            right: 8px !important;
+        }
+
+        .select2Group .select2Reset {
+            position: absolute !important;
+            top: 50% !important;
+            right: 26px !important;
+            transform: translateY(-50%) !important;
+            cursor: pointer !important;
+            z-index: 2 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .select2Group .select2Reset[style*="display: none"],
+        .select2Group .select2Reset[style*="display:none"],
+        .select2Group .select2Reset[x-cloak] {
+            display: none !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            display: none !important;
+        }
+
+        .select2Group .select2Reset svg {
+            fill: #94a3b8 !important;
+            width: 18px !important;
+            height: 18px !important;
+            background: #ffffff !important;
+            border-radius: 50% !important;
+            transition: fill 0.15s ease !important;
+        }
+
+        .select2Group .select2Reset:hover svg {
+            fill: #ef4444 !important;
         }
 
         .btn-excel-export {
@@ -614,106 +739,153 @@
                     <div class="filter-form-grid">
                         @if ($viewMode === 'daily')
                             <div class="filter-field-wrap">
-                                <label for="from_date">{{ __('sales_report.filter.from_date') }}</label>
-                                <input type="text" name="from_date" id="from_date" class="filter-input datepicker-input"
-                                    value="{{ $from_date }}" autocomplete="off" placeholder="{{ __('sales_report.filter.placeholder_date') }}">
+                                <label for="sales-from-date">{{ __('sales_report.filter.from_date') }}</label>
+                                <div class="filter-date-input" @click="$refs.fromDate.focus()">
+                                    <input type="text" name="from_date" id="sales-from-date" x-ref="fromDate" class="filter-input"
+                                        value="{{ $from_date }}" autocomplete="off" placeholder="{{ __('sales_report.filter.placeholder_date') }}">
+                                    <i class="bx bx-calendar" aria-hidden="true"></i>
+                                </div>
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="to_date">{{ __('sales_report.filter.to_date') }}</label>
-                                <input type="text" name="to_date" id="to_date" class="filter-input datepicker-input"
-                                    value="{{ $to_date }}" autocomplete="off" placeholder="{{ __('sales_report.filter.placeholder_date') }}">
+                                <label for="sales-to-date">{{ __('sales_report.filter.to_date') }}</label>
+                                <div class="filter-date-input" @click="$refs.toDate.focus()">
+                                    <input type="text" name="to_date" id="sales-to-date" x-ref="toDate" class="filter-input"
+                                        value="{{ $to_date }}" autocomplete="off" placeholder="{{ __('sales_report.filter.placeholder_date') }}">
+                                    <i class="bx bx-calendar" aria-hidden="true"></i>
+                                </div>
                             </div>
                         @else
                             <div class="filter-field-wrap">
                                 <label for="year">{{ __('sales_report.filter.year') }}</label>
-                                <select name="year" id="year" class="filter-select">
-                                    @foreach ($availableYears as $yr)
-                                        <option value="{{ $yr }}" {{ (int) $selectedYear === (int) $yr ? 'selected' : '' }}>{{ $yr }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="select2Group">
+                                    <select name="year" id="year" class="SelectField select2">
+                                        @foreach ($availableYears as $yr)
+                                            <option value="{{ $yr }}" {{ (int) $selectedYear === (int) $yr ? 'selected' : '' }}>{{ $yr }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <div class="filter-field-wrap">
                                 <label for="from_month">{{ __('sales_report.filter.from_month') }}</label>
-                                <select name="from_month" id="from_month" class="filter-select">
-                                    @for ($m = 1; $m <= 12; $m++)
-                                        <option value="{{ $m }}" {{ (int) $from_month === $m ? 'selected' : '' }}>
-                                            {{ __('sales_report.months.' . $m) }}
-                                        </option>
-                                    @endfor
-                                </select>
+                                <div class="select2Group">
+                                    <select name="from_month" id="from_month" class="SelectField select2">
+                                        @for ($m = 1; $m <= 12; $m++)
+                                            <option value="{{ $m }}" {{ (int) $from_month === $m ? 'selected' : '' }}>
+                                                {{ __('sales_report.months.' . $m) }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
                             </div>
                             <div class="filter-field-wrap">
                                 <label for="to_month">{{ __('sales_report.filter.to_month') }}</label>
-                                <select name="to_month" id="to_month" class="filter-select">
-                                    @for ($m = 1; $m <= 12; $m++)
-                                        <option value="{{ $m }}" {{ (int) $to_month === $m ? 'selected' : '' }}>
-                                            {{ __('sales_report.months.' . $m) }}
-                                        </option>
-                                    @endfor
-                                </select>
+                                <div class="select2Group">
+                                    <select name="to_month" id="to_month" class="SelectField select2">
+                                        @for ($m = 1; $m <= 12; $m++)
+                                            <option value="{{ $m }}" {{ (int) $to_month === $m ? 'selected' : '' }}>
+                                                {{ __('sales_report.months.' . $m) }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
                             </div>
                         @endif
 
                         <div class="filter-field-wrap">
                             <label for="shop_id">{{ __('sales_report.filter.shop') }}</label>
-                            <select name="shop_id" id="shop_id" class="filter-select">
-                                <option value="">{{ __('sales_report.filter.all_shops') }}</option>
-                                @foreach ($shops as $shop)
-                                    <option value="{{ $shop->id }}" {{ request('shop_id') == $shop->id ? 'selected' : '' }}>
-                                        {{ $shop->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="shop_id" id="shop_id" class="SelectField select2">
+                                    <option value="">{{ __('sales_report.filter.all_shops') }}</option>
+                                    @foreach ($shops as $shop)
+                                        <option value="{{ $shop->id }}" {{ request('shop_id') == $shop->id ? 'selected' : '' }}>
+                                            {{ $shop->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.shop_id" @click.stop="resetFilter('shop_id')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="barber_id">{{ __('sales_report.filter.staff') }}</label>
-                            <select name="barber_id" id="barber_id" class="filter-select">
-                                <option value="">{{ __('sales_report.filter.all_staff') }}</option>
-                                @foreach ($barbers as $barber)
-                                    <option value="{{ $barber->id }}" {{ request('barber_id') == $barber->id ? 'selected' : '' }}>
-                                        {{ $barber->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="barber_id" id="barber_id" class="SelectField select2">
+                                    <option value="">{{ __('sales_report.filter.all_staff') }}</option>
+                                    @foreach ($barbers as $barber)
+                                        <option value="{{ $barber->id }}" {{ request('barber_id') == $barber->id ? 'selected' : '' }}>
+                                            {{ $barber->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.barber_id" @click.stop="resetFilter('barber_id')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="payment_status">{{ __('sales_report.filter.payment_status') }}</label>
-                            <select name="payment_status" id="payment_status" class="filter-select">
-                                <option value="">{{ __('sales_report.filter.status_active_exclude_cancel') }}</option>
-                                <option value="all" {{ request('payment_status') === 'all' ? 'selected' : '' }}>{{ __('sales_report.filter.status_all') }}</option>
-                                <option value="Paid" {{ request('payment_status') === 'Paid' ? 'selected' : '' }}>{{ __('sales_report.filter.status_paid') }}</option>
-                                <option value="Partial" {{ request('payment_status') === 'Partial' ? 'selected' : '' }}>{{ __('sales_report.filter.status_partial') }}</option>
-                                <option value="Pending" {{ request('payment_status') === 'Pending' ? 'selected' : '' }}>{{ __('sales_report.filter.status_pending') }}</option>
-                                <option value="Cancel" {{ request('payment_status') === 'Cancel' ? 'selected' : '' }}>{{ __('sales_report.filter.status_cancel') }}</option>
-                            </select>
+                            <div class="select2Group">
+                                <select name="payment_status" id="payment_status" class="SelectField select2">
+                                    <option value="">{{ __('sales_report.filter.status_active_exclude_cancel') }}</option>
+                                    <option value="all" {{ request('payment_status') === 'all' ? 'selected' : '' }}>{{ __('sales_report.filter.status_all') }}</option>
+                                    <option value="Paid" {{ request('payment_status') === 'Paid' ? 'selected' : '' }}>{{ __('sales_report.filter.status_paid') }}</option>
+                                    <option value="Partial" {{ request('payment_status') === 'Partial' ? 'selected' : '' }}>{{ __('sales_report.filter.status_partial') }}</option>
+                                    <option value="Pending" {{ request('payment_status') === 'Pending' ? 'selected' : '' }}>{{ __('sales_report.filter.status_pending') }}</option>
+                                    <option value="Cancel" {{ request('payment_status') === 'Cancel' ? 'selected' : '' }}>{{ __('sales_report.filter.status_cancel') }}</option>
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.payment_status" @click.stop="resetFilter('payment_status')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="pay_way">{{ __('sales_report.filter.payment_method') }}</label>
-                            <select name="pay_way" id="pay_way" class="filter-select">
-                                <option value="">{{ __('sales_report.filter.all_methods') }}</option>
-                                @foreach ($paymentMethods as $pm)
-                                    @php
-                                        $pmKey = strtolower(str_replace(' ', '_', $pm));
-                                        $pmLabel = __('sales_report.payment_methods.' . $pmKey);
-                                        if ($pmLabel === 'sales_report.payment_methods.' . $pmKey) {
-                                            $pmLabel = $pm;
-                                        }
-                                    @endphp
-                                    <option value="{{ $pm }}" {{ request('pay_way') === $pm ? 'selected' : '' }}>{{ $pmLabel }}</option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="pay_way" id="pay_way" class="SelectField select2">
+                                    <option value="">{{ __('sales_report.filter.all_methods') }}</option>
+                                    @foreach ($paymentMethods as $pm)
+                                        @php
+                                            $pmKey = strtolower(str_replace(' ', '_', $pm));
+                                            $pmLabel = __('sales_report.payment_methods.' . $pmKey);
+                                            if ($pmLabel === 'sales_report.payment_methods.' . $pmKey) {
+                                                $pmLabel = $pm;
+                                            }
+                                        @endphp
+                                        <option value="{{ $pm }}" {{ request('pay_way') === $pm ? 'selected' : '' }}>{{ $pmLabel }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.pay_way" @click.stop="resetFilter('pay_way')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="item_type">{{ __('sales_report.filter.item_type') }}</label>
-                            <select name="item_type" id="item_type" class="filter-select">
-                                <option value="">{{ __('sales_report.filter.all_items') }}</option>
-                                <option value="product" {{ request('item_type') === 'product' ? 'selected' : '' }}>{{ __('sales_report.filter.products_only') }}</option>
-                                <option value="service" {{ request('item_type') === 'service' ? 'selected' : '' }}>{{ __('sales_report.filter.services_only') }}</option>
-                            </select>
+                            <div class="select2Group">
+                                <select name="item_type" id="item_type" class="SelectField select2">
+                                    <option value="">{{ __('sales_report.filter.all_items') }}</option>
+                                    <option value="product" {{ request('item_type') === 'product' ? 'selected' : '' }}>{{ __('sales_report.filter.products_only') }}</option>
+                                    <option value="service" {{ request('item_type') === 'service' ? 'selected' : '' }}>{{ __('sales_report.filter.services_only') }}</option>
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.item_type" @click.stop="resetFilter('item_type')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
@@ -1289,23 +1461,90 @@
 
 @section('script')
     <script>
-        $(document).ready(function() {
-            $(".datepicker-input").datepicker({
-                changeYear: true,
-                changeMonth: true,
-                gotoCurrent: true,
-                dateFormat: "yy-mm-dd",
-            });
-        });
-
         document.addEventListener('alpine:init', () => {
             Alpine.data('xSalesReport', () => ({
                 viewMode: '{{ $viewMode }}',
                 grouping: '{{ $grouping }}',
+                filterValues: {},
                 showDetailModal: false,
                 modalLoading: false,
                 periodData: null,
                 exportLoading: false,
+
+                init() {
+                    this.$nextTick(() => {
+                        this.initDatepickers();
+
+                        if (!window.jQuery || !$.fn.select2) return;
+
+                        $(this.$root).find('#salesFilterForm select.select2').each((index, element) => {
+                            const $select = $(element);
+                            this.filterValues[element.name] = $select.val() || '';
+
+                            if ($select.hasClass('select2-hidden-accessible')) return;
+
+                            $select.select2({
+                                placeholder: $select.find('option[value=""]').text(),
+                                width: '100%'
+                            }).on('select2:open', function() {
+                                if (typeof window.$select2FocusInputSearch === 'function') {
+                                    window.$select2FocusInputSearch();
+                                }
+                            }).on('change select2:select select2:clear select2:unselect', () => {
+                                this.filterValues[element.name] = $select.val() || '';
+                            });
+                        });
+                    });
+                },
+
+                initDatepickers() {
+                    if (!window.jQuery || !$.fn.datepicker || !this.$refs.fromDate || !this.$refs.toDate) return;
+
+                    const $from = $(this.$refs.fromDate);
+                    const $to = $(this.$refs.toDate);
+                    const options = {
+                        dateFormat: 'yy-mm-dd',
+                        changeYear: true,
+                        changeMonth: true,
+                        gotoCurrent: true,
+                        yearRange: '-50:+10',
+                        beforeShow: function(input, instance) {
+                            instance.dpDiv.addClass('sales-report-datepicker');
+                        },
+                        onClose: function(dateText, instance) {
+                            instance.dpDiv.removeClass('sales-report-datepicker');
+                        },
+                    };
+
+                    $from.datepicker({
+                        ...options,
+                        onSelect: function(selected) {
+                            $to.datepicker('option', 'minDate', selected);
+                        }
+                    }).on('change', function() {
+                        $to.datepicker('option', 'minDate', $from.datepicker('getDate'));
+                    });
+
+                    $to.datepicker({
+                        ...options,
+                        onSelect: function(selected) {
+                            $from.datepicker('option', 'maxDate', selected);
+                        }
+                    }).on('change', function() {
+                        $from.datepicker('option', 'maxDate', $to.datepicker('getDate'));
+                    });
+
+                    if ($from.val()) {
+                        $to.datepicker('option', 'minDate', $from.datepicker('getDate'));
+                    }
+                    if ($to.val()) {
+                        $from.datepicker('option', 'maxDate', $to.datepicker('getDate'));
+                    }
+                },
+
+                resetFilter(name) {
+                    $(this.$root).find(`#salesFilterForm select[name="${name}"]`).val('').trigger('change');
+                },
 
                 getLocalizedStatus(status) {
                     const s = (status || '').toLowerCase();

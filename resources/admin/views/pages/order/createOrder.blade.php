@@ -301,7 +301,7 @@
                                         x-init="fetchSelectCustomer()">
                                         <option value=""> {{ __('order.form.select_customer') }}</option>
                                     </select>
-                                    <div class="select2Reset" x-show="(formData?.customer_id || customerData?.id) && canEditOrderItems()" @click.stop="resetCustomer()">
+                                    <div class="select2Reset" x-show="(formData?.customer_id || customerData?.id) && canEditOrderItems()" @click.stop="resetCustomer()" style="display: none;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                             <path
                                                 d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -322,7 +322,7 @@
                                         x-init="fetchSelectShop()">
                                         <option value=""> {{ __('order.form.select_shop') }}</option>
                                     </select>
-                                    <div class="select2Reset" x-show="(formData?.shop_id || shopData?.id) && canEditOrderItems()" @click.stop="resetShop()">
+                                    <div class="select2Reset" x-show="(formData?.shop_id || shopData?.id) && canEditOrderItems()" @click.stop="resetShop()" style="display: none;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                             <path
                                                 d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -832,6 +832,14 @@
                         display: flex !important;
                         align-items: center !important;
                         justify-content: center !important;
+                    }
+                    .sidebar-form-grid .select2Group .select2Reset[style*="display: none"],
+                    .sidebar-form-grid .select2Group .select2Reset[style*="display:none"],
+                    .sidebar-form-grid .select2Group .select2Reset[x-cloak] {
+                        display: none !important;
+                    }
+                    .sidebar-form-grid .select2-container--default .select2-selection--single .select2-selection__clear {
+                        display: none !important;
                     }
                     .sidebar-form-grid .select2Group .select2Reset svg {
                         fill: #94a3b8 !important;
@@ -2472,6 +2480,15 @@
                                 this.fiterProduct(this.searchFilter);
                                 this.saveDraft();
                             }
+                        }).on('select2:clear select2:unselect', () => {
+                            this.shopData = null;
+                            this.formData.shop_id = null;
+                            this.dataCart = [];
+                            this.orderDeleteId = [];
+                            this.syncCatalogSelection();
+                            this.calculatorProductPrice();
+                            this.fiterProduct(this.searchFilter);
+                            this.saveDraft();
                         }).on('select2:open', () => {
                             $select2FocusInputSearch();
                         });
@@ -2522,6 +2539,10 @@
                                 this.formData.customer_id = null;
                                 this.saveDraft();
                             }
+                        }).on('select2:clear select2:unselect', () => {
+                            this.customerData = null;
+                            this.formData.customer_id = null;
+                            this.saveDraft();
                         }).on('select2:open', () => {
                             $select2FocusInputSearch();
                         });

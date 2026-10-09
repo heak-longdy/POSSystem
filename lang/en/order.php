@@ -77,6 +77,7 @@ return [
         'all_barber' => 'All Barber',
         'from_date' => 'From Date',
         'to_date' => 'To Date',
+        'advanced_filter' => 'Advanced Filter',
     ],
 
     'order_notify' => [

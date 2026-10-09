@@ -1181,7 +1181,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 14px;">
-                            <a href="{{ Route::has('admin-remaining-amount-list') ? route('admin-remaining-amount-list', 'all') : 'javascript:void(0);' }}" class="badge-subtle badge-coral-subtle" style="text-decoration: none;">
+                            <a href="{{ Route::has('admin-remaining-amount-list') ? route('admin-remaining-amount-list', 'partial') : 'javascript:void(0);' }}" class="badge-subtle badge-coral-subtle" style="text-decoration: none;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="12" y1="8" x2="12" y2="12"></line>

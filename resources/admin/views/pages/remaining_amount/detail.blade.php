@@ -12,7 +12,7 @@
             <div class="booking-detail-page-wrapper">
                 <!-- Top Navigation / Breadcrumb -->
                 <div class="detail-breadcrumb">
-                    <a href="{{ route('admin-remaining-amount-list', 'all') }}" class="breadcrumb-link">
+                    <a href="{{ route('admin-remaining-amount-list', 'partial') }}" class="breadcrumb-link">
                         <i data-feather="dollar-sign"></i>
                         <span>{{ __('remaining_amount.title') }}</span>
                     </a>
@@ -131,7 +131,7 @@
                             </button>
                         </div>
 
-                        <a href="{{ route('admin-remaining-amount-list', 'all') }}" class="btn btn-system btn-system-outline btn-system-neutral">
+                        <a href="{{ route('admin-remaining-amount-list', 'partial') }}" class="btn btn-system btn-system-outline btn-system-neutral">
                             <i data-feather="arrow-left"></i>
                             <span>{{ __('remaining_amount.detail.back_to_list') }}</span>
                         </a>

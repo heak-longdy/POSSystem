@@ -26,12 +26,6 @@
             'showTabs' => true,
             'tabs' => [
                 [
-                    'label' => __('remaining_amount.tab.all_outstanding'),
-                    'icon' => 'bx bx-list-ul',
-                    'url' => $tabUrl('all'),
-                    'active' => $status === 'all',
-                ],
-                [
                     'label' => __('remaining_amount.tab.partial_paid'),
                     'icon' => 'bx bx-credit-card',
                     'url' => $tabUrl('partial'),
@@ -151,7 +145,7 @@
                         <div>
                             <h3>{{ __('order.detail.add_payment') }}</h3>
                             <div class="modal-subtitle-text"
-                                x-text="`${addPaymentOrder?.invoice_number || addPaymentOrder?.invoice_title || ''} • ${addPaymentOrder?.customer_name || (addPaymentOrder?.customer ? (addPaymentOrder.customer.name || addPaymentOrder.customer.phone) : '') || @json(__('order.walk_in_customer'))}`">
+                                x-text="getAddPaymentSubtitle()">
                             </div>
                         </div>
                     </div>
@@ -240,8 +234,8 @@
                                 <i class='bx bx-wallet'></i>
                             </div>
                             <div>
-                                <h3 class="modal-title" x-text="`{{ __('order.table.order_id') }}: ${activeOrder?.invoice_number || ''}`"></h3>
-                                <p class="modal-subtitle" x-text="`${activeOrder?.customer_name || @json(__('order.walk_in_customer'))} • ${activeOrder?.shop_name || @json(__('order.table.shop'))}`"></p>
+                                <h3 class="modal-title" x-text="getActiveOrderTitle()"></h3>
+                                <p class="modal-subtitle" x-text="getActiveOrderSubtitle()"></p>
                             </div>
                         </div>
                         <button type="button" class="btn-close-modal" @click="closePaymentModal()">&times;</button>
@@ -826,6 +820,24 @@
                         'Pending': @json(__('order.status.pending')),
                     };
                     return map[status] || status || @json(__('order.status.pending'));
+                },
+                walkInCustomerText: @json(__('order.walk_in_customer')),
+                shopText: @json(__('order.table.shop')),
+                orderIdText: @json(__('order.table.order_id')),
+                getAddPaymentSubtitle() {
+                    const invoice = this.addPaymentOrder?.invoice_number || this.addPaymentOrder?.invoice_title || '';
+                    const customer = this.addPaymentOrder?.customer_name
+                        || (this.addPaymentOrder?.customer ? (this.addPaymentOrder.customer.name || this.addPaymentOrder.customer.phone) : '')
+                        || this.walkInCustomerText;
+                    return `${invoice} • ${customer}`;
+                },
+                getActiveOrderTitle() {
+                    return `${this.orderIdText}: ${this.activeOrder?.invoice_number || ''}`;
+                },
+                getActiveOrderSubtitle() {
+                    const customer = this.activeOrder?.customer_name || this.walkInCustomerText;
+                    const shop = this.activeOrder?.shop_name || this.shopText;
+                    return `${customer} • ${shop}`;
                 },
                 paymentMethodLabel(method) {
                     const map = {

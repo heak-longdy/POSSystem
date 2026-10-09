@@ -32,7 +32,11 @@ class RemainingAmountController extends Controller
 
     public function index(Request $req)
     {
-        $status = $this->normalizeStatusTab($req->status ?? 'all');
+        if ($req->status === 'all') {
+            return redirect()->route('admin-order-list', array_merge(['status' => 'all'], $req->except('status')));
+        }
+
+        $status = $this->normalizeStatusTab($req->status ?? 'partial');
         $dates = $this->dateRange($req, false);
 
         $query = Order::query()
@@ -113,7 +117,7 @@ class RemainingAmountController extends Controller
     public function show($id = null)
     {
         if (!$id) {
-            return redirect()->route('admin-' . $this->routeName . '-list', 'all');
+            return redirect()->route('admin-' . $this->routeName . '-list', 'partial');
         }
 
         $order = Order::withTrashed()->with([
@@ -128,7 +132,7 @@ class RemainingAmountController extends Controller
 
         if (!$order) {
             Session::flash('warning', __('order.message.not_found'));
-            return redirect()->route('admin-' . $this->routeName . '-list', 'all');
+            return redirect()->route('admin-' . $this->routeName . '-list', 'partial');
         }
 
         $data['order'] = $order;
@@ -376,7 +380,7 @@ class RemainingAmountController extends Controller
     public function report(Request $req)
     {
         $dates = $this->dateRange($req, false);
-        $status = $this->normalizeStatusTab($req->status ?? 'all');
+        $status = $this->normalizeStatusTab($req->status ?? 'partial');
 
         $data = Order::with([
             'shop:id,name,phone',
@@ -490,10 +494,9 @@ class RemainingAmountController extends Controller
         $status = strtolower((string) $status);
 
         return match ($status) {
-            'partial' => 'partial',
             'pending' => 'pending',
             'paid' => 'paid',
-            default => 'all',
+            default => 'partial',
         };
     }
 

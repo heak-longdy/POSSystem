@@ -290,6 +290,7 @@ return [
         'from_date' => 'ចាប់ពីថ្ងៃ',
         'to_date' => 'ដល់ថ្ងៃ',
         'search' => 'ស្វែងរក...',
+        'advanced_filter' => 'តម្រងកម្រិតខ្ពស់',
     ],
 
     'empty' => [

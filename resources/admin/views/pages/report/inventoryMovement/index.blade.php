@@ -168,6 +168,42 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
+        .inventory-report-wrapper .filter-date-input {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .inventory-report-wrapper .filter-date-input .filter-input {
+            height: 43px;
+            border-radius: 7px;
+            padding-right: 36px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #0f172a;
+            cursor: pointer;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .inventory-report-wrapper .filter-date-input .filter-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        }
+
+        .inventory-report-wrapper .filter-date-input .bx-calendar {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: #64748b;
+            pointer-events: none;
+            line-height: 1;
+        }
+
+        #ui-datepicker-div.inventory-report-datepicker {
+            z-index: 9999 !important;
+        }
+
         .filter-actions-wrap {
             display: flex;
             align-items: center;
@@ -616,103 +652,150 @@
                     <div class="filter-form-grid">
                         @if ($viewMode === 'daily')
                             <div class="filter-field-wrap">
-                                <label for="from_date">{{ __('inventory_movement.filter.from_date') }}</label>
-                                <input type="text" name="from_date" id="from_date" class="filter-input datepicker-input"
-                                    value="{{ $from_date }}" autocomplete="off" placeholder="{{ __('inventory_movement.filter.placeholder_date') }}">
+                                <label for="inventory-from-date">{{ __('inventory_movement.filter.from_date') }}</label>
+                                <div class="filter-date-input" @click="$refs.fromDate.focus()">
+                                    <input type="text" name="from_date" id="inventory-from-date" x-ref="fromDate" class="filter-input"
+                                        value="{{ $from_date }}" autocomplete="off" placeholder="{{ __('inventory_movement.filter.placeholder_date') }}">
+                                    <i class="bx bx-calendar" aria-hidden="true"></i>
+                                </div>
                             </div>
                             <div class="filter-field-wrap">
-                                <label for="to_date">{{ __('inventory_movement.filter.to_date') }}</label>
-                                <input type="text" name="to_date" id="to_date" class="filter-input datepicker-input"
-                                    value="{{ $to_date }}" autocomplete="off" placeholder="{{ __('inventory_movement.filter.placeholder_date') }}">
+                                <label for="inventory-to-date">{{ __('inventory_movement.filter.to_date') }}</label>
+                                <div class="filter-date-input" @click="$refs.toDate.focus()">
+                                    <input type="text" name="to_date" id="inventory-to-date" x-ref="toDate" class="filter-input"
+                                        value="{{ $to_date }}" autocomplete="off" placeholder="{{ __('inventory_movement.filter.placeholder_date') }}">
+                                    <i class="bx bx-calendar" aria-hidden="true"></i>
+                                </div>
                             </div>
                         @else
                             <div class="filter-field-wrap">
                                 <label for="year">{{ __('inventory_movement.filter.year') }}</label>
-                                <select name="year" id="year" class="filter-select">
-                                    @foreach ($availableYears as $yr)
-                                        <option value="{{ $yr }}" {{ (int) $selectedYear === (int) $yr ? 'selected' : '' }}>{{ $yr }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="select2Group">
+                                    <select name="year" id="year" class="SelectField select2">
+                                        @foreach ($availableYears as $yr)
+                                            <option value="{{ $yr }}" {{ (int) $selectedYear === (int) $yr ? 'selected' : '' }}>{{ $yr }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <div class="filter-field-wrap">
                                 <label for="from_month">{{ __('inventory_movement.filter.from_month') }}</label>
-                                <select name="from_month" id="from_month" class="filter-select">
-                                    @for ($m = 1; $m <= 12; $m++)
-                                        <option value="{{ $m }}" {{ (int) $from_month === $m ? 'selected' : '' }}>
-                                            {{ __('inventory_movement.months.' . $m) }}
-                                        </option>
-                                    @endfor
-                                </select>
+                                <div class="select2Group">
+                                    <select name="from_month" id="from_month" class="SelectField select2">
+                                        @for ($m = 1; $m <= 12; $m++)
+                                            <option value="{{ $m }}" {{ (int) $from_month === $m ? 'selected' : '' }}>
+                                                {{ __('inventory_movement.months.' . $m) }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
                             </div>
                             <div class="filter-field-wrap">
                                 <label for="to_month">{{ __('inventory_movement.filter.to_month') }}</label>
-                                <select name="to_month" id="to_month" class="filter-select">
-                                    @for ($m = 1; $m <= 12; $m++)
-                                        <option value="{{ $m }}" {{ (int) $to_month === $m ? 'selected' : '' }}>
-                                            {{ __('inventory_movement.months.' . $m) }}
-                                        </option>
-                                    @endfor
-                                </select>
+                                <div class="select2Group">
+                                    <select name="to_month" id="to_month" class="SelectField select2">
+                                        @for ($m = 1; $m <= 12; $m++)
+                                            <option value="{{ $m }}" {{ (int) $to_month === $m ? 'selected' : '' }}>
+                                                {{ __('inventory_movement.months.' . $m) }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
                             </div>
                         @endif
 
                         <div class="filter-field-wrap">
                             <label for="shop_id">{{ __('inventory_movement.filter.shop') }}</label>
-                            <select name="shop_id" id="shop_id" class="filter-select">
-                                <option value="">{{ __('inventory_movement.filter.all_shops') }}</option>
-                                @foreach ($shops as $shop)
-                                    <option value="{{ $shop->id }}" {{ request('shop_id') == $shop->id ? 'selected' : '' }}>
-                                        {{ $shop->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="shop_id" id="shop_id" class="SelectField select2">
+                                    <option value="">{{ __('inventory_movement.filter.all_shops') }}</option>
+                                    @foreach ($shops as $shop)
+                                        <option value="{{ $shop->id }}" {{ request('shop_id') == $shop->id ? 'selected' : '' }}>
+                                            {{ $shop->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.shop_id" @click.stop="resetFilter('shop_id')" title="{{ __('inventory_movement.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="category_id">{{ __('inventory_movement.filter.category') }}</label>
-                            <select name="category_id" id="category_id" class="filter-select">
-                                <option value="">{{ __('inventory_movement.filter.all_categories') }}</option>
-                                @foreach ($categories as $cat)
-                                    <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
-                                        {{ $cat->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="category_id" id="category_id" class="SelectField select2">
+                                    <option value="">{{ __('inventory_movement.filter.all_categories') }}</option>
+                                    @foreach ($categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
+                                            {{ $cat->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.category_id" @click.stop="resetFilter('category_id')" title="{{ __('inventory_movement.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="product_id">{{ __('inventory_movement.filter.product') }}</label>
-                            <select name="product_id" id="product_id" class="filter-select">
-                                <option value="">{{ __('inventory_movement.filter.all_products') }}</option>
-                                @foreach ($products as $prod)
-                                    <option value="{{ $prod->id }}" {{ request('product_id') == $prod->id ? 'selected' : '' }}>
-                                        {{ $prod->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="product_id" id="product_id" class="SelectField select2">
+                                    <option value="">{{ __('inventory_movement.filter.all_products') }}</option>
+                                    @foreach ($products as $prod)
+                                        <option value="{{ $prod->id }}" {{ request('product_id') == $prod->id ? 'selected' : '' }}>
+                                            {{ $prod->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.product_id" @click.stop="resetFilter('product_id')" title="{{ __('inventory_movement.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="movement_type">{{ __('inventory_movement.filter.movement_type') }}</label>
-                            <select name="movement_type" id="movement_type" class="filter-select">
-                                @foreach ($movementTypes as $key => $label)
-                                    <option value="{{ $key }}" {{ request('movement_type', 'all') == $key ? 'selected' : '' }}>
-                                        {{ __('inventory_movement.filter.movement_types.' . $key) }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="movement_type" id="movement_type" class="SelectField select2">
+                                    @foreach ($movementTypes as $key => $label)
+                                        <option value="{{ $key }}" {{ request('movement_type', 'all') == $key ? 'selected' : '' }}>
+                                            {{ __('inventory_movement.filter.movement_types.' . $key) }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.movement_type && filterValues.movement_type !== 'all'" @click.stop="resetFilter('movement_type', 'all')" title="{{ __('inventory_movement.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
                             <label for="request_by">{{ __('inventory_movement.filter.staff') }}</label>
-                            <select name="request_by" id="request_by" class="filter-select">
-                                <option value="">{{ __('inventory_movement.filter.all_staff') }}</option>
-                                @foreach ($staffUsers as $stf)
-                                    <option value="{{ $stf->id }}" {{ request('request_by') == $stf->id ? 'selected' : '' }}>
-                                        {{ $stf->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="select2Group">
+                                <select name="request_by" id="request_by" class="SelectField select2">
+                                    <option value="">{{ __('inventory_movement.filter.all_staff') }}</option>
+                                    @foreach ($staffUsers as $stf)
+                                        <option value="{{ $stf->id }}" {{ request('request_by') == $stf->id ? 'selected' : '' }}>
+                                            {{ $stf->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="select2Reset" x-show="filterValues.request_by" @click.stop="resetFilter('request_by')" title="{{ __('inventory_movement.button.reset') }}" style="display: none;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="filter-field-wrap">
@@ -1280,24 +1363,91 @@
 
 @section('script')
     <script>
-        $(document).ready(function() {
-            $(".datepicker-input").datepicker({
-                changeYear: true,
-                changeMonth: true,
-                gotoCurrent: true,
-                dateFormat: "yy-mm-dd",
-            });
-        });
-
         document.addEventListener('alpine:init', () => {
             Alpine.data('xInventoryReport', () => ({
                 viewMode: '{{ $viewMode }}',
                 grouping: '{{ $grouping }}',
+                filterValues: {},
                 showDetailModal: false,
                 modalLoading: false,
                 periodData: null,
                 modalSearch: '',
                 exportLoading: false,
+
+                init() {
+                    this.$nextTick(() => {
+                        this.initDatepickers();
+
+                        if (!window.jQuery || !$.fn.select2) return;
+
+                        $(this.$root).find('#inventoryFilterForm select.select2').each((index, element) => {
+                            const $select = $(element);
+                            this.filterValues[element.name] = $select.val() || '';
+
+                            if ($select.hasClass('select2-hidden-accessible')) return;
+
+                            $select.select2({
+                                placeholder: $select.find('option[value=""]').text(),
+                                width: '100%'
+                            }).on('select2:open', function() {
+                                if (typeof window.$select2FocusInputSearch === 'function') {
+                                    window.$select2FocusInputSearch();
+                                }
+                            }).on('change select2:select select2:clear select2:unselect', () => {
+                                this.filterValues[element.name] = $select.val() || '';
+                            });
+                        });
+                    });
+                },
+
+                initDatepickers() {
+                    if (!window.jQuery || !$.fn.datepicker || !this.$refs.fromDate || !this.$refs.toDate) return;
+
+                    const $from = $(this.$refs.fromDate);
+                    const $to = $(this.$refs.toDate);
+                    const options = {
+                        dateFormat: 'yy-mm-dd',
+                        changeYear: true,
+                        changeMonth: true,
+                        gotoCurrent: true,
+                        yearRange: '-50:+10',
+                        beforeShow: function(input, instance) {
+                            instance.dpDiv.addClass('inventory-report-datepicker');
+                        },
+                        onClose: function(dateText, instance) {
+                            instance.dpDiv.removeClass('inventory-report-datepicker');
+                        },
+                    };
+
+                    $from.datepicker({
+                        ...options,
+                        onSelect: function(selected) {
+                            $to.datepicker('option', 'minDate', selected);
+                        }
+                    }).on('change', function() {
+                        $to.datepicker('option', 'minDate', $from.datepicker('getDate'));
+                    });
+
+                    $to.datepicker({
+                        ...options,
+                        onSelect: function(selected) {
+                            $from.datepicker('option', 'maxDate', selected);
+                        }
+                    }).on('change', function() {
+                        $from.datepicker('option', 'maxDate', $to.datepicker('getDate'));
+                    });
+
+                    if ($from.val()) {
+                        $to.datepicker('option', 'minDate', $from.datepicker('getDate'));
+                    }
+                    if ($to.val()) {
+                        $from.datepicker('option', 'maxDate', $to.datepicker('getDate'));
+                    }
+                },
+
+                resetFilter(name, defaultValue = '') {
+                    $(this.$root).find(`#inventoryFilterForm select[name="${name}"]`).val(defaultValue).trigger('change');
+                },
 
                 get filteredModalMovements() {
                     if (!this.periodData || !this.periodData.movements) return [];

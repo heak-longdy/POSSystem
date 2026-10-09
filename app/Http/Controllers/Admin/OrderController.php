@@ -83,6 +83,9 @@ class OrderController extends Controller
             ->when($paymentStatus, function ($query) use ($paymentStatus) {
                 $query->where('payment_status', $paymentStatus);
             })
+            ->when($status === 'all' && !$paymentStatus, function ($query) {
+                $query->where('payment_status', '!=', 'Cancel');
+            })
             ->when($req->search, function ($query) use ($req) {
                 $query->where(function ($q) use ($req) {
                     $q->where('invoice_number', 'like', '%' . $req->search . '%')
@@ -668,7 +671,9 @@ class OrderController extends Controller
     {
         $dates = $this->dateRange($req, false);
         $itemSelect = ['id', 'name', 'phone'];
-        $paymentStatus = $this->normalizePaymentStatus($req->payment_status ?: $req->status);
+        $status = $this->normalizeOrderStatusTab($req->status);
+        $paymentStatus = $this->orderPaymentStatusForTab($status)
+            ?: $this->normalizePaymentStatus($req->payment_status ?: $req->status);
 
         $data = OrderDetail::with([
             'product:id,name',
@@ -684,7 +689,7 @@ class OrderController extends Controller
                 ]);
             },
         ])
-            ->whereHas('order', function ($query) use ($req, $dates, $paymentStatus) {
+            ->whereHas('order', function ($query) use ($req, $dates, $paymentStatus, $status) {
                 $query->when($dates['from'], function ($q) use ($dates) {
                         $q->whereDate('order_date', '>=', $dates['from']);
                     })
@@ -696,6 +701,9 @@ class OrderController extends Controller
                     })
                     ->when($paymentStatus, function ($q) use ($paymentStatus) {
                         $q->where('payment_status', $paymentStatus);
+                    })
+                    ->when($status === 'all' && !$paymentStatus, function ($q) {
+                        $q->where('payment_status', '!=', 'Cancel');
                     })
                     ->when($req->search, function ($q) use ($req) {
                         $q->where(function ($sub) use ($req) {
@@ -1110,6 +1118,7 @@ class OrderController extends Controller
             'paid' => 'Paid',
             'rejected', 'cancel' => 'Rejected',
             'trash' => 'trash',
+            'all', 'all_outstanding', 'all-outstanding' => 'all',
             default => null,
         };
     }
