@@ -266,6 +266,17 @@ return [
                 'children' => [],
             ],
             [
+                'type' => 'single',
+                'active' => 'admin/file-manager/*',
+                'path' => 'admin/file-manager/index',
+                'name' => [
+                    'en' => 'File Manager',
+                    'km' => 'គ្រប់គ្រងឯកសារ',
+                ],
+                'icon' => 'bx-folder',
+                'dropDown' => 'disable',
+            ],
+            [
                 'active' => 'admin/about/privacy*,admin/aboutUs*,admin/uom/*,admin/category/*,admin/supplier/*,admin/setting/invoice*',
                 'permission' => ['about-view', 'uom-view'],
                 'name' => [

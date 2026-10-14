@@ -1,5 +1,5 @@
-<div class="file-manager-wrapper" x-data="settingsPage" :class="{'full-page':$store.page.full_page}">
-    <div class="file-manager-header">
+<div class="file-manager-wrapper" x-data="settingsPage" :class="{'full-page':fileManagerState.full_page}">
+    <div class="file-manager-header" x-show="!fileManagerState.full_page">
         <div class="label">
             <span>@lang('file-manager.title')</span>
         </div>
@@ -38,23 +38,4 @@
             </button> --}}
         </div>
     </div>
-    <script>
-        Alpine.data('settingsPage', () => ({
-            init() {
-                this.reloadIcon();
-            },
-            reloadIcon() {
-                feather.replace();
-                setTimeout(() => {
-                    feather.replace();
-                }, 10);
-            },
-            onClose() {
-                Alpine.store('animate').leave(".dialog-container", (res) => {
-                    Alpine.store('page').active = false;
-                    Alpine.store('page').options.afterClose(false);
-                });
-            },
-        }));
-    </script>
 </div>

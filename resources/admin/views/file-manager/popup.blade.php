@@ -1,18 +1,11 @@
 @if(!defined('ADMIN_FILE_MANAGER_POPUP_LOADED'))
 @php define('ADMIN_FILE_MANAGER_POPUP_LOADED', true); @endphp
 <div id="file-manager-popup-container" data-file-manager-popup="true">
-    <template x-data="{}" x-if="$store?.page?.active">
-        <div class="dialog" style="z-index: 99999;">
-            <div class="dialog-container">
-                <template x-if="$store.page.active == 'all_files'">
-                    @include('admin::file-manager.all_files')
-                </template>
-                <template x-if="$store.page.active == 'trash_bin'">
-                    @include('admin::file-manager.trash_bin')
-                </template>
-                <template x-if="$store.page.active == 'settings'">
-                    @include('admin::file-manager.settings')
-                </template>
+    <template x-data="{}" x-if="$store?.page?.active && !$store.page.full_page">
+        <div class="dialog" x-data="fileManagerPopup" style="z-index: 99999; opacity: 0;"
+            @file-manager-close.stop="closePopup($event.detail)">
+            <div class="dialog-container" x-ref="panel">
+                @include('admin::file-manager.content')
             </div>
         </div>
     </template>

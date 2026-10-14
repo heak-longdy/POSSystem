@@ -9,7 +9,6 @@ return [
         'base_salary' => 'ប្រាក់ខែគោល',
         'bonus_rewards' => 'ប្រាក់លើកទឹកចិត្ត / រង្វាន់',
         'deductions' => 'ការកាត់ប្រាក់',
-        'net_total_expense' => 'ចំណាយសុទ្ធសរុប',
         'net_total_payable' => 'ប្រាក់ត្រូវបើកសុទ្ធសរុប',
     ],
 

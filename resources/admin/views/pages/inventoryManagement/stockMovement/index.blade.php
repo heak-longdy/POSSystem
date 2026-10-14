@@ -53,6 +53,8 @@
     </div>
 @stop
 @section('script')
+    <script src="{{ asset('admin-public/js/exceljs.min.js') }}"></script>
+    <script src="{{ asset('admin-public/js/FileSaver.min.js') }}"></script>
     <script lang="ts">
         $(document).ready(function() {
             $("#date").datepicker({
@@ -91,13 +93,6 @@
         $('.SelectShop').append(shop).trigger('change');
     </script>
     <script>
-        const header = {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-                Accept: "application/json",
-            },
-            responseType: "json",
-        };
         document.addEventListener('alpine:init', () => {
             Alpine.data("xStockMovement", () => ({
                 loading: false,

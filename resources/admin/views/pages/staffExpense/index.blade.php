@@ -2,46 +2,6 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('staff_expense.title')])
     <div class="content-wrapper" id="app" x-data="xIndex">
-        <!-- Financial Summary Metric Cards -->
-        <div class="expense-summary-cards">
-            <div class="card-col">
-                <div class="expense-card salary">
-                    <div class="card-info">
-                        <span class="card-label">{{ __('staff_expense.summary.base_salary') }}</span>
-                        <h4 class="card-value">${{ number_format($summary['salary'] ?? 0, 2) }}</h4>
-                    </div>
-                    <i class="bx bx-money card-icon"></i>
-                </div>
-            </div>
-            <div class="card-col">
-                <div class="expense-card bonus">
-                    <div class="card-info">
-                        <span class="card-label">{{ __('staff_expense.summary.bonus_rewards') }}</span>
-                        <h4 class="card-value">${{ number_format($summary['bonus'] ?? 0, 2) }}</h4>
-                    </div>
-                    <i class="bx bx-gift card-icon"></i>
-                </div>
-            </div>
-            <div class="card-col">
-                <div class="expense-card deduction">
-                    <div class="card-info">
-                        <span class="card-label">{{ __('staff_expense.summary.deductions') }}</span>
-                        <h4 class="card-value">${{ number_format($summary['deduction'] ?? 0, 2) }}</h4>
-                    </div>
-                    <i class="bx bx-minus-circle card-icon"></i>
-                </div>
-            </div>
-            <div class="card-col">
-                <div class="expense-card net-total">
-                    <div class="card-info">
-                        <span class="card-label">{{ __('staff_expense.summary.net_total_expense') }}</span>
-                        <h4 class="card-value">${{ number_format($summary['netTotal'] ?? 0, 2) }}</h4>
-                    </div>
-                    <i class="bx bx-calculator card-icon"></i>
-                </div>
-            </div>
-        </div>
-
         @component('admin::components.listingData', [
             'routeName' => $routeName,
             'createName' => __('staff_expense.button.record_expense'),

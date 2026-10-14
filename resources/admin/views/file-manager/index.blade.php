@@ -1,63 +1,25 @@
-@extends('admin::index')
-@section('index')
-    <template x-data="{}" x-if="$store.page.active == 'all_files'">
-        @include('admin::file-manager.all_files')
-    </template>
-    <template x-data="{}" x-if="$store.page.active == 'trash_bin'">
-        @include('admin::file-manager.trash_bin')
-    </template>
-    <template x-data="{}" x-if="$store.page.active == 'settings'">
-        @include('admin::file-manager.settings')
-    </template>
-    @include('admin::file-manager.scripts')
-    <script>
-        Alpine.store('page', {
-            active: 'all_files',
-            full_page: true,
-            options: {
-                multiple: {{ request('multiple') ?? 'false' }},
-                returnUrl: `{{ request('returnUrl') ?? null }}`,
-                afterClose: (data, base_url) => {
-                    const returnUrl = Alpine.store('page').options.returnUrl;
-                    if (returnUrl) {
-                        const files = JSON.stringify({
-                            data: data,
-                            base_url: base_url
-                        });
-                        window.location.href = returnUrl + '?data=' + files;
-                    }
-                },
-            },
-        });
-        Alpine.store('animate', {
-            enter: (target, fn) => {
-                if (!target) return;
-                anime({
-                    targets: target, //this.$root.children[0]
-                    scale: [0.9, 1],
-                    opacity: [0, 1],
-                    direction: 'forwards',
-                    easing: 'easeInSine',
-                    duration: 200,
-                    complete: (res) => {
-                        fn ? fn(res) : null;
-                    },
-                });
-            },
-            leave: (target, fn) => {
-                if (!target) return;
-                anime({
-                    targets: target,
-                    scale: [1, 0.9],
-                    opacity: [1, 0],
-                    direction: 'forwards',
-                    easing: 'easeOutSine',
-                    duration: 200,
-                    complete: (res) => {
-                        fn ? fn(res) : null;
-                    },
-                });
-            }
-        })  ;
-    </script>
-@stop
+@extends('admin::shared.layout')
+@section('layout')
+    @include('admin::shared.header', ['header_name' => __('file-manager.title')])
+    <div class="content-wrapper">
+        <div class="content-body file-manager-page" x-data="fileManagerPage">
+            @include('admin::file-manager.content')
+        </div>
+    </div>
+
+    <style>
+        /* Fit the existing file browser inside the standard workspace content area. */
+        .file-manager-page .file-manager-wrapper.full-page {
+            width: 100%;
+            min-width: 800px;
+            height: calc(100vh - 45px);
+            min-height: 500px;
+            max-height: none;
+        }
+
+        .file-manager-page .file-manager-body {
+            flex: 1;
+            min-height: 0;
+        }
+    </style>
+@endsection

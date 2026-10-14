@@ -73,7 +73,6 @@ class StaffExpenseController extends Controller
         }
 
         $data['data']      = $query->orderBy('expense_date', 'desc')->orderBy('id', 'desc')->paginate(50);
-        $data['summary']   = $this->expenseService->calculateSummary($filters, $onlyTrashed);
         $data['staffList'] = Staff::where('status', 1)->orderBy('name')->get();
         $data['shops']     = Shop::where('status', 1)->orderBy('name')->get();
         $data['types']     = ExpenseType::cases();

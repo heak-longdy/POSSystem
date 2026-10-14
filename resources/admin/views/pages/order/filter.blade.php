@@ -14,6 +14,7 @@
             this.showAdvancedFilter = !this.showAdvancedFilter;
             if (this.showAdvancedFilter) {
                 this.$nextTick(() => {
+                    this.fetchSelectShop();
                     if (typeof initOrderDatepickers === 'function') initOrderDatepickers();
                 });
             }
@@ -59,10 +60,10 @@
 
         <div class="filter-popover-body">
             {{-- Shop Selection (Standard Select2) --}}
-            <div class="filter-field-group">
-                <label for="shop_id">{{ __('order.table.shop') }}</label>
+            <div class="filter-field-group" x-id="['order-filter-shop']">
+                <label :for="$id('order-filter-shop')">{{ __('order.table.shop') }}</label>
                 <div class="select2Group">
-                    <select name="shop_id" id="shop_id" class="SelectField select2" x-init="fetchSelectShop()">
+                    <select name="shop_id" :id="$id('order-filter-shop')" class="SelectField select2">
                         <option value="">{{ __('order.select_shop') }}</option>
                     </select>
                     <div class="select2Reset" x-show="formData.shop_id" @click.stop="resetShopField()" style="display: none;">

@@ -553,7 +553,7 @@
         });
     </script>
     <script>
-        const registerOrderListingAlpine = () => {
+        function registerOrderListingAlpine() {
             if (typeof Alpine === 'undefined') return;
             Alpine.data('xIndex', () => ({
                 exportLoading: false,
@@ -566,21 +566,15 @@
                     search: @json(request('search')),
                 },
                 init() {
-                    const shop = @json($shop);
-
-                    if (shop?.id) {
-                        $select2Data('#shop_id', shop.id, shop.name || shop.phone);
-                        this.formData.shop_id = shop.id;
-                    }
-
                     this.$nextTick(() => {
+                        this.fetchSelectShop();
                         initOrderDatepickers();
                     });
                 },
                 fetchSelectShop() {
                     const self = this;
-                    const $select = $('#shop_id');
-                    if (!$select.length) return;
+                    const $select = $(this.$root).find('select[name="shop_id"]');
+                    if (!$select.length || $select.data('select2')) return;
 
                     $select.select2({
                         placeholder: '{{ __('order.select_shop') }}',
@@ -608,9 +602,15 @@
                     }).on('change select2:select select2:clear select2:unselect', function () {
                         self.formData.shop_id = $(this).val();
                     });
+
+                    const shop = @json($shop);
+                    if (shop?.id) {
+                        $select2Data($select, shop.id, shop.name || shop.phone);
+                        this.formData.shop_id = shop.id;
+                    }
                 },
                 resetShopField() {
-                    $('#shop_id').val(null).trigger('change');
+                    $(this.$root).find('select[name="shop_id"]').val(null).trigger('change');
                     this.formData.shop_id = null;
                 },
                 resetAdvancedFilters() {
@@ -810,7 +810,7 @@
                     return value;
                 },
             }));
-        };
+        }
 
         if (window.Alpine) {
             registerOrderListingAlpine();

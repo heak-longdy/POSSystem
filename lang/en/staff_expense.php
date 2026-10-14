@@ -9,7 +9,6 @@ return [
         'base_salary' => 'Base Salary',
         'bonus_rewards' => 'Bonuses / Rewards',
         'deductions' => 'Deductions',
-        'net_total_expense' => 'Net Total Expense',
         'net_total_payable' => 'Net Total Payable',
     ],
 

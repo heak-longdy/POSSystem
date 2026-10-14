@@ -3,11 +3,123 @@
         if (window.__FILE_MANAGER_SCRIPTS_LOADED__) return;
         window.__FILE_MANAGER_SCRIPTS_LOADED__ = true;
 
+        // Some forms include the shared picker before their parent layout renders it.
+        // Keep that singleton outside tab panes so hiding/closing a form cannot hide/remove it.
+        const popup = document.getElementById('file-manager-popup-container');
+        const viewport = document.getElementById('workspace-viewport');
+        if (popup && viewport?.contains(popup)) {
+            viewport.before(popup);
+        }
+
         if (window.moment) {
             moment.locale('{{ App::currentLocale() }}');
         }
 
         if (window.Alpine) {
+            // Coalesce icon updates after Alpine renders, and only visit this file manager.
+            const pendingIconUpdates = new WeakSet();
+            const reloadFileManagerIcons = (component) => {
+                const root = component.$root;
+                if (!root?.isConnected || pendingIconUpdates.has(root)) return;
+                pendingIconUpdates.add(root);
+                component.$nextTick(() => {
+                    pendingIconUpdates.delete(root);
+                    if (!root.isConnected || !window.feather?.icons) return;
+                    root.querySelectorAll('i[data-feather]').forEach((element) => {
+                        const icon = feather.icons[element.dataset.feather];
+                        if (!icon) return;
+                        const attributes = Object.fromEntries(
+                            Array.from(element.attributes, ({ name, value }) => [name, value])
+                        );
+                        const template = document.createElement('template');
+                        template.innerHTML = icon.toSvg(attributes);
+                        element.replaceWith(template.content.firstElementChild);
+                    });
+                });
+            };
+
+            const closeFileManager = (component, files = false, basePath) => {
+                if (component.fileManagerState.full_page) return;
+                component.$dispatch('file-manager-close', { files, basePath });
+            };
+
+            // Each workspace page owns its navigation state; the form picker keeps its store.
+            Alpine.data('fileManagerPage', () => ({
+                fileManagerState: {
+                    active: 'all_files',
+                    full_page: true,
+                    options: { multiple: true }
+                }
+            }));
+
+            Alpine.data('fileManagerPopup', () => {
+                let animations = [];
+                let closing = false;
+
+                return {
+                    get fileManagerState() {
+                        return Alpine.store('page');
+                    },
+                    init() {
+                        this.$nextTick(() => {
+                            if (!closing && this.$root.isConnected) this.animatePopup(true);
+                        });
+                    },
+                    animatePopup(entering, complete = () => {}) {
+                        const overlay = this.$root;
+                        const panel = this.$refs.panel;
+                        // Capture the current frame so closing during entry never jumps.
+                        const opacity = getComputedStyle(overlay).opacity;
+                        const transform = getComputedStyle(panel).transform;
+                        animations.forEach(animation => animation.cancel());
+                        animations = [];
+                        overlay.style.opacity = entering ? '1' : '0';
+
+                        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !panel.animate) {
+                            complete();
+                            return;
+                        }
+
+                        const timing = {
+                            duration: entering ? 180 : 120,
+                            easing: entering ? 'cubic-bezier(0.2, 0, 0, 1)' : 'cubic-bezier(0.4, 0, 1, 1)',
+                            fill: 'both'
+                        };
+                        animations = [
+                            overlay.animate([{ opacity }, { opacity: entering ? 1 : 0 }], timing),
+                            panel.animate([
+                                { transform: entering ? 'translateY(8px) scale(0.985)' : transform },
+                                { transform: entering ? 'none' : 'translateY(4px) scale(0.985)' }
+                            ], timing)
+                        ];
+                        const currentAnimations = animations;
+                        Promise.all(currentAnimations.map(animation => animation.finished)).then(() => {
+                            if (animations !== currentAnimations) return;
+                            currentAnimations.forEach(animation => animation.cancel());
+                            animations = [];
+                            complete();
+                        }, () => {}); // A close or unmount can cancel the entry animation.
+                    },
+                    closePopup({ files = false, basePath } = {}) {
+                        if (closing) return;
+                        closing = true;
+                        const pageStore = Alpine.store('page');
+                        const afterClose = pageStore.options?.afterClose;
+                        this.animatePopup(false, () => {
+                            pageStore.active = false;
+                            // Unmount before calling back, so another picker can open immediately.
+                            this.$nextTick(() => {
+                                if (typeof afterClose === 'function') afterClose(files, basePath);
+                            });
+                        });
+                    },
+                    destroy() {
+                        animations.forEach(animation => animation.cancel());
+                        animations = [];
+                    }
+                };
+            });
+
             Alpine.store('page', {
                 active: false,
                 full_page: false,
@@ -89,7 +201,7 @@
                     multiple: false,
                 },
                 init() {
-                    const storeOptions = Alpine.store('page')?.options;
+                    const storeOptions = this.fileManagerState.options;
                     this.options.multiple = storeOptions ? !!storeOptions.multiple : false;
                     this.reloadIcon();
                     this.firstPage();
@@ -210,32 +322,10 @@
                     this.reloadIcon();
                 },
                 onClose() {
-                    Alpine.store('animate')?.leave(".dialog-container", (res) => {
-                        const pageStore = Alpine.store('page');
-                        if (pageStore) {
-                            pageStore.active = false;
-                            if (typeof pageStore.options?.afterClose === 'function') {
-                                pageStore.options.afterClose(false);
-                            }
-                        }
-                        this.selected_file = [];
-                        this.dataFolders = [];
-                        this.lastScrollTarget = 0;
-                    });
+                    closeFileManager(this);
                 },
                 onChooseFiles() {
-                    Alpine.store('animate')?.leave(".dialog-container", (res) => {
-                        const pageStore = Alpine.store('page');
-                        if (pageStore) {
-                            pageStore.active = false;
-                            if (typeof pageStore.options?.afterClose === 'function') {
-                                pageStore.options.afterClose(this.selected_file, this.base_path);
-                            }
-                        }
-                        this.selected_file = [];
-                        this.dataFolders = [];
-                        this.lastScrollTarget = 0;
-                    });
+                    closeFileManager(this, this.selected_file, this.base_path);
                 },
                 onSelectFiles(file) {
                     if (this.options.multiple) {
@@ -339,12 +429,7 @@
                     return this.selected_file.findIndex(item => item.id == file.id) + 1;
                 },
                 reloadIcon() {
-                    if (window.feather && typeof window.feather.replace === 'function') {
-                        feather.replace();
-                        setTimeout(() => {
-                            if (window.feather) feather.replace();
-                        }, 50);
-                    }
+                    reloadFileManagerIcons(this);
                 },
                 dialog: {
                     rootData: null,
@@ -548,18 +633,7 @@
                     this.reloadIcon();
                 },
                 onClose() {
-                    Alpine.store('animate')?.leave(".dialog-container", (res) => {
-                        const pageStore = Alpine.store('page');
-                        if (pageStore) {
-                            pageStore.active = false;
-                            if (typeof pageStore.options?.afterClose === 'function') {
-                                pageStore.options.afterClose(false);
-                            }
-                        }
-                        this.selected_files = [];
-                        this.dataFolders = [];
-                        this.lastScrollTarget = 0;
-                    });
+                    closeFileManager(this);
                 },
                 restoreBySelected() {
                     this.dialog.open('confirmRestoreDialog');
@@ -660,12 +734,7 @@
                     return this.selected_files.findIndex(item => item.id == file.id) + 1;
                 },
                 reloadIcon() {
-                    if (window.feather && typeof window.feather.replace === 'function') {
-                        feather.replace();
-                        setTimeout(() => {
-                            if (window.feather) feather.replace();
-                        }, 50);
-                    }
+                    reloadFileManagerIcons(this);
                 },
                 dialog: {
                     rootData: null,
@@ -706,23 +775,10 @@
                     this.reloadIcon();
                 },
                 reloadIcon() {
-                    if (window.feather && typeof window.feather.replace === 'function') {
-                        feather.replace();
-                        setTimeout(() => {
-                            if (window.feather) feather.replace();
-                        }, 50);
-                    }
+                    reloadFileManagerIcons(this);
                 },
                 onClose() {
-                    Alpine.store('animate')?.leave(".dialog-container", (res) => {
-                        const pageStore = Alpine.store('page');
-                        if (pageStore) {
-                            pageStore.active = false;
-                            if (typeof pageStore.options?.afterClose === 'function') {
-                                pageStore.options.afterClose(false);
-                            }
-                        }
-                    });
+                    closeFileManager(this);
                 },
             }));
 
@@ -1051,19 +1107,11 @@
         // Global trigger function for opening File Manager
         window.fileManager = (options) => {
             if (window.Alpine) {
-                Alpine.store('page', {
-                    active: 'all_files',
-                    full_page: false,
-                    options: options || {}
-                });
-                setTimeout(() => {
-                    Alpine.store('animate')?.enter(".dialog-container", (res) => {
-                        res?.animatables?.[0]?.target?.removeAttribute('style');
-                    });
-                    if (window.feather && typeof window.feather.replace === 'function') {
-                        feather.replace();
-                    }
-                }, 50);
+                const pageStore = Alpine.store('page');
+                if (pageStore.active && !pageStore.full_page) return;
+                pageStore.options = options || {};
+                pageStore.full_page = false;
+                pageStore.active = 'all_files';
             }
         };
     })();

@@ -69,7 +69,7 @@ Route::middleware(['AdminGuard'])
     ->group(function () {
         Route::get('/', function () {
             return redirect()->route('admin-dashboard');
-        });
+        })->name('home');
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -208,7 +208,7 @@ Route::middleware(['AdminGuard'])
             'as'     => 'select-'
         ], function () {
 
-            Route::get('product', [Admin\SelectController::class, 'selectProduct'])->name('product');
+            Route::get('product', [Admin\SelectController::class, 'selectProduct'])->name('product-by-shop');
             Route::get('customer', [Admin\SelectController::class, 'selectCustomer'])->name('customer');
             Route::get('supplier', [Admin\SelectController::class, 'selectSupplier'])->name('supplier');
 
@@ -420,8 +420,8 @@ Route::get('clear-cache-s', function () {
     Artisan::call('cache:clear');
     Artisan::call('config:clear');
     return "Cache is cleared";
-});
+})->name('clear-cache-s');
 Route::get('clear-cache', function () {
     Artisan::call('optimize:clear');
     return "Cache is cleared";
-});
+})->name('clear-cache');
