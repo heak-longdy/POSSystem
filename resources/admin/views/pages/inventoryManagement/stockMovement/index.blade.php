@@ -8,10 +8,18 @@
             'filterStatus' => false,
             // 'filterView' => 'admin::pages.inventoryManagement.partials.stock-movement-filter',
             'filterData' => ['shop' => $shop],
-            'showTabs' => false,
+            'showTabs' => true,
+            'tabs' => [
+                [
+                    'label' => __('global.tab.all'),
+                    'icon' => 'bx bx-data',
+                    'url' => route('admin-' . $routeName . '-list', 1),
+                    'active' => true,
+                ],
+            ],
             'showCreate' => false,
             'exportAction' => auth()->user()->can('stock-movement-excel') ? 'excel()' : null,
-            'exportLabel' => __('stock_movement.button.excel'),
+            'exportLabel' => __('global.button.export'),
             'data' => $data,
             'status' => $status,
             'tbHeader' => [

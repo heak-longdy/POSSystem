@@ -48,7 +48,7 @@
                     </form>
                     <button type="button" @click="excel()" class="btnExcel">
                         <i class="material-symbols-outlined">upgrade</i>
-                        <span>Excel</span>
+                        <span>{{ __('global.button.export') }}</span>
                     </button>
                     <button s-click-link="{!! url()->current() !!}">
                         <i data-feather="refresh-ccw"></i>

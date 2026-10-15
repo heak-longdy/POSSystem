@@ -63,7 +63,7 @@ return [
 
     'table' => [
         'no' => 'ល.រ',
-        'order_id' => 'លេខកូដបញ្ជាទិញ',
+        'order_id' => 'លេខកូដ',
         'shop' => 'ហាង',
         'barber' => 'ជាងកាត់សក់',
         'customer' => 'អតិថិជន',
@@ -75,7 +75,7 @@ return [
         'remaining' => 'នៅសល់',
         'discount' => 'បញ្ចុះតម្លៃ',
         'commission' => 'កម្រៃជើងសារ',
-        'order_date' => 'កាលបរិច្ឆេទបញ្ជាទិញ',
+        'order_date' => 'កាលបរិច្ឆេទ',
         'total_price' => 'តម្លៃសរុប $',
         'product' => 'ផលិតផល',
         'item' => 'ទំនិញ',
@@ -223,7 +223,7 @@ return [
 
     'button' => [
         'create' => 'បង្កើតការបញ្ជាទិញ',
-        'excel' => 'Excel',
+        'excel' => 'នាំចេញ Excel',
         'add_to_cart' => 'បន្ថែមទៅកន្ត្រក',
         'added_to_cart' => 'បានបន្ថែមទៅកន្ត្រក',
         'in_cart' => 'ក្នុងកន្ត្រក',

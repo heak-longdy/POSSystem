@@ -10,6 +10,7 @@
     'filterData' => $filterData ?? [],
     'showCreate' => $showCreate ?? true,
     'showSearch' => $showSearch ?? true,
+    'showSearchButton' => $showSearchButton ?? true,
     'showTabs' => $showTabs ?? true,
     'createPermission' => $createPermission ?? null,
     'tabs' => $tabs ?? null,

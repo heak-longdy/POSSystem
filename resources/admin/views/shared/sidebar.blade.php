@@ -24,6 +24,7 @@
             </div>
         </a>
     </li>
+    <?php $showTitleNum = 35 ?>
     @foreach (config('menu') as $key => $item)
         {{-- @foreach (Menu::menuList() as $key => $item) --}}
         @if (isset($item['type']) && $item['type'] == 'dropdown-multiple')
@@ -46,7 +47,7 @@
                                 {{-- <i class='bx bx-detail icon'></i> --}}
                                 {{-- <i class='bx bx-align-right icon'></i> --}}
                                 {{-- <i class='bx bx-right-indent icon'></i> --}}
-                                {!! Str::limit(\App\Support\Language::translatedValue($itemListMenu['name']), 25, ' ...') !!}
+                                {!! Str::limit(\App\Support\Language::translatedValue($itemListMenu['name']), $showTitleNum, ' ...') !!}
                                 @if (!isset($itemListMenu['dropDown']) || $itemListMenu['dropDown'] != 'disable')
                                     <i class='bx bx-chevron-right icon-right'></i>
                                 @endif
@@ -61,7 +62,7 @@
                                                     class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                                     <i
                                                         class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
-                                                    {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 25, ' ...') !!}
+                                                    {!! Str::limit(\App\Support\Language::translatedValue($child['name']), $showTitleNum, ' ...') !!}
                                                 </a>
                                             </li>
                                         @endforeach
@@ -98,7 +99,7 @@
                                             class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                             <i
                                                 class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
-                                            {!! Str::limit(\App\Support\Language::translatedValue($child['name']), 25, ' ...') !!}
+                                            {!! Str::limit(\App\Support\Language::translatedValue($child['name']), $showTitleNum, ' ...') !!}
                                         </a>
                                     </li>
                                 @endforeach
@@ -111,7 +112,7 @@
             <li class="li">
                 <a data-url="{!! url($item['path']) !!}" role="link" tabindex="0" class="{{ routeActive($item['active']) ? 'active' : '' }}">
                     <i class='bx {{ isset($item['icon']) && $item['icon'] ? $item['icon'] : 'bxs-wrench' }} icon'></i>
-                    {!! Str::limit(\App\Support\Language::translatedValue($item['name']), 25, ' ...') !!}
+                    {!! Str::limit(\App\Support\Language::translatedValue($item['name']), $showTitleNum, ' ...') !!}
                 </a>
             </li>
         @endif
@@ -134,7 +135,6 @@
             open: false,
 
             infoProfile() {
-                console.log('object');
                 this.$store.confirmDialogInfoProfile.open({
                     data: {
                         message: `Are you sure want to ?`,

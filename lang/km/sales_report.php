@@ -28,6 +28,8 @@ return [
         'all_shops' => 'ហាងទាំងអស់',
         'staff' => 'បុគ្គលិក / ជាង',
         'all_staff' => 'បុគ្គលិកទាំងអស់',
+        'customer' => 'អតិថិជន',
+        'all_customers' => 'អតិថិជនទាំងអស់',
         'payment_status' => 'ស្ថានភាពទូទាត់',
         'status_active_exclude_cancel' => 'សកម្ម (មិនរាប់បញ្ចូលការបោះបង់)',
         'status_all' => 'ស្ថានភាពទាំងអស់',

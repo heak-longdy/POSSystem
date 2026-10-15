@@ -97,7 +97,7 @@ return [
         'reset'              => 'កំណត់ឡើងវិញ',
         'createPosition'     => 'បង្កើតតួនាទី',
         'createSlide'        => 'បង្កើតស្លាយ',
-        'excel'              => 'Excel',
+        'excel'              => 'នាំចេញ Excel',
     ],
 
     // Tabs
@@ -156,6 +156,7 @@ return [
         'delete_success'     => 'លុបបានជោគជ័យ!',
         'restore_success'    => 'ស្តារឡើងវិញបានជោគជ័យ!',
         'save_success'       => 'រក្សាទុកបានជោគជ័យ!',
+        'exporting_excel'    => 'កំពុងនាំចេញ Excel...',
     ],
 
     // Validations

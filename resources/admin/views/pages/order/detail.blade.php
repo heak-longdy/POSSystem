@@ -7,7 +7,7 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('order.detail.title')])
 
-    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper order-detail-scroll order-details-refresh" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate + ' print-lang-' + printLanguage" x-cloak>
+    <div class="content-wrapper order-detail-wrapper booking-detail-wrapper order-details-refresh" id="bookingDetailApp" x-data="xOrderDetail()" :class="'printing-' + activePrintTemplate + ' print-lang-' + printLanguage" x-cloak>
         <div class="content-body" id="bookingDetailContentBody">
             <div class="booking-detail-page-wrapper">
                 <!-- Top Navigation / Breadcrumb -->
@@ -575,52 +575,30 @@
 
 @section('script')
     <style>
-        @media screen {
-            /* Constrain only the active Order Details tab to its own scroll area. */
-            #content:has(.workspace-tab-pane.active .order-detail-scroll) {
-                display: flex !important;
-                flex-direction: column !important;
-                height: 100vh !important;
-                max-height: 100vh !important;
-                overflow: hidden !important;
-            }
-
-            /* Let both flex ancestors shrink so the content body can overflow and scroll. */
-            #workspace-viewport:has(.workspace-tab-pane.active .order-detail-scroll),
-            .workspace-tab-pane.active:has(.order-detail-scroll) {
-                min-height: 0;
-            }
-
-            .workspace-tab-pane:has(.order-detail-scroll) .header {
-                flex-shrink: 0 !important;
-                width: 100% !important;
-            }
-        }
-
         .content-wrapper.booking-detail-wrapper {
             flex: 1 1 auto !important;
-            min-height: 0 !important;
-            height: auto !important;
-            max-height: 100% !important;
             width: 100% !important;
+            height: auto !important;
+            min-height: auto !important;
+            max-height: none !important;
             display: flex !important;
             flex-direction: column !important;
             position: relative !important;
-            overflow: hidden !important;
+            overflow: visible !important;
             margin: 0 !important;
             padding: 0 !important;
         }
 
         .booking-detail-wrapper .content-body {
             flex: 1 1 auto !important;
-            min-height: 0 !important;
-            height: 100% !important;
             width: 100% !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
+            height: auto !important;
+            min-height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            overflow-x: visible !important;
+            overflow-y: visible !important;
             padding: 0 !important;
-            scroll-behavior: smooth !important;
-            -webkit-overflow-scrolling: touch;
         }
 
         /* Scoped Detail Page Styling using System Tokens */
@@ -2322,32 +2300,6 @@
                             feather.replace();
                         }
                     });
-
-                    // Follow system setup: bind scroll to #content .content-body and #jsScroll
-                    const contentBody = document.querySelector("#content .content-body");
-                    const contentHeader = document.querySelector("#content");
-                    const headerEl = document.querySelector("#content .header");
-                    const jsScroll = document.getElementById("jsScroll");
-
-                    if (contentBody) {
-                        contentBody.addEventListener("scroll", function () {
-                            const st = contentBody.scrollTop;
-                            if (st > 10) {
-                                contentHeader?.classList.add("isScrolled");
-                                headerEl?.classList.add("isScrolled");
-                            } else {
-                                contentHeader?.classList.remove("isScrolled");
-                                headerEl?.classList.remove("isScrolled");
-                            }
-                        }, { passive: true });
-
-                        jsScroll?.addEventListener("click", function () {
-                            contentBody.scrollTo({
-                                top: 0,
-                                behavior: "smooth"
-                            });
-                        });
-                    }
                 },
                 setPrintLanguage(lang) {
                     this.printLanguage = lang;

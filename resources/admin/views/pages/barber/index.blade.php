@@ -26,7 +26,7 @@
                         </button>
                         <button type="button" @click="excel()" class="btnExcel">
                             <i class="material-symbols-outlined">upgrade</i>
-                            <span>Excel</span>
+                            <span>{{ __('global.button.export') }}</span>
                         </button>
                     </form>
                     @can('barber-create')
@@ -104,7 +104,7 @@
                     </form>
                     <button type="button" @click="excel()" class="btnExcel">
                         <i class="material-symbols-outlined">upgrade</i>
-                        <span>Excel</span>
+                        <span>{{ __('global.button.export') }}</span>
                     </button>
                     {{-- <button s-click-link="{!! url()->current() !!}">
                         <i data-feather="refresh-ccw"></i>
@@ -120,7 +120,7 @@
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
                     <span id="spinner"></span>
-                    <label>Export excel ...</label>
+                    <label>{{ __('global.message.exporting_excel') }}</label>
                 </div>
             </div>
         </template>

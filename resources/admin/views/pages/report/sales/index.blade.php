@@ -89,6 +89,11 @@
             margin-bottom: 14px;
         }
 
+        .sales-report-wrapper .report-filter-panel,
+        .sales-report-wrapper .report-filter-panel .preset-btn {
+            border-radius: 7px;
+        }
+
         .filter-header-row {
             display: flex;
             align-items: center;
@@ -198,15 +203,16 @@
             align-items: center;
             gap: 8px;
             height: 43px;
+            width: fit-content;
         }
 
         .btn-filter-search {
             height: 43px;
-            padding: 0 16px;
+            padding: 0 16px !important;
             background: #2563eb;
             color: #ffffff;
-            border: none;
-            border-radius: 7px;
+            border: none !important;
+            border-radius: 7px !important;
             font-size: 12.5px;
             font-weight: 600;
             display: inline-flex;
@@ -235,6 +241,7 @@
             cursor: pointer;
             text-decoration: none;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
         .btn-filter-reset:hover {
@@ -701,7 +708,7 @@
                 <div class="header-action-button">
                     <button type="button" @click="exportExcel()" class="btn-excel-export" :disabled="exportLoading">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M252.31-180Q222-180 201-201q-21-21-21-51.31v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46q0 4.62 3.85 8.46 3.84 3.85 8.46 3.85h455.38q4.62 0 8.46-3.85 3.85-3.84 3.85-8.46v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46Q780-222 759-201q-21 21-51.31 21H252.31ZM450-664.46l-76.92 76.92q-8.93 8.92-21.19 8.81-12.27-.12-21.58-9.43-8.69-9.3-9-21.07-.31-11.77 9-21.08l124.38-124.38q5.62-5.62 11.85-7.92 6.23-2.31 13.46-2.31t13.46 2.31q6.23 2.3 11.85 7.92l124.38 124.38q8.92 8.92 8.81 20.89-.12 11.96-8.81 21.26-9.31 9.31-21.38 9.62-12.08.31-21.39-9L510-664.46v306q0 12.77-8.62 21.38-8.61 8.62-21.38 8.62t-21.38-8.62q-8.62-8.61-8.62-21.38v-306Z"/></svg>
-                        <span x-text="exportLoading ? '{{ __('sales_report.excel.exporting') }}' : '{{ __('sales_report.button.export_excel') }}'">{{ __('sales_report.button.export_excel') }}</span>
+                        <span x-text="exportLoading ? '{{ __('sales_report.excel.exporting') }}' : '{{ __('global.button.export') }}'">{{ __('global.button.export') }}</span>
                     </button>
                     <button type="button" s-click-link="{!! url()->current() !!}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -811,17 +818,17 @@
                         </div>
 
                         <div class="filter-field-wrap">
-                            <label for="barber_id">{{ __('sales_report.filter.staff') }}</label>
+                            <label for="sales-customer-id">{{ __('sales_report.filter.customer') }}</label>
                             <div class="select2Group">
-                                <select name="barber_id" id="barber_id" class="SelectField select2">
-                                    <option value="">{{ __('sales_report.filter.all_staff') }}</option>
-                                    @foreach ($barbers as $barber)
-                                        <option value="{{ $barber->id }}" {{ request('barber_id') == $barber->id ? 'selected' : '' }}>
-                                            {{ $barber->name }}
+                                <select name="customer_id" id="sales-customer-id" class="SelectField select2">
+                                    <option value="">{{ __('sales_report.filter.all_customers') }}</option>
+                                    @foreach ($customers as $customer)
+                                        <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                            {{ $customer->name }}@if ($customer->phone) ({{ $customer->phone }})@endif
                                         </option>
                                     @endforeach
                                 </select>
-                                <div class="select2Reset" x-show="filterValues.barber_id" @click.stop="resetFilter('barber_id')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
+                                <div class="select2Reset" x-show="filterValues.customer_id" @click.stop="resetFilter('customer_id')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                         <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
                                     </svg>
@@ -865,22 +872,6 @@
                                     @endforeach
                                 </select>
                                 <div class="select2Reset" x-show="filterValues.pay_way" @click.stop="resetFilter('pay_way')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                                        <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="filter-field-wrap">
-                            <label for="item_type">{{ __('sales_report.filter.item_type') }}</label>
-                            <div class="select2Group">
-                                <select name="item_type" id="item_type" class="SelectField select2">
-                                    <option value="">{{ __('sales_report.filter.all_items') }}</option>
-                                    <option value="product" {{ request('item_type') === 'product' ? 'selected' : '' }}>{{ __('sales_report.filter.products_only') }}</option>
-                                    <option value="service" {{ request('item_type') === 'service' ? 'selected' : '' }}>{{ __('sales_report.filter.services_only') }}</option>
-                                </select>
-                                <div class="select2Reset" x-show="filterValues.item_type" @click.stop="resetFilter('item_type')" title="{{ __('sales_report.button.reset') }}" style="display: none;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                         <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
                                     </svg>

@@ -60,10 +60,8 @@ class StaffExpenseReportController extends Controller
 
         if ($grouping === 'grouped') {
             $rows = $this->aggregateDailyExpenses(clone $baseQuery);
-            $chartRows = $rows;
         } else {
             $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
-            $chartRows = $this->aggregateDailyExpenses(clone $baseQuery);
         }
 
         $filterOptions = $this->getFilterOptions();
@@ -77,7 +75,6 @@ class StaffExpenseReportController extends Controller
             'filters'       => $appliedFilters,
             'summary'       => $summary,
             'rows'          => $rows,
-            'chartRows'     => $chartRows,
             'ungroupedRows' => $ungroupedRows,
             'staffList'     => $filterOptions['staffList'],
             'shops'         => $filterOptions['shops'],
@@ -104,10 +101,8 @@ class StaffExpenseReportController extends Controller
 
         if ($grouping === 'grouped') {
             $rows = $this->aggregateMonthlyExpenses(clone $baseQuery);
-            $chartRows = $rows;
         } else {
             $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
-            $chartRows = $this->aggregateMonthlyExpenses(clone $baseQuery);
         }
 
         $filterOptions = $this->getFilterOptions();
@@ -124,7 +119,6 @@ class StaffExpenseReportController extends Controller
             'filters'        => $appliedFilters,
             'summary'        => $summary,
             'rows'           => $rows,
-            'chartRows'      => $chartRows,
             'ungroupedRows'  => $ungroupedRows,
             'staffList'      => $filterOptions['staffList'],
             'shops'          => $filterOptions['shops'],
@@ -134,7 +128,7 @@ class StaffExpenseReportController extends Controller
     }
 
     /**
-     * API / JSON endpoint for export and dynamic charts
+     * API / JSON endpoint for export
      */
     public function report(Request $req)
     {

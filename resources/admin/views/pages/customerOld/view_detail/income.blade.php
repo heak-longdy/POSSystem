@@ -36,7 +36,7 @@
                         <button type="submit" class="btn-create bg-success" @click="check = 'excel_export'"
                             :disabled="checkData">
                             <i data-feather="arrow-down-circle"></i>
-                            <span>Excel</span>
+                            <span>{{ __('global.button.export') }}</span>
                         </button>
 
                         <button class="btn-create bg-primary" id="btn_pdf" @click="check = 'pdf_export'"

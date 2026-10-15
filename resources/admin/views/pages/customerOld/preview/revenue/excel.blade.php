@@ -122,7 +122,7 @@
                         <button type="button" id="table_to_excel" class="btn-create excel-btn"
                             onclick="htmlTableToExcel('xlsx')">
                             <i data-feather="download"></i>
-                            <span>Save</span>
+                            <span>{{ __('global.button.export') }}</span>
                         </button>
 
 
@@ -130,7 +130,7 @@
                         {{-- 
                     <button type="button" class="btn-create excel-btn"  s-click-link="{!!route('admin-customer-export_excel')!!}">
                         <i data-feather="download"></i>
-                        <span>Save</span>
+                        <span>{{ __('global.button.export') }}</span>
                     </button> --}}
 
                     </div>

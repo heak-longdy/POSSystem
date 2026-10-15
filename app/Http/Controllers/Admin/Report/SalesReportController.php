@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin\Report;
 
 use App\Http\Controllers\Controller;
-use App\Models\Barber;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderDetail;
@@ -79,7 +78,7 @@ class SalesReportController extends Controller
             'rows' => $rows,
             'ungroupedRows' => $ungroupedRows,
             'shops' => $filterOptions['shops'],
-            'barbers' => $filterOptions['barbers'],
+            'customers' => $filterOptions['customers'],
             'paymentMethods' => $filterOptions['paymentMethods'],
             'paymentStatuses' => $filterOptions['paymentStatuses'],
         ]);
@@ -115,7 +114,7 @@ class SalesReportController extends Controller
             'rows' => $rows,
             'ungroupedRows' => null,
             'shops' => $filterOptions['shops'],
-            'barbers' => $filterOptions['barbers'],
+            'customers' => $filterOptions['customers'],
             'paymentMethods' => $filterOptions['paymentMethods'],
             'paymentStatuses' => $filterOptions['paymentStatuses'],
             'availableYears' => $this->getAvailableYears(),
@@ -791,14 +790,14 @@ class SalesReportController extends Controller
     private function getFilterOptions()
     {
         $shops = Shop::where('status', 1)->orderBy('name', 'asc')->get(['id', 'name']);
-        $barbers = Barber::where('status', 1)->orderBy('name', 'asc')->get(['id', 'name']);
+        $customers = Customer::orderBy('name', 'asc')->get(['id', 'name', 'phone']);
 
         $paymentMethods = ['Cash', 'ABA PAY', 'KHQR', 'Credit Card', 'Bank Transfer'];
         $paymentStatuses = ['Paid', 'Partial', 'Pending', 'Cancel'];
 
         return [
             'shops' => $shops,
-            'barbers' => $barbers,
+            'customers' => $customers,
             'paymentMethods' => $paymentMethods,
             'paymentStatuses' => $paymentStatuses,
         ];

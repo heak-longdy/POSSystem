@@ -199,6 +199,7 @@
             align-items: center;
             gap: 8px;
             height: 43px;
+            width: fit-content;
         }
 
         .btn-filter-search {
@@ -207,7 +208,7 @@
             background: #2563eb;
             color: #ffffff;
             border: none;
-            border-radius: 7px;
+            border-radius: 7px !important;
             font-size: 12.5px;
             font-weight: 600;
             display: inline-flex;
@@ -235,43 +236,12 @@
             gap: 4px;
             text-decoration: none;
             transition: background 0.15s ease;
+            white-space: nowrap;
         }
 
         .btn-filter-reset:hover {
             background: #e2e8f0;
             color: #1e293b;
-        }
-
-        /* Chart Card */
-        .report-chart-card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 16px 18px;
-            border: 1px solid #edf2f7;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-            margin-bottom: 16px;
-        }
-
-        .chart-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .chart-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 220px;
-            width: 100%;
         }
 
         /* Data Table Card */
@@ -610,7 +580,7 @@
                 <div class="header-action-button">
                     <button type="button" @click="exportExcel()" class="btn-excel-export" :disabled="exportLoading">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M252.31-180Q222-180 201-201q-21-21-21-51.31v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46q0 4.62 3.85 8.46 3.84 3.85 8.46 3.85h455.38q4.62 0 8.46-3.85 3.85-3.84 3.85-8.46v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46Q780-222 759-201q-21 21-51.31 21H252.31ZM450-664.46l-76.92 76.92q-8.93 8.92-21.19 8.81-12.27-.12-21.58-9.43-8.69-9.3-9-21.07-.31-11.77 9-21.08l124.38-124.38q5.62-5.62 11.85-7.92 6.23-2.31 13.46-2.31t13.46 2.31q6.23 2.3 11.85 7.92l124.38 124.38q8.92 8.92 8.81 20.89-.12 11.96-8.81 21.26-9.31 9.31-21.38 9.62-12.08.31-21.39-9L510-664.46v306q0 12.77-8.62 21.38-8.61 8.62-21.38 8.62t-21.38-8.62q-8.62-8.61-8.62-21.38v-306Z"/></svg>
-                        <span x-text="exportLoading ? '{{ __('staff_expense_report.excel.exporting') }}' : '{{ __('staff_expense_report.button.export_excel') }}'">{{ __('staff_expense_report.button.export_excel') }}</span>
+                        <span x-text="exportLoading ? '{{ __('staff_expense_report.excel.exporting') }}' : '{{ __('global.button.export') }}'">{{ __('global.button.export') }}</span>
                     </button>
                     <button type="button" s-click-link="{!! url()->current() !!}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -852,19 +822,6 @@
                         <div class="kpi-value">{{ number_format($summary['total_transactions']) }}</div>
                         <div class="kpi-sub">{{ $summary['distinct_staff_count'] }} {{ __('staff_expense_report.kpi.active_staff_members') }}</div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Visual Analytics Chart Card -->
-            <div class="report-chart-card">
-                <div class="chart-header">
-                    <div class="chart-title">
-                        <i class='bx bx-line-chart' style="color: #2563eb; font-size: 18px;"></i>
-                        <span>{{ $viewMode === 'daily' ? __('staff_expense_report.chart.daily_trend') : __('staff_expense_report.chart.monthly_trend') }}</span>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="staffExpenseChart"></canvas>
                 </div>
             </div>
 
@@ -1287,8 +1244,7 @@
 @stop
 
 @section('script')
-    <!-- CDN & Local Assets for Charts & Excel Export -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Local Assets for Excel Export -->
     <script src="{{ asset('admin-public/js/exceljs.min.js') }}"></script>
     <script src="{{ asset('admin-public/js/FileSaver.min.js') }}"></script>
 
@@ -1562,137 +1518,6 @@
                     }
                 }
             }));
-
-            // Initialize Chart.js
-            initExpenseChart();
         });
-
-        function initExpenseChart() {
-            const chartCanvas = document.getElementById('staffExpenseChart');
-            if (!chartCanvas) return;
-
-            const rowsData = @json($chartRows ?? $rows ?? []);
-            const viewMode = '{{ $viewMode }}';
-
-            let labels = [];
-            let salaryData = [];
-            let bonusData = [];
-            let otherData = [];
-            let deductionData = [];
-            let netData = [];
-
-            // Chronological order for chart (reverse from table desc)
-            const chronological = [...rowsData].reverse();
-
-            chronological.forEach(r => {
-                labels.push(viewMode === 'daily' ? r.date_formatted : r.month_name);
-                salaryData.push(r.salary_total || 0);
-                bonusData.push(r.bonus_total || 0);
-                otherData.push(r.other_total || 0);
-                deductionData.push(r.deduction_total || 0);
-                netData.push(r.net_total || 0);
-            });
-
-            const ctx = chartCanvas.getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '{{ __('staff_expense_report.chart.salary') }} ($)',
-                            data: salaryData,
-                            backgroundColor: 'rgba(20, 184, 166, 0.7)',
-                            borderColor: '#0d9488',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                        },
-                        {
-                            label: '{{ __('staff_expense_report.chart.bonus') }} ($)',
-                            data: bonusData,
-                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
-                            borderColor: '#10b981',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                        },
-                        {
-                            label: '{{ __('staff_expense_report.chart.other') }} ($)',
-                            data: otherData,
-                            backgroundColor: 'rgba(100, 116, 139, 0.7)',
-                            borderColor: '#64748b',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                        },
-                        {
-                            label: '{{ __('staff_expense_report.chart.deductions') }} ($)',
-                            data: deductionData,
-                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                            borderColor: '#ef4444',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                        },
-                        {
-                            label: '{{ __('staff_expense_report.chart.net_expense') }} ($)',
-                            data: netData,
-                            type: 'line',
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                            borderWidth: 2.5,
-                            fill: false,
-                            tension: 0.3,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#2563eb',
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: { size: 12, weight: '600' },
-                                boxWidth: 14,
-                                padding: 16,
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            padding: 12,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        label += '$' + Number(context.parsed.y).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { font: { size: 11 } }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#f1f5f9' },
-                            ticks: {
-                                font: { size: 11 },
-                                callback: function(value) {
-                                    return '$' + value;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
     </script>
 @stop

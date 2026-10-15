@@ -48,7 +48,7 @@
                     @can('report-transaction-excel')
                         <button type="button" @click="excel(`{{ $status }}`)" class="btnExcel">
                             <i class="material-symbols-outlined">upgrade</i>
-                            <span>Excel</span>
+                            <span>{{ __('global.button.export') }}</span>
                         </button>
                     @endcan
                     <button s-click-link="{!! url()->current() !!}">
@@ -226,7 +226,7 @@
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
                     <span id="spinner"></span>
-                    <label>Export excel ...</label>
+                    <label>{{ __('global.message.exporting_excel') }}</label>
                 </div>
             </div>
         </template>

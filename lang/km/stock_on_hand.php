@@ -19,7 +19,7 @@ return [
     ],
 
     'button' => [
-        'excel' => 'Excel',
+        'excel' => 'នាំចេញ Excel',
         'cancel' => 'បោះបង់',
         'view' => 'មើល',
     ],

@@ -1304,7 +1304,7 @@ class OrderController extends Controller
             'Paid' => 'bg-success',
             'Partial' => 'bg-info',
             'Cancel' => 'bg-danger',
-            default => 'bg-warning text-dark',
+            default => 'bg-warning',
         };
         $date = $order->payment_date
             ? '<small class="text-muted">' . e(Carbon::parse($order->payment_date)->format('Y-m-d H:i')) . '</small>'

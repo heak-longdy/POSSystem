@@ -73,16 +73,6 @@ return [
         'active_staff_members' => 'Active Staff Members',
     ],
 
-    'chart' => [
-        'daily_trend' => 'Staff Expense Trend & Category Breakdown (Daily)',
-        'monthly_trend' => 'Staff Expense Trend & Category Breakdown (Monthly)',
-        'salary' => 'Salary',
-        'bonus' => 'Bonus',
-        'other' => 'Other',
-        'deductions' => 'Deductions',
-        'net_expense' => 'Net Expense',
-    ],
-
     'table' => [
         'daily_breakdown' => 'Daily Aggregated Expense Breakdown',
         'monthly_breakdown' => 'Monthly Aggregated Expense Breakdown',

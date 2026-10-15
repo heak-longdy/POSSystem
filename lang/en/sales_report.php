@@ -28,6 +28,8 @@ return [
         'all_shops' => 'All Shops',
         'staff' => 'Staff / Barber',
         'all_staff' => 'All Staff',
+        'customer' => 'Customer',
+        'all_customers' => 'All Customers',
         'payment_status' => 'Payment Status',
         'status_active_exclude_cancel' => 'Active (Exclude Cancel)',
         'status_all' => 'All Statuses',

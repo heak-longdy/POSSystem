@@ -277,7 +277,7 @@
             <div class="loadingFullSizeLayout">
                 <div class="loading loadingSubmit">
                     <span id="spinner"></span>
-                    <label>Export excel ...</label>
+                    <label>{{ __('global.message.exporting_excel') }}</label>
                 </div>
             </div>
         </template>

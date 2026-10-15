@@ -56,7 +56,7 @@
                         </div>
                     @endif
                 @endif
-                @if ($showSearch || (isset($filterView) && $filterView))
+                @if (($showSearchButton ?? true) && ($showSearch || (isset($filterView) && $filterView)))
                     <button mat-flat-button type="submit" class="bg-success btnSearch">
                         {{-- <i class='bx bx-search'></i> --}}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">

@@ -8,44 +8,41 @@
             gap: 6px;
             position: relative;
         }
-        .order-listing-wrapper .header .header-action-button .filter .form-row {
-            height: 38px;
-            border-radius: 25px !important;
-            border: 1px solid rgba(152, 152, 152, 0.35) !important;
+        .order-listing-wrapper .filter-search-input {
+            height: 43px;
+            width: 100%;
+            border-radius: 7px;
+            border: 1px solid #cbd5e1;
             background: #ffffff;
-            display: inline-flex;
-            align-items: center;
             padding: 0 12px;
             box-sizing: border-box;
-            margin-left: 0;
-            min-width: unset;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #0f172a;
+            outline: none;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        .order-listing-wrapper .header .header-action-button .filter .form-row:focus-within {
-            border-color: #3b82f6 !important;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+        .order-listing-wrapper .filter-search-input:focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
         }
-        .order-listing-wrapper .header .header-action-button .filter .form-row input {
-            height: 100%;
-            width: 100%;
-            border: none !important;
-            background: transparent !important;
-            font-size: 13px;
-            color: #1e293b;
-            padding: 0 4px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .order-listing-wrapper .header .header-action-button .filter .form-row input::placeholder {
+        .order-listing-wrapper .filter-search-input::placeholder {
             color: #8892a0 !important;
         }
 
-        /* Ensure headers and tabs do not clip the popover */
+        /* Keep the toolbar's shared horizontal scrolling and scrollbar styles. */
         .order-listing-wrapper .header {
             z-index: 100 !important;
             overflow: visible !important;
         }
-        .order-listing-wrapper .header-tab,
+        .order-listing-wrapper .header-tab {
+            min-width: 0;
+            max-width: 100%;
+        }
+        .order-listing-wrapper .header-tab > *,
+        .order-listing-wrapper .header-action-button > * {
+            flex-shrink: 0;
+        }
         .order-listing-wrapper .header-action-button,
         .order-listing-wrapper .header-action-button .filter {
             overflow: visible !important;
@@ -97,10 +94,9 @@
 
         /* Advanced Filter Popover */
         .order-listing-wrapper .advanced-filter-popover {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
+            position: fixed;
             width: 370px;
+            max-width: calc(100vw - 16px);
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
@@ -263,32 +259,6 @@
             z-index: 9999 !important;
         }
 
-        /* Search submit button */
-        .order-listing-wrapper .header .header-action-button .filter .btnSearch {
-            height: 38px !important;
-            width: 38px !important;
-            border-radius: 50% !important;
-            border: 1px solid rgba(152, 152, 152, 0.35) !important;
-            background: #ffffff !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 0 !important;
-            margin-left: 0 !important;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .order-listing-wrapper .header .header-action-button .filter .btnSearch:hover {
-            background: #f1f5f9 !important;
-            border-color: #3b82f6 !important;
-            color: #2563eb !important;
-        }
-        .order-listing-wrapper .header .header-action-button .filter .btnSearch svg {
-            width: 18px;
-            height: 18px;
-            color: #475569;
-        }
-
         /* Reset / Clear button */
         .btn-clear-filter {
             display: inline-flex;
@@ -336,6 +306,7 @@
                 'lastMonthDay' => $lastMonthDay,
             ],
             'showSearch' => true,
+            'showSearchButton' => false,
             'showTabs' => true,
             'tabs' => [
                 [
@@ -376,7 +347,7 @@
                 ],
             ],
             'exportAction' => 'excel()',
-            'exportLabel' => __('global.button.excel'),
+            'exportLabel' => __('global.button.export'),
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
@@ -614,6 +585,8 @@
                     this.formData.shop_id = null;
                 },
                 resetAdvancedFilters() {
+                    $(this.$root).find('input[name="search"]').val('');
+                    this.formData.search = '';
                     this.resetShopField();
                     $('#from_date').val('').trigger('change');
                     $('#to_date').val('').trigger('change');
@@ -623,9 +596,9 @@
                     }
                     this.formData.from_date = '';
                     this.formData.to_date = '';
-                    const hasAppliedAdvanced = @json(request()->filled('shop_id') || request()->filled('from_date') || request()->filled('to_date'));
+                    const hasAppliedAdvanced = @json(request()->filled('search') || request()->filled('shop_id') || request()->filled('from_date') || request()->filled('to_date'));
                     if (hasAppliedAdvanced) {
-                        const form = document.querySelector('form.filter');
+                        const form = this.$el.closest('form.filter');
                         if (form) form.submit();
                     }
                 },

@@ -137,18 +137,6 @@ return [
         'listMenu' => [
             [
                 'type'  => 'single',
-                'active' => 'admin/report/order-transaction*',
-                'path' => 'admin/report/order-transaction/daily',
-                'permission' => ['report-transaction-view', 'report-sales-view', 'order-view'],
-                'name' => [
-                    'en' => 'Order Transaction Report',
-                    'km' => 'របាយការណ៍ប្រតិបត្តិការបញ្ជាទិញ',
-                ],
-                'icon' => 'bx-receipt',
-                'dropDown' => 'disable',
-            ],
-            [
-                'type'  => 'single',
                 'active' => 'admin/report/sales*',
                 'path' => 'admin/report/sales/daily',
                 'permission' => ['report-sales-view', 'order-view'],

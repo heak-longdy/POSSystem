@@ -1,11 +1,7 @@
 @php
-    $advancedCount = (request()->filled('shop_id') ? 1 : 0) + (request()->filled('from_date') ? 1 : 0) + (request()->filled('to_date') ? 1 : 0);
-    $hasAnyFilter = request()->filled('from_date') || request()->filled('to_date') || request()->filled('shop_id') || request()->filled('search');
+    $advancedCount = (request()->filled('search') ? 1 : 0) + (request()->filled('shop_id') ? 1 : 0) + (request()->filled('from_date') ? 1 : 0) + (request()->filled('to_date') ? 1 : 0);
+    $hasAnyFilter = $advancedCount > 0;
 @endphp
-
-<div class="form-row search-input" style="width: 190px; min-width: 180px;">
-    <input type="text" name="search" placeholder="{{ __('order.filter.search') }}" value="{!! request('search') !!}">
-</div>
 
 <div class="advanced-filter-container"
     x-data="{
@@ -14,19 +10,30 @@
             this.showAdvancedFilter = !this.showAdvancedFilter;
             if (this.showAdvancedFilter) {
                 this.$nextTick(() => {
+                    this.positionPopover();
                     this.fetchSelectShop();
                     if (typeof initOrderDatepickers === 'function') initOrderDatepickers();
                 });
             }
         },
+        positionPopover() {
+            if (!this.showAdvancedFilter) return;
+            const button = this.$refs.filterButton.getBoundingClientRect();
+            const popover = this.$refs.filterPopover;
+            const left = Math.max(8, Math.min(button.right - popover.offsetWidth, document.documentElement.clientWidth - popover.offsetWidth - 8));
+            popover.style.top = (button.bottom + 8) + 'px';
+            popover.style.left = left + 'px';
+        },
         close() {
             this.showAdvancedFilter = false;
         }
     }"
+    @resize.window="positionPopover()"
+    @scroll.window.capture="positionPopover()"
     @keydown.escape.window="close()"
     @click.outside="if (!$event.target.closest('.select2-container') && !$event.target.closest('#ui-datepicker-div')) { close(); }">
 
-    <button type="button" class="btn-advanced-filter {{ $advancedCount > 0 ? 'active' : '' }}"
+    <button type="button" x-ref="filterButton" class="btn-advanced-filter {{ $advancedCount > 0 ? 'active' : '' }}"
         :class="{ 'open': showAdvancedFilter }"
         @click.stop="toggle()"
         title="{{ __('order.filter.advanced_filter') }}">
@@ -38,7 +45,7 @@
         <i class='bx bx-chevron-down' :class="{ 'bx-rotate-180': showAdvancedFilter }" style="font-size: 15px; transition: transform 0.2s ease;"></i>
     </button>
 
-    <div class="advanced-filter-popover" x-show="showAdvancedFilter" x-cloak
+    <div class="advanced-filter-popover" x-ref="filterPopover" x-show="showAdvancedFilter" x-cloak
         x-transition:enter="transition ease-out duration-150"
         x-transition:enter-start="opacity-0 transform scale-95 -translate-y-1"
         x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
@@ -59,6 +66,12 @@
         </div>
 
         <div class="filter-popover-body">
+            <div class="filter-field-group" x-id="['order-filter-search']">
+                <label :for="$id('order-filter-search')">{{ __('order.button.search') }}</label>
+                <input type="text" name="search" :id="$id('order-filter-search')" class="filter-search-input"
+                    placeholder="{{ __('order.filter.search') }}" value="{{ request('search') }}">
+            </div>
+
             {{-- Shop Selection (Standard Select2) --}}
             <div class="filter-field-group" x-id="['order-filter-shop']">
                 <label :for="$id('order-filter-shop')">{{ __('order.table.shop') }}</label>
@@ -101,7 +114,7 @@
                 <span>{{ __('global.button.reset') }}</span>
             </button>
             <button type="submit" class="btn-popover-apply">
-                <i class='bx bx-check'></i>
+                <i class='bx bx-search'></i>
                 <span>{{ __('order.button.search') }}</span>
             </button>
         </div>

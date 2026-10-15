@@ -156,6 +156,7 @@ return [
         'delete_success'     => 'Deleted successfully!',
         'restore_success'    => 'Restored successfully!',
         'save_success'       => 'Saved successfully!',
+        'exporting_excel'    => 'Exporting Excel...',
     ],
 
     // Validations

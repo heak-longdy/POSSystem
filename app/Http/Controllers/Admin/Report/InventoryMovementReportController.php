@@ -63,10 +63,8 @@ class InventoryMovementReportController extends Controller
 
         if ($grouping === 'grouped') {
             $rows = $this->aggregateDailyMovements(clone $baseQuery);
-            $chartRows = $rows;
         } else {
             $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
-            $chartRows = $this->aggregateDailyMovements(clone $baseQuery);
         }
 
         $filterOptions = $this->getFilterOptions();
@@ -80,7 +78,6 @@ class InventoryMovementReportController extends Controller
             'filters' => $appliedFilters,
             'summary' => $summary,
             'rows' => $rows,
-            'chartRows' => $chartRows,
             'ungroupedRows' => $ungroupedRows,
             'shops' => $filterOptions['shops'],
             'categories' => $filterOptions['categories'],
@@ -110,10 +107,8 @@ class InventoryMovementReportController extends Controller
 
         if ($grouping === 'grouped') {
             $rows = $this->aggregateMonthlyMovements(clone $baseQuery);
-            $chartRows = $rows;
         } else {
             $ungroupedRows = $this->getUngroupedPaginated(clone $baseQuery, $req);
-            $chartRows = $this->aggregateMonthlyMovements(clone $baseQuery);
         }
 
         $filterOptions = $this->getFilterOptions();
@@ -130,7 +125,6 @@ class InventoryMovementReportController extends Controller
             'filters' => $appliedFilters,
             'summary' => $summary,
             'rows' => $rows,
-            'chartRows' => $chartRows,
             'ungroupedRows' => $ungroupedRows,
             'shops' => $filterOptions['shops'],
             'categories' => $filterOptions['categories'],
@@ -143,7 +137,7 @@ class InventoryMovementReportController extends Controller
     }
 
     /**
-     * API / JSON endpoint for export and charts
+     * API / JSON endpoint for export
      */
     public function report(Request $req)
     {

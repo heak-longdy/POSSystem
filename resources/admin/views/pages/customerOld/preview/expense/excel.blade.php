@@ -103,7 +103,7 @@
                 <div class="p-2 bd-highlight">
                     <button type="button" class="btn-create excel-btn"  onclick="htmlTableToExcel('xlsx')">
                         <i data-feather="download"></i>
-                        <span>Save</span>
+                        <span>{{ __('global.button.export') }}</span>
                     </button>
                 </div>
                 <div class="p-2 bd-highlight">

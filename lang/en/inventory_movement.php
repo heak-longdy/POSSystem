@@ -84,15 +84,6 @@ return [
         'active_products' => 'active products',
     ],
 
-    'chart' => [
-        'daily_trends' => 'Daily Inventory Flow Trends',
-        'monthly_trends' => 'Monthly Inventory Flow Trends',
-        'stock_in' => 'Stock In (+)',
-        'stock_out' => 'Stock Out (-)',
-        'pos_sales' => 'POS Sales Out',
-        'net_movement' => 'Net Movement',
-    ],
-
     'table' => [
         'daily_breakdown' => 'Daily Movement Ledger Breakdown',
         'monthly_breakdown' => 'Monthly Movement Summary Breakdown',
