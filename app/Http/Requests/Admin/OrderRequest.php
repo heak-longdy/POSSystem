@@ -38,7 +38,7 @@ class OrderRequest extends FormRequest
             'order_date' => 'required|date',
             'delivery_date' => 'nullable|date',
             'dataCarts' => 'required|json',
-            'partial_payment_amount' => 'nullable|numeric|min:0',
+            'partial_payment_amount' => 'nullable|numeric|min:0|multiple_of:0.01',
             'partial_payment_note' => 'nullable|string|max:500',
         ];
     }

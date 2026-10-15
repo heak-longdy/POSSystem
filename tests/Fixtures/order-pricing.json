@@ -1,0 +1,66 @@
+[
+  {
+    "name": "NO-0013",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 20, "itemData": {"price": 2.79, "discount": 1, "discountType": "usd"}},
+      {"product_id": 3, "product_type": "product", "product_qty": 1, "itemData": {"price": 2.49, "discount": 0}},
+      {"product_id": 2, "product_type": "product", "product_qty": 1, "itemData": {"price": 2.99, "discount": 0}}
+    ],
+    "lines": [35.8, 2.49, 2.99],
+    "subtotal": 61.28, "discount": 20, "commission": 0, "total": 41.28
+  },
+  {
+    "name": "Product percentage discount and service discount",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 3, "itemData": {"price": 19.95, "discount": 12.5, "discountType": "percent"}},
+      {"product_id": 1, "product_type": "service", "product_qty": 1, "itemData": {"price": 25, "discount": 10, "discountType": "percent"}}
+    ],
+    "lines": [52.37, 22.5],
+    "subtotal": 84.85, "discount": 9.98, "commission": 0, "total": 74.87
+  },
+  {
+    "name": "Full discounts remain zero",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 3, "itemData": {"price": 2.79, "discount": 100, "discountType": "percent", "total": 0}},
+      {"product_id": 1, "product_type": "service", "product_qty": 1, "itemData": {"price": 10, "discount": 10, "discountType": "usd", "total": 0}}
+    ],
+    "lines": [0, 0],
+    "subtotal": 18.37, "discount": 18.37, "commission": 0, "total": 0
+  },
+  {
+    "name": "Discounts cannot make item totals negative",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 2, "itemData": {"price": 5, "discount": 10, "discountType": "usd"}},
+      {"product_id": 1, "product_type": "service", "product_qty": 1, "itemData": {"price": 5, "discount": 150, "discountType": "percent"}}
+    ],
+    "lines": [0, 0],
+    "subtotal": 15, "discount": 15, "commission": 0, "total": 0
+  },
+  {
+    "name": "Existing commission deduction is preserved",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 3, "itemData": {"price": 10, "discount": 10, "discountType": "percent", "commission": 5, "commissionType": "percent"}},
+      {"product_id": 1, "product_type": "service", "product_qty": 1, "itemData": {"price": 20, "discount": 2, "discountType": "usd", "commission": 1, "commissionType": "usd"}}
+    ],
+    "lines": [27, 18],
+    "subtotal": 50, "discount": 5, "commission": 2.5, "total": 42.5
+  },
+  {
+    "name": "Round extended lines once and retain existing KHR behavior",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 3, "itemData": {"price": 0.05, "discount": 10, "discountType": "percent"}},
+      {"product_id": 1, "product_type": "service", "product_qty": 1, "itemData": {"price": 5, "discount": 1, "discountType": "khr"}}
+    ],
+    "lines": [0.14, 4],
+    "subtotal": 5.15, "discount": 1.01, "commission": 0, "total": 4.14
+  },
+  {
+    "name": "Half cent discounts round consistently in PHP and JavaScript",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 1, "itemData": {"price": 19.99, "discount": 50, "discountType": "percent"}},
+      {"product_id": 1, "product_type": "service", "product_qty": 1, "itemData": {"price": 2.01, "discount": 50, "discountType": "percent"}}
+    ],
+    "lines": [10, 1.01],
+    "subtotal": 22, "discount": 10.99, "commission": 0, "total": 11.01
+  }
+]

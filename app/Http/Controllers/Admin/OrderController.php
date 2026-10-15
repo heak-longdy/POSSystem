@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\ValidationException;
 use App\Services\InvoiceService;
+use App\Services\OrderPricing;
 use Throwable;
 
 class OrderController extends Controller
@@ -189,8 +190,9 @@ class OrderController extends Controller
 
         $data['order'] = $order;
         $data['routeName'] = $this->routeName;
+        $data['paymentRemainingAmount'] = $this->remainingPaymentCents($order) / 100;
         $data['canEdit'] = $order->payment_status === 'Pending' && !$order->trashed();
-        $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && (float) $order->remaining_amount > 0;
+        $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && $data['paymentRemainingAmount'] > 0;
         $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0;
         $data['canReject'] = $data['canCancel'];
 
@@ -234,8 +236,14 @@ class OrderController extends Controller
                 $totalPoint += (int) ($detail->point ?? 0);
             }
 
-            $order->update(['total_point' => $totalPoint]);
             $order->load('orderDetails');
+            $totals = app(OrderPricing::class)->totals($order->orderDetails);
+            $order->update([
+                'total_point' => $totalPoint,
+                'total_price' => $totals['total_price'],
+                'total_discount' => $totals['total_discount'],
+                'total_commission' => $totals['total_commission'],
+            ]);
             $this->adjustCustomerPoint($order, 1);
             $this->recordInitialPayment(
                 $order,
@@ -303,7 +311,7 @@ class OrderController extends Controller
             }
 
             if ($order->payment_status !== 'Paid') {
-                $remaining = (float) $order->remaining_amount;
+                $remaining = $this->remainingPaymentCents($order) / 100;
                 if ($remaining > 0) {
                     OrderPayment::create([
                         'order_id' => $order->id,
@@ -352,7 +360,7 @@ class OrderController extends Controller
     public function addPayment(Request $req, $id)
     {
         $req->validate([
-            'amount' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.01|multiple_of:0.01',
             'payment_method' => 'nullable|string|max:50',
             'payment_date' => 'nullable|date',
             'note' => 'nullable|string|max:500',
@@ -371,7 +379,8 @@ class OrderController extends Controller
                     'payment_status' => 'Order is already fully paid.',
                 ]);
             }
-            if ((float) $req->amount > (float) $order->remaining_amount) {
+            $amountCents = $this->paymentCents($req->amount);
+            if ($amountCents > $this->remainingPaymentCents($order)) {
                 throw ValidationException::withMessages([
                     'amount' => 'Payment amount exceeds remaining balance.',
                 ]);
@@ -384,7 +393,7 @@ class OrderController extends Controller
 
             OrderPayment::create([
                 'order_id' => $order->id,
-                'amount' => $req->amount,
+                'amount' => $amountCents / 100,
                 'payment_method' => $paymentMethod,
                 'payment_date' => $paymentDate,
                 'note' => $req->note,
@@ -409,7 +418,7 @@ class OrderController extends Controller
     public function updatePayment(Request $req, $paymentId)
     {
         $req->validate([
-            'amount' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.01|multiple_of:0.01',
             'payment_method' => 'nullable|string|max:50',
             'payment_date' => 'nullable|date',
             'note' => 'nullable|string|max:500',
@@ -425,15 +434,16 @@ class OrderController extends Controller
                 ]);
             }
 
-            $availableBalance = (float) $order->remaining_amount + (float) $payment->amount;
-            if ((float) $req->amount > $availableBalance) {
+            $amountCents = $this->paymentCents($req->amount);
+            $availableBalanceCents = $this->remainingPaymentCents($order) + $this->paymentCents($payment->amount);
+            if ($amountCents > $availableBalanceCents) {
                 throw ValidationException::withMessages([
                     'amount' => 'Payment amount exceeds available balance.',
                 ]);
             }
 
             $updateData = [
-                'amount' => $req->amount,
+                'amount' => $amountCents / 100,
                 'note' => $req->note,
             ];
 
@@ -721,15 +731,32 @@ class OrderController extends Controller
         return response()->json($data);
     }
 
+    // Limit cent normalization to order payments; keep shared pricing/report models unchanged.
+    protected function paymentCents($amount, string $field = 'amount'): int
+    {
+        $cents = round((float) ($amount ?? 0) * 100);
+        // Reject overflow before an integer cast could turn an excessive payment negative.
+        if (!is_finite($cents) || $cents >= PHP_INT_MAX || $cents <= PHP_INT_MIN) {
+            throw ValidationException::withMessages([$field => 'Payment amount is too large.']);
+        }
+
+        return (int) $cents;
+    }
+
+    protected function remainingPaymentCents(Order $order): int
+    {
+        return max(0, $this->paymentCents($order->total_price) - $this->paymentCents($order->paid_amount));
+    }
+
     protected function syncOrderPaymentState(Order $order)
     {
-        $totalPaid = OrderPayment::where('order_id', $order->id)->sum('amount');
-        $totalPrice = (float) ($order->total_price ?? 0);
+        $totalPaidCents = $this->paymentCents(OrderPayment::where('order_id', $order->id)->sum('amount'));
+        $totalPriceCents = $this->paymentCents($order->total_price);
 
-        if ((float) $totalPaid <= 0 && $totalPrice > 0) {
+        if ($totalPaidCents <= 0 && $totalPriceCents > 0) {
             $paymentStatus = 'Pending';
             $paymentDate = null;
-        } elseif ((float) $totalPaid >= $totalPrice) {
+        } elseif ($totalPaidCents >= $totalPriceCents) {
             $paymentStatus = 'Paid';
             $paymentDate = $order->payment_date ?: Carbon::now()->format('Y-m-d H:i:s');
         } else {
@@ -738,7 +765,7 @@ class OrderController extends Controller
         }
 
         $order->update([
-            'paid_amount' => $totalPaid,
+            'paid_amount' => $totalPaidCents / 100,
             'payment_status' => $paymentStatus,
             'payment_date' => $paymentDate,
         ]);
@@ -781,8 +808,8 @@ class OrderController extends Controller
             'total_price_formatted' => '$' . number_format((float) ($order->total_price ?? 0), 2),
             'paid_amount' => (float) ($order->paid_amount ?? 0),
             'paid_amount_formatted' => '$' . number_format((float) ($order->paid_amount ?? 0), 2),
-            'remaining_amount' => (float) $order->remaining_amount,
-            'remaining_amount_formatted' => '$' . number_format((float) $order->remaining_amount, 2),
+            'remaining_amount' => $this->remainingPaymentCents($order) / 100,
+            'remaining_amount_formatted' => '$' . number_format($this->remainingPaymentCents($order) / 100, 2),
             'payment_status' => $order->payment_status ?: 'Pending',
             'payment_date' => $order->payment_date,
             'payments' => $payments,
@@ -791,10 +818,11 @@ class OrderController extends Controller
 
     protected function recordInitialPayment(Order $order, float $amount, ?string $paymentMethod = null, ?string $paymentDate = null, ?string $note = null): void
     {
+        $amountCents = $this->paymentCents($amount, 'partial_payment_amount');
         $existingPayment = OrderPayment::where('order_id', $order->id)
             ->orderBy('id', 'asc')->first();
 
-        if ($amount <= 0) {
+        if ($amountCents <= 0) {
             if ($existingPayment && $order->payments()->count() === 1 && $order->payment_status === 'Pending') {
                 $existingPayment->delete();
                 $this->syncOrderPaymentState($order);
@@ -802,7 +830,7 @@ class OrderController extends Controller
             return;
         }
 
-        if ($amount > (float) ($order->total_price ?? 0)) {
+        if ($amountCents > $this->paymentCents($order->total_price)) {
             throw ValidationException::withMessages([
                 'partial_payment_amount' => __('order.validation.partial_max'),
             ]);
@@ -810,7 +838,7 @@ class OrderController extends Controller
 
         $paymentData = [
             'order_id' => $order->id,
-            'amount' => $amount,
+            'amount' => $amountCents / 100,
             'payment_method' => $paymentMethod ?: ($order->pay_way ?: 'Cash'),
             'payment_date' => $paymentDate
                 ? Carbon::parse($paymentDate)->format('Y-m-d H:i:s')
@@ -893,9 +921,10 @@ class OrderController extends Controller
             'shop_id' => $req->shop_id,
             'order_date' => $req->order_date,
             'delivery_date' => $req->delivery_date ?: null,
-            'total_price' => $req->subTotal ?? 0,
-            'total_discount' => $req->total_discount ?? 0,
-            'total_commission' => $req->commissionTotal ?? 0,
+            // Recalculate from saved line items before recording any payment.
+            'total_price' => 0,
+            'total_discount' => 0,
+            'total_commission' => 0,
             'pay_way' => $req->pay_way ?: ($order->pay_way ?: 'Cash'),
             'payment_status' => $order->payment_status ?: 'Pending',
         ];

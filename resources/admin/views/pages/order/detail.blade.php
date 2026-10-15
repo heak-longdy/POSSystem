@@ -74,7 +74,7 @@
                         <!-- Primary order actions -->
                         <div class="header-right-actions">
                             @if ($canAddPayment)
-                                <button type="button" class="btn btn-create bg-success btn-system btn-system-success" @click="openPaymentModal = true">
+                                <button type="button" class="btn btn-create bg-success btn-system btn-system-success" :disabled="paymentSubmitting" @click="openPaymentModal = true">
                                     <i data-feather="plus-circle"></i>
                                     <span>{{ __('order.detail.add_payment') }}</span>
                                 </button>
@@ -163,13 +163,13 @@
                     </article>
 
                     <article class="kpi-card">
-                        <div class="kpi-icon-wrap {{ (float) ($order->remaining_amount ?? 0) > 0 ? 'kpi-orange' : 'kpi-gray' }}">
+                        <div class="kpi-icon-wrap {{ $paymentRemainingAmount > 0 ? 'kpi-orange' : 'kpi-gray' }}">
                             <i data-feather="credit-card"></i>
                         </div>
                         <div class="kpi-info">
                             <span class="kpi-label">{{ __('order.detail.balance_due') }}</span>
-                            <strong class="kpi-value {{ (float) ($order->remaining_amount ?? 0) > 0 ? 'text-danger' : 'text-muted' }}">
-                                ${{ number_format((float) ($order->remaining_amount ?? 0), 2) }}
+                            <strong class="kpi-value {{ $paymentRemainingAmount > 0 ? 'text-danger' : 'text-muted' }}">
+                                ${{ number_format($paymentRemainingAmount, 2) }}
                             </strong>
                         </div>
                     </article>
@@ -210,8 +210,9 @@
                                                     : ($detail->product?->name ?? '---');
                                                 $unitPrice = (float) ($detail->price ?? 0);
                                                 $qty = (int) ($detail->qty ?: 1);
-                                                $discount = (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0));
-                                                $lineSubtotal = max(0, ($unitPrice * $qty) - $discount);
+                                                $line = app(\App\Services\OrderPricing::class)->line($detail);
+                                                $discount = $line['discount'];
+                                                $lineSubtotal = $line['total'];
                                             @endphp
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
@@ -252,7 +253,7 @@
                                     <span class="count-badge">{{ $order->payments ? $order->payments->count() : 0 }}</span>
                                 </div>
                                 @if ($canAddPayment)
-                                    <button type="button" class="btn btn-create bg-success btn-system-sm btn-system-success" @click="openPaymentModal = true">
+                                    <button type="button" class="btn btn-create bg-success btn-system-sm btn-system-success" :disabled="paymentSubmitting" @click="openPaymentModal = true">
                                         <i data-feather="plus"></i>
                                         <span>{{ __('order.detail.add_payment') }}</span>
                                     </button>
@@ -432,11 +433,12 @@
                             </div>
                             <div class="billing-body">
                                 @php
-                                    $subtotal = (float) ($order->total_price ?? 0) + (float) ($order->total_discount ?? 0);
+                                    $commission = (float) ($order->total_commission ?? 0);
+                                    $subtotal = (float) ($order->total_price ?? 0) + (float) ($order->total_discount ?? 0) + $commission;
                                     $discount = (float) ($order->total_discount ?? 0);
                                     $grandTotal = (float) ($order->total_price ?? 0);
                                     $paid = (float) ($order->paid_amount ?? 0);
-                                    $remaining = (float) ($order->remaining_amount ?? 0);
+                                    $remaining = $paymentRemainingAmount;
                                 @endphp
                                 <div class="billing-row">
                                     <span>{{ __('order.detail.subtotal') }}</span>
@@ -446,6 +448,12 @@
                                     <span>{{ __('order.detail.discount') }}</span>
                                     <span class="text-danger">- ${{ number_format($discount, 2) }}</span>
                                 </div>
+                                @if ($commission != 0)
+                                    <div class="billing-row">
+                                        <span>{{ __('order.commission') }}</span>
+                                        <span class="text-danger">- ${{ number_format($commission, 2) }}</span>
+                                    </div>
+                                @endif
                                 <div class="billing-divider"></div>
                                 <div class="billing-row billing-grand-total">
                                     <span>{{ __('order.detail.grand_total') }}</span>
@@ -464,7 +472,7 @@
                                 </div>
 
                                 @if ($canAddPayment)
-                                    <button type="button" class="btn btn-create bg-success btn-system btn-system-success btn-full-width mt-3" @click="openPaymentModal = true">
+                                    <button type="button" class="btn btn-create bg-success btn-system btn-system-success btn-full-width mt-3" :disabled="paymentSubmitting" @click="openPaymentModal = true">
                                         <i data-feather="check-circle"></i>
                                         <span>{{ __('order.button.make_payment') }}</span>
                                     </button>
@@ -487,14 +495,14 @@
                             </button>
                         </div>
 
-                        <form @submit.prevent="submitPayment()">
-                            <div class="modal-body-custom">
+                        <form @submit.prevent="submitPayment()" :aria-busy="paymentSubmitting">
+                            <fieldset class="modal-body-custom" :disabled="paymentSubmitting" style="border: 0; margin: 0; min-width: 0;">
                                 <div class="form-group-modal">
                                     <label>{{ __('order.amount') }} ($) <span class="text-danger">*</span></label>
                                     <div class="input-action-wrap">
-                                        <input type="number" step="0.01" min="0.01" max="{{ $order->remaining_amount }}"
+                                        <input type="number" step="0.01" min="0.01" max="{{ number_format($paymentRemainingAmount, 2, '.', '') }}"
                                             class="modal-input" x-model="paymentForm.amount" required>
-                                        <button type="button" class="btn-fill-max" @click="paymentForm.amount = {{ (float) $order->remaining_amount }}">
+                                        <button type="button" class="btn-fill-max" @click="paymentForm.amount = {{ $paymentRemainingAmount }}">
                                             {{ __('order.button.full_balance') }}
                                         </button>
                                     </div>
@@ -536,15 +544,15 @@
                                     <textarea class="modal-textarea" rows="3" x-model="paymentForm.note"
                                         placeholder="{{ __('order.placeholder.note') }}"></textarea>
                                 </div>
-                            </div>
+                            </fieldset>
 
                             <div class="modal-footer-custom">
                                 <button type="button" class="btn btn-system btn-system-outline btn-system-neutral" :disabled="paymentSubmitting" @click="openPaymentModal = false">
                                     <span>{{ __('order.button.close') }}</span>
                                 </button>
-                                <button type="submit" class="btn btn-create bg-success btn-system btn-system-success" :disabled="paymentSubmitting">
-                                    <span x-show="!paymentSubmitting">{{ __('order.detail.add_payment') }}</span>
-                                    <span x-show="paymentSubmitting">{{ __('order.button.processing_payment') }}</span>
+                                <button type="submit" class="btn btn-create bg-success btn-system btn-system-success" :disabled="paymentSubmitting" :aria-busy="paymentSubmitting">
+                                    <span class="bx bx-loader-alt bx-spin" x-show="paymentSubmitting" style="display: none;" aria-hidden="true"></span>
+                                    <span aria-live="polite" x-text="paymentSubmitting ? @js(__('order.button.processing_payment')) : @js(__('order.detail.add_payment'))"></span>
                                 </button>
                             </div>
                         </form>
@@ -2288,8 +2296,9 @@
                 activePrintTemplate: 'template1',
                 printLanguage: '{{ app()->getLocale() === 'km' ? 'km' : 'en' }}',
                 paymentSubmitting: false,
+                paymentNoticeKey: 'order-payment-success:{{ $order->id }}',
                 paymentForm: {
-                    amount: {{ (float) ($order->remaining_amount ?? 0) }},
+                    amount: {{ $paymentRemainingAmount }},
                     payment_method: 'Cash',
                     payment_date: '{{ \Carbon\Carbon::now()->format('Y-m-d\TH:i') }}',
                     note: ''
@@ -2299,47 +2308,80 @@
                         if (window.feather) {
                             feather.replace();
                         }
+                        // Consume the notice once when a full-page refresh was needed.
+                        try {
+                            if (sessionStorage.getItem(this.paymentNoticeKey)) {
+                                sessionStorage.removeItem(this.paymentNoticeKey);
+                                this.notifyPayment('success', @json(__('order.message.payment_status_success')));
+                            }
+                        } catch (error) {
+                            // Storage may be unavailable; the payment flow must still work.
+                        }
                     });
                 },
                 setPrintLanguage(lang) {
                     this.printLanguage = lang;
                 },
+                notifyPayment(type, message) {
+                    // Reuse the shared admin::components.iziToast configuration.
+                    window.iziToast[type]({
+                        ...window.property,
+                        title: type === 'success' ? 'Success' : 'Error',
+                        message: message
+                    });
+                },
                 async submitPayment() {
                     if (this.paymentSubmitting) return;
                     if (!this.paymentForm.amount || Number(this.paymentForm.amount) <= 0) {
-                        alert('Please enter a valid payment amount.');
+                        this.notifyPayment('error', 'Please enter a valid payment amount.');
                         return;
                     }
 
                     this.paymentSubmitting = true;
                     const url = '{{ route('admin-' . ($routeName ?? 'order') . '-add-payment', $order->id) }}';
+                    const tabKey = this.$root.closest('.workspace-tab-pane')?.getAttribute('data-tab-key');
+                    let response;
 
                     try {
-                        const response = await Axios.post(url, {
+                        response = await Axios.post(url, {
                             _token: '{{ csrf_token() }}',
                             amount: this.paymentForm.amount,
                             payment_method: this.paymentForm.payment_method,
                             payment_date: this.paymentForm.payment_date,
                             note: this.paymentForm.note
                         });
-
-                        if (response.data && (response.data.message === 'success' || response.status === 200)) {
-                            if (window.toastr) {
-                                toastr.success('{{ __('order.message.payment_status_success') }}');
-                            }
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 400);
-                        } else {
-                            alert(response.data?.error || 'Payment recording failed.');
-                            this.paymentSubmitting = false;
-                        }
                     } catch (error) {
                         this.paymentSubmitting = false;
                         const errorMsg = error.response?.data?.error ||
                             Object.values(error.response?.data?.errors || {})?.[0]?.[0] ||
                             'Failed to record payment.';
-                        alert(errorMsg);
+                        this.notifyPayment('error', errorMsg);
+                        return;
+                    }
+
+                    if (!(response.data && (response.data.message === 'success' || response.status === 200))) {
+                        this.paymentSubmitting = false;
+                        this.notifyPayment('error', response.data?.error || 'Payment recording failed.');
+                        return;
+                    }
+
+                    this.openPaymentModal = false;
+                    const workspace = window.MDI;
+                    const tab = workspace?.tabs.find(item => item.key === tabKey);
+                    if (tab && typeof workspace.fetchAndMountTab === 'function') {
+                        this.notifyPayment('success', @json(__('order.message.payment_status_success')));
+                        // Keep the current content visible until its replacement is ready.
+                        // Refresh the submitting tab even if the user has switched tabs.
+                        this.$nextTick(() => workspace.fetchAndMountTab(tab));
+                    } else if (this.$root.isConnected) {
+                        try {
+                            sessionStorage.setItem(this.paymentNoticeKey, '1');
+                        } catch (error) {
+                            this.notifyPayment('success', @json(__('order.message.payment_status_success')));
+                        }
+                        window.location.reload();
+                    } else {
+                        this.notifyPayment('success', @json(__('order.message.payment_status_success')));
                     }
                 },
                 printTemplate1(lang = null) {

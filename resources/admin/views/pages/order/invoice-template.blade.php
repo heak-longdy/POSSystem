@@ -128,8 +128,7 @@
                     }
                     $unitPrice = (float) ($detail->price ?? 0);
                     $qty = (int) ($detail->qty ?: 1);
-                    $disc = (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0));
-                    $lineTotal = max(0, ($unitPrice * $qty) - $disc);
+                    $lineTotal = app(\App\Services\OrderPricing::class)->line($detail)['total'];
                 @endphp
                 <tr class="inv-item-row">
                     <td class="cell-num">{{ $index + 1 }}</td>

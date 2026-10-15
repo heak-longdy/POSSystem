@@ -143,9 +143,10 @@
                     $uomName = $detail->product?->uom?->name ?: '12';
                     $unitPrice = (float) ($detail->price ?? 0);
                     $qty = (int) ($detail->qty ?: 1);
-                    $disc = (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0));
-                    $netUnitPrice = max(0, $unitPrice - ($qty > 0 ? ($disc / $qty) : 0));
-                    $lineTotal = max(0, ($unitPrice * $qty) - $disc);
+                    $line = app(\App\Services\OrderPricing::class)->line($detail);
+                    $disc = $line['discount'] / max(1, $qty);
+                    $netUnitPrice = max(0, $unitPrice - $disc);
+                    $lineTotal = $line['total'];
                 @endphp
                 <tr class="slip-row">
                     <td class="td-no">{{ $index + 1 }}</td>

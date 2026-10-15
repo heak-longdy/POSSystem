@@ -1927,7 +1927,7 @@
                                     <span>{{ __('order.initial_partial_payment') }}</span>
                                 </div>
                                 <button type="button" class="booking-pay-full-btn"
-                                    @click="formData.partial_payment_amount = Number(amountPaid || 0)"
+                                    @click="formData.partial_payment_amount = Math.round(Number(amountPaid || 0) * 100) / 100"
                                     :title="'Fill ' + formatCurrency(amountPaid)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                                     <span>{{ __('order.pay_full') }} (<span x-text="formatCurrency(amountPaid)"></span>)</span>
@@ -1939,7 +1939,7 @@
                                     <div class="booking-input-prefix-group">
                                         <span class="input-addon-prefix">$</span>
                                         <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
-                                            :max="subTotal" placeholder="0.00" autocomplete="off">
+                                            :max="amountPaid" placeholder="0.00" autocomplete="off">
                                     </div>
                                     <template x-for="item in dataError?.partial_payment_amount">
                                         <div class="msgError"><p x-text="item"></p></div>
@@ -2000,10 +2000,10 @@
                                     <span>{{ __('order.record_payment') }}</span>
                                 </div>
                                 <button type="button" class="booking-pay-full-btn"
-                                    @click="formData.partial_payment_amount = Number(remainingAmount || amountPaid || 0)"
-                                    :title="'Fill ' + formatCurrency(remainingAmount || amountPaid)">
+                                    @click="formData.partial_payment_amount = remainingAmount"
+                                    :title="'Fill ' + formatCurrency(remainingAmount)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                                    <span>{{ __('order.pay_full') }} (<span x-text="formatCurrency(remainingAmount || amountPaid)"></span>)</span>
+                                    <span>{{ __('order.pay_full') }} (<span x-text="formatCurrency(remainingAmount)"></span>)</span>
                                 </button>
                             </div>
                             <div class="booking-payment-form-grid">
@@ -2012,7 +2012,7 @@
                                     <div class="booking-input-prefix-group">
                                         <span class="input-addon-prefix">$</span>
                                         <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
-                                            :max="remainingAmount || subTotal" placeholder="0.00" autocomplete="off">
+                                            :max="remainingAmount" placeholder="0.00" autocomplete="off">
                                     </div>
                                     <template x-for="item in dataError?.partial_payment_amount">
                                         <div class="msgError"><p x-text="item"></p></div>
@@ -2314,7 +2314,7 @@
                 },
                 syncPaymentState(data = {}) {
                     this.paidAmount = Number(data?.paid_amount || 0);
-                    this.remainingAmount = Number(data?.remaining_amount || 0);
+                    this.remainingAmount = Math.round(Number(data?.remaining_amount || 0) * 100) / 100;
                     this.orderStatus = data?.payment_status || 'Pending';
                     this.paymentHistory = data?.payments || [];
                     this.refreshIcons();
@@ -2680,11 +2680,18 @@
                     return amount > 0 ? `-${this.formatCurrency(amount)}` : this.formatCurrency(0);
                 },
                 cartLineTotal(item) {
-                    const qty = item?.product_type === 'product' ? Number(item?.product_qty || 1) : 1;
-                    const unitPrice = item?.itemData?.discount
-                        ? Number(item?.itemData?.total || 0)
-                        : Number(item?.itemData?.price || 0);
-                    return qty * unitPrice;
+                    const qty = this.cartQuantity(item);
+                    const unitTotal = this.totalDiscount(item?.itemData?.discountType,
+                        item?.itemData?.price, item?.itemData?.discount);
+                    return this.roundMoney(qty * unitTotal);
+                },
+                cartQuantity(item) {
+                    return item?.product_type === 'service' ? 1 : Math.max(1, Math.trunc(Number(item?.product_qty || 1)));
+                },
+                roundMoney(value) {
+                    const cents = Number(value || 0) * 100;
+                    const rounded = Math.round(Math.abs(cents) + Number.EPSILON * Math.max(1, Math.abs(cents)) * 4);
+                    return (cents < 0 ? -rounded : rounded) / 100;
                 },
                 formatDate(value, pattern = 'DD MMM YYYY') {
                     if (!value) {
@@ -3086,7 +3093,7 @@
                     const baseDiscount = Number(discount || 0);
 
                     if (type === 'percent') {
-                        amount = basePrice - (basePrice * baseDiscount / 100);
+                        amount = Math.max(0, basePrice - (basePrice * baseDiscount / 100));
                     } else if (type === 'usd' || type === 'khr') {
                         amount = baseDiscount > basePrice ? 0 : basePrice - baseDiscount;
                     } else {
@@ -3109,18 +3116,21 @@
 
                     if (this.dataCart?.length > 0) {
                         this.dataCart.forEach((item) => {
-                            const qty = item?.product_qty ? Number(item.product_qty) : 1;
+                            const qty = this.cartQuantity(item);
                             const unitPrice = Number(item?.itemData?.price || 0);
-                            const price = item?.itemData?.discount ? Number(item?.itemData?.total || unitPrice) : unitPrice;
-                            const totalCommission = Number(item?.itemData?.totalCommission || 0);
+                            const totalCommission = this.getCommssion(item?.itemData?.commissionType,
+                                unitPrice, item?.itemData?.commission);
 
-                            this.subTotal += qty * unitPrice;
-                            this.commissionTotal += totalCommission * qty;
-                            this.total += qty * price;
+                            this.subTotal += this.roundMoney(qty * unitPrice);
+                            this.commissionTotal += this.roundMoney(totalCommission * qty);
+                            this.total += this.cartLineTotal(item);
                         });
                     }
 
-                    this.amountPaid = this.total - this.commissionTotal;
+                    this.subTotal = this.roundMoney(this.subTotal);
+                    this.total = this.roundMoney(this.total);
+                    this.commissionTotal = this.roundMoney(this.commissionTotal);
+                    this.amountPaid = this.roundMoney(this.total - this.commissionTotal);
                     this.saveDraft();
                 },
                 async productValidation($cb) {
@@ -3256,7 +3266,7 @@
                         return;
                     }
 
-                    if (amount > Number(this.remainingAmount || 0)) {
+                    if (Math.round(amount * 100) > Math.round(Number(this.remainingAmount || 0) * 100)) {
                         this.setValidationErrors({
                             amount: [@json(__('order.validation.payment_amount_exceeds'))]
                         });
@@ -3296,7 +3306,7 @@
                 savePaymentEdit(pay) {
                     this.dataError = {};
                     const amount = Number(this.editPaymentAmount || 0);
-                    const availableBalance = Number(this.remainingAmount || 0) + Number(pay?.amount || 0);
+                    const availableBalanceCents = Math.round(Number(this.remainingAmount || 0) * 100) + Math.round(Number(pay?.amount || 0) * 100);
 
                     if (amount <= 0) {
                         this.setValidationErrors({
@@ -3305,7 +3315,7 @@
                         return;
                     }
 
-                    if (amount > availableBalance) {
+                    if (Math.round(amount * 100) > availableBalanceCents) {
                         this.setValidationErrors({
                             amount: [@json(__('order.validation.payment_amount_exceeds'))]
                         });
@@ -3443,10 +3453,11 @@
                     }
 
                     const partialPayment = Number(this.formData.partial_payment_amount || 0);
-                    const maxAllowedPayment = this.orderId ? Number(this.remainingAmount || this.subTotal || 0) : Number(this.subTotal || 0);
+                    const maxAllowedPayment = this.orderId && !this.canEditOrderItems()
+                        ? Number(this.remainingAmount || 0) : Number(this.amountPaid || 0);
                     if (partialPayment < 0) {
                         errors.partial_payment_amount = [@json(__('order.validation.partial_min'))];
-                    } else if (partialPayment > maxAllowedPayment) {
+                    } else if (Math.round(partialPayment * 100) > Math.round(maxAllowedPayment * 100)) {
                         errors.partial_payment_amount = [@json(__('order.validation.partial_max'))];
                     }
                     if (this.formData.partial_payment_note && this.formData.partial_payment_note.length > 500) {
