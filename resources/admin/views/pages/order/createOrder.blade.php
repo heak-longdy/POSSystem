@@ -11,7 +11,8 @@
 @endphp
 @section('layout')
     @include('admin::shared.header', ['header_name' => $headerName])
-    <div class="form-admin booking booking-dashboard booking-order-ui" x-data="XDatacreateorder">
+    <div class="form-admin booking booking-dashboard booking-order-ui" x-data="XDatacreateorder"
+        x-id="['order-date', 'delivery-date']">
         <div class="booking-pos-workspace">
             <div class="booking-pos-header">
                 <div class="form-header">
@@ -335,16 +336,16 @@
                                 </template>
                             </div>
                             <div class="form-group form-group--full">
-                                <label><i data-feather="calendar"></i> {{ __('order.form.order_date') }}</label>
-                                <input type="text" id="order_date" name="order_date" x-model="formData.order_date"
+                                <label :for="$id('order-date')"><i data-feather="calendar" aria-hidden="true"></i> {{ __('order.form.order_date') }}</label>
+                                <input type="text" :id="$id('order-date')" x-ref="orderDate" name="order_date" x-model="formData.order_date"
                                     :disabled="!canEditOrderItems()" autocomplete="off" class="sidebar-date-input">
                                 <template x-for="item in dataError?.order_date">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
                             <div class="form-group form-group--full">
-                                <label><i data-feather="truck"></i> {{ __('order.form.delivery_date') }}</label>
-                                <input type="text" id="delivery_date" x-model="formData.delivery_date"
+                                <label :for="$id('delivery-date')"><i data-feather="truck" aria-hidden="true"></i> {{ __('order.form.delivery_date') }}</label>
+                                <input type="text" :id="$id('delivery-date')" x-ref="deliveryDate" x-model="formData.delivery_date"
                                     :disabled="!canEditOrderItems()" autocomplete="off" class="sidebar-date-input">
                                 <template x-for="item in dataError?.delivery_date">
                                     <span class="error" x-text="item">Error</span>
@@ -2055,8 +2056,8 @@
                     status: 'confirmed',
                     customer_id: null,
                     disable: false,
-                    order_date: moment().format('YYYY-MM-DD'),
-                    delivery_date: moment().add(2, 'days').format('YYYY-MM-DD'),
+                    order_date: moment().locale('en').format('YYYY-MM-DD'),
+                    delivery_date: moment().locale('en').add(2, 'days').format('YYYY-MM-DD'),
                     pay_way: 'Cash',
                     partial_payment_amount: null,
                     partial_payment_note: '',
@@ -2116,13 +2117,13 @@
                     this.formData.customer_id = order?.customer_id || order?.customer?.id || null;
                     const orderDateVal = order?.order_date;
                     this.formData.order_date = orderDateVal
-                        ? moment(orderDateVal).format('YYYY-MM-DD')
-                        : moment().format('YYYY-MM-DD');
+                        ? moment(orderDateVal).locale('en').format('YYYY-MM-DD')
+                        : moment().locale('en').format('YYYY-MM-DD');
                     this.formData.delivery_date = order?.delivery_date
-                        ? moment(order.delivery_date).format('YYYY-MM-DD')
+                        ? moment(order.delivery_date).locale('en').format('YYYY-MM-DD')
                         : (orderDateVal
-                            ? moment(orderDateVal).add(2, 'days').format('YYYY-MM-DD')
-                            : moment().add(2, 'days').format('YYYY-MM-DD'));
+                            ? moment(orderDateVal).locale('en').add(2, 'days').format('YYYY-MM-DD')
+                            : moment().locale('en').add(2, 'days').format('YYYY-MM-DD'));
                     this.formData.pay_way = order?.pay_way || 'Cash';
                     this.dataCart = [];
 
@@ -2154,8 +2155,8 @@
 
                     this.calculatorProductPrice();
                     this.fiterProduct(this.searchFilter);
-                    this.initOrderDatepicker();
                     this.$nextTick(() => {
+                        this.initOrderDatepicker();
                         this.fetchSelectShop();
                         this.fetchSelectCustomer();
                         this.prefillSelectFields(order, selectedShop);
@@ -2176,33 +2177,29 @@
                     this.refreshIcons();
                 },
                 initOrderDatepicker() {
+                    if (!window.jQuery || !$.fn.datepicker) return;
+
                     const vm = this;
-                    const $orderDate = this.getScopeEl("#order_date");
-                    const $deliveryDate = this.getScopeEl("#delivery_date");
-                    if ($orderDate.length) {
-                        $orderDate.datepicker({
-                            dateFormat: 'yy-mm-dd',
-                            changeYear: true,
-                            changeMonth: true,
-                            gotoCurrent: true,
-                            yearRange: "-10:+10",
+                    const options = {
+                        dateFormat: 'yy-mm-dd',
+                        changeYear: true,
+                        changeMonth: true,
+                        gotoCurrent: true,
+                        yearRange: '-50:+10',
+                    };
+                    [
+                        [this.$refs.orderDate, 'order_date'],
+                        [this.$refs.deliveryDate, 'delivery_date'],
+                    ].forEach(([input, field]) => {
+                        if (!input || $(input).hasClass('hasDatepicker')) return;
+
+                        $(input).datepicker({
+                            ...options,
                             onSelect(selectedDate) {
-                                vm.formData.order_date = selectedDate;
+                                vm.formData[field] = selectedDate;
                             }
                         });
-                    }
-                    if ($deliveryDate.length) {
-                        $deliveryDate.datepicker({
-                            dateFormat: 'yy-mm-dd',
-                            changeYear: true,
-                            changeMonth: true,
-                            gotoCurrent: true,
-                            yearRange: "-10:+10",
-                            onSelect(selectedDate) {
-                                vm.formData.delivery_date = selectedDate;
-                            }
-                        });
-                    }
+                    });
                 },
                 initTwoColumnSticky() {
                     const leftCol = (this.$el ? this.$el.querySelector('.booking-pos-main-col') : null) || document.querySelector('.booking-pos-main-col');
@@ -3033,6 +3030,10 @@
 
                         if (draft.formData) {
                             this.formData = Object.assign({}, this.formData, draft.formData);
+                            ['order_date', 'delivery_date'].forEach((field) => {
+                                this.formData[field] = String(this.formData[field] || '').replace(/[០-៩]/g,
+                                    digit => String(digit.charCodeAt(0) - 0x17E0));
+                            });
                         }
                         if (draft.shopData) {
                             this.shopData = draft.shopData;
@@ -3066,10 +3067,10 @@
                             }
 
                             if (draft.formData?.order_date) {
-                                this.getScopeEl('#order_date').val(draft.formData.order_date);
+                                $(this.$refs.orderDate).val(this.formData.order_date);
                             }
                             if (draft.formData?.delivery_date) {
-                                this.getScopeEl('#delivery_date').val(draft.formData.delivery_date);
+                                $(this.$refs.deliveryDate).val(this.formData.delivery_date);
                             }
                             this.fiterProduct(this.searchFilter);
                             this.calculatorProductPrice();

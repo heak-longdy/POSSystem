@@ -96,10 +96,6 @@
             grid-template-columns: 1.1fr 1.1fr 1fr;
         }
 
-        .dash-grid-row-3 {
-            grid-template-columns: 1fr 1.8fr;
-        }
-
         .dash-grid-row-4 {
             grid-template-columns: 1fr 1.8fr;
         }
@@ -113,7 +109,6 @@
                 grid-template-columns: repeat(3, 1fr);
             }
             .dash-grid-row-2,
-            .dash-grid-row-3,
             .dash-grid-row-4 {
                 grid-template-columns: 1fr 1fr;
             }
@@ -135,7 +130,6 @@
             .dash-card.top-mini-card:last-child {
                 grid-column: span 2;
             }
-            .dash-grid-row-3,
             .dash-grid-row-4 {
                 grid-template-columns: 1fr;
             }
@@ -145,7 +139,6 @@
             .dash-grid-row-1,
             .dash-grid-row-secondary,
             .dash-grid-row-2,
-            .dash-grid-row-3,
             .dash-grid-row-4 {
                 grid-template-columns: 1fr;
             }
@@ -608,27 +601,6 @@
         .earnings-bottom-chart {
             margin: 0 -24px -5px -24px;
             height: 75px;
-        }
-
-        /* ---------------- Row 3 Cards ---------------- */
-        /* Weekly Stats */
-        .weekly-items-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-top: 15px;
-        }
-
-        .weekly-item-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .item-left-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
         .item-badge-pill {
@@ -1299,130 +1271,6 @@
                 </div>
 
 
-                <!-- ================= ROW 3 ================= -->
-                <div class="dash-grid-row dash-grid-row-3">
-
-                    <!-- 9. Weekly Stats -->
-                    <div class="dash-card">
-                        <h3 class="dash-card-title">@lang('dashboard.weekly_stats')</h3>
-                        <p class="dash-card-subtitle">
-                            @lang('dashboard.average_sales'): <strong style="color: var(--text-dark); font-weight: 700;">{{ $weeklyStats['average_sales_formatted'] ?? '$0.00' }}</strong>
-                        </p>
-                        
-                        <div style="margin: 5px -10px 10px -10px;">
-                            <div id="chart-weekly-stats" style="width: 100%; height: 130px;"></div>
-                        </div>
-
-                        <div class="weekly-items-list">
-                            <!-- Item 1: Top Sales -->
-                            <div class="weekly-item-row">
-                                <div class="item-left-info" style="min-width: 0; flex: 1;">
-                                    <div class="grid-icon-box blue" style="flex-shrink: 0;">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
-                                            <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
-                                            <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
-                                        </svg>
-                                    </div>
-                                    <div style="min-width: 0; overflow: hidden;">
-                                        <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.top_sales')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $weeklyStats['top_sales']['name'] ?? '---' }}">{{ $weeklyStats['top_sales']['name'] ?? '---' }}</p>
-                                    </div>
-                                </div>
-                                <span class="item-badge-pill badge-blue" style="flex-shrink: 0; margin-left: 8px;">{{ $weeklyStats['top_sales']['badge'] ?? '+0' }}</span>
-                            </div>
-
-                            <!-- Item 2: Best Seller -->
-                            <div class="weekly-item-row">
-                                <div class="item-left-info" style="min-width: 0; flex: 1;">
-                                    <div class="grid-icon-box teal" style="flex-shrink: 0;">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
-                                            <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
-                                            <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
-                                        </svg>
-                                    </div>
-                                    <div style="min-width: 0; overflow: hidden;">
-                                        <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.best_seller')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $weeklyStats['best_seller']['name'] ?? '---' }}">{{ $weeklyStats['best_seller']['name'] ?? '---' }}</p>
-                                    </div>
-                                </div>
-                                <span class="item-badge-pill badge-teal" style="flex-shrink: 0; margin-left: 8px;">{{ $weeklyStats['best_seller']['badge'] ?? '+0' }}</span>
-                            </div>
-
-                            <!-- Item 3: Most Commented / Top Category -->
-                            <div class="weekly-item-row">
-                                <div class="item-left-info" style="min-width: 0; flex: 1;">
-                                    <div class="grid-icon-box orange" style="flex-shrink: 0;">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                            <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
-                                            <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
-                                            <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
-                                        </svg>
-                                    </div>
-                                    <div style="min-width: 0; overflow: hidden;">
-                                        <h4 style="font-size: 14px; font-weight: 700; margin: 0; color: var(--text-dark);">@lang('dashboard.most_commented')</h4>
-                                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $weeklyStats['most_commented']['name'] ?? '---' }}">{{ $weeklyStats['most_commented']['name'] ?? '---' }}</p>
-                                    </div>
-                                </div>
-                                <span class="item-badge-pill badge-orange" style="flex-shrink: 0; margin-left: 8px;">{{ $weeklyStats['most_commented']['badge'] ?? '+0' }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 10. Yearly Sales -->
-                    <div class="dash-card">
-                        <div class="table-header-flex" style="margin-bottom: 4px;">
-                            <div>
-                                <h3 class="dash-card-title">@lang('dashboard.yearly_sales')</h3>
-                                <p class="dash-card-subtitle" id="yearly-sales-subtitle">
-                                    @lang('dashboard.total_sales'): <strong id="yearly-sales-total-val" style="color: var(--text-dark); font-weight: 700;">{{ $yearlySalesData['total_sales_formatted'] ?? '$0.00' }}</strong>
-                                </p>
-                            </div>
-                            <select class="select-month-dropdown" id="yearly-sales-year-select" aria-label="@lang('dashboard.yearly_sales')">
-                                @foreach ($yearlySalesAvailableYears ?? [] as $yr)
-                                    <option value="{{ $yr }}" {{ (int)($selectedYearlySalesYear ?? 0) === (int)$yr ? 'selected' : '' }}>
-                                        {{ $yr }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div id="chart-yearly-sales" style="min-height: 200px; margin: 10px 0;"></div>
-
-                        <div class="card-dual-stats">
-                            <div class="dual-stat-item">
-                                <div class="grid-icon-box blue">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
-                                        <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
-                                        <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-details">
-                                    <p style="margin: 0; font-size: 12px; color: var(--text-muted);">@lang('dashboard.salary')</p>
-                                    <h4 id="yearly-sales-salary-val">{{ $yearlySalesData['salary_formatted'] ?? '$0.00' }}</h4>
-                                </div>
-                            </div>
-                            <div class="dual-stat-item">
-                                <div class="grid-icon-box cyan">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                        <circle cx="4" cy="4" r="2.5"/><circle cx="12" cy="4" r="2.5"/><circle cx="20" cy="4" r="2.5"/>
-                                        <circle cx="4" cy="12" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="20" cy="12" r="2.5"/>
-                                        <circle cx="4" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="20" cy="20" r="2.5"/>
-                                    </svg>
-                                </div>
-                                <div class="stat-details">
-                                    <p style="margin: 0; font-size: 12px; color: var(--text-muted);">@lang('dashboard.expense')</p>
-                                    <h4 id="yearly-sales-expense-val">{{ $yearlySalesData['expense_formatted'] ?? '$0.00' }}</h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-
                 <!-- ================= ROW 4 ================= -->
                 <div class="dash-grid-row dash-grid-row-4">
 
@@ -1778,153 +1626,6 @@
             if (document.querySelector("#chart-monthly-earnings")) {
                 var monthlyChart = new ApexCharts(document.querySelector("#chart-monthly-earnings"), monthlyEarningsOptions);
                 monthlyChart.render();
-            }
-
-            // 5. Weekly Stats Spline Chart
-            var weeklyStatsData = {!! json_encode($weeklyStats['chart_data'] ?? [0, 0, 0, 0, 0, 0, 0]) !!};
-            var weeklyStatsCategories = {!! json_encode($weeklyStats['chart_categories'] ?? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) !!};
-            var weeklyStatsOptions = {
-                series: [{
-                    name: @json(__('dashboard.sales')),
-                    data: weeklyStatsData
-                }],
-                labels: weeklyStatsCategories,
-                chart: {
-                    type: 'area',
-                    height: 125,
-                    sparkline: { enabled: true },
-                    fontFamily: 'inherit'
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 2.2,
-                    colors: ['#5D87FF']
-                },
-                fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 0,
-                        opacityFrom: 0.12,
-                        opacityTo: 0.0,
-                        stops: [0, 100]
-                    }
-                },
-                colors: ['#5D87FF'],
-                yaxis: {
-                    min: 0,
-                    show: false
-                },
-                tooltip: {
-                    theme: 'dark',
-                    x: {
-                        show: true
-                    },
-                    y: {
-                        formatter: function (val) {
-                            return '$' + Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                        }
-                    }
-                }
-            };
-            if (document.querySelector("#chart-weekly-stats")) {
-                var weeklyChart = new ApexCharts(document.querySelector("#chart-weekly-stats"), weeklyStatsOptions);
-                weeklyChart.render();
-            }
-
-            // 6. Yearly Sales Column Chart
-            var yearlySalesData = @json($yearlySalesData['chart_data'] ?? []);
-            var yearlySalesOptions = {
-                series: [{
-                    name: @json(__('dashboard.sales')),
-                    data: yearlySalesData
-                }],
-                chart: {
-                    type: 'bar',
-                    height: 190,
-                    toolbar: { show: false },
-                    fontFamily: 'inherit'
-                },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        columnWidth: '38%',
-                        distributed: false
-                    }
-                },
-                dataLabels: { enabled: false },
-                grid: { show: false },
-                yaxis: { show: false },
-                xaxis: {
-                    axisBorder: { show: false },
-                    axisTicks: { show: false },
-                    labels: {
-                        style: { colors: '#7C8FAC', fontSize: '11px' }
-                    }
-                },
-                tooltip: {
-                    theme: 'dark',
-                    y: {
-                        formatter: function (val) {
-                            return '$' + Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                        }
-                    }
-                }
-            };
-            if (document.querySelector("#chart-yearly-sales")) {
-                var yearlyChart = new ApexCharts(document.querySelector("#chart-yearly-sales"), yearlySalesOptions);
-                yearlyChart.render();
-            }
-
-            // Yearly Sales Year Filter (AJAX)
-            var yearlySalesYearSelect = document.getElementById('yearly-sales-year-select');
-            var chartYearlyEl = document.querySelector("#chart-yearly-sales");
-            if (yearlySalesYearSelect && yearlyChart) {
-                yearlySalesYearSelect.addEventListener('change', function () {
-                    var selectedYear = this.value;
-                    if (chartYearlyEl) {
-                        chartYearlyEl.style.opacity = '0.4';
-                        chartYearlyEl.style.transition = 'opacity 0.2s ease';
-                    }
-
-                    fetch(`{{ route('admin-dashboard') }}?yearly_sales_year=${encodeURIComponent(selectedYear)}&ajax=yearly_sales`, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(function (response) {
-                        if (!response.ok) throw new Error('Network error');
-                        return response.json();
-                    })
-                    .then(function (data) {
-                        if (data && data.status === 'success') {
-                            var totalValEl = document.getElementById('yearly-sales-total-val');
-                            if (totalValEl && data.total_sales_formatted) {
-                                totalValEl.textContent = data.total_sales_formatted;
-                            }
-                            var salaryValEl = document.getElementById('yearly-sales-salary-val');
-                            if (salaryValEl && data.salary_formatted) {
-                                salaryValEl.textContent = data.salary_formatted;
-                            }
-                            var expenseValEl = document.getElementById('yearly-sales-expense-val');
-                            if (expenseValEl && data.expense_formatted) {
-                                expenseValEl.textContent = data.expense_formatted;
-                            }
-                            yearlyChart.updateSeries([{
-                                name: @json(__('dashboard.sales')),
-                                data: data.chart_data || []
-                            }]);
-                        }
-                        if (chartYearlyEl) {
-                            chartYearlyEl.style.opacity = '1';
-                        }
-                    })
-                    .catch(function (err) {
-                        console.error('Error fetching yearly sales:', err);
-                        if (chartYearlyEl) {
-                            chartYearlyEl.style.opacity = '1';
-                        }
-                    });
-                });
             }
 
             // 7. Product Performance Month Filter (AJAX)

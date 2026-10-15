@@ -65,13 +65,11 @@
                         </div>
                         <div class="table-header">
                             <div class="row table-row-5"><span>{{ __('shop.table.no') }}</span></div>
-                            <div class="row table-row-8 text left"><span>{{ __('shop.table.image') }}</span></div>
-                            <div class="row table-row-25 text left"><span>{{ __('shop.table.product') }}</span></div>
-                            <div class="row table-row-14 text left"><span>{{ __('shop.table.category') }}</span></div>
-                            <div class="row table-row-8 text left"><span>{{ __('shop.table.uom') }}</span></div>
-                            <div class="row table-row-9"><span>{{ __('shop.table.price') }}</span></div>
-                            <div class="row table-row-7"><span>{{ __('shop.table.point') }}</span></div>
-                            <div class="row table-row-9"><span>{{ __('shop.table.commission') }}</span></div>
+                            <div class="row table-row-10 text left"><span>{{ __('shop.table.image') }}</span></div>
+                            <div class="row table-row-30 text left"><span>{{ __('shop.table.product') }}</span></div>
+                            <div class="row table-row-15 text left"><span>{{ __('shop.table.category') }}</span></div>
+                            <div class="row table-row-10 text left"><span>{{ __('shop.table.uom') }}</span></div>
+                            <div class="row table-row-15"><span>{{ __('shop.table.price') }}</span></div>
                             <div class="row table-row-10"><span>{{ __('shop.table.status') }}</span></div>
                             <div class="row table-row-5"><span></span></div>
                         </div>
@@ -81,35 +79,23 @@
                                     <div class="row table-row-5">
                                         <span>{!! $products->currentPage() * $products->perPage() - $products->perPage() + ($index + 1) !!}</span>
                                     </div>
-                                    <div class="row table-row-8 text left">
+                                    <div class="row table-row-10 text left">
                                         <div class="thumbnail" data-fancybox data-src="{!! $item->product?->image_url !!}">
                                             <img src="{!! $item->product?->image_url !!}"
                                                 onerror="this.src='{{ asset('images/logo/default.png') }}'" alt="">
                                         </div>
                                     </div>
-                                    <div class="row table-row-25 text left">
+                                    <div class="row table-row-30 text left">
                                         <span>{{ $item->product?->name ?? '---' }}</span>
                                     </div>
-                                    <div class="row table-row-14 text left">
+                                    <div class="row table-row-15 text left">
                                         <span>{{ $item->product?->category?->name ?? '---' }}</span>
                                     </div>
-                                    <div class="row table-row-8 text left">
+                                    <div class="row table-row-10 text left">
                                         <span>{{ $item->product?->uom?->name ?? '---' }}</span>
                                     </div>
-                                    <div class="row table-row-9">
+                                    <div class="row table-row-15">
                                         <span>{{ $item->price !== null ? number_format($item->price, 2) . ' $' : '---' }}</span>
-                                    </div>
-                                    <div class="row table-row-7">
-                                        <span>{{ $item->point ?? '---' }}</span>
-                                    </div>
-                                    <div class="row table-row-9">
-                                        <span>
-                                            @if ($item->commission !== null)
-                                                {{ number_format($item->commission, 2) }}{{ $item->commission_type == 'percent' ? '%' : ' $' }}
-                                            @else
-                                                ---
-                                            @endif
-                                        </span>
                                     </div>
                                     <div class="row table-row-10">
                                         <span>{{ $item->status == 1 ? __('global.tab.active') : ($item->status == 2 ? __('global.tab.disable') : '---') }}</span>
