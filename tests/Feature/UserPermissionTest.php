@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\ModulePermission;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Support\PermissionModuleSelection;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Schema\Blueprint;
@@ -77,22 +78,169 @@ class UserPermissionTest extends TestCase
 
     public function test_new_user_can_be_created_assigned_permissions_and_edited_without_losing_access(): void
     {
+        $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole->syncPermissions(Permission::all());
         $this->manager->givePermissionTo('user-create');
         $this->actingAs($this->manager)->post(route('admin-user-save'), [
             'name' => 'New cashier', 'email' => 'cashier@example.test', 'status' => 1,
-            'role' => 'cashier', 'language_preference' => 'en',
+            'language_preference' => 'en',
             'password' => 'test-password', 'confirm_password' => 'test-password',
         ])->assertRedirect(route('admin-user-list', 1));
         $user = User::where('email', 'cashier@example.test')->firstOrFail();
-        $this->assertTrue($user->hasRole('cashier'));
-        $this->postJson($this->saveUrl($user), ['permission' => ['user-view']])->assertOk();
+        $this->assertSame('admin', $user->role);
+        $this->assertSame(['dashboard-view'], $user->getAllPermissions()->pluck('name')->all());
+        $this->assertCount(0, $user->roles);
+        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('test-password', $user->password));
+        $this->get(route('admin-user-permission', $user->id))->assertOk()
+            ->assertViewHas('userPermissions', ['dashboard-view'])
+            ->assertViewHas('inheritedPermissions', []);
+        $this->postJson($this->saveUrl($user), ['permission' => ['dashboard-view', 'user-view']])->assertOk();
         $this->post(route('admin-user-save', $user->id), [
             'name' => 'Updated cashier', 'email' => $user->email, 'status' => 1,
-            'role' => 'cashier', 'language_preference' => 'en',
+            'language_preference' => 'en',
         ])->assertRedirect(route('admin-user-list', 1));
         $this->assertSame('Updated cashier', $user->fresh()->name);
+        $this->assertEqualsCanonicalizing(['dashboard-view', 'user-view'], $user->fresh()->getAllPermissions()->pluck('name')->all());
         $this->actingAs($user->fresh())->get(route('admin-user-list', 1))->assertOk();
         $this->getJson(route('admin-user-create'))->assertForbidden();
+        $this->actingAs($this->manager)->postJson($this->saveUrl($user), ['permission' => ['dashboard-view']])->assertOk();
+        $this->actingAs($user->fresh())->getJson(route('admin-user-list', 1))->assertForbidden();
+        $this->assertSame('admin', $user->fresh()->role);
+        $this->assertCount(Permission::count(), $adminRole->fresh()->permissions);
+    }
+
+    public function test_creation_and_edit_forms_omit_role(): void
+    {
+        $this->manager->givePermissionTo('user-create');
+        $this->actingAs($this->manager)->get(route('admin-user-create'))->assertOk()->assertDontSee('name="role"', false);
+        $this->get(route('admin-user-edit', $this->staff->id))->assertOk()->assertDontSee('name="role"', false);
+    }
+
+    public function test_edit_preserves_existing_role_and_permissions_even_if_a_role_is_submitted(): void
+    {
+        $role = Role::create(['name' => 'cashier', 'guard_name' => 'web']);
+        $role->givePermissionTo('user-view');
+        $this->staff->update(['role' => 'cashier']);
+        $this->staff->assignRole($role);
+        $this->staff->givePermissionTo('product-view');
+        Role::create(['name' => 'admin', 'guard_name' => 'web'])->syncPermissions(Permission::all());
+
+        $this->actingAs($this->manager)->post(route('admin-user-save', $this->staff->id), [
+            'name' => 'Updated staff', 'email' => $this->staff->email, 'status' => 1,
+            'language_preference' => 'en', 'role' => 'admin',
+        ])->assertRedirect(route('admin-user-list', 1))->assertSessionHas('success');
+
+        $staff = $this->staff->fresh();
+        $this->assertSame('Updated staff', $staff->name);
+        $this->assertSame('cashier', $staff->role);
+        $this->assertSame(['cashier'], $staff->getRoleNames()->all());
+        $this->assertSame(['product-view'], $staff->permissions->pluck('name')->all());
+        $this->assertSame(['user-view'], $staff->getPermissionsViaRoles()->pluck('name')->all());
+        $this->assertFalse($staff->can('product-update'));
+    }
+
+    public function test_default_admin_has_only_dashboard_access_even_when_admin_role_has_all_permissions(): void
+    {
+        $role = Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        $role->syncPermissions(Permission::all());
+        $this->manager->givePermissionTo('user-create');
+        $this->actingAs($this->manager)->post(route('admin-user-save'), [
+            'name' => 'Dashboard user', 'email' => 'dashboard@example.test', 'status' => 1,
+            'language_preference' => 'en', 'password' => 'test-password', 'confirm_password' => 'test-password',
+        ])->assertSessionHas('success');
+        $user = User::where('email', 'dashboard@example.test')->firstOrFail();
+        foreach (Permission::pluck('name') as $permission) {
+            $this->assertSame($permission === 'dashboard-view', $user->can($permission), $permission);
+        }
+
+        // Exercise real route authorization and sidebar rendering without the
+        // unrelated Dashboard analytics tables / MySQL aggregate functions.
+        $this->partialMock(DashboardController::class, function ($mock) {
+            $mock->shouldReceive('index')->once()->andReturnUsing(fn () => response()->view('admin::shared.sidebar'));
+        });
+        $response = $this->actingAs($user)->get(route('admin-dashboard'))->assertOk();
+        $document = new \DOMDocument();
+        @$document->loadHTML($response->getContent());
+        $links = (new \DOMXPath($document))->query('//ul[contains(@class,"side-menu")]//a[@data-url]');
+        $this->assertSame([route('admin-dashboard')], array_map(fn ($link) => $link->getAttribute('data-url'), iterator_to_array($links)));
+
+        $checkMenu = function ($items) use (&$checkMenu) {
+            foreach ($items as $item) {
+                if (!empty($item['path'])) {
+                    $this->getJson(url($item['path']))->assertForbidden();
+                }
+                $checkMenu($item['listMenu'] ?? $item['children'] ?? []);
+            }
+        };
+        $checkMenu(config('menu'));
+        foreach (['user-save-permission', 'user-save', 'order-save', 'product-save'] as $route) {
+            $this->postJson(route('admin-' . $route, $this->manager->id), [])->assertForbidden();
+        }
+        foreach (['admin-setting-invoice-save', 'admin-setting-invoice-preview',
+            'admin-file-manager-upload', 'admin-file-manager-rename-file', 'admin-file-manager-create-folder',
+            'admin-file-manager-rename-folder', 'admin-our-service-store', 'admin-setting-save'] as $route) {
+            $this->postJson(route($route), [])->assertForbidden();
+        }
+        foreach (['first', 'files', 'folders'] as $action) {
+            $this->getJson(route('admin-file-manager-' . $action))->assertForbidden();
+        }
+        foreach (['delete-file', 'delete-folder', 'delete-all'] as $action) {
+            $this->deleteJson(route('admin-file-manager-' . $action))->assertForbidden();
+        }
+        $this->putJson(route('admin-file-manager-restore-all'))->assertForbidden();
+        $this->getJson(url('admin/setting/invoice'))->assertForbidden();
+    }
+
+    public function test_file_and_invoice_access_can_be_granted_and_revoked_through_permission_configuration(): void
+    {
+        $this->staff->update(['role' => 'admin']);
+        $this->staff->givePermissionTo('dashboard-view');
+        $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))->assertOk()
+            ->assertSee('value="file-manager-view"', false)->assertSee('value="setting-invoice-update"', false);
+        $this->postJson($this->saveUrl(), ['permission' => ['dashboard-view', 'file-manager-view', 'setting-invoice-update']])->assertOk();
+        $this->actingAs($this->staff->fresh())->get(route('admin-file-manager-index'))->assertOk();
+        $this->postJson(route('admin-file-manager-upload'), [])->assertForbidden();
+        $this->postJson(route('admin-setting-invoice-save'), [])->assertUnprocessable();
+        $this->getJson(route('admin-setting-invoice-index'))->assertForbidden();
+        $this->actingAs($this->manager)->postJson($this->saveUrl(), ['permission' => ['dashboard-view']])->assertOk();
+        $this->actingAs($this->staff->fresh())->getJson(route('admin-file-manager-index'))->assertForbidden();
+        $this->postJson(route('admin-setting-invoice-save'), [])->assertForbidden();
+    }
+
+    public function test_create_ignores_submitted_roles_and_permissions_including_for_super_admin_creators(): void
+    {
+        $super = User::create(['name' => 'Super', 'email' => 'super@example.test', 'role' => 'super_admin']);
+        $this->actingAs($super);
+        foreach (['admin', 'cashier', 'super_admin'] as $submittedRole) {
+            $this->from(route('admin-user-create'))->post(route('admin-user-save'), [
+                'name' => 'New user', 'email' => $submittedRole . '@example.test', 'status' => 1,
+                'language_preference' => 'en', 'password' => 'test-password', 'confirm_password' => 'test-password',
+                'role' => $submittedRole, 'roles' => ['super_admin'], 'permission' => ['user-update'],
+                'permissions' => ['product-view'], 'save_opt' => 'save_new',
+            ])->assertRedirect(route('admin-user-create'))->assertSessionHas('success');
+            $user = User::where('email', $submittedRole . '@example.test')->firstOrFail();
+            $this->assertSame('admin', $user->role);
+            $this->assertCount(0, $user->roles);
+            $this->assertSame(['dashboard-view'], $user->getAllPermissions()->pluck('name')->all());
+        }
+        $this->postJson(route('admin-user-save'), [
+            'id' => $super->id, 'name' => 'No password', 'email' => 'invalid@example.test',
+            'status' => 1, 'language_preference' => 'en',
+        ])->assertUnprocessable()->assertJsonValidationErrors(['password', 'confirm_password']);
+        $this->assertDatabaseMissing('users', ['email' => 'invalid@example.test']);
+    }
+
+    public function test_failed_default_permission_assignment_rolls_back_user_creation(): void
+    {
+        Permission::where('name', 'dashboard-view')->delete();
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->manager->givePermissionTo('user-create');
+        $this->actingAs($this->manager)->from(route('admin-user-create'))->post(route('admin-user-save'), [
+            'name' => 'Failed user', 'email' => 'failed@example.test', 'status' => 1,
+            'language_preference' => 'en', 'password' => 'test-password', 'confirm_password' => 'test-password',
+        ])->assertRedirect(route('admin-user-create'))->assertSessionHas('warning')->assertSessionMissing('success');
+        $this->assertDatabaseMissing('users', ['email' => 'failed@example.test']);
+        $this->assertArrayNotHasKey('password', session()->getOldInput());
     }
 
     public function test_invalid_permissions_never_clear_existing_assignments(): void
@@ -167,6 +315,8 @@ class UserPermissionTest extends TestCase
         $moduleIds = DB::table('module_permissions')->pluck('id', 'name')->all();
         (new PermissionSeeder())->run();
         $migration = require database_path('migrations/2026_10_15_000000_complete_user_permission_catalog.php');
+        $migration->up();
+        $migration = require database_path('migrations/2026_10_16_000000_add_file_and_invoice_permissions.php');
         $migration->up();
         $this->assertSame($before, DB::table('permissions')->pluck('id', 'name')->all());
         $this->assertSame($moduleIds, DB::table('module_permissions')->pluck('id', 'name')->all());
@@ -274,12 +424,34 @@ class UserPermissionTest extends TestCase
 
         // The editor may assign active modules even before the target has access.
         $response = $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))->assertOk();
-        $names = $response['groupedModules']->flatten(1)->pluck('name')->sort()->values()->all();
+        $menu = $response['permissionMenu'];
+        $names = PermissionModuleSelection::flatten($menu)->pluck('name')->all();
         $expected = ['Dashboard', 'Product', 'Order', 'Shop', 'Customer', 'Stock In', 'Stock Out',
             'Stock Transfer', 'Stock On Hand', 'Stock Movement', 'Report Sales', 'Report Inventory Movement',
-            'Staff Expense Report', 'Position', 'Staff', 'Staff Expense', 'User', 'Category', 'Supplier', 'UOM'];
-        sort($expected);
+            'Staff Expense Report', 'Position', 'Staff', 'Staff Expense', 'User', 'File Manager', 'Category', 'Supplier', 'UOM', 'Invoice Setting'];
         $this->assertSame($expected, $names);
+        $groups = $menu->filter(fn ($item) => isset($item['children']))->values();
+        $this->assertSame(['Inventory Management', 'Report Management', 'Setting & Application'],
+            $groups->map(fn ($item) => $item['label']['en'])->all());
+        $this->assertSame(['Stock In', 'Stock Out', 'Stock Transfer', 'Stock On Hand', 'Stock Movement'],
+            PermissionModuleSelection::flatten($groups[0]['children'])->pluck('name')->all());
+        $this->assertSame(['Report Sales', 'Report Inventory Movement', 'Staff Expense Report'],
+            PermissionModuleSelection::flatten($groups[1]['children'])->pluck('name')->all());
+        $settings = $groups[2]['children'];
+        $this->assertSame(['Position', 'Staff', 'Staff Expense', 'User'],
+            $settings->take(4)->map(fn ($item) => $item['module']->name)->all());
+        $this->assertSame('File Manager', $settings[4]['module']->name);
+        $this->assertSame('Setting', $settings[5]['label']['en']);
+        $this->assertSame(['Category', 'Supplier', 'UOM', 'Invoice Setting'],
+            PermissionModuleSelection::flatten($settings[5]['children'])->pluck('name')->all());
+
+        $document = new \DOMDocument();
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        $cards = $xpath->query('//div[contains(concat(" ", @class, " "), " permissionItem ")]');
+        $this->assertSame(PermissionModuleSelection::flatten($menu)->pluck('id')->map(fn ($id) => (string) $id)->all(),
+            array_map(fn ($card) => $card->getAttribute('data-module-id'), iterator_to_array($cards)));
+        $this->assertSame(1, $xpath->query('//div[@data-group="Setting & Application"]//div[@data-group="Setting"]')->length);
         $response->assertDontSee('value="blog-view"', false)->assertDontSee('value="about-view"', false)
             ->assertDontSee('value="report-transaction-view"', false)->assertSee('value="stock-in-create"', false);
         $this->assertSame($menuBefore, config('menu'));
@@ -309,6 +481,66 @@ class UserPermissionTest extends TestCase
         $this->assertSame(['Dashboard'], $selection());
         config(['menu' => [['path' => 'admin/blog/list/1', 'permission' => 'blog-view']]]);
         $this->assertSame(['Blog', 'Dashboard'], $selection());
+    }
+
+    public function test_permission_menu_follows_nested_reordering_and_keeps_shared_modules_once(): void
+    {
+        // Database order and parent labels must not determine the menu hierarchy.
+        ModulePermission::query()->update(['sort_no' => 0, 'parent_name' => 'Old group']);
+        $modules = ModulePermission::with('permission')->orderByDesc('id')->get();
+        $modulesBefore = $modules->toJson();
+        $product = ['path' => 'admin/product/list/1', 'permission' => 'product-view'];
+        $supplier = ['path' => 'admin/supplier/list/1', 'permission' => 'supplier-view'];
+        $user = ['path' => 'admin/user/list/1', 'permission' => 'user-view'];
+        config(['menu' => [
+            ['label' => 'First', 'list-menu' => [
+                ['name' => 'Nested', 'children' => [$supplier, $product]],
+                $user,
+            ]],
+            ['path' => 'admin/shop/list/1', 'permission' => 'shop-view'],
+            // A different permission belonging to Product still uses one card.
+            ['label' => 'Duplicate only', 'children' => [array_merge($product, ['permission' => 'product-update'])]],
+            ['label' => 'Hidden', 'hidden' => true, 'children' => [
+                ['path' => 'admin/category/list/1', 'permission' => 'category-view'],
+            ]],
+        ]]);
+        $menu = PermissionModuleSelection::treeFromMenu($modules);
+        $this->assertSame(['Dashboard', 'Supplier', 'Product', 'User', 'Shop'],
+            PermissionModuleSelection::flatten($menu)->pluck('name')->all());
+        $this->assertCount(3, $menu); // Dashboard, First, Shop; no empty groups.
+        $this->assertSame('First', $menu[1]['label']);
+        $this->assertSame('Nested', $menu[1]['children'][0]['label']);
+        $this->assertSame(['Supplier', 'Product'],
+            PermissionModuleSelection::flatten($menu[1]['children'][0]['children'])->pluck('name')->all());
+        $this->assertSame($modulesBefore, $modules->toJson());
+
+        config(['menu' => [$user, ['label' => 'First', 'listMenu' => [$product, $supplier]]]]);
+        $this->assertSame(['Dashboard', 'User', 'Product', 'Supplier'],
+            PermissionModuleSelection::fromMenu($modules)->pluck('name')->all());
+    }
+
+    public function test_permission_menu_uses_khmer_menu_labels_and_searches_ancestor_groups(): void
+    {
+        $this->manager->update(['language_preference' => 'km']);
+        $response = $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))->assertOk();
+        $document = new \DOMDocument();
+        @$document->loadHTML('<?xml encoding="utf-8" ?>' . $response->getContent());
+        $xpath = new \DOMXPath($document);
+        $settings = $xpath->query('//div[@data-group="ការកំណត់ និងកម្មវិធី"]//div[@data-group="ការកំណត់"]');
+        $this->assertSame(1, $settings->length);
+        $cards = $xpath->query('.//div[contains(concat(" ", @class, " "), " permissionItem ")]', $settings->item(0));
+        $this->assertSame(4, $cards->length);
+        foreach ($cards as $card) {
+            $this->assertStringContainsString('ការកំណត់ និងកម្មវិធី', $card->getAttribute('data-group'));
+            $this->assertStringContainsString('Setting & Application', $card->getAttribute('data-group'));
+        }
+        $positionId = ModulePermission::where('name', 'Position')->value('id');
+        $positionLabel = $xpath->query('//div[@data-module-id="' . $positionId . '"]//div[contains(@class,"permissionHeader")]/div[1]/span')->item(0);
+        $this->assertSame('មុខតំណែង', trim($positionLabel->textContent));
+        $checkboxes = $xpath->query('//input[@name="permission[]" and @type="checkbox"]');
+        $values = array_map(fn ($input) => $input->getAttribute('value'), iterator_to_array($checkboxes));
+        $this->assertCount(count(array_unique($values)), $values);
+        $this->assertContains('product-update', $values);
     }
 
     public function test_module_selection_excludes_container_and_alternative_access_modules(): void

@@ -18,6 +18,8 @@ class InvoiceSettingController extends Controller
     public function __construct(InvoiceService $invoiceService)
     {
         $this->invoiceService = $invoiceService;
+        $this->middleware('permission:setting-invoice-view', ['only' => ['index']]);
+        $this->middleware('permission:setting-invoice-update', ['only' => ['save', 'preview']]);
     }
 
     /**

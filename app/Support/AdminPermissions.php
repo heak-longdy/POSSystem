@@ -37,6 +37,19 @@ class AdminPermissions
         if ($name === 'admin-dashboard') {
             return ['dashboard-view'];
         }
+        if (str_starts_with($name ?? '', 'admin-file-manager-')) {
+            $action = substr($name, strlen('admin-file-manager-'));
+            $actions = [
+                'index' => 'view', 'first' => 'view', 'files' => 'view', 'folders' => 'view',
+                'upload' => 'create', 'create-folder' => 'create',
+                'rename-file' => 'update', 'rename-folder' => 'update', 'restore-all' => 'update',
+                'delete-file' => 'delete', 'delete-folder' => 'delete', 'delete-all' => 'delete',
+            ];
+            return ['file-manager-' . ($actions[$action] ?? 'view')];
+        }
+        if (in_array($name, ['admin-setting-setting', 'admin-setting-save', 'admin-our-service-index', 'admin-our-service-store'])) {
+            return [$request->isMethod('GET') ? 'service-view' : 'service-update'];
+        }
         if (str_starts_with($name ?? '', 'admin-select-')) {
             $modules = config('admin_permissions.lookups.' . substr($name, strlen('admin-select-')), []);
             return collect($modules)->flatMap(fn ($module) => [

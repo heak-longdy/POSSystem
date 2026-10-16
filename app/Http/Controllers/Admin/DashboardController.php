@@ -20,13 +20,13 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $data['totalRevenueUsd'] = 23;
-        $data['totalRevenueKhr'] =  23;
-        $data['totalRevenueThb'] = 23;
+        $data['totalRevenueUsd'] = 0;
+        $data['totalRevenueKhr'] =  0;
+        $data['totalRevenueThb'] = 0;
 
-        $data['totalExpenseUsd'] =  23;
-        $data['totalExpenseKhr'] =  23;
-        $data['totalExpenseThb'] =  23;
+        $data['totalExpenseUsd'] =  0;
+        $data['totalExpenseKhr'] =  0;
+        $data['totalExpenseThb'] =  0;
 
         $data['totalCustomerPaidUsd'] = CustomerPaid::sum('amount_usd');
         $data['totalCustomerPaidKhr'] = CustomerPaid::sum('amount_kh');
@@ -56,9 +56,9 @@ class DashboardController extends Controller
         $data['activeStaffCount'] = (int) Staff::where('status', 1)->count();
 
         // User Count Dynamic Data
-        $data['totalUserCount'] = (int) User::count();
+        $data['totalUserCount'] = (int) User::where('role', '!=', 'super_admin')->count();
         $data['totalUsersCount'] = $data['totalUserCount'];
-        $data['activeUserCount'] = (int) User::where('status', 1)->count();
+        $data['activeUserCount'] = (int) User::where('role', '!=', 'super_admin')->where('status', 1)->count();
         $data['activeUsersCount'] = $data['activeUserCount'];
 
         $data['recentTransactions'] = Order::with(['customer', 'shop'])
@@ -67,11 +67,11 @@ class DashboardController extends Controller
             ->get();
 
         // Weekly Stats Dynamic Data
-        $data['weeklyStats'] = $this->getWeeklyStatsData();
+        //$data['weeklyStats'] = $this->getWeeklyStatsData();
 
-        if ($request->get('ajax') === 'weekly_stats') {
-            return response()->json($data['weeklyStats']);
-        }
+        // if ($request->get('ajax') === 'weekly_stats') {
+        //     return response()->json($data['weeklyStats']);
+        // }
 
         // Product Performance Dynamic Data
         $selectedMonth = $request->get('product_month', $request->get('month', 'all'));
@@ -90,16 +90,16 @@ class DashboardController extends Controller
         }
 
         // Yearly Sales Dynamic Data
-        $availableYears = $this->getYearlySalesAvailableYears();
-        $selectedYear = (int) ($request->get('year') ?: ($availableYears[0] ?? (int) Carbon::now()->year));
-        $data['yearlySalesAvailableYears'] = $availableYears;
-        $data['selectedYearlySalesYear'] = $selectedYear;
-        $data['yearlySales'] = $this->getYearlySalesData($selectedYear);
+        // $availableYears = $this->getYearlySalesAvailableYears();
+        // $selectedYear = (int) ($request->get('year') ?: ($availableYears[0] ?? (int) Carbon::now()->year));
+        // $data['yearlySalesAvailableYears'] = $availableYears;
+        // $data['selectedYearlySalesYear'] = $selectedYear;
+        // $data['yearlySales'] = $this->getYearlySalesData($selectedYear);
 
-        // If AJAX request specifically for yearly sales filter
-        if ($request->get('ajax') === 'yearly_sales') {
-            return response()->json($data['yearlySales']);
-        }
+        // // If AJAX request specifically for yearly sales filter
+        // if ($request->get('ajax') === 'yearly_sales') {
+        //     return response()->json($data['yearlySales']);
+        // }
 
         return view('admin::pages.dashboard', $data);
     }

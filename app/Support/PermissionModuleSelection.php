@@ -8,17 +8,37 @@ class PermissionModuleSelection
 {
     public static function fromMenu(Collection $modules): Collection
     {
-        // Dashboard is rendered directly by the sidebar, outside config/menu.php.
-        $menuPermissions = array_merge(['dashboard-view'], static::menuPermissions(config('menu', [])));
-
-        return $modules->filter(function ($module) use ($menuPermissions) {
-            return $module->permission->contains(fn ($permission) => in_array($permission->name, $menuPermissions, true));
-        })->values();
+        return static::flatten(static::treeFromMenu($modules));
     }
 
-    private static function menuPermissions(array $items): array
+    public static function treeFromMenu(Collection $modules): Collection
     {
-        $permissions = [];
+        $modulesByPermission = [];
+        foreach ($modules as $module) {
+            foreach ($module->permission as $permission) {
+                $modulesByPermission[$permission->name] = $module;
+            }
+        }
+
+        // Dashboard is rendered directly by the sidebar, outside config/menu.php.
+        $items = array_merge([
+            ['path' => 'admin/dashboard', 'permission' => 'dashboard-view'],
+        ], config('menu', []));
+        $seen = [];
+
+        return static::buildTree($items, $modulesByPermission, $seen);
+    }
+
+    public static function flatten(Collection $menu): Collection
+    {
+        return $menu->flatMap(fn ($item) => isset($item['module'])
+            ? [$item['module']]
+            : static::flatten($item['children'])->all())->values();
+    }
+
+    private static function buildTree(array $items, array $modulesByPermission, array &$seen): Collection
+    {
+        $menu = collect();
         foreach ($items as $item) {
             if (!filter_var($item['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN)
                 || !filter_var($item['visible'] ?? true, FILTER_VALIDATE_BOOLEAN)
@@ -30,32 +50,54 @@ class PermissionModuleSelection
             $children = $item['listMenu'] ?? $item['list-menu'] ?? $item['children'] ?? [];
             if ($children) {
                 // Container permissions are navigation checks, not module entries.
-                $permissions = array_merge($permissions, static::menuPermissions($children));
-                continue;
-            }
-            if (empty($item['path']) || empty($item['permission'])) {
-                continue;
-            }
-
-            $candidates = (array) $item['permission'];
-            $permission = reset($candidates);
-            $path = trim(parse_url($item['path'], PHP_URL_PATH) ?? '', '/');
-            $path = str_replace('/', '-', preg_replace('#^admin/#', '', $path));
-            $matchLength = 0;
-            foreach ($candidates as $candidate) {
-                $module = substr($candidate, 0, strrpos($candidate, '-'));
-                if (str_starts_with($path . '-', $module . '-') && strlen($module) > $matchLength) {
-                    $permission = $candidate;
-                    $matchLength = strlen($module);
+                $children = static::buildTree($children, $modulesByPermission, $seen);
+                if ($children->isNotEmpty()) {
+                    $label = $item['label'] ?? $item['name'] ?? null;
+                    if ($label) {
+                        $menu->push(['label' => $label, 'children' => $children]);
+                    } else {
+                        $menu = $menu->concat($children);
+                    }
                 }
+                continue;
             }
 
-            // Prefer the linked module over alternative access permissions (e.g.
-            // Order View also opens Sales Report). Shared screens without their
-            // own permission, such as Remaining Amount, use the first declaration.
-            $permissions[] = $permission;
+            $permission = static::modulePermission($item);
+            $module = $modulesByPermission[$permission] ?? null;
+            if (!$module || isset($seen[$module->id])) {
+                continue;
+            }
+
+            // Shared screens use the module's first position in the menu.
+            $seen[$module->id] = true;
+            $menu->push(['label' => $item['name'] ?? null, 'module' => $module]);
         }
 
-        return array_values(array_unique($permissions));
+        return $menu;
+    }
+
+    private static function modulePermission(array $item): ?string
+    {
+        if (empty($item['path']) || empty($item['permission'])) {
+            return null;
+        }
+
+        $candidates = (array) $item['permission'];
+        $permission = reset($candidates);
+        $path = trim(parse_url($item['path'], PHP_URL_PATH) ?? '', '/');
+        $path = str_replace('/', '-', preg_replace('#^admin/#', '', $path));
+        $matchLength = 0;
+        foreach ($candidates as $candidate) {
+            $module = substr($candidate, 0, strrpos($candidate, '-'));
+            if (str_starts_with($path . '-', $module . '-') && strlen($module) > $matchLength) {
+                $permission = $candidate;
+                $matchLength = strlen($module);
+            }
+        }
+
+        // Prefer the linked module over alternative access permissions (e.g.
+        // Order View also opens Sales Report). Shared screens without their
+        // own permission, such as Remaining Amount, use the first declaration.
+        return $permission;
     }
 }

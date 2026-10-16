@@ -30,4 +30,15 @@ class PermissionRequest extends FormRequest
                 Rule::exists('permissions', 'name')->where('guard_name', 'web')],
         ];
     }
+
+    public function messages()
+    {
+        return [
+            'permission.array' => __('permission.validation.array'),
+            'permission.*.required' => __('permission.validation.required'),
+            'permission.*.string' => __('permission.validation.string'),
+            'permission.*.distinct' => __('permission.validation.distinct'),
+            'permission.*.exists' => __('permission.validation.exists'),
+        ];
+    }
 }

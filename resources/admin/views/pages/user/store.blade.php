@@ -20,22 +20,6 @@
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
-                    <div class="form-row">
-                        <label>@lang('user.form.role.label')</label>
-                        <select name="role">
-                            <option value="">-- @lang('user.filter.role') --</option>
-                            @foreach (config('dummy.user.role') as $key => $roleName)
-                                @if ($key != 'super_admin' || (auth()->check() && auth()->user()->role === 'super_admin'))
-                                    <option value="{{ $key }}" {!! (request('id') && $data?->role == $key) || old('role') == $key ? 'selected' : '' !!}>
-                                        {{ __('user.roles.' . $key) !== 'user.roles.' . $key ? __('user.roles.' . $key) : ucfirst(str_replace('_', ' ', $roleName)) }}
-                                    </option>
-                                @endif
-                            @endforeach
-                        </select>
-                        @error('role')
-                            <label class="error">{{ $message }}</label>
-                        @enderror
-                    </div>
                 </div>
                 <div class="row-3">
                     <div class="form-row">

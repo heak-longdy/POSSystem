@@ -257,6 +257,7 @@ return [
                 'type' => 'single',
                 'active' => 'admin/file-manager/*',
                 'path' => 'admin/file-manager/index',
+                'permission' => 'file-manager-view',
                 'name' => [
                     'en' => 'File Manager',
                     'km' => 'គ្រប់គ្រងឯកសារ',
@@ -306,6 +307,7 @@ return [
                     [
                         'active' => 'admin/setting/invoice*',
                         'path' => 'admin/setting/invoice',
+                        'permission' => 'setting-invoice-view',
                         'name' => [
                             'en' => 'Invoice Setting',
                             'km' => 'ការកំណត់វិក្កយបត្រ',

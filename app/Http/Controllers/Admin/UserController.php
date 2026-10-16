@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Session;
 use App\Models\ModulePermission;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
 use App\Services\Tools;
 use App\Support\PermissionModuleSelection;
 use Exception;
@@ -79,21 +78,38 @@ class UserController extends Controller
     }
     public function Save(UserRequest $req, $id = "")
     {
+        $user = $id ? User::findOrFail($id) : new User();
+        $creating = !$user->exists;
         if ($req->password) {
             $req["password"] = bcrypt($req->password);
         } else {
             unset($req["password"]);
         }
-        $redirect = $req->input('save_opt') == 'save_new' ? 'back' : null;
-        $response = $this->tools->onSave($this->table, $req, $id, $this->routeName, $redirect);
-        if ($req->filled('role')) {
-            $user = $id ? User::find($id) : User::where('email', $req->email)->first();
-            if ($user) {
-                Role::firstOrCreate(['name' => $req->role, 'guard_name' => 'web']);
-                $user->syncRoles([$req->role]);
-            }
+        try {
+            DB::transaction(function () use ($req, $user, $creating) {
+                // Roles are not editable through the user details form.
+                $user->fill($req->only(array_diff($user->getFillable(), ['role'])));
+                if ($creating) {
+                    $user->role = 'admin';
+                }
+                $user->save();
+
+                if ($creating) {
+                    // The Role field is a label. Attaching the shared Spatie admin
+                    // role would also grant any permissions configured on that role.
+                    $user->syncPermissions(['dashboard-view']);
+                }
+            });
+        } catch (\Throwable $error) {
+            Log::error('Unable to save user', ['user_id' => $id ?: null, 'exception' => $error]);
+            return redirect()->back()->withInput($req->except(['password', 'confirm_password']))
+                ->with('warning', __('Unable to save user.'));
         }
-        return $response;
+
+        Session::flash('success', $creating ? 'Create success.' : 'Update success.');
+        return $req->input('save_opt') === 'save_new'
+            ? redirect()->back()
+            : redirect()->route('admin-user-list', 1);
     }
     public function updateStatus($id, $status)
     {
@@ -149,13 +165,9 @@ class UserController extends Controller
         $modules = ModulePermission::with(['permission' => function ($query) {
                 $query->where('guard_name', 'web')->orderBy('id');
             }])
-            ->orderBy('sort_no')
             ->get();
-        $modules = PermissionModuleSelection::fromMenu($modules);
-        $groupedModules = $modules
-            ->groupBy(function ($item) {
-                return $item->parent_name ?: 'General';
-            });
+        $permissionMenu = PermissionModuleSelection::treeFromMenu($modules);
+        $modules = PermissionModuleSelection::flatten($permissionMenu);
 
         $userPermissions = $user->permissions->pluck('name')->toArray();
         $selectablePermissions = $modules->flatMap(fn ($module) => $module->permission->pluck('name'))->all();
@@ -164,7 +176,7 @@ class UserController extends Controller
 
         return view($this->layout . 'permission', [
             'user' => $user,
-            'groupedModules' => $groupedModules,
+            'permissionMenu' => $permissionMenu,
             'userPermissions' => $userPermissions,
             'preservedPermissions' => $preservedPermissions,
             'inheritedPermissions' => $inheritedPermissions,

@@ -138,7 +138,7 @@ return [
     'message' => [
         'change_password_success' => 'ប្តូរពាក្យសម្ងាត់បានជោគជ័យ!',
         'change_password_error' => 'ការប្តូរពាក្យសម្ងាត់បានបរាជ័យ!',
-        'cannot_modify_super_admin' => 'មិនអាចកែប្រែសិទ្ធិរបស់ Super Admin បានទេ។',
+        'cannot_modify_super_admin' => 'មិនអាចកែប្រែសិទ្ធិរបស់អ្នកគ្រប់គ្រងជាន់ខ្ពស់បានទេ។',
         'permission_success' => 'កំណត់សិទ្ធិបានជោគជ័យ!',
         'permission_error' => 'ការកំណត់សិទ្ធិបានបរាជ័យ',
     ],

@@ -20,6 +20,20 @@ return [
     'all' => 'All',
     'search_modules' => 'Search modules...',
     'no_actions' => 'No actions defined',
+    'group' => [
+        'general' => 'General',
+        'inventory_management' => 'Inventory Management',
+        'page_management' => 'Page Management',
+        'report_management' => 'Report Management',
+        'setting' => 'Setting',
+    ],
+    'validation' => [
+        'array' => 'The permission list must be an array.',
+        'required' => 'Please select a permission.',
+        'string' => 'The selected permission is invalid.',
+        'distinct' => 'The same permission cannot be selected more than once.',
+        'exists' => 'The selected permission does not exist.',
+    ],
     'module' => [
         'dashboard' => 'Dashboard',
         'about' => 'About',
@@ -74,15 +88,23 @@ return [
         'report_sales' => 'Report Sales',
         'sales_report' => 'Sales Report',
         'report_inventory' => 'Report Inventory Movement',
+        'report_inventory_movement' => 'Report Inventory Movement',
         'inventory_movement' => 'Inventory Movement Report',
         'staff_expense' => 'Staff Expense',
         'report_staff_expense' => 'Staff Expense Report',
         'staff_expense_report' => 'Staff Expense Report',
         'staff' => 'Staff Management',
+        'position' => 'Position',
         'supplier' => 'Supplier',
         'uom' => 'UOM',
     ],
     'permission' => [
+        'file-manager-view' => 'View',
+        'file-manager-create' => 'Create',
+        'file-manager-update' => 'Update',
+        'file-manager-delete' => 'Delete',
+        'setting-invoice-view' => 'View',
+        'setting-invoice-update' => 'Update',
         'dashboard-view' => 'View',
 
         //user
@@ -152,6 +174,7 @@ return [
         'product-create' => 'Create',
         'product-update' => 'Update',
         'product-delete' => 'Delete',
+        'product-excel' => 'Export Excel',
         // service
         'service-view' => 'View',
         'service-create' => 'Create',
@@ -332,6 +355,7 @@ return [
         'staff-expense-delete' => 'Delete',
         'staff-expense-restore' => 'Restore',
         'staff-expense-force-delete' => 'Force Delete',
+        'staff-expense-excel' => 'Export Excel',
 
         // report-staff-expense
         'report-staff-expense-view' => 'View',
@@ -344,5 +368,10 @@ return [
         'staff-delete' => 'Delete',
         'staff-restore' => 'Restore',
         'staff-force-delete' => 'Force Delete',
+        // position
+        'position-view' => 'View',
+        'position-create' => 'Create',
+        'position-update' => 'Update',
+        'position-delete' => 'Delete',
     ],
 ];
