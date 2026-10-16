@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'inherited' => 'Granted by role',
+    'inherited_help' => 'Checkboxes manage direct permissions. Permissions granted by a role remain active when unchecked.',
+    'super_admin_access' => 'Super administrators always have full access, regardless of the selected permissions.',
+
     'title' => 'Permission',
     'no_permission' => [
         'title' => 'No Permission',

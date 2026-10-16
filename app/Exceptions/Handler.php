@@ -44,6 +44,9 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->renderable(function (\Spatie\Permission\Exceptions\UnauthorizedException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => __('permission.no_permission.description')], 403);
+            }
             return response()->view('admin::pages.no-permission', [], 403);
         });
     }

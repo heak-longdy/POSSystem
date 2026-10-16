@@ -1,12 +1,123 @@
 @extends('admin::shared.layout')
+
 @section('layout')
+    <style>
+        /* Scoped Select2 filter styles for Stock On Hand */
+        .select2-filter-wrap {
+            min-width: 200px !important;
+            max-width: 260px !important;
+            width: 220px !important;
+            margin-left: 5px !important;
+            display: flex !important;
+            align-items: center !important;
+            position: relative !important;
+        }
+
+        .select2-filter-wrap .select2Group {
+            width: 100% !important;
+            position: relative !important;
+        }
+
+        .select2-filter-wrap .select2Group select,
+        .select2-filter-wrap .select2Group .SelectField {
+            width: 100% !important;
+            height: 40px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 25px !important;
+            padding: 0 10px !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            color: #334155 !important;
+            background: #ffffff !important;
+            outline: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2.select2-container {
+            width: 100% !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2-container .select2-selection--single {
+            height: 40px !important;
+            border-radius: 25px !important;
+            border: 1px solid #cbd5e1 !important;
+            background-color: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 10px !important;
+            box-shadow: none !important;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2-container--open .select2-selection--single,
+        .select2-filter-wrap .select2Group .select2-container--focus .select2-selection--single,
+        .select2-filter-wrap .select2Group .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #334155 !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            line-height: normal !important;
+            padding-left: 0 !important;
+            padding-right: 28px !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #94a3b8 !important;
+            font-weight: 400 !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100% !important;
+            top: 0 !important;
+            right: 8px !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2Reset {
+            position: absolute !important;
+            top: 50% !important;
+            right: 26px !important;
+            transform: translateY(-50%) !important;
+            cursor: pointer !important;
+            z-index: 2 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2Reset[style*="display: none"],
+        .select2-filter-wrap .select2Group .select2Reset[style*="display:none"],
+        .select2-filter-wrap .select2Group .select2Reset[x-cloak] {
+            display: none !important;
+        }
+
+        .select2-filter-wrap .select2-container--default .select2-selection--single .select2-selection__clear {
+            display: none !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2Reset svg {
+            fill: #94a3b8 !important;
+            width: 18px !important;
+            height: 18px !important;
+            background: #ffffff !important;
+            border-radius: 50% !important;
+            transition: fill 0.15s ease !important;
+        }
+
+        .select2-filter-wrap .select2Group .select2Reset:hover svg {
+            fill: #ef4444 !important;
+        }
+    </style>
     @include('admin::shared.header', ['header_name' => __('stock_on_hand.title')])
-    <div class="content-wrapper" x-data="xStockOnHand">
+    <div class="content-wrapper" id="app" x-data="xStockOnHand">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
             'createName' => '',
             'filterStatus' => false,
-            // 'filterView' => 'admin::pages.inventoryManagement.partials.stock-filter',
+            'filterView' => 'admin::pages.inventoryManagement.stockOnHand.filter',
             'filterData' => ['shop' => $shop],
             'showTabs' => true,
             'tabs' => [
@@ -18,7 +129,8 @@
                 ],
             ],
             'showCreate' => false,
-            'exportAction' => auth()->user()->can('stock-on-hand-excel') ? 'excel()' : null,
+            'exportAction' => 'excel()',
+            'exportUrl' => $exportUrl ?? (\Illuminate\Support\Facades\Route::has('admin-stock-on-hand-export') ? route('admin-stock-on-hand-export', request()->query()) : url('admin/stock-on-hand/export' . (request()->query() ? '?' . http_build_query(request()->query()) : ''))),
             'exportLabel' => __('global.button.export'),
             'data' => $data,
             'status' => $status,
@@ -48,61 +160,46 @@
             ],
         ])
         @endcomponent
+
         <template x-if="exportLoading">
-            <div class="loadingFullSizeLayout">
-                <div class="loading loadingSubmit">
-                    <span id="spinner"></span>
-                    <label>{{ __('stock_on_hand.export_excel') }}</label>
+            <div style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 99999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+                <div style="background: #ffffff; padding: 24px 32px; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 14px; font-weight: 600; color: #1e293b;">
+                    <svg style="animation: spin 1s linear infinite; width: 26px; height: 26px; color: #10b981;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path style="opacity: 0.75;" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ __('global.status.exporting') ?? 'Exporting Excel...' }}</span>
                 </div>
             </div>
         </template>
     </div>
 @stop
+
 @section('script')
-    <script lang="ts">
-        $(document).ready(function() {
-            $("#date").datepicker({
-                changeYear: true,
-                gotoCurrent: true,
-                yearRange: "-1:+1",
-                dateFormat: "yy-mm-dd",
-            });
-        });
-    </script>
+    <script src="{{ asset('admin-public/js/exceljs.min.js') }}"></script>
+    <script src="{{ asset('admin-public/js/FileSaver.min.js') }}"></script>
     <script>
-        var option = "<option selected></option>";
-        //shop
-        var shop = $(option).val(`{{ isset($shop->id) ? $shop->id : '' }}`).text(
-            `{{ isset($shop->name) ? $shop->name : '' }}`);
-        $('.SelectShop').append(shop).trigger('change');
-    </script>
-    <script>
-        const header = {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
-                Accept: "application/json",
-            },
-            responseType: "json",
-        };
-        document.addEventListener('alpine:init', () => {
+        function registerStockOnHandIndexAlpine() {
             Alpine.data("xStockOnHand", () => ({
-                loading: false,
-                loadingSubmit: false,
-                memberCarData: [],
-                baseImageUrl: "{{ asset('file_manager') }}",
-                dataError: null,
-                formData: {!! json_encode(request()->only(['search', 'shop_id', 'date'])) !!},
+                shopId: @json(request('shop_id') ?? ($shop?->id ?? '')),
                 exportLoading: false,
                 init() {
-                    this.fetchSelectShop();
+                    this.$nextTick(() => {
+                        this.initSelectShop();
+                    });
                 },
-                fetchSelectShop() {
-                    $(`#shop_id`).select2({
+                initSelectShop() {
+                    const self = this;
+                    const $select = $(this.$root).find('#stock_on_hand_filter_shop_id');
+                    if (!$select.length || $select.data('select2')) return;
+
+                    $select.select2({
                         placeholder: @json(__('stock_on_hand.filter.select_shop')),
+                        width: '100%',
                         ajax: {
                             url: '{{ route('admin-select-stock-shop') }}',
                             dataType: 'json',
-                            type: "GET",
+                            type: 'GET',
                             quietMillis: 50,
                             data: function(param) {
                                 return {
@@ -113,71 +210,73 @@
                                 return {
                                     results: $.map(data.data, function(item) {
                                         return {
-                                            text: item?.name ? item?.name : '',
+                                            text: item?.name ? item.name : item?.phone,
                                             id: item.id
-                                        }
+                                        };
                                     })
                                 };
                             }
                         }
-                    }).on('select2:open', (e) => {
-                        document.querySelector('.select2-search__field').focus();
+                    }).on('select2:open', function() {
+                        if (typeof window.$select2FocusInputSearch === 'function') {
+                            window.$select2FocusInputSearch();
+                        } else {
+                            const searchField = document.querySelector('.select2-search__field');
+                            if (searchField) searchField.focus();
+                        }
+                    }).on('change select2:select select2:clear select2:unselect', function() {
+                        self.shopId = $(this).val();
                     });
+
+                    const selectedShop = @json($shop);
+                    if (selectedShop?.id) {
+                        this.shopId = selectedShop.id;
+                    }
+                },
+                resetShopFilter() {
+                    const $select = $(this.$root).find('#stock_on_hand_filter_shop_id');
+                    $select.val(null).trigger('change');
+                    this.shopId = '';
                 },
                 async excel() {
                     this.exportLoading = true;
-                    setTimeout(async () => {
-                        await this.fetchData(
-                            `/admin/stock-on-hand/report`,
-                            this.formData,
-                            (res) => {
-                                this.RunExcelJSExportVerII(res);
-                                this.exportLoading = false;
-                            });
-                    }, 500);
-                },
-                async fetchData(url, formData, callback) {
-                    await Axios.get(url, {
-                            params: formData,
-                        })
-                        .then((response) => {
-                            callback(response.data);
-                        })
-                        .catch(function(error) {
-                            this.exportLoading = false;
+                    try {
+                        const response = await Axios.get('{{ \Illuminate\Support\Facades\Route::has('admin-stock-on-hand-report') ? route('admin-stock-on-hand-report') : url('admin/stock-on-hand/report') }}', {
+                            params: {
+                                search: $(this.$root).find('input[name="search"]').val() || @json(request('search')),
+                                shop_id: $(this.$root).find('select[name="shop_id"]').val() || @json(request('shop_id')),
+                            }
                         });
+                        await this.runExcelExport(response.data);
+                    } catch (error) {
+                        console.error('Export Excel failed:', error);
+                    } finally {
+                        this.exportLoading = false;
+                    }
                 },
-                async RunExcelJSExportVerII(dataItem) {
-                    let datas = dataItem;
+                async runExcelExport(datas) {
                     let workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet(@json(__('stock_on_hand.excel.sheet_name') ?? 'Stock On Hand'));
                     const dataColumn = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
                     let lastColumn = dataColumn[dataColumn.length - 1];
 
                     const style_font = {
                         name: "Khmer OS System",
-                        size: 11
+                        size: 10
                     };
                     const style_font_header = {
                         name: "Khmer OS Muol Light",
                         family: 4,
-                        size: 18,
+                        size: 16,
                         color: {
                             argb: "538DD5"
                         },
                     };
                     const style_border = {
-                        top: {
-                            style: "thin"
-                        },
-                        left: {
-                            style: "thin"
-                        },
-                        bottom: {
-                            style: "thin"
-                        },
-                        right: {
-                            style: "thin"
-                        },
+                        top: { style: "thin" },
+                        left: { style: "thin" },
+                        bottom: { style: "thin" },
+                        right: { style: "thin" },
                     };
                     const align_center = {
                         vertical: "middle",
@@ -189,41 +288,26 @@
                         horizontal: "left",
                         wrapText: true,
                     };
-                    const wrapText = {
-                        wrapText: true
-                    };
-                    const colorRed = {
-                        color: {
-                            argb: "FF0000"
-                        }
-                    };
 
-                    // Create workbook and worksheet
-                    const worksheet = workbook.addWorksheet(@json(__('stock_on_hand.excel.sheet_name')));
-
-                    // Add Row Title and formatting
-                    const titleTopRow = worksheet.addRow([@json(__('stock_on_hand.excel.title'))]);
+                    const titleTopRow = worksheet.addRow([@json(__('stock_on_hand.excel.title') ?? 'STOCK ON HAND REPORT')]);
                     titleTopRow.font = style_font_header;
                     titleTopRow.alignment = align_center;
-                    worksheet.mergeCells("A1:" + lastColumn + 1);
-
+                    worksheet.mergeCells("A1:" + lastColumn + "1");
                     worksheet.addRow([]);
-                    // Add Header Row
-                    const header = [
-                        @json(__('stock_on_hand.excel.id')),
-                        @json(__('stock_on_hand.excel.product')),
-                        @json(__('stock_on_hand.excel.categories')),
-                        @json(__('stock_on_hand.excel.uom')),
-                        @json(__('stock_on_hand.excel.current_stock')),
-                        @json(__('stock_on_hand.excel.date')),
-                        @json(__('stock_on_hand.excel.shop')),
-                        @json(__('stock_on_hand.excel.requested_by')),
+
+                    const headers = [
+                        @json(__('global.table.no')),
+                        @json(__('stock_on_hand.table.product')),
+                        @json(__('stock_on_hand.table.category')),
+                        @json(__('stock_on_hand.table.uom')),
+                        @json(__('stock_on_hand.table.current_stock')),
+                        @json(__('stock_on_hand.table.date')),
+                        @json(__('stock_on_hand.table.shop')),
+                        @json(__('stock_on_hand.table.requested_by')),
                     ];
 
-                    const headerRow = worksheet.addRow(header);
-
-                    // Cell Style : Fill and Border
-                    headerRow.eachCell((cell, number) => {
+                    const headerRow = worksheet.addRow(headers);
+                    headerRow.eachCell((cell) => {
                         cell.fill = {
                             type: "pattern",
                             pattern: "solid",
@@ -233,276 +317,60 @@
                         };
                         cell.font = {
                             name: "Khmer Moul",
-                            size: 12
+                            size: 11,
+                            bold: true,
                         };
                         cell.border = style_border;
                         cell.alignment = align_center;
-
                     });
-                    let i = 4;
-                    datas.forEach((item, index) => {
-                        worksheet.addRow([
-                            item?.id,
-                            item?.product?.name,
-                            item?.category?.name,
-                            item?.uom?.name,
-                            item?.current_stock,
-                            this.dateFormatEn(item?.created_at, 'YYYY-MM-DD H:mm'),
-                            item?.shop?.name,
-                            item.request_by_type == "admin" ? item?.user?.username : item?.barber?.name,
+
+                    (datas || []).forEach((item, index) => {
+                        const row = worksheet.addRow([
+                            index + 1,
+                            item?.product_title || item?.product?.name || '---',
+                            item?.category_title || item?.category?.name || item?.product?.category?.name || '---',
+                            item?.uom_title || item?.uom?.name || item?.product?.uom?.name || '---',
+                            item?.current_stock ?? 0,
+                            item?.created_date || (item?.created_at ? moment(item.created_at).format('YYYY-MM-DD HH:mm') : ''),
+                            item?.shop_title || item?.shop?.name || '---',
+                            item?.request_by_title || (item?.request_by_type === 'admin' ? item?.user?.username : item?.barber?.name) || '---',
                         ]);
-                        //setStyle
-                        dataColumn.forEach((column) => {
-                            worksheet.getCell(column + i).font = style_font;
-                            worksheet.getCell(column + i).alignment = align_center;
-                            worksheet.getCell(column + i).border = style_border;
 
-                            // if (column == "G" || column == "K") {
-                            //     worksheet.getCell(column + i)
-                            //         .alignment = align_left;
-                            // }
-
-                        });
-                        //endSteStyle
-                        i++;
-
-                    });
-
-                    // add background for header
-                    const backgroundCell = {
-                        type: "pattern",
-                        pattern: "solid",
-                        fgColor: {
-                            argb: "d4d4d4E5"
-                        },
-                    };
-
-                    //setWidthHeight
-                    worksheet.getRow(1).height = 50;
-                    worksheet.getRow(3).height = 22;
-                    dataColumn.forEach((column, colIndex = 1) => {
-                        let colI = colIndex + 1;
-                        worksheet.getColumn(colI).width = 25;
-                        if (colI == 1) {
-                            worksheet.getColumn(colI).width = 14;
-                        }
-                        if (colI == 2) {
-                            worksheet.getColumn(colI).width = 45;
-                        }
-                        if (colI == 4 || colI == 5) {
-                            worksheet.getColumn(colI).width = 17;
-                        }
-                        if (colI == 7) {
-                            worksheet.getColumn(colI).width = 32;
-                        }
-                    });
-                    //endSetWithHeight
-
-                    const footerRowTotal = worksheet.addRow([]);
-
-                    // Generate Excel File with given name
-                    const titleExportName = @json(__('stock_on_hand.excel.file_prefix')) + this
-                        .dateFormatEn(moment(),
-                            'DD_MM_YYYY_H:mm:ss');
-                    workbook.xlsx.writeBuffer().then(function(data) {
-                        const blob = new Blob([data], {
-                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        });
-                        saveAs(blob, titleExportName);
-                    });
-                },
-                async RunExcelJSExport(dataItem) {
-                    let datas = dataItem;
-                    let workbook = new ExcelJS.Workbook();
-                    const dataColumn = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
-                    let lastColumn = dataColumn[dataColumn.length - 1];
-
-                    const style_font = {
-                        name: "Khmer OS System",
-                        size: 11
-                    };
-                    const style_font_header = {
-                        name: "Khmer OS Muol Light",
-                        family: 4,
-                        size: 18,
-                        color: {
-                            argb: "538DD5"
-                        },
-                    };
-                    const style_border = {
-                        top: {
-                            style: "thin"
-                        },
-                        left: {
-                            style: "thin"
-                        },
-                        bottom: {
-                            style: "thin"
-                        },
-                        right: {
-                            style: "thin"
-                        },
-                    };
-                    const align_center = {
-                        vertical: "middle",
-                        horizontal: "center",
-                        wrapText: true,
-                    };
-                    const align_left = {
-                        vertical: "middle",
-                        horizontal: "left",
-                        wrapText: true,
-                    };
-                    const wrapText = {
-                        wrapText: true
-                    };
-                    const colorRed = {
-                        color: {
-                            argb: "FF0000"
-                        }
-                    };
-
-                    // Create workbook and worksheet
-                    const worksheet = workbook.addWorksheet(@json(__('stock_on_hand.excel.inventory_report_sheet')));
-
-                    // Add Row Title and formatting
-                    const titleTopRow = worksheet.addRow([@json(__('stock_on_hand.excel.inventory_report_title'))]);
-                    titleTopRow.font = style_font_header;
-                    titleTopRow.alignment = align_center;
-                    worksheet.mergeCells("A1:" + lastColumn + 1);
-
-                    worksheet.addRow([]);
-                    // Add Header Row
-                    const header = [
-                        @json(__('stock_on_hand.excel.id')),
-                        @json(__('stock_on_hand.excel.date')),
-                        @json(__('stock_on_hand.excel.shop')),
-                        @json(__('stock_on_hand.excel.product')),
-                        @json(__('stock_on_hand.excel.categories')),
-                        @json(__('stock_on_hand.excel.quantities')),
-                        @json(__('stock_on_hand.excel.price')),
-                        @json(__('stock_on_hand.excel.requested_by')),
-                        @json(__('stock_on_hand.excel.stock_type')),
-                        @json(__('stock_on_hand.excel.send_to')),
-                    ];
-
-                    const headerRow = worksheet.addRow(header);
-
-                    // Cell Style : Fill and Border
-                    headerRow.eachCell((cell, number) => {
-                        cell.fill = {
-                            type: "pattern",
-                            pattern: "solid",
-                            fgColor: {
-                                argb: "d4d4d4E5"
-                            },
-                        };
-                        cell.font = {
-                            name: "Khmer Moul",
-                            size: 12
-                        };
-
-
-                        cell.border = style_border;
-                        cell.alignment = align_center;
-                        // if (cell?._address == "G3" || cell?._address == "K3") {
-                        //     cell.alignment = align_left;
-                        // }
-                    });
-                    let i = 4;
-                    datas.forEach((item, index) => {
-                        worksheet.addRow([
-                            item?.id,
-                            this.dateFormatEn(item?.created_at, 'YYYY-MM-DD H:mm'),
-                            item?.shop?.name,
-                            item?.product?.name,
-                            item?.category?.name,
-                            item?.qty,
-                            item?.product?.price ? item.product.price : 0,
-                            item?.user?.username,
-                            item?.status,
-                            item?.shop_to?.name,
-                        ]);
-                        //setStyle
-                        dataColumn.forEach((column) => {
-                            worksheet.getCell(column + i).font = style_font;
-                            worksheet.getCell(column + i).alignment = align_center;
-                            worksheet.getCell(column + i).border = style_border;
-
-                            // if (column == "G" || column == "K") {
-                            //     worksheet.getCell(column + i)
-                            //         .alignment = align_left;
-                            // }    
-
-                            if (column == "I" || column == "J") {
-                                worksheet.getCell(column + i).fill = {
-                                    type: "pattern",
-                                    pattern: "solid",
-                                    fgColor: {
-                                        argb: "d4d4d4E5"
-                                    },
-                                };
+                        row.eachCell((cell, colNumber) => {
+                            cell.border = style_border;
+                            cell.font = style_font;
+                            if ([2, 3, 7, 8].includes(colNumber)) {
+                                cell.alignment = align_left;
+                            } else {
+                                cell.alignment = align_center;
                             }
-
                         });
-                        //endSteStyle
-                        i++;
-
                     });
 
-                    // add background for header
-                    const backgroundCell = {
-                        type: "pattern",
-                        pattern: "solid",
-                        fgColor: {
-                            argb: "d4d4d4E5"
-                        },
-                    };
+                    worksheet.columns = [
+                        { width: 8 },
+                        { width: 28 },
+                        { width: 18 },
+                        { width: 12 },
+                        { width: 16 },
+                        { width: 20 },
+                        { width: 22 },
+                        { width: 18 },
+                    ];
 
-                    //setWidthHeight
-                    worksheet.getRow(1).height = 50;
-                    worksheet.getRow(3).height = 22;
-                    dataColumn.forEach((column, colIndex = 1) => {
-                        let colI = colIndex + 1;
-                        worksheet.getColumn(colI).width = 25;
-                        if (colI == 1) {
-                            worksheet.getColumn(colI).width = 14;
-                        }
-                        if (colI == 2) {
-                            worksheet.getColumn(colI).width = 18;
-                        }
-                        if (colI == 4) {
-                            worksheet.getColumn(colI).width = 45;
-                        }
-                        if (colI == 3) {
-                            worksheet.getColumn(colI).width = 32;
-                        }
-                        if (colI >= 6 && colI <= 9) {
-                            worksheet.getColumn(colI).width = 16;
-                        }
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     });
-                    //endSetWithHeight
-
-                    const footerRowTotal = worksheet.addRow([]);
-
-                    // Generate Excel File with given name
-                    const titleExportName = @json(__('stock_on_hand.excel.inventory_export_filename')) + this
-                        .dateFormatEn(moment(),
-                            'DD_MM_YYYY_H:mm:ss');
-                    workbook.xlsx.writeBuffer().then(function(data) {
-                        const blob = new Blob([data], {
-                            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                        });
-                        saveAs(blob, titleExportName);
-                    });
-                },
-                dateFormat(date, type) {
-                    return moment(date).locale('km').format(type);
-                },
-                dateFormatEn(date, type) {
-                    return date ? moment(date).format(type) : "";
-                },
+                    saveAs(blob, 'Stock_On_Hand_Report_' + moment().format('YYYY_MM_DD_HHmmss') + '.xlsx');
+                }
             }));
-        });
+        }
+
+        if (window.Alpine) {
+            registerStockOnHandIndexAlpine();
+        } else {
+            document.addEventListener('alpine:init', registerStockOnHandIndexAlpine);
+        }
     </script>
 @stop

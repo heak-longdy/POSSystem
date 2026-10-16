@@ -1,10 +1,11 @@
 @if(!defined('ADMIN_SEARCH_MENU_LOADED'))
 @php define('ADMIN_SEARCH_MENU_LOADED', true); @endphp
 @php
-    $rawMenu = config('menu', []);
+    $rawMenu = \App\Support\AdminPermissions::visibleMenu(config('menu', []));
     $allAdminMenuItems = [];
 
     // 1. Dashboard
+    if (auth()->user()->can('dashboard-view')) {
     $allAdminMenuItems[] = [
         'id' => 'menu-dashboard',
         'title' => \App\Support\Language::translatedValue(['en' => 'Dashboard', 'km' => 'ផ្ទាំងគ្រប់គ្រង']),
@@ -18,6 +19,8 @@
         'url' => route('admin-dashboard'),
         'keywords' => 'dashboard overview home ផ្ទាំងគ្រប់គ្រង',
     ];
+
+    }
 
     // 2. Normalize and flatten all menu items from config('menu')
     foreach ($rawMenu as $mIndex => $item) {

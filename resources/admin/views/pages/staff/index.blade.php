@@ -18,7 +18,7 @@
                     'rowClass' => 'thumbnailIcon',
                 ],
                 ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 20],
-                ['field' => 'position.title', 'title' => __('global.table.position'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'position_title', 'title' => __('global.table.position'), 'class' => 'text left', 'colVal' => 15],
                 ['field' => 'phone_number', 'title' => __('global.table.phone'), 'class' => 'text left', 'colVal' => 15],
                 ['field' => 'email', 'title' => __('global.table.email'), 'class' => 'text left', 'colVal' => 18],
                 ['field' => 'address', 'title' => __('global.table.address'), 'class' => 'text left', 'colVal' => 16],

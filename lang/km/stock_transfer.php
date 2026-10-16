@@ -20,11 +20,24 @@ return [
 
     'button' => [
         'create' => 'បង្កើតការផ្ទេរស្តុក',
+        'export_excel' => 'នាំចេញ Excel',
         'save' => 'រក្សាទុក',
         'save_new' => 'រក្សាទុក & បង្កើតថ្មី',
         'submit' => 'រក្សាទុក',
         'cancel' => 'បោះបង់',
         'edit' => 'កែប្រែ',
+    ],
+
+    'excel' => [
+        'title' => 'របាយការណ៍ការផ្ទេរស្តុក',
+        'sheet_name' => 'ការផ្ទេរស្តុក',
+        'generated_on' => 'កាលបរិច្ឆេទបង្កើត',
+        'filter_shop' => 'ហាង',
+        'filter_status' => 'ស្ថានភាព',
+        'filter_search' => 'ស្វែងរក',
+        'all' => 'ទាំងអស់',
+        'total_records' => 'ចំនួនកំណត់ត្រាសរុប',
+        'total_qty' => 'បរិមាណសរុប',
     ],
 
     'form' => [

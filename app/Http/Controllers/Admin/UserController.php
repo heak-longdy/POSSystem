@@ -9,13 +9,12 @@ use App\Http\Requests\Admin\UserRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use App\Models\ModelHasPermission;
 use App\Models\ModulePermission;
-use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use App\Services\Tools;
+use App\Support\PermissionModuleSelection;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -147,23 +146,32 @@ class UserController extends Controller
             return redirect()->route('admin-user-list', 1);
         }
 
-        $groupedModules = ModulePermission::with('permission')
+        $modules = ModulePermission::with(['permission' => function ($query) {
+                $query->where('guard_name', 'web')->orderBy('id');
+            }])
             ->orderBy('sort_no')
-            ->get()
+            ->get();
+        $modules = PermissionModuleSelection::fromMenu($modules);
+        $groupedModules = $modules
             ->groupBy(function ($item) {
                 return $item->parent_name ?: 'General';
             });
 
         $userPermissions = $user->permissions->pluck('name')->toArray();
+        $selectablePermissions = $modules->flatMap(fn ($module) => $module->permission->pluck('name'))->all();
+        $preservedPermissions = array_values(array_diff($userPermissions, $selectablePermissions));
+        $inheritedPermissions = $user->getPermissionsViaRoles()->pluck('name')->unique()->values()->all();
 
         return view($this->layout . 'permission', [
             'user' => $user,
             'groupedModules' => $groupedModules,
             'userPermissions' => $userPermissions,
+            'preservedPermissions' => $preservedPermissions,
+            'inheritedPermissions' => $inheritedPermissions,
         ]);
     }
 
-    public function onSavePermission(Request $req, $id = null)
+    public function onSavePermission(PermissionRequest $req, $id = null)
     {
         $userId = $id ?? $req->id;
         $user = User::findOrFail($userId);
@@ -173,15 +181,12 @@ class UserController extends Controller
             return redirect()->route('admin-user-list', 1);
         }
 
-        DB::beginTransaction();
         try {
-            $permissions = $req->input('permission', []);
-            if (!is_array($permissions)) {
-                $permissions = [];
-            }
-            app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-            $user->syncPermissions($permissions);
-            DB::commit();
+            $permissions = $req->validated()['permission'] ?? [];
+            DB::transaction(function () use ($user, $permissions) {
+                $user->syncPermissions($permissions);
+            });
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
             Session::flash('success', __('user.message.permission_success'));
 
             if ($req->ajax() || $req->wantsJson()) {
@@ -192,10 +197,12 @@ class UserController extends Controller
             }
 
             return redirect()->route('admin-user-list', 1);
-        } catch (Exception $error) {
-            DB::rollback();
-            Session::flash('warning', __('user.message.permission_error') . ': ' . $error->getMessage());
-            return redirect()->back();
+        } catch (\Throwable $error) {
+            Log::error('Unable to update user permissions', ['user_id' => $user->id, 'exception' => $error]);
+            if ($req->expectsJson()) {
+                return response()->json(['error' => true, 'message' => __('user.message.permission_error')], 500);
+            }
+            return redirect()->back()->withInput()->with('warning', __('user.message.permission_error'));
         }
     }
 }

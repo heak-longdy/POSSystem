@@ -163,7 +163,7 @@ return [
                 'type' => 'single',
                 'active' => 'admin/report/inventory-movement*',
                 'path' => 'admin/report/inventory-movement/daily',
-                'permission' => ['report-inventory-view', 'stock-movement-view', 'report-sales-view'],
+                'permission' => ['report-inventory-view', 'stock-movement-view', 'report-sales-view', 'order-view'],
                 'name' => [
                     'en' => 'Inventory Movement Report',
                     'km' => 'របាយការណ៍បម្រែបម្រួលស្តុក',
@@ -175,7 +175,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/report/staff-expense*',
                 'path' => 'admin/report/staff-expense/daily',
-                'permission' => ['staff-expense-view', 'report-sales-view'],
+                'permission' => ['report-staff-expense-view', 'staff-expense-view', 'report-sales-view'],
                 'name' => [
                     'en' => 'Staff Expense Report',
                     'km' => 'របាយការណ៍ចំណាយបុគ្គលិក',
@@ -233,7 +233,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/staff-expense*',
                 'path' => 'admin/staff-expense/list/1',
-                'permission' => ['staff-expense-view', 'staff-view'],
+                'permission' => ['staff-expense-view'],
                 'name' => [
                     'en' => 'Staff Expenses',
                     'km' => 'ចំណាយបុគ្គលិក',

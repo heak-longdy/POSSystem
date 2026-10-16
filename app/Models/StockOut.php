@@ -42,7 +42,7 @@ class StockOut extends Model
     }
     public function customer()
     {
-        return $this->hasOne(customer::class, 'id', 'to_id');
+        return $this->hasOne(Customer::class, 'id', 'to_id');
     }
     public function stockType()
     {

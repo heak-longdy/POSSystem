@@ -65,7 +65,7 @@ Route::prefix('auth')->group(function () {
     Route::get('/sign-out', [AuthController::class, 'signOut'])->name('sign-out');
 });
 
-Route::middleware(['AdminGuard'])
+Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::class])
     ->group(function () {
         Route::get('/', function () {
             return redirect()->route('admin-dashboard');
@@ -147,6 +147,8 @@ Route::middleware(['AdminGuard'])
             Route::post('delete/{id?}', [StockInController::class, 'delete'])->name('delete');
             Route::post('restore/{id?}', [StockInController::class, 'restore'])->name('restore');
             Route::post('destroy/{id?}', [StockInController::class, 'destroy'])->name('destroy');
+            Route::get('report', [StockInController::class, 'report'])->name('report');
+            Route::get('export', [StockInController::class, 'export'])->name('export');
         });
         //stockOut
         Route::group([
@@ -162,6 +164,8 @@ Route::middleware(['AdminGuard'])
             Route::post('delete/{id?}', [StockOutController::class, 'delete'])->name('delete');
             Route::post('restore/{id?}', [StockOutController::class, 'restore'])->name('restore');
             Route::post('destroy/{id?}', [StockOutController::class, 'destroy'])->name('destroy');
+            Route::get('report', [StockOutController::class, 'report'])->name('report');
+            Route::get('export', [StockOutController::class, 'export'])->name('export');
         });
         //stockTransfer
         Route::group([
@@ -178,6 +182,8 @@ Route::middleware(['AdminGuard'])
             Route::post('delete/{id?}', [StockTransferController::class, 'delete'])->name('delete');
             Route::post('restore/{id?}', [StockTransferController::class, 'restore'])->name('restore');
             Route::post('destroy/{id?}', [StockTransferController::class, 'destroy'])->name('destroy');
+            Route::get('report', [StockTransferController::class, 'report'])->name('report');
+            Route::get('export', [StockTransferController::class, 'export'])->name('export');
         });
         //stockOnHand
         Route::group([
@@ -188,6 +194,7 @@ Route::middleware(['AdminGuard'])
             Route::get('view/{id?}', [StockOnHandController::class, 'onView'])->name('view');
             Route::get('find/{product_id?}/{shop_id?}', [StockOnHandController::class, 'onFind'])->name('onFind');
             Route::get('report', [StockOnHandController::class, 'report'])->name('report');
+            Route::get('export', [StockOnHandController::class, 'export'])->name('export');
         });
         //stockMovement
         Route::group([
@@ -197,6 +204,7 @@ Route::middleware(['AdminGuard'])
             Route::get('list/{status?}', [StockMovementController::class, 'index'])->name('list');
             Route::get('view/{id?}', [StockMovementController::class, 'onView'])->name('view');
             Route::get('report', [StockMovementController::class, 'report'])->name('report');
+            Route::get('export', [StockMovementController::class, 'export'])->name('export');
         });
 
         //Setting

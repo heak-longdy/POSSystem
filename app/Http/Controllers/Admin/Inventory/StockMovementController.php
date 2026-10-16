@@ -17,7 +17,7 @@ class StockMovementController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:stock-movement-view', ['only' => ['index', 'onView', 'report']]);
+        $this->middleware('permission:stock-movement-view', ['only' => ['index', 'onView', 'report', 'export']]);
     }
 
     public function index(Request $req)
@@ -25,6 +25,10 @@ class StockMovementController extends Controller
         $data['status'] = 1;
         $data['routeName'] = $this->routeName;
         $data['shop'] = $req->shop_id ? Shop::find($req->shop_id) : null;
+        $exportRoute = 'admin-' . $this->routeName . '-export';
+        $data['exportUrl'] = \Illuminate\Support\Facades\Route::has($exportRoute)
+            ? route($exportRoute, $req->query())
+            : url('admin/' . $this->routeName . '/export' . ($req->query() ? '?' . http_build_query($req->query()) : ''));
         $data['data'] = $this->queryData('index');
 
         return view($this->layout . 'index', $data);
@@ -57,6 +61,58 @@ class StockMovementController extends Controller
     {
         $data = $this->queryData('report');
         return response()->json($data);
+    }
+
+    public function export(Request $req)
+    {
+        $items = $this->queryData('report');
+        $fileName = 'stock_movement_export_' . date('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0",
+        ];
+
+        $columns = [
+            __('global.table.no'),
+            __('stock_movement.table.product'),
+            __('stock_movement.table.category'),
+            __('stock_movement.table.uom'),
+            __('stock_movement.table.qty'),
+            __('stock_movement.table.status'),
+            __('stock_movement.table.from'),
+            __('stock_movement.table.to'),
+            __('stock_movement.table.date'),
+            __('stock_movement.table.requested_by'),
+        ];
+
+        $callback = function () use ($items, $columns) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
+            fputcsv($file, $columns);
+
+            foreach ($items as $index => $item) {
+                fputcsv($file, [
+                    $index + 1,
+                    $item->product_title ?? ($item->product->name ?? '---'),
+                    $item->category_title ?? ($item->category->name ?? '---'),
+                    $item->uom_title ?? ($item->uom->name ?? '---'),
+                    $item->qty ?? 0,
+                    $item->stock_status_title ?? '---',
+                    $item->from_title ?? '---',
+                    $item->to_title ?? '---',
+                    $item->created_date ?? '',
+                    $item->request_by_title ?? '---',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function queryData($type)

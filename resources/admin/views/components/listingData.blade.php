@@ -1,3 +1,6 @@
+@php
+    $createPermission = $createPermission ?? (array_key_exists($routeName, config('admin_permissions.modules', [])) ? $routeName . '-create' : null);
+@endphp
 @include('admin::components.listHeaderComponent', [
     'routeName' => $routeName,
     'createName' => $createName,
@@ -41,15 +44,21 @@
                                     @if ($header['field'] === 'index')
                                         <span>{!! $data->currentPage() * $data->perPage() - $data->perPage() + ($index + 1) !!}</span>
                                     @elseif($header['field'] === 'image_url')
-                                        <div class="thumbnail {!! isset($header['rowClass']) ? $header['rowClass'] : '' !!}" data-fancybox data-src="{!! isset($item->{$header['field']}) ? $item->{$header['field']} : '' !!}">
-                                            <img src="{!! isset($item->{$header['field']}) ? $item->{$header['field']} : '' !!}"
+                                        @php
+                                            $imageUrl = data_get($item, $header['field']);
+                                        @endphp
+                                        <div class="thumbnail {!! isset($header['rowClass']) ? $header['rowClass'] : '' !!}" data-fancybox data-src="{!! $imageUrl !!}">
+                                            <img src="{!! $imageUrl !!}"
                                                 onerror="(this).src='{{ asset('images/logo/default.png') }}'"
                                                 alt="">
                                         </div>
                                     @elseif($header['field'] === 'order_items_title')
-                                        <div class="order-items-column-wrapper">{!! isset($item->{$header['field']}) ? $item->{$header['field']} : '---' !!}</div>
+                                        <div class="order-items-column-wrapper">{!! data_get($item, $header['field']) ?? '---' !!}</div>
                                     @elseif($header['field'] != 'action')
-                                        <span>{!! isset($item->{$header['field']}) ? $item->{$header['field']} : '---' !!}</span>
+                                        @php
+                                            $columnValue = data_get($item, $header['field']);
+                                        @endphp
+                                        <span>{!! ($columnValue !== null && $columnValue !== '') ? $columnValue : '---' !!}</span>
                                     @elseif($header['field'] === 'action')
                                         <div class="dropdown">
                                             <i data-feather="more-vertical" class="action-btn" id="dropdownMenuButton"
@@ -60,6 +69,7 @@
                                                     @if ($status != 'trash')
                                                         @if ($itHd['key'] == 'active')
                                                             @foreach ($itHd['action'] as $acItem)
+                                                                @continue(!\App\Support\AdminPermissions::allowsAction($routeName, $acItem['url'] ?? ''))
                                                                 @php
                                                                     $visible = true;
                                                                     if (isset($acItem['visible']) && is_array($acItem['visible'])) {
@@ -107,6 +117,7 @@
                                                         @if ($item->status == 2)
                                                             @if ($itHd['key'] == 'enable')
                                                                 @foreach ($itHd['action'] as $acItem)
+                                                                @continue(!\App\Support\AdminPermissions::allowsAction($routeName, $acItem['url'] ?? ''))
                                                                     <li>
                                                                         <a class="dropdown-item {!! isset($acItem['class']) ? $acItem['class'] : '' !!}"
                                                                             @click="verifyDialog({{ $item }},'{!! $acItem['url'] !!}','{{ $acItem['title'] }}')">
@@ -120,6 +131,7 @@
                                                         @else
                                                             @if ($itHd['key'] == 'disable')
                                                                 @foreach ($itHd['action'] as $acItem)
+                                                                @continue(!\App\Support\AdminPermissions::allowsAction($routeName, $acItem['url'] ?? ''))
                                                                     <li>
                                                                         <a class="dropdown-item {!! isset($acItem['class']) ? $acItem['class'] : '' !!}"
                                                                             @click="verifyDialog({{ $item }},'{!! $acItem['url'] !!}','{{ $acItem['title'] }}')">
@@ -134,6 +146,7 @@
                                                     @else
                                                         @if ($itHd['key'] == 'trash')
                                                             @foreach ($itHd['action'] as $acItem)
+                                                                @continue(!\App\Support\AdminPermissions::allowsAction($routeName, $acItem['url'] ?? ''))
                                                                 <li>
                                                                     <a class="dropdown-item {!! isset($acItem['class']) ? $acItem['class'] : '' !!}"
                                                                         @click="verifyDialog({{ $item }},'{!! $acItem['url'] !!}','{{ $acItem['title'] }}')">
@@ -225,7 +238,7 @@
             @component('admin::components.empty', [
                 'name' => __('No data'),
                 'msg' => ($showCreate ?? true) ? 'You can create a new ' . $routeName . ' by clicking the button below' : null,
-                'permission' => ($showCreate ?? true) ? ($createPermission ?? 'Position-create') : null,
+                'permission' => ($showCreate ?? true) ? ($createPermission) : null,
                 'url' => ($showCreate ?? true) ? route('admin-' . $routeName . '-create') : null,
                 'button' => ($showCreate ?? true) ? $createName : null,
             ])

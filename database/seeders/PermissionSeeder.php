@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\ModulePermission;
 use App\Models\Permission;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Schema;
 
 class PermissionSeeder extends Seeder
 {
@@ -19,14 +18,6 @@ class PermissionSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        Schema::disableForeignKeyConstraints();
-        if (Schema::hasTable('module_permissions')) {
-            ModulePermission::truncate();
-        }
-        if (Schema::hasTable('permissions')) {
-            Permission::truncate();
-        }
-        Schema::enableForeignKeyConstraints();
         $view = "View";
         $create = "Create";
         $edit = "Edit";
@@ -82,12 +73,12 @@ class PermissionSeeder extends Seeder
        
 
         //dashboard
-        $dashboard = ModulePermission::create([
+        $dashboard = $this->module([
             'name' => 'Dashboard',
             'parent_id' => $stDashboard,
             'sort_no' => $stDashboard,
         ]);
-        Permission::create([
+        $this->permission([
             'display_name' => $view,
             'name' => 'dashboard-view',
             'guard_name' => 'web',
@@ -95,13 +86,13 @@ class PermissionSeeder extends Seeder
         ]);
 
         //Order
-        $order = ModulePermission::create([
+        $order = $this->module([
             'name' => 'Order',
             'parent_id' => $stOrder,
             'sort_no' => $stOrder,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'order-view',
@@ -131,13 +122,13 @@ class PermissionSeeder extends Seeder
         //end Order
 
         //Customer
-        $customer = ModulePermission::create([
+        $customer = $this->module([
             'name' => 'Customer',
             'parent_id' => $stCustomer,
             'sort_no' => $stCustomer,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'customer-view',
@@ -160,13 +151,13 @@ class PermissionSeeder extends Seeder
         //endCustomer
 
         //Shop
-        $shop = ModulePermission::create([
+        $shop = $this->module([
             'name' => 'Shop',
             'parent_id' => $stShop,
             'sort_no' => $stShop,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'shop-view',
@@ -189,13 +180,13 @@ class PermissionSeeder extends Seeder
         //endShop
 
         //Barber
-        $barber = ModulePermission::create([
+        $barber = $this->module([
             'name' => 'Barber',
             'parent_id' => $stBarber,
             'sort_no' => $stBarber,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'barber-view',
@@ -218,13 +209,13 @@ class PermissionSeeder extends Seeder
         //endBarber
 
         //Wallet
-        $wallet = ModulePermission::create([
+        $wallet = $this->module([
             'name' => 'Wallet',
             'parent_id' => $stWallet,
             'sort_no' => $stWallet,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'wallet-view',
@@ -247,13 +238,13 @@ class PermissionSeeder extends Seeder
         //endWallet
 
         //Product
-        $product = ModulePermission::create([
+        $product = $this->module([
             'name' => 'Product',
             'parent_id' => $stProduct,
             'sort_no' => $stProduct,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'product-view',
@@ -276,13 +267,13 @@ class PermissionSeeder extends Seeder
         //endProduct
 
         //Service
-        $service = ModulePermission::create([
+        $service = $this->module([
             'name' => 'Service',
             'parent_id' => $stService,
             'sort_no' => $stService,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'service-view',
@@ -305,13 +296,13 @@ class PermissionSeeder extends Seeder
         //endService
 
         //Promotion
-        $promotion = ModulePermission::create([
+        $promotion = $this->module([
             'name' => 'Promotion',
             'parent_id' => $stPromotion,
             'sort_no' => $stPromotion,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'promotion-view',
@@ -340,13 +331,13 @@ class PermissionSeeder extends Seeder
         //endPromotion
 
         //Banner
-        $slide = ModulePermission::create([
+        $slide = $this->module([
             'name' => 'Banner',
             'parent_id' => $stSlide,
             'sort_no' => $stSlide,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'slide-view',
@@ -375,13 +366,13 @@ class PermissionSeeder extends Seeder
         //endBanner
 
         //User
-        $user = ModulePermission::create([
+        $user = $this->module([
             'name' => 'User',
             'parent_id' => $stUser,
             'sort_no' => $stUser,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'user-view',
@@ -410,13 +401,13 @@ class PermissionSeeder extends Seeder
         //endUser
 
         //customerPoint
-        $customerPoint = ModulePermission::create([
+        $customerPoint = $this->module([
             'name' => 'Customer Point',
             'parent_id' => $stCustomerPoint,
             'sort_no' => $stCustomerPoint,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'customer-point-view',
@@ -432,13 +423,13 @@ class PermissionSeeder extends Seeder
         ]);
         //endCustomerPoint
         //reportTransaction
-        $reportTransaction = ModulePermission::create([
+        $reportTransaction = $this->module([
             'name' => 'Report Transaction',
             'parent_id' => $stReportTransaction,
             'sort_no' => $stReportTransaction,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'report-transaction-view',
@@ -454,13 +445,13 @@ class PermissionSeeder extends Seeder
         ]);
         //endReportTransaction
         //reportSummary
-        $reportSummary = ModulePermission::create([
+        $reportSummary = $this->module([
             'name' => 'Report Summary',
             'parent_id' => $stReportSummary,
             'sort_no' => $stReportSummary,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'report-summary-view',
@@ -471,12 +462,12 @@ class PermissionSeeder extends Seeder
         //endReportSummary
 
         //reportSales
-        $reportSales = ModulePermission::create([
+        $reportSales = $this->module([
             'name' => 'Report Sales',
             'parent_id' => $stReportSales,
             'sort_no' => $stReportSales,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'report-sales-view',
@@ -493,12 +484,12 @@ class PermissionSeeder extends Seeder
         //endReportSales
 
         //reportInventory
-        $reportInventory = ModulePermission::create([
+        $reportInventory = $this->module([
             'name' => 'Report Inventory Movement',
             'parent_id' => $stReportInventory,
             'sort_no' => $stReportInventory,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'report-inventory-view',
@@ -517,13 +508,13 @@ class PermissionSeeder extends Seeder
 
         // InventoryManagement
         // StockIn
-        $stockIn = ModulePermission::create([
+        $stockIn = $this->module([
             'name' => 'Stock In',
             'parent_id' => $gpInventoryManagement,
             'parent_name' => 'Inventory Management',
             'sort_no' => $stStockIn,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'stock-in-view',
@@ -538,13 +529,13 @@ class PermissionSeeder extends Seeder
             ]
         ]);
         // StockOut
-        $stockOut = ModulePermission::create([
+        $stockOut = $this->module([
             'name' => 'Stock Out',
             'parent_id' => $gpInventoryManagement,
             'parent_name' => 'Inventory Management',
             'sort_no' => $stStockOut,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'stock-out-view',
@@ -559,13 +550,13 @@ class PermissionSeeder extends Seeder
             ]
         ]);
         // StockTransfer
-        $stockTransfer = ModulePermission::create([
+        $stockTransfer = $this->module([
             'name' => 'Stock Transfer',
             'parent_id' => $gpInventoryManagement,
             'parent_name' => 'Inventory Management',
             'sort_no' => $stStockTransfer,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'stock-transfer-view',
@@ -580,13 +571,13 @@ class PermissionSeeder extends Seeder
             ]
         ]);
         // StockOnHand
-        $stockOnHand = ModulePermission::create([
+        $stockOnHand = $this->module([
             'name' => 'Stock On Hand',
             'parent_id' => $gpInventoryManagement,
             'parent_name' => 'Inventory Management',
             'sort_no' => $stStockOnHand,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'stock-on-hand-view',
@@ -601,13 +592,13 @@ class PermissionSeeder extends Seeder
             ]
         ]);
         // StockMovement
-        $stockMovement = ModulePermission::create([
+        $stockMovement = $this->module([
             'name' => 'Stock Movement',
             'parent_id' => $gpInventoryManagement,
             'parent_name' => 'Inventory Management',
             'sort_no' => $stStockMovement,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'stock-movement-view',
@@ -624,14 +615,14 @@ class PermissionSeeder extends Seeder
 
         // Page
         //About us
-        $aboutUs = ModulePermission::create([
+        $aboutUs = $this->module([
             'name' => 'About us',
             'parent_id' => $gpPage,
             'parent_name' => 'Page Management',
             'sort_no' => $stAbout,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'about-view',
@@ -648,14 +639,14 @@ class PermissionSeeder extends Seeder
         //endAboutUs
         
         //Privacy & Policy
-        $policy = ModulePermission::create([
+        $policy = $this->module([
             'name' => 'Privacy & Policy',
             'parent_id' => $gpPage,
             'parent_name' => 'Page Management',
             'sort_no' => $stPolicy,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'privacy-view',
@@ -671,14 +662,14 @@ class PermissionSeeder extends Seeder
         ]);
         //endPrivacy & Policy
         //Contact Us
-        $contactUs = ModulePermission::create([
+        $contactUs = $this->module([
             'name' => 'Contact us',
             'parent_id' => $gpPage,
             'parent_name' => 'Page Management',
             'sort_no' => $stContact,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'contact-view',
@@ -695,14 +686,14 @@ class PermissionSeeder extends Seeder
         //endContact
         // Setting
         //Category
-        $category = ModulePermission::create([
+        $category = $this->module([
             'name' => 'Category',
             'parent_id' => $gpSetting,
             'parent_name' => 'Setting',
             'sort_no' => $stCategory,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'category-view',
@@ -724,14 +715,14 @@ class PermissionSeeder extends Seeder
         ]);
         //endCategory
         //Supplier
-        $supplier = ModulePermission::create([
+        $supplier = $this->module([
             'name' => 'Supplier',
             'parent_id' => $gpSetting,
             'parent_name' => 'Setting',
             'sort_no' => $stSupplier,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'supplier-view',
@@ -753,14 +744,14 @@ class PermissionSeeder extends Seeder
         ]);
         //endCategory
         //Uom
-        $uom = ModulePermission::create([
+        $uom = $this->module([
             'name' => 'UOM',
             'parent_id' => $gpSetting,
             'parent_name' => 'Setting',
             'sort_no' => $stUom,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'uom-view',
@@ -782,14 +773,14 @@ class PermissionSeeder extends Seeder
         ]);
         //endUOM
         //Brand
-        $brand = ModulePermission::create([
+        $brand = $this->module([
             'name' => 'Brand',
             'parent_id' => $gpSetting,
             'parent_name' => 'Setting',
             'sort_no' => $stBrand,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'brand-view',
@@ -811,13 +802,13 @@ class PermissionSeeder extends Seeder
         ]);
         //endBrand
         //brandSetting
-        $brandSetting = ModulePermission::create([
+        $brandSetting = $this->module([
             'name' => 'Brand Setting',
             'parent_id' => $gpSetting,
             'parent_name' => 'Setting',
             'sort_no' => $stBrandSetting,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'brand-setting-view',
@@ -839,14 +830,14 @@ class PermissionSeeder extends Seeder
         ]);
         //endBrand
         //Point
-        $point = ModulePermission::create([
+        $point = $this->module([
             'name' => 'Point',
             'parent_id' => $gpSetting,
             'parent_name' => 'Setting',
             'sort_no' => $stPoint,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'reward-view',
@@ -868,14 +859,14 @@ class PermissionSeeder extends Seeder
         ]);
         //endPoint
         //Point
-        $topUpRate = ModulePermission::create([
+        $topUpRate = $this->module([
             'name' => 'Top Up Rate',
             'parent_id' => $gpSetting,
             'parent_name' => 'Setting',
             'sort_no' => $stTopUpRate,
 
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'top-up-rate-view',
@@ -885,12 +876,12 @@ class PermissionSeeder extends Seeder
         ]);
         //Staff Expense
         $stStaffExpense = $this->increaseIndex();
-        $staffExpense = ModulePermission::create([
+        $staffExpense = $this->module([
             'name' => 'Staff Expense',
             'parent_id' => $stStaffExpense,
             'sort_no' => $stStaffExpense,
         ]);
-        Permission::insert([
+        $this->permissions([
             [
                 'display_name' => $view,
                 'name' => 'staff-expense-view',
@@ -929,8 +920,48 @@ class PermissionSeeder extends Seeder
             ],
         ]);
 
+        $this->completeActiveModules();
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
+    private function module(array $attributes)
+    {
+        return ModulePermission::firstOrCreate(['name' => $attributes['name']], $attributes);
+    }
+
+    private function permission(array $attributes)
+    {
+        return Permission::updateOrCreate(
+            ['name' => $attributes['name'], 'guard_name' => $attributes['guard_name']],
+            $attributes
+        );
+    }
+
+    private function permissions(array $permissions): void
+    {
+        foreach ($permissions as $permission) {
+            $this->permission($permission);
+        }
+    }
+
+    private function completeActiveModules(): void
+    {
+        $labels = ['view' => 'View', 'create' => 'Create', 'update' => 'Edit',
+            'delete' => 'Delete', 'restore' => 'Restore', 'force-delete' => 'Destroy', 'excel' => 'Excel'];
+        foreach (config('admin_permissions.modules') as $prefix => $name) {
+            $module = $this->module(['name' => $name, 'sort_no' => $this->increaseIndex()]);
+            $actions = array_merge(['view', 'create', 'update', 'delete'], config('admin_permissions.extra_actions.' . $prefix, []));
+            foreach ($actions as $action) {
+                $this->permission(['name' => $prefix . '-' . $action, 'guard_name' => 'web',
+                    'display_name' => $labels[$action], 'module_id' => $module->id]);
+            }
+        }
+        $module = $this->module(['name' => 'Staff Expense Report', 'parent_name' => 'Report Management', 'sort_no' => $this->increaseIndex()]);
+        foreach (['view', 'excel'] as $action) {
+            $this->permission(['name' => 'report-staff-expense-' . $action, 'guard_name' => 'web',
+                'display_name' => $labels[$action], 'module_id' => $module->id]);
+        }
+    }
+
     public function increaseIndex()
     {
         return $this->index += 1;

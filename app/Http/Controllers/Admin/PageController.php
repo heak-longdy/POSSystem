@@ -16,11 +16,6 @@ class PageController extends Controller
     private $PageService;
     function __construct(PageService $itemSer)
     {
-        $this->middleware('permission:contact-view', ['only' => ['Page']]);
-        $this->middleware('permission:about-view', ['only' => ['Page']]);
-        $this->middleware('permission:policy-view', ['only' => ['Page']]);
-        $this->middleware('permission:preface-view', ['only' => ['Page']]);
-        $this->middleware('permission:supportUs-view', ['only' => ['Page']]);
         $this->PageService = $itemSer;
     }
     public function Page(Request $req)

@@ -23,7 +23,7 @@ class Staff extends Model
         'user',
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'position_title'];
 
     public function getImageUrlAttribute()
     {
@@ -33,8 +33,13 @@ class Staff extends Model
         return null;
     }
 
+    public function getPositionTitleAttribute()
+    {
+        return $this->position ? $this->position->title : null;
+    }
+
     public function position()
     {
-        return $this->belongsTo(Position::class, 'position_id');
+        return $this->belongsTo(Position::class, 'position_id')->withTrashed();
     }
 }

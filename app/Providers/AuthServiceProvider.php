@@ -33,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         }
 
         Gate::before(function ($user, $ability) {
-            return $user->role === 'super_admin';
+            return $user->role === 'super_admin' ? true : null;
         });
 
         // $this->commands([

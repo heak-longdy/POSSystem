@@ -37,12 +37,85 @@ class StockInController extends Controller
         $data['status'] = $req->status;
         $data['routeName'] = $this->routeName;
         $data['shop'] = $req->shop_id ? Shop::find($req->shop_id) : null;
+        $exportRoute = 'admin-' . $this->routeName . '-export';
+        $data['exportUrl'] = \Illuminate\Support\Facades\Route::has($exportRoute)
+            ? route($exportRoute, $req->query())
+            : url('admin/' . $this->routeName . '/export' . ($req->query() ? '?' . http_build_query($req->query()) : ''));
+        $data['data'] = $this->queryData('list', $req);
 
-        $query = $req->status === 'trash'
+        return view($this->layout . 'index', $data);
+    }
+
+    public function report(Request $req)
+    {
+        $data = $this->queryData('report', $req);
+        return response()->json($data);
+    }
+
+    public function export(Request $req)
+    {
+        $items = $this->queryData('report', $req);
+        $fileName = 'stock_in_export_' . date('Y-m-d_H-i-s') . '.csv';
+
+        $headers = [
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0",
+        ];
+
+        $columns = [
+            __('stock_in.table.no'),
+            __('stock_in.table.product'),
+            __('stock_in.table.shop'),
+            __('stock_in.table.supplier'),
+            __('stock_in.table.category'),
+            __('stock_in.table.uom'),
+            __('stock_in.table.qty'),
+            __('stock_in.table.date'),
+            __('stock_in.table.requested_by'),
+            __('stock_in.table.status'),
+            __('stock_in.table.remark'),
+        ];
+
+        $callback = function () use ($items, $columns) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
+            fputcsv($file, $columns);
+
+            foreach ($items as $index => $item) {
+                fputcsv($file, [
+                    $index + 1,
+                    $item->product_title ?? '---',
+                    $item->shop_title ?? '---',
+                    $item->supplier_title ?? '---',
+                    $item->category_title ?? '---',
+                    $item->uom_title ?? '---',
+                    $item->qty ?? 0,
+                    $item->created_date ?? '',
+                    $item->request_by_title ?? '---',
+                    $item->stock_status_title ?? '---',
+                    $item->remark ?? '',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function queryData($type = 'list', Request $req = null)
+    {
+        $req = $req ?: request();
+        $status = $req->status ?: 1;
+
+        $query = $status === 'trash'
             ? StockIn::onlyTrashed()
-            : StockIn::where('status', $req->status);
+            : StockIn::where('status', $status);
 
-        $data['data'] = $query->with([
+        $getData = $query->with([
             'product.category',
             'product.uom',
             'shop',
@@ -67,11 +140,11 @@ class StockInController extends Controller
             ->when($req->date, function ($query) use ($req) {
                 $query->whereDate('created_at', $req->date);
             })
-            ->orderBy('id', 'desc')
-            ->paginate(50)
-            ->appends($req->query());
+            ->orderBy('id', 'desc');
 
-        return view($this->layout . 'index', $data);
+        return $type === 'report'
+            ? $getData->get()
+            : $getData->paginate(50)->appends($req->query());
     }
 
     public function onCreate()

@@ -3,6 +3,11 @@
 return [
     'title' => 'Stock In Management',
     'select_shop' => 'Select Shop',
+    'export_excel' => 'Export Excel',
+    'excel' => [
+        'sheet_name' => 'Stock In Report',
+        'title' => 'STOCK IN REPORT',
+    ],
 
     'table' => [
         'no' => 'Nº',

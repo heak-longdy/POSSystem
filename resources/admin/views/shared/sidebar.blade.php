@@ -11,6 +11,7 @@
     @include('admin::components.confirm-dialog-info-profile')
 </div>
 <ul class="side-menu">
+    @can('dashboard-view')
     <li class="li">
         <a data-url="{{ route('admin-dashboard') }}" role="link" tabindex="0" class="overView {{ routeActive('admin/dashboard') ? 'active' : '' }}">
             <div class="div">
@@ -24,8 +25,9 @@
             </div>
         </a>
     </li>
+    @endcan
     <?php $showTitleNum = 35 ?>
-    @foreach (config('menu') as $key => $item)
+    @foreach (\App\Support\AdminPermissions::visibleMenu(config('menu')) as $key => $item)
         {{-- @foreach (Menu::menuList() as $key => $item) --}}
         @if (isset($item['type']) && $item['type'] == 'dropdown-multiple')
             <div class="navItemSiderbarGroup li">

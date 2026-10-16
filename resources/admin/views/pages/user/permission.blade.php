@@ -1,10 +1,15 @@
 @extends('admin::shared.layout')
 @section('layout')
     @include('admin::shared.header', ['header_name' => '', 'customClass' => 'headerInForm'])
-    <div class="form-admin" x-data="xPermission">
+    <div class="form-admin" x-data="xPermission({{ json_encode(old('_permissions_form') ? (is_array(old('permission')) ? old('permission') : []) : $userPermissions) }})">
         <div class="form-bg"></div>
         <form id="form" class="form-wrapper" action="{!! route('admin-user-save-permission', $user->id) !!}" method="POST">
             {{ csrf_field() }}
+            <input type="hidden" name="_permissions_form" value="1">
+            {{-- Excluded modules are not editable here; retain their existing assignments. --}}
+            @foreach ($preservedPermissions as $permission)
+                <input type="hidden" name="permission[]" value="{{ $permission }}">
+            @endforeach
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-user-list', 1) !!}"></i>
@@ -43,6 +48,13 @@
                     </div>
                 </div>
 
+                @if ($user->role === 'super_admin')
+                    <p>{{ __('permission.super_admin_access') }}</p>
+                @endif
+                @if (count($inheritedPermissions))
+                    <p>{{ __('permission.inherited_help') }}</p>
+                @endif
+
                 <!-- Permission Controls & Search -->
                 <div class="row" style="margin-bottom: 15px;">
                     <div class="permissionLayoutGp" style="width: 100%;">
@@ -57,21 +69,23 @@
                                 </div>
                                 <label class="permissionListCheckall" style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0; user-select: none;">
                                     <span class="span" style="font-size: 14px; font-weight: 500;">{{ __('permission.select_all') }}</span>
-                                    <input type="checkbox" id="chk-permissionSelectAll" class="chk-permissionSelectAll"
-                                        :checked="isAllSelected()"
+                                    <input type="checkbox" id="chk-permissionSelectAll-{{ $user->id }}" class="chk-permissionSelectAll"
+                                        x-effect="$el.checked = isAllSelected(); $el.indeterminate = selectedCount > 0 && !isAllSelected()"
                                         @change="toggleSelectAll($event.target.checked)"
                                         style="width: 18px; height: 18px; cursor: pointer; accent-color: #2563eb;" />
                                 </label>
                             </div>
                         </div>
 
-                        @error('permission')
-                            <div class="error" style="color: red; margin-bottom: 10px;">{{ $message }}</div>
-                        @enderror
+                        @foreach ($errors->get('permission') + $errors->get('permission.*') as $messages)
+                            @foreach ((array) $messages as $message)
+                                <div class="error" style="color: red; margin-bottom: 10px;">{{ $message }}</div>
+                            @endforeach
+                        @endforeach
 
                         <!-- Grouped Permission Modules -->
                         @foreach ($groupedModules as $groupName => $modules)
-                            <div class="permission-category-block" x-show="isCategoryVisible('{{ addslashes($groupName) }}')" style="margin-bottom: 24px;">
+                            <div class="permission-category-block" data-group="{{ $groupName }}" x-show="isCategoryVisible($el)" style="margin-bottom: 24px;">
                                 <label class="parentLabel" style="font-weight: 600; font-size: 17px; color: #334155; display: block; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 14px;">
                                     {{ $groupName }}
                                 </label>
@@ -79,7 +93,8 @@
                                 <div class="permissionLayout" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; width: 100%;">
                                     @foreach ($modules as $modul)
                                         <div class="permissionItem showMenu"
-                                            x-show="isModuleVisible('{{ addslashes($modul->name) }}', '{{ addslashes($groupName) }}')"
+                                            data-name="{{ $modul->name }}" data-group="{{ $groupName }}"
+                                            x-show="isModuleVisible($el.dataset.name, $el.dataset.group)"
                                             data-module-id="{{ $modul->id }}"
                                             style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
                                             
@@ -93,9 +108,9 @@
                                                 <div class="inputItem" @click.stop="" style="display: flex; align-items: center; gap: 6px;">
                                                     <span style="font-size: 12px; color: #94a3b8;">{{ __('permission.all') }}</span>
                                                     <input type="checkbox"
-                                                        id="chk-group-{{ $modul->id }}"
+                                                        id="chk-group-{{ $user->id }}-{{ $modul->id }}"
                                                         class="chk-permission-group"
-                                                        :checked="isModuleAllChecked({{ $modul->id }})"
+                                                        x-effect="$el.checked = isModuleAllChecked({{ $modul->id }}); $el.indeterminate = isModulePartial({{ $modul->id }})"
                                                         @change="toggleModuleAll({{ $modul->id }}, $event.target.checked)"
                                                         style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" />
                                                 </div>
@@ -104,21 +119,24 @@
                                             <div class="permissionListItemGpCh" style="display: block; padding-top: 10px;">
                                                 @if(isset($modul->permission) && $modul->permission->count() > 0)
                                                     @foreach ($modul->permission as $action)
-                                                        <label class="permissionItemCh" for="perm-{{ $action->id }}"
+                                                        <label class="permissionItemCh" for="perm-{{ $user->id }}-{{ $action->id }}"
                                                             style="display: flex; align-items: center; justify-content: space-between; padding: 6px 4px; cursor: pointer; border-bottom: 1px dashed #f1f5f9; margin: 0; user-select: none;">
                                                             <div style="display: flex; align-items: center; gap: 8px;">
                                                                 <i data-feather="check-circle" style="width: 14px; height: 14px; color: #94a3b8;"></i>
-                                                                <span style="font-size: 13px; color: #334155;">{{ $action->display_name ?: $action->name }}</span>
+                                                                <span style="font-size: 13px; color: #334155;">{{ $action->display_name ?: $action->name }}
+                                                                    @if (in_array($action->name, $inheritedPermissions))
+                                                                        <small>({{ __('permission.inherited') }})</small>
+                                                                    @endif
+                                                                </span>
                                                             </div>
                                                             <div class="inputItem">
                                                                 <input type="checkbox"
-                                                                    id="perm-{{ $action->id }}"
+                                                                    id="perm-{{ $user->id }}-{{ $action->id }}"
                                                                     name="permission[]"
                                                                     value="{{ $action->name }}"
                                                                     class="permissionAllitem perm-item-{{ $modul->id }}"
                                                                     data-module-id="{{ $modul->id }}"
-                                                                    @if(in_array($action->name, $userPermissions)) checked @endif
-                                                                    @change="onPermissionChange()"
+                                                                    x-model="selectedPermissions"
                                                                     style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" />
                                                             </div>
                                                         </label>
@@ -155,63 +173,48 @@
 @section('script')
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('xPermission', () => ({
+            Alpine.data('xPermission', (permissions = []) => ({
                 search: '',
-                totalCount: 0,
-                selectedCount: 0,
+                selectedPermissions: permissions,
+                availablePermissions: [],
 
                 init() {
                     this.$nextTick(() => {
-                        if (typeof feather !== 'undefined') {
-                            feather.replace();
-                        }
-                        this.updateCounts();
+                        this.availablePermissions = Array.from(this.$root.querySelectorAll('input.permissionAllitem')).map(box => box.value);
+                        this.selectedPermissions = this.selectedPermissions.filter(name => this.availablePermissions.includes(name));
+                        if (typeof feather !== 'undefined') feather.replace();
                     });
                 },
 
-                updateCounts() {
-                    const allBoxes = document.querySelectorAll('input.permissionAllitem');
-                    this.totalCount = allBoxes.length;
-                    this.selectedCount = document.querySelectorAll('input.permissionAllitem:checked').length;
-                },
-
-                onPermissionChange() {
-                    this.updateCounts();
-                },
+                get totalCount() { return this.availablePermissions.length; },
+                get selectedCount() { return this.selectedPermissions.length; },
 
                 toggleSelectAll(checked) {
-                    const allBoxes = document.querySelectorAll('input.permissionAllitem');
-                    allBoxes.forEach(box => {
-                        box.checked = checked;
-                    });
-                    const groupBoxes = document.querySelectorAll('input.chk-permission-group');
-                    groupBoxes.forEach(box => {
-                        box.checked = checked;
-                    });
-                    this.updateCounts();
+                    this.selectedPermissions = checked ? [...this.availablePermissions] : [];
                 },
 
                 isAllSelected() {
-                    if (this.totalCount === 0) return false;
-                    return this.selectedCount === this.totalCount;
+                    return this.totalCount > 0 && this.selectedCount === this.totalCount;
+                },
+
+                modulePermissions(moduleId) {
+                    return Array.from(this.$root.querySelectorAll('.perm-item-' + moduleId)).map(box => box.value);
                 },
 
                 toggleModuleAll(moduleId, checked) {
-                    const moduleBoxes = document.querySelectorAll('.perm-item-' + moduleId);
-                    moduleBoxes.forEach(box => {
-                        box.checked = checked;
-                    });
-                    this.updateCounts();
+                    const names = this.modulePermissions(moduleId);
+                    this.selectedPermissions = checked
+                        ? [...new Set([...this.selectedPermissions, ...names])]
+                        : this.selectedPermissions.filter(name => !names.includes(name));
                 },
 
                 isModuleAllChecked(moduleId) {
-                    const moduleBoxes = document.querySelectorAll('.perm-item-' + moduleId);
-                    if (!moduleBoxes || moduleBoxes.length === 0) return false;
-                    let allChecked = true;
-                    moduleBoxes.forEach(box => {
-                        if (!box.checked) allChecked = false;
-                    });
-                    return allChecked;
+                    const names = this.modulePermissions(moduleId);
+                    return names.length > 0 && names.every(name => this.selectedPermissions.includes(name));
+                },
+
+                isModulePartial(moduleId) {
+                    return !this.isModuleAllChecked(moduleId) && this.modulePermissions(moduleId).some(name => this.selectedPermissions.includes(name));
                 },
 
                 toggleMenu(el) {
@@ -235,11 +238,9 @@
                     return moduleName.toLowerCase().includes(q) || groupName.toLowerCase().includes(q);
                 },
 
-                isCategoryVisible(groupName) {
-                    if (!this.search || this.search.trim() === '') return true;
-                    const q = this.search.toLowerCase().trim();
-                    if (groupName.toLowerCase().includes(q)) return true;
-                    return true;
+                isCategoryVisible(category) {
+                    return Array.from(category.querySelectorAll('.permissionItem')).some(module =>
+                        this.isModuleVisible(module.dataset.name, module.dataset.group));
                 }
             }));
         });

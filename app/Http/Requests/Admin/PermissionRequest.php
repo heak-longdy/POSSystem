@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class PermissionRequest extends FormRequest
 {
@@ -14,7 +14,7 @@ class PermissionRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check();
+        return $this->user() && $this->user()->can('user-update');
     }
 
     /**
@@ -25,15 +25,9 @@ class PermissionRequest extends FormRequest
     public function rules()
     {
         return [
-            "id"    => "required",
-            "permission"  => "required"
-        ];
-    }
-    public function messages()
-    {
-        return [
-            "id.required" => "id is required",
-            "permission.required" => "permission is required"
+            'permission' => ['sometimes', 'array'],
+            'permission.*' => ['required', 'string', 'distinct',
+                Rule::exists('permissions', 'name')->where('guard_name', 'web')],
         ];
     }
 }

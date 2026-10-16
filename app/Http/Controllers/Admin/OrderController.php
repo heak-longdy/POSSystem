@@ -31,14 +31,6 @@ class OrderController extends Controller
     protected $layout = 'admin::pages.order.';
     protected $routeName = 'order';
 
-    public function __construct()
-    {
-        $this->middleware('permission:order-view', ['only' => ['index', 'product', 'getPaymentDetails', 'show']]);
-        $this->middleware('permission:order-create', ['only' => ['onCreate', 'save', 'Save']]);
-        $this->middleware('permission:order-update', ['only' => ['onEdit', 'edit', 'save', 'Save', 'restore', 'updatePaymentStatus', 'cancelOrder', 'addPayment', 'updatePayment', 'sendPaymentReminder']]);
-        $this->middleware('permission:order-delete', ['only' => ['delete', 'restore', 'destroy', 'deletePayment']]);
-    }
-
     public function index(Request $req)
     {
         if (!$req->status) {

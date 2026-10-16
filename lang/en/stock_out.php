@@ -21,11 +21,24 @@ return [
 
     'button' => [
         'create' => 'Create Stock Out',
+        'export_excel' => 'Export Excel',
         'save' => 'Save',
         'save_new' => 'Save & New',
         'submit' => 'Submit',
         'cancel' => 'Cancel',
         'edit' => 'Edit',
+    ],
+
+    'excel' => [
+        'title' => 'STOCK OUT REPORT',
+        'sheet_name' => 'Stock Out',
+        'generated_on' => 'Generated on',
+        'filter_shop' => 'Shop',
+        'filter_status' => 'Status',
+        'filter_search' => 'Search',
+        'all' => 'All',
+        'total_records' => 'Total Records',
+        'total_qty' => 'Total Qty',
     ],
 
     'form' => [
