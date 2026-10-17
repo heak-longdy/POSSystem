@@ -7,13 +7,16 @@ return [
 
     'tab' => [
         'all_outstanding' => 'នៅសល់ទាំងអស់',
+        'partial' => 'បង់ប្រាក់ខ្លះ',
+        'paid' => 'បានបង់ប្រាក់',
         'partial_paid' => 'បង់ប្រាក់ខ្លះ',
         'pending_payment' => 'រង់ចាំការទូទាត់',
-        'fully_paid' => 'បានបង់ពេញ',
+        'fully_paid' => 'បានបង់ប្រាក់',
     ],
 
     'action' => [
         'view_detail' => 'មើលព័ត៌មានលម្អិត',
+        'paid' => 'បានបង់ប្រាក់',
         'add_payment' => 'បន្ថែមការបង់ប្រាក់',
         'manage_payment' => 'គ្រប់គ្រងការទូទាត់',
         'payment_history' => 'ប្រវត្តិនៃការទូទាត់',

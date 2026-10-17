@@ -7,13 +7,16 @@ return [
 
     'tab' => [
         'all_outstanding' => 'All Outstanding',
-        'partial_paid' => 'Partial Paid',
+        'partial' => 'Partial',
+        'paid' => 'Paid',
+        'partial_paid' => 'Partial',
         'pending_payment' => 'Pending Payment',
-        'fully_paid' => 'Fully Paid',
+        'fully_paid' => 'Paid',
     ],
 
     'action' => [
         'view_detail' => 'View Detail',
+        'paid' => 'Paid',
         'add_payment' => 'Add Payment',
         'manage_payment' => 'Manage Payment',
         'payment_history' => 'Payment History',

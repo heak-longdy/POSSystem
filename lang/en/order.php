@@ -132,6 +132,7 @@ return [
         'destroy' => 'Destroy',
         'reject_order' => 'Reject Order',
         'paid' => 'Paid',
+        'add_payment' => 'Add Payment',
         'cancel' => 'Cancel',
         'delete_payment' => 'Delete Payment',
         'manage_payment' => 'Manage Payment',

@@ -1390,15 +1390,18 @@
             color: #0f172a;
         }
         .btn-close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            line-height: 1;
-            color: #94a3b8;
-            cursor: pointer;
+            background: none !important;
+            border: none !important;
+            font-size: 24px !important;
+            line-height: 1 !important;
+            color: #94a3b8 !important;
+            cursor: pointer !important;
+            min-width: 0 !important;
+            padding: 0 !important;
         }
         .btn-close-modal:hover {
             color: #334155;
+            background: none !important;
         }
         .modal-body-custom {
             padding: 20px;

@@ -22,6 +22,7 @@ class AdminPermissions
             'change-password' => 'update', 'save-password' => 'update',
             'add-payment' => 'update', 'update-payment' => 'update', 'cancel' => 'update',
             'update-payment-status' => 'update', 'send-payment-reminder' => 'update',
+            'paid' => 'update',
             'delete' => 'delete', 'delete-payment' => 'delete',
             'restore' => in_array($module, ['staff', 'staff-expense']) ? 'restore' : 'update',
             'destroy' => in_array($module, ['staff', 'staff-expense']) ? 'force-delete' : 'delete',

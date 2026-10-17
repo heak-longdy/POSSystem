@@ -36,6 +36,10 @@ class RemainingAmountController extends Controller
             return redirect()->route('admin-order-list', array_merge(['status' => 'all'], $req->except('status')));
         }
 
+        if ($req->status === 'pending') {
+            return redirect()->route('admin-' . $this->routeName . '-list', array_merge(['status' => 'partial'], $req->except('status')));
+        }
+
         $status = $this->normalizeStatusTab($req->status ?? 'partial');
         $dates = $this->dateRange($req, false);
 
@@ -494,7 +498,6 @@ class RemainingAmountController extends Controller
         $status = strtolower((string) $status);
 
         return match ($status) {
-            'pending' => 'pending',
             'paid' => 'paid',
             default => 'partial',
         };

@@ -1217,6 +1217,7 @@ class OrderController extends Controller
             $item->total_commission_title = '$' . number_format((float) ($item->total_commission ?? 0), 2);
             $item->total_discount_title = '$' . number_format((float) ($item->total_discount ?? 0), 2);
             $item->can_reject = $item->payment_status === 'Pending' && (float) ($item->paid_amount ?? 0) <= 0;
+            $item->can_add_payment = ($item->payment_status !== 'Cancel' && (float) ($item->remaining_amount ?? 0) > 0);
             $itemDate = $item->order_date;
             $item->order_date_title = $itemDate
                 ? Carbon::parse($itemDate)->format('Y-m-d H:i')

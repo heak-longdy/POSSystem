@@ -26,19 +26,13 @@
             'showTabs' => true,
             'tabs' => [
                 [
-                    'label' => __('remaining_amount.tab.partial_paid'),
+                    'label' => __('order.tab.partial'),
                     'icon' => 'bx bx-credit-card',
                     'url' => $tabUrl('partial'),
                     'active' => $status === 'partial',
                 ],
                 [
-                    'label' => __('remaining_amount.tab.pending_payment'),
-                    'icon' => 'bx bx-time-five',
-                    'url' => $tabUrl('pending'),
-                    'active' => $status === 'pending',
-                ],
-                [
-                    'label' => __('remaining_amount.tab.fully_paid'),
+                    'label' => __('order.tab.paid'),
                     'icon' => 'bx bx-check-circle',
                     'url' => $tabUrl('paid'),
                     'active' => $status === 'paid',
@@ -75,59 +69,23 @@
                                     'type' => 'link',
                                 ],
                                 [
+                                    'url' => 'paid',
+                                    'title' => __('order.action.paid'),
+                                    'icon' => 'check_circle',
+                                    'type' => 'click',
+                                    'handler' => 'markAsPaid',
+                                    'class' => 'text-success',
+                                    'visible' => ['payment_status' => 'Partial'],
+                                ],
+                                [
                                     'url' => 'add-payment',
                                     'title' => __('remaining_amount.action.add_payment'),
                                     'icon' => 'add_circle',
                                     'type' => 'click',
                                     'handler' => 'openAddPaymentModal',
-                                    'class' => 'text-success font-weight-bold',
+                                    'class' => 'text-success',
                                     'visible' => ['can_add_payment' => true],
                                 ],
-                                [
-                                    'url' => 'payment',
-                                    'title' => __('remaining_amount.action.manage_payment'),
-                                    'icon' => 'payments',
-                                    'type' => 'click',
-                                    'handler' => 'openPaymentModal',
-                                    'class' => 'text-primary',
-                                    'visible' => ['payment_status' => 'Pending'],
-                                ],
-                                [
-                                    'url' => 'payment',
-                                    'title' => __('remaining_amount.action.manage_payment'),
-                                    'icon' => 'payments',
-                                    'type' => 'click',
-                                    'handler' => 'openPaymentModal',
-                                    'class' => 'text-success',
-                                    'visible' => ['payment_status' => 'Partial'],
-                                ],
-                                [
-                                    'url' => 'payment',
-                                    'title' => __('remaining_amount.action.payment_history'),
-                                    'icon' => 'history',
-                                    'type' => 'click',
-                                    'handler' => 'openPaymentModal',
-                                    'class' => 'text-info',
-                                    'visible' => ['payment_status' => 'Paid'],
-                                ],
-                                // [
-                                //     'url' => 'reminder',
-                                //     'title' => __('remaining_amount.action.send_reminder'),
-                                //     'icon' => 'notifications_active',
-                                //     'type' => 'click',
-                                //     'handler' => 'quickSendReminder',
-                                //     'class' => 'text-warning',
-                                //     'visible' => ['payment_status' => 'Partial'],
-                                // ],
-                                // [
-                                //     'url' => 'reminder',
-                                //     'title' => __('remaining_amount.action.send_reminder'),
-                                //     'icon' => 'notifications_active',
-                                //     'type' => 'click',
-                                //     'handler' => 'quickSendReminder',
-                                //     'class' => 'text-warning',
-                                //     'visible' => ['payment_status' => 'Pending'],
-                                // ],
                             ],
                         ],
                     ],
@@ -223,229 +181,6 @@
             </div>
         </div>
 
-        <!-- Standalone Payment & Payment History Modal -->
-        <template x-if="showPaymentModal">
-            <div class="payment-modal-backdrop" @click.self="closePaymentModal()">
-                <div class="payment-modal-card">
-                    <!-- Modal Header -->
-                    <div class="payment-modal-header">
-                        <div class="header-left">
-                            <div class="modal-badge-icon">
-                                <i class='bx bx-wallet'></i>
-                            </div>
-                            <div>
-                                <h3 class="modal-title" x-text="getActiveOrderTitle()"></h3>
-                                <p class="modal-subtitle" x-text="getActiveOrderSubtitle()"></p>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close-modal" @click="closePaymentModal()">&times;</button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div class="payment-modal-body">
-                        <!-- Financial Breakdown Card -->
-                        <div class="modal-ledger-summary">
-                            <div class="summary-col">
-                                <span class="summary-label">{{ __('remaining_amount.ledger.total_amount') }}</span>
-                                <strong class="summary-val" x-text="activeOrder?.total_price_formatted || '$0.00'"></strong>
-                            </div>
-                            <div class="summary-col">
-                                <span class="summary-label">{{ __('remaining_amount.ledger.amount_paid') }}</span>
-                                <strong class="summary-val text-success" x-text="activeOrder?.paid_amount_formatted || '$0.00'"></strong>
-                            </div>
-                            <div class="summary-col">
-                                <span class="summary-label">{{ __('remaining_amount.ledger.remaining_balance') }}</span>
-                                <strong class="summary-val text-danger" x-text="activeOrder?.remaining_amount_formatted || '$0.00'"></strong>
-                            </div>
-                        </div>
-
-                        <!-- Progress Bar -->
-                        <div class="modal-progress-wrap">
-                            <div class="progress-bar-rail">
-                                <div class="progress-bar-fill" :style="`width: ${modalProgressPercent()}%`"
-                                    :class="modalStatusClass()"></div>
-                            </div>
-                            <div class="progress-meta">
-                                <span x-text="`{{ __('order.status_label') }}: ${paymentStatusLabel(activeOrder?.payment_status)}`"
-                                    :class="'badge-' + (activeOrder?.payment_status || 'pending').toLowerCase()"></span>
-                                <span x-text="`${modalProgressPercent()}% {{ __('order.paid') }}`"></span>
-                            </div>
-                        </div>
-
-                        <!-- Modal Tabs -->
-                        <div class="modal-nav-tabs">
-                            <button type="button" class="modal-tab-btn" :class="{ 'is-active': activeModalTab === 'pay' }"
-                                @click="activeModalTab = 'pay'" x-show="activeOrder?.remaining_amount > 0">
-                                <i class='bx bx-plus-circle'></i> {{ __('remaining_amount.modal.make_payment') }}
-                            </button>
-                            <button type="button" class="modal-tab-btn" :class="{ 'is-active': activeModalTab === 'history' }"
-                                @click="activeModalTab = 'history'">
-                                <i class='bx bx-history'></i> {{ __('remaining_amount.modal.payment_history') }} (<span x-text="activeOrder?.payments?.length || 0"></span>)
-                            </button>
-                        </div>
-
-                        <!-- Tab 1: Make Payment Form -->
-                        <div class="modal-tab-content" x-show="activeModalTab === 'pay' && activeOrder?.remaining_amount > 0">
-                            <form @submit.prevent="submitModalPayment()">
-                                <div class="modal-form-grid">
-                                    <div class="modal-form-group">
-                                        <label>{{ __('remaining_amount.form.payment_amount') }} <span class="text-danger">*</span></label>
-                                        <div class="input-with-action">
-                                            <input type="number" step="0.01" min="0.01" :max="activeOrder?.remaining_amount"
-                                                x-model="paymentForm.amount" class="modal-input" placeholder="0.00" required>
-                                            <button type="button" class="btn-quick-full"
-                                                @click="paymentForm.amount = activeOrder?.remaining_amount">
-                                                {{ __('remaining_amount.form.full_balance') }}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="modal-form-group" style="grid-column: span 2;">
-                                        <label>{{ __('remaining_amount.form.payment_method') }}</label>
-                                        <div class="payment-method-selector">
-                                            <label class="method-option" :class="paymentForm.payment_method === 'Cash' ? 'is-active' : ''">
-                                                <input type="radio" value="Cash" x-model="paymentForm.payment_method">
-                                                <i data-feather="dollar-sign"></i>
-                                                <span>{{ __('order.payment.cash') }}</span>
-                                            </label>
-                                            <label class="method-option" :class="paymentForm.payment_method === 'ABA' ? 'is-active' : ''">
-                                                <input type="radio" value="ABA" x-model="paymentForm.payment_method">
-                                                <i data-feather="credit-card"></i>
-                                                <span>{{ __('order.payment.aba') }}</span>
-                                            </label>
-                                            <label class="method-option" :class="paymentForm.payment_method === 'Card' ? 'is-active' : ''">
-                                                <input type="radio" value="Card" x-model="paymentForm.payment_method">
-                                                <i data-feather="server"></i>
-                                                <span>{{ __('order.payment.card') }}</span>
-                                            </label>
-                                            <label class="method-option" :class="paymentForm.payment_method === 'QR' ? 'is-active' : ''">
-                                                <input type="radio" value="QR" x-model="paymentForm.payment_method">
-                                                <i data-feather="maximize"></i>
-                                                <span>{{ __('order.payment.qr') }}</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="modal-form-group" style="grid-column: span 2;">
-                                        <label>{{ __('remaining_amount.form.payment_date_time') }}</label>
-                                        <input type="datetime-local" x-model="paymentForm.payment_date" class="modal-input">
-                                    </div>
-                                    <div class="modal-form-group" style="grid-column: span 2;">
-                                        <label>{{ __('remaining_amount.form.note_reference') }}</label>
-                                        <input type="text" x-model="paymentForm.note" class="modal-input" placeholder="{{ __('remaining_amount.placeholder.note') }}" maxlength="500">
-                                    </div>
-                                </div>
-                                <div class="modal-form-actions">
-                                    <button type="button" class="btn-secondary-action" :disabled="reminderLoading"
-                                        @click="sendReminderNotification()" x-show="activeOrder?.remaining_amount > 0">
-                                        <i class='bx bx-bell'></i>
-                                        <span x-show="!reminderLoading">{{ __('remaining_amount.action.send_reminder') }}</span>
-                                        <span x-show="reminderLoading" style="display: none;">{{ __('remaining_amount.button.sending') }}</span>
-                                    </button>
-                                    <button type="submit" class="btn-primary-action" :disabled="paymentSubmitting">
-                                        <i class='bx bx-check-circle' x-show="!paymentSubmitting"></i>
-                                        <span x-show="!paymentSubmitting">{{ __('order.record_payment') }}</span>
-                                        <span x-show="paymentSubmitting" style="display: none;">{{ __('remaining_amount.button.processing_payment') }}</span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Tab 2: Payment History Table -->
-                        <div class="modal-tab-content" x-show="activeModalTab === 'history' || activeOrder?.remaining_amount <= 0">
-                            <div class="history-table-container">
-                                <template x-if="!activeOrder?.payments || activeOrder?.payments?.length === 0">
-                                    <div class="empty-history-state">
-                                        <i class='bx bx-folder-open'></i>
-                                        <p>{{ __('remaining_amount.history.empty') }}</p>
-                                    </div>
-                                </template>
-                                <template x-if="activeOrder?.payments && activeOrder?.payments?.length > 0">
-                                    <table class="history-data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>{{ __('remaining_amount.history.date_time') }}</th>
-                                                <th>{{ __('remaining_amount.history.method') }}</th>
-                                                <th>{{ __('remaining_amount.history.amount') }}</th>
-                                                <th>{{ __('remaining_amount.history.staff') }}</th>
-                                                <th>{{ __('remaining_amount.history.note') }}</th>
-                                                <th style="text-align:right;">{{ __('remaining_amount.history.actions') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <template x-for="pay in activeOrder.payments" :key="pay.id">
-                                                <tr>
-                                                    <!-- Normal Row View -->
-                                                    <template x-if="editingPaymentId !== pay.id">
-                                                        <td class="cell-date" x-text="pay.payment_date_formatted || '---'"></td>
-                                                    </template>
-                                                    <template x-if="editingPaymentId !== pay.id">
-                                                        <td>
-                                                            <span class="badge-method" :class="'badge-' + (pay.payment_method || 'cash').toLowerCase()"
-                                                                x-text="paymentMethodLabel(pay.payment_method)"></span>
-                                                        </td>
-                                                    </template>
-                                                    <template x-if="editingPaymentId !== pay.id">
-                                                        <td class="cell-amount text-success" x-text="pay.amount_formatted || formatCurrency(pay.amount)"></td>
-                                                    </template>
-                                                    <template x-if="editingPaymentId !== pay.id">
-                                                        <td class="cell-staff" x-text="pay.created_by || '---'"></td>
-                                                    </template>
-                                                    <template x-if="editingPaymentId !== pay.id">
-                                                        <td class="cell-note" x-text="pay.note || '-'"></td>
-                                                    </template>
-                                                    <template x-if="editingPaymentId !== pay.id">
-                                                        <td style="text-align:right;">
-                                                            <button type="button" class="btn-table-icon" @click="startEditPayment(pay)" title="{{ __('remaining_amount.action.edit_payment') }}">
-                                                                <i class='bx bx-edit'></i>
-                                                            </button>
-                                                            <button type="button" class="btn-table-icon text-danger" @click="deletePayment(pay)" title="{{ __('remaining_amount.action.delete_payment') }}">
-                                                                <i class='bx bx-trash'></i>
-                                                            </button>
-                                                        </td>
-                                                    </template>
-
-                                                    <!-- Inline Edit Mode -->
-                                                    <template x-if="editingPaymentId === pay.id">
-                                                        <td colspan="6" class="cell-edit-container">
-                                                            <div class="inline-edit-grid">
-                                                                <div class="edit-field">
-                                                                    <label>{{ __('remaining_amount.history.amount') }}</label>
-                                                                    <input type="number" step="0.01" min="0.01" x-model="editPaymentForm.amount" class="modal-input-sm">
-                                                                </div>
-                                                                <div class="edit-field">
-                                                                    <label>{{ __('remaining_amount.history.method') }}</label>
-                                                                    <select x-model="editPaymentForm.payment_method" class="modal-select-sm">
-                                                                        <option value="Cash">{{ __('order.payment.cash') }}</option>
-                                                                        <option value="ABA">{{ __('order.payment.aba') }}</option>
-                                                                        <option value="Card">{{ __('order.payment.card') }}</option>
-                                                                        <option value="QR">{{ __('order.payment.qr') }}</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="edit-field">
-                                                                    <label>{{ __('remaining_amount.history.date') }}</label>
-                                                                    <input type="datetime-local" x-model="editPaymentForm.payment_date" class="modal-input-sm">
-                                                                </div>
-                                                                <div class="edit-field" style="grid-column: span 3;">
-                                                                    <label>{{ __('remaining_amount.history.note') }}</label>
-                                                                    <input type="text" x-model="editPaymentForm.note" class="modal-input-sm" placeholder="{{ __('order.placeholder.note') }}">
-                                                                </div>
-                                                                <div class="edit-actions" style="grid-column: span 3; justify-content: flex-end; display: flex; gap: 8px;">
-                                                                    <button type="button" class="btn-cancel-sm" @click="cancelEditPayment()">{{ __('action_button.cancel') }}</button>
-                                                                    <button type="button" class="btn-save-sm" :disabled="paymentSubmitting" @click="saveEditPayment(pay)">{{ __('action_button.save') }}</button>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                    </template>
-                                                </tr>
-                                            </template>
-                                        </tbody>
-                                    </table>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </template>
 
         <template x-if="exportLoading">
             <div class="loadingFullSizeLayout">
@@ -514,15 +249,18 @@
             margin-top: 2px;
         }
         .btn-close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            line-height: 1;
-            color: #94a3b8;
-            cursor: pointer;
+            background: none !important;
+            border: none !important;
+            font-size: 24px !important;
+            line-height: 1 !important;
+            color: #94a3b8 !important;
+            cursor: pointer !important;
+            min-width: 0 !important;
+            padding: 0 !important;
         }
         .btn-close-modal:hover {
             color: #334155;
+            background: none !important;
         }
         .modal-body-custom {
             padding: 20px;
@@ -726,31 +464,14 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('xRemainingAmount', () => ({
                 exportLoading: false,
-                showPaymentModal: false,
                 showAddPaymentModal: false,
-                activeModalTab: 'pay',
-                activeOrder: null,
                 addPaymentOrder: null,
                 paymentSubmitting: false,
                 addPaymentSubmitting: false,
-                reminderLoading: false,
-                editingPaymentId: null,
                 addPaymentForm: {
                     amount: null,
                     payment_method: 'Cash',
                     payment_date: moment().format('YYYY-MM-DDTHH:mm'),
-                    note: '',
-                },
-                paymentForm: {
-                    amount: null,
-                    payment_method: 'Cash',
-                    payment_date: moment().format('YYYY-MM-DDTHH:mm'),
-                    note: '',
-                },
-                editPaymentForm: {
-                    amount: null,
-                    payment_method: 'Cash',
-                    payment_date: '',
                     note: '',
                 },
                 formData: {
@@ -831,14 +552,6 @@
                         || this.walkInCustomerText;
                     return `${invoice} • ${customer}`;
                 },
-                getActiveOrderTitle() {
-                    return `${this.orderIdText}: ${this.activeOrder?.invoice_number || ''}`;
-                },
-                getActiveOrderSubtitle() {
-                    const customer = this.activeOrder?.customer_name || this.walkInCustomerText;
-                    const shop = this.activeOrder?.shop_name || this.shopText;
-                    return `${customer} • ${shop}`;
-                },
                 paymentMethodLabel(method) {
                     const map = {
                         'Cash': @json(__('order.payment.cash')),
@@ -847,6 +560,37 @@
                         'QR': @json(__('order.payment.qr')),
                     };
                     return map[method] || method || 'Cash';
+                },
+                markAsPaid(item) {
+                    const confirmTemplate = "{{ __('order.confirm.mark_as_paid', ['invoice' => '__INVOICE__']) }}";
+                    let message = confirmTemplate.replace('__INVOICE__', '<b>' + (item?.invoice_title || '') + '</b>');
+                    if (item?.payment_status === 'Partial' && item?.remaining_amount_title) {
+                        message += `<br><small style="color:#10b981;font-weight:600;display:block;margin-top:6px;">{{ __('order.table.remaining') }}: ${item.remaining_amount_title}</small>`;
+                    }
+                    this.$store.confirmDialog.open({
+                        data: {
+                            message: message,
+                            btnClose: `{{ __('global.cancel') }}`,
+                            btnSave: '{{ __('order.action.paid') }}',
+                            item: item,
+                            url: `{{ url('admin/order/update-payment-status') }}/${item.id}`,
+                            postData: {
+                                payment_status: 'Paid',
+                            },
+                            typeAction: 'paid',
+                            digPosition: "posTop",
+                            class: "deleteDialog",
+                            icon: 'bx bx-check-circle',
+                            iconStyle: 'font-size: 55px; margin-bottom: 15px; border: 1px solid rgba(16, 185, 129, 0.8); color: rgb(16 185 129); border-radius: 50%; padding: 4px;',
+                            btnSaveClass: 'bg-success',
+                            width: "20rem"
+                        },
+                        afterClosed: (result) => {
+                            if (result) {
+                                reloadData(`{{ url()->full() }}`);
+                            }
+                        }
+                    });
                 },
                 openAddPaymentModal(item) {
                     this.addPaymentOrder = item;
@@ -929,189 +673,12 @@
                         }
                     } catch (error) {
                         this.paymentSubmitting = false;
+                        this.addPaymentSubmitting = false;
                         const errorMsg = error.response?.data?.error ||
                             Object.values(error.response?.data?.errors || {})?.[0]?.[0] ||
                             @json(__('remaining_amount.message.error_record_payment'));
                         alert(errorMsg);
                     }
-                },
-                openPaymentModal(item) {
-                    this.activeOrder = item;
-                    this.showPaymentModal = true;
-                    this.activeModalTab = (item?.remaining_amount > 0) ? 'pay' : 'history';
-                    this.editingPaymentId = null;
-                    this.paymentForm = {
-                        amount: item?.remaining_amount || null,
-                        payment_method: 'Cash',
-                        payment_date: moment().format('YYYY-MM-DDTHH:mm'),
-                        note: '',
-                    };
-
-                    this.$nextTick(() => {
-                        if (window.feather) {
-                            feather.replace();
-                        }
-                    });
-
-                    Axios.get(`{{ url('admin/remaining-amount/payment-details') }}/${item.id}`)
-                        .then((res) => {
-                            this.activeOrder = res.data;
-                            if (this.activeOrder.remaining_amount <= 0) {
-                                this.activeModalTab = 'history';
-                            }
-                        })
-                        .catch((err) => {
-                            console.error(err);
-                        });
-                },
-                closePaymentModal() {
-                    this.showPaymentModal = false;
-                    this.activeOrder = null;
-                    this.editingPaymentId = null;
-                },
-                modalProgressPercent() {
-                    if (!this.activeOrder) return 0;
-                    const total = Number(this.activeOrder.total_price || 0);
-                    const paid = Number(this.activeOrder.paid_amount || 0);
-                    if (total <= 0) return 0;
-                    return Math.min(100, Math.max(0, Math.round((paid / total) * 100)));
-                },
-                modalStatusClass() {
-                    const status = this.activeOrder?.payment_status;
-                    if (status === 'Paid') return 'fill-paid';
-                    if (status === 'Partial') return 'fill-partial';
-                    return 'fill-pending';
-                },
-                submitModalPayment() {
-                    if (!this.activeOrder?.id) return;
-                    this.paymentSubmitting = true;
-
-                    Axios.post(`{{ url('admin/remaining-amount/add-payment') }}/${this.activeOrder.id}`, {
-                        amount: this.paymentForm.amount,
-                        payment_method: this.paymentForm.payment_method,
-                        payment_date: this.paymentForm.payment_date,
-                        note: this.paymentForm.note,
-                    }).then((res) => {
-                        this.activeOrder = res.data;
-                        this.paymentForm.amount = this.activeOrder.remaining_amount || null;
-                        this.paymentForm.note = '';
-                        this.paymentForm.payment_date = moment().format('YYYY-MM-DDTHH:mm');
-                        if (this.activeOrder.remaining_amount <= 0) {
-                            this.activeModalTab = 'history';
-                        }
-                        reloadData(`{{ url()->full() }}`);
-                    }).catch((err) => {
-                        const message = err.response?.data?.error ||
-                            Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-                            @json(__('remaining_amount.message.error_record_payment'));
-                        alert(message);
-                    }).finally(() => {
-                        this.paymentSubmitting = false;
-                    });
-                },
-                startEditPayment(pay) {
-                    this.editingPaymentId = pay.id;
-                    this.editPaymentForm = {
-                        amount: pay.amount,
-                        payment_method: pay.payment_method || 'Cash',
-                        payment_date: pay.payment_date ? moment(pay.payment_date).format('YYYY-MM-DDTHH:mm') : moment().format('YYYY-MM-DDTHH:mm'),
-                        note: pay.note || '',
-                    };
-                },
-                cancelEditPayment() {
-                    this.editingPaymentId = null;
-                },
-                saveEditPayment(pay) {
-                    this.paymentSubmitting = true;
-                    Axios.put(`{{ url('admin/remaining-amount/update-payment') }}/${pay.id}`, {
-                        amount: this.editPaymentForm.amount,
-                        payment_method: this.editPaymentForm.payment_method,
-                        payment_date: this.editPaymentForm.payment_date,
-                        note: this.editPaymentForm.note,
-                    }).then((res) => {
-                        this.activeOrder = res.data;
-                        this.cancelEditPayment();
-                        reloadData(`{{ url()->full() }}`);
-                    }).catch((err) => {
-                        const message = err.response?.data?.error ||
-                            Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-                            @json(__('remaining_amount.message.error_update_payment'));
-                        alert(message);
-                    }).finally(() => {
-                        this.paymentSubmitting = false;
-                    });
-                },
-                confirmPaymentAction(message, btnSave, onConfirm) {
-                    const confirmDialog = this.$store?.confirmDialog;
-                    if (confirmDialog && typeof confirmDialog.open === 'function') {
-                        confirmDialog.open({
-                            data: {
-                                message: message,
-                                btnClose: `{{ __('action_button.cancel') }}`,
-                                btnSave: btnSave || @json(__('action_button.delete')),
-                                typeAction: 'manual',
-                                digPosition: 'posTop',
-                                class: 'deleteDialog',
-                                width: '18rem',
-                            },
-                            afterClosed: (result) => {
-                                if (result) {
-                                    onConfirm();
-                                }
-                            }
-                        });
-                        return;
-                    }
-
-                    if (window.confirm(message.replace(/<[^>]*>/g, ''))) {
-                        onConfirm();
-                    }
-                },
-                deletePayment(pay) {
-                    const amount = pay.amount_formatted || ('$' + Number(pay.amount || 0).toFixed(2));
-                    const method = this.paymentMethodLabel(pay.payment_method);
-                    const template = @json(__('remaining_amount.confirm.delete_payment_record'));
-                    const message = template.replace(':amount', amount).replace(':method', method);
-
-                    this.confirmPaymentAction(message, @json(__('remaining_amount.action.delete_payment')), () => {
-                        this.paymentSubmitting = true;
-                        Axios.delete(`{{ url('admin/remaining-amount/delete-payment') }}/${pay.id}`, {
-                            data: { _token: '{{ csrf_token() }}' }
-                        }).then((res) => {
-                            this.activeOrder = res.data;
-                            reloadData(`{{ url()->full() }}`);
-                        }).catch((err) => {
-                            const message = err.response?.data?.error ||
-                                Object.values(err.response?.data?.errors || {})?.[0]?.[0] ||
-                                @json(__('remaining_amount.message.error_delete_payment'));
-                            alert(message);
-                        }).finally(() => {
-                            this.paymentSubmitting = false;
-                        });
-                    });
-                },
-                sendReminderNotification() {
-                    if (!this.activeOrder?.id) return;
-                    this.reminderLoading = true;
-                    Axios.post(`{{ url('admin/remaining-amount/send-reminder') }}/${this.activeOrder.id}`, {
-                        _token: '{{ csrf_token() }}'
-                    }).then((res) => {
-                        alert(res.data.success_message || @json(__('remaining_amount.message.reminder_sent_success')));
-                    }).catch((err) => {
-                        alert(err.response?.data?.error || @json(__('remaining_amount.message.error_send_reminder')));
-                    }).finally(() => {
-                        this.reminderLoading = false;
-                    });
-                },
-                quickSendReminder(item) {
-                    if (!item?.id) return;
-                    Axios.post(`{{ url('admin/remaining-amount/send-reminder') }}/${item.id}`, {
-                        _token: '{{ csrf_token() }}'
-                    }).then((res) => {
-                        alert(res.data.success_message || @json(__('remaining_amount.message.reminder_sent_success')));
-                    }).catch((err) => {
-                        alert(err.response?.data?.error || @json(__('remaining_amount.message.error_send_reminder')));
-                    });
                 },
                 formatCurrency(val) {
                     return '$' + (Number(val || 0)).toFixed(2);

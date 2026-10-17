@@ -282,6 +282,246 @@
             color: #b91c1c;
             transform: scale(1.05);
         }
+
+        /* Add Payment Modal Styles */
+        .modal-backdrop-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-dialog-custom {
+            background: #ffffff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: modalFadeInCustom 0.2s ease-out;
+        }
+        @keyframes modalFadeInCustom {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header-custom {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .modal-title-wrap svg,
+        .modal-title-wrap i {
+            width: 22px;
+            height: 22px;
+            color: #00b74a;
+        }
+        .modal-title-wrap h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .modal-subtitle-text {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+        }
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            line-height: 1;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+        .btn-close-modal:hover {
+            color: #334155;
+        }
+        .modal-body-custom {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .remaining-info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .remaining-info-box .info-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+        }
+        .remaining-info-box .info-val {
+            font-size: 16px;
+            font-weight: 700;
+            color: #dc2626;
+        }
+        .form-group-modal {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-group-modal label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin: 0;
+        }
+        .modal-input, .modal-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .modal-input:focus, .modal-textarea:focus {
+            border-color: #3C91E6;
+            box-shadow: 0 0 0 3px rgba(60, 145, 230, 0.15);
+        }
+        .input-action-wrap {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-fill-max {
+            background: #ffffff;
+            border: 1px solid rgba(152, 152, 152, 0.25);
+            border-radius: 20px;
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333333;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .btn-fill-max:hover {
+            background: #f5f5f5;
+            color: #111111;
+        }
+        .payment-method-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .method-option {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.15s;
+            margin: 0;
+            background: #ffffff;
+        }
+        .method-option input {
+            display: none;
+        }
+        .method-option svg,
+        .method-option i {
+            width: 16px;
+            height: 16px;
+        }
+        .method-option.is-active {
+            border-color: #00c753 !important;
+            background: #ecfdf5 !important;
+            color: #00c753 !important;
+        }
+        .method-option.is-active svg,
+        .method-option.is-active i {
+            color: #00c753 !important;
+        }
+        .modal-footer-custom {
+            padding: 16px 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f8fafc;
+        }
+        .btn-system {
+            height: 40px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            grid-gap: 7px !important;
+            gap: 7px !important;
+            padding: 0 16px !important;
+            border-radius: 20px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            text-transform: none !important;
+            border: unset !important;
+            box-sizing: border-box !important;
+            white-space: nowrap !important;
+            transition: all 0.2s ease !important;
+            line-height: 1 !important;
+        }
+        .btn-system svg {
+            width: 18px !important;
+            height: 18px !important;
+            stroke-width: 2 !important;
+            line-height: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        .btn-system span {
+            font-size: 13px !important;
+            line-height: normal !important;
+        }
+        .btn-system-success {
+            background-color: #00b74a !important;
+            color: #ffffff !important;
+            border: unset !important;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.1) !important;
+        }
+        .btn-system-success:hover:not(:disabled) {
+            background-color: #009e40 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 6px rgba(0, 183, 74, 0.3) !important;
+        }
+        .btn-system-outline,
+        .btn-system-neutral {
+            background-color: #ffffff !important;
+            color: #333333 !important;
+            border: 1px solid rgba(152, 152, 152, 0.25) !important;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.05) !important;
+        }
+        .btn-system-outline:hover:not(:disabled),
+        .btn-system-neutral:hover:not(:disabled) {
+            background-color: #f5f5f5 !important;
+            border-color: rgba(152, 152, 152, 0.45) !important;
+            color: #111111 !important;
+        }
     </style>
     <div class="content-wrapper order-listing-wrapper" id="app" x-data="xIndex">
         @php
@@ -322,16 +562,16 @@
                     'active' => $status === 'Pending',
                 ],
                 [
-                    'label' => __('order.tab.paid'),
-                    'icon' => 'bx bx-check-circle',
-                    'url' => $orderTabUrl('Paid'),
-                    'active' => $status === 'Paid',
-                ],
-                [
                     'label' => __('order.tab.partial'),
                     'icon' => 'bx bx-credit-card',
                     'url' => $orderTabUrl('Partial'),
                     'active' => $status === 'Partial',
+                ],
+                [
+                    'label' => __('order.tab.paid'),
+                    'icon' => 'bx bx-check-circle',
+                    'url' => $orderTabUrl('Paid'),
+                    'active' => $status === 'Paid',
                 ],
                 [
                     'label' => __('order.tab.rejected'),
@@ -339,12 +579,12 @@
                     'url' => $orderTabUrl('Rejected'),
                     'active' => $status === 'Rejected',
                 ],
-                [
-                    'label' => __('order.tab.trash'),
-                    'icon' => 'bx bx-trash-alt',
-                    'url' => $orderTabUrl('trash'),
-                    'active' => $status === 'trash',
-                ],
+                // [
+                //     'label' => __('order.tab.trash'),
+                //     'icon' => 'bx bx-trash-alt',
+                //     'url' => $orderTabUrl('trash'),
+                //     'active' => $status === 'trash',
+                // ],
             ],
             'exportAction' => 'excel()',
             'exportLabel' => __('global.button.export'),
@@ -394,20 +634,13 @@
                                     'visible' => ['payment_status' => ['Pending', 'Partial']],
                                 ],
                                 [
-                                    'url' => 'edit',
-                                    'title' => __('order.action.payment'),
-                                    'icon' => 'payments',
-                                    'type' => 'link',
+                                    'url' => 'add-payment',
+                                    'title' => __('order.action.add_payment'),
+                                    'icon' => 'add_circle',
+                                    'type' => 'click',
+                                    'handler' => 'openAddPaymentModal',
                                     'class' => 'text-success',
-                                    'visible' => ['payment_status' => 'Partial'],
-                                ],
-                                [
-                                    'url' => 'edit',
-                                    'title' => __('order.action.payment'),
-                                    'icon' => 'payments',
-                                    'type' => 'link',
-                                    'class' => 'text-success',
-                                    'visible' => ['payment_status' => 'Paid'],
+                                    'visible' => ['payment_status' => ['Pending', 'Partial']],
                                 ],
                                 [
                                     'url' => 'cancel',
@@ -419,13 +652,13 @@
                                     'class' => 'text-danger',
                                     'visible' => ['can_reject' => true],
                                 ],
-                                [
-                                    'url' => 'delete',
-                                    'title' => __('global.action.delete'),
-                                    'icon' => 'Delete',
-                                    'class' => 'text-danger',
-                                    'visible' => ['payment_status' => 'Pending'],
-                                ],
+                                // [
+                                //     'url' => 'delete',
+                                //     'title' => __('global.action.delete'),
+                                //     'icon' => 'Delete',
+                                //     'class' => 'text-danger',
+                                //     'visible' => ['payment_status' => 'Pending'],
+                                // ],
                             ],
                         ],
                         [
@@ -446,6 +679,94 @@
             ],
         ])
         @endcomponent
+
+        <!-- Dedicated Add Payment Modal (Similar to Order Detail) -->
+        <div class="modal-backdrop-custom" x-show="showAddPaymentModal" x-transition.opacity style="display: none;">
+            <div class="modal-dialog-custom" @click.away="if (!addPaymentSubmitting) closeAddPaymentModal()">
+                <div class="modal-header-custom">
+                    <div class="modal-title-wrap">
+                        <i data-feather="plus-circle" class="text-success"></i>
+                        <div>
+                            <h3>{{ __('order.detail.add_payment') }}</h3>
+                            <div class="modal-subtitle-text"
+                                x-text="getAddPaymentSubtitle()">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close-modal" :disabled="addPaymentSubmitting" @click="closeAddPaymentModal()">
+                        &times;
+                    </button>
+                </div>
+
+                <form @submit.prevent="submitAddPayment()">
+                    <fieldset class="modal-body-custom" :disabled="addPaymentSubmitting" style="border: 0; margin: 0; min-width: 0;">
+                        <div class="remaining-info-box">
+                            <span class="info-label">{{ __('remaining_amount.ledger.remaining_balance') }}</span>
+                            <strong class="info-val text-danger" x-text="formatCurrency(addPaymentOrder?.remaining_amount)"></strong>
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('order.amount') }} ($) <span class="text-danger">*</span></label>
+                            <div class="input-action-wrap">
+                                <input type="number" step="0.01" min="0.01" :max="addPaymentOrder?.remaining_amount"
+                                    class="modal-input" x-model="addPaymentForm.amount" required placeholder="0.00">
+                                <button type="button" class="btn-fill-max" @click="addPaymentForm.amount = Number(addPaymentOrder?.remaining_amount || 0)">
+                                    {{ __('order.button.full_balance') }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('order.detail.method') }}</label>
+                            <div class="payment-method-selector">
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'Cash' ? 'is-active' : ''">
+                                    <input type="radio" value="Cash" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="dollar-sign"></i>
+                                    <span>{{ __('order.payment.cash') }}</span>
+                                </label>
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'ABA' ? 'is-active' : ''">
+                                    <input type="radio" value="ABA" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="credit-card"></i>
+                                    <span>{{ __('order.payment.aba') }}</span>
+                                </label>
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'Card' ? 'is-active' : ''">
+                                    <input type="radio" value="Card" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="server"></i>
+                                    <span>{{ __('order.payment.card') }}</span>
+                                </label>
+                                <label class="method-option" :class="addPaymentForm.payment_method === 'QR' ? 'is-active' : ''">
+                                    <input type="radio" value="QR" x-model="addPaymentForm.payment_method">
+                                    <i data-feather="maximize"></i>
+                                    <span>{{ __('order.payment.qr') }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('order.table.pay_date') }}</label>
+                            <input type="datetime-local" class="modal-input" x-model="addPaymentForm.payment_date">
+                        </div>
+
+                        <div class="form-group-modal">
+                            <label>{{ __('order.note') }}</label>
+                            <textarea class="modal-textarea" rows="3" x-model="addPaymentForm.note"
+                                placeholder="{{ __('order.placeholder.note') }}"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <div class="modal-footer-custom">
+                        <button type="button" class="btn btn-system btn-system-outline btn-system-neutral" :disabled="addPaymentSubmitting" @click="closeAddPaymentModal()">
+                            <span>{{ __('order.button.close') }}</span>
+                        </button>
+                        <button type="submit" class="btn btn-create bg-success btn-system btn-system-success" :disabled="addPaymentSubmitting">
+                            <span class="bx bx-loader-alt bx-spin" x-show="addPaymentSubmitting" style="display: none;" aria-hidden="true"></span>
+                            <span x-show="!addPaymentSubmitting">{{ __('order.detail.add_payment') }}</span>
+                            <span x-show="addPaymentSubmitting" style="display: none;">{{ __('order.button.processing_payment') }}</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         <template x-if="exportLoading">
             <div class="loadingFullSizeLayout">
@@ -528,6 +849,16 @@
             if (typeof Alpine === 'undefined') return;
             Alpine.data('xIndex', () => ({
                 exportLoading: false,
+                showAddPaymentModal: false,
+                addPaymentOrder: null,
+                addPaymentSubmitting: false,
+                addPaymentForm: {
+                    amount: null,
+                    payment_method: 'Cash',
+                    payment_date: '',
+                    note: '',
+                },
+                walkInCustomerText: @json(__('order.walk_in_customer')),
                 formData: {
                     status: @json($status),
                     payment_status: null,
@@ -540,6 +871,9 @@
                     this.$nextTick(() => {
                         this.fetchSelectShop();
                         initOrderDatepickers();
+                        if (window.feather) {
+                            feather.replace();
+                        }
                     });
                 },
                 fetchSelectShop() {
@@ -695,6 +1029,103 @@
                             }
                         }
                     });
+                },
+                getAddPaymentSubtitle() {
+                    const invoice = this.addPaymentOrder?.invoice_number || this.addPaymentOrder?.invoice_title || '';
+                    const customer = this.addPaymentOrder?.customer_name
+                        || (this.addPaymentOrder?.customer ? (this.addPaymentOrder.customer.name || this.addPaymentOrder.customer.phone) : '')
+                        || this.walkInCustomerText;
+                    return `${invoice} • ${customer}`;
+                },
+                openAddPaymentModal(item) {
+                    this.addPaymentOrder = item;
+                    this.showAddPaymentModal = true;
+                    this.addPaymentSubmitting = false;
+                    const initialAmount = (item && Number(item.remaining_amount) > 0)
+                        ? Number(item.remaining_amount)
+                        : null;
+                    this.addPaymentForm = {
+                        amount: initialAmount,
+                        payment_method: 'Cash',
+                        payment_date: moment().format('YYYY-MM-DDTHH:mm'),
+                        note: '',
+                    };
+
+                    this.$nextTick(() => {
+                        if (window.feather) {
+                            feather.replace();
+                        }
+                    });
+
+                    if (item?.id) {
+                        Axios.get(`{{ url('admin/order/payment-details') }}/${item.id}`)
+                            .then((res) => {
+                                if (res.data) {
+                                    this.addPaymentOrder = res.data;
+                                    if (!this.addPaymentForm.amount && res.data.remaining_amount) {
+                                        this.addPaymentForm.amount = Number(res.data.remaining_amount);
+                                    }
+                                }
+                            })
+                            .catch((err) => {
+                                console.error('Error fetching order details for Add Payment:', err);
+                            });
+                    }
+                },
+                closeAddPaymentModal() {
+                    this.showAddPaymentModal = false;
+                    this.addPaymentOrder = null;
+                    this.addPaymentSubmitting = false;
+                },
+                async submitAddPayment() {
+                    if (this.addPaymentSubmitting || !this.addPaymentOrder?.id) return;
+                    if (!this.addPaymentForm.amount || Number(this.addPaymentForm.amount) <= 0) {
+                        alert(@json(__('order.validation.payment_amount_required') ?: 'Please enter a valid payment amount.'));
+                        return;
+                    }
+                    if (Number(this.addPaymentForm.amount) > Number(this.addPaymentOrder.remaining_amount || 0)) {
+                        alert(@json(__('order.validation.payment_amount_exceeds') ?: 'Payment amount exceeds available balance.'));
+                        return;
+                    }
+
+                    this.addPaymentSubmitting = true;
+                    const url = `{{ url('admin/order/add-payment') }}/${this.addPaymentOrder.id}`;
+
+                    try {
+                        const response = await Axios.post(url, {
+                            _token: '{{ csrf_token() }}',
+                            amount: this.addPaymentForm.amount,
+                            payment_method: this.addPaymentForm.payment_method,
+                            payment_date: this.addPaymentForm.payment_date,
+                            note: this.addPaymentForm.note,
+                        });
+
+                        if (response.data && (response.data.message === 'success' || response.status === 200)) {
+                            if (window.iziToast) {
+                                iziToast.success({
+                                    title: 'Success',
+                                    message: @json(__('order.message.payment_status_success')),
+                                    position: 'topRight'
+                                });
+                            } else if (window.toastr) {
+                                toastr.success(@json(__('order.message.payment_status_success')));
+                            }
+                            this.closeAddPaymentModal();
+                            reloadData(`{{ url()->full() }}`);
+                        } else {
+                            alert(response.data?.error || @json(__('order.message.payment_status_error') ?: 'Payment recording failed.'));
+                            this.addPaymentSubmitting = false;
+                        }
+                    } catch (error) {
+                        this.addPaymentSubmitting = false;
+                        const errorMsg = error.response?.data?.error ||
+                            Object.values(error.response?.data?.errors || {})?.[0]?.[0] ||
+                            @json(__('order.message.payment_status_error') ?: 'Payment recording failed.');
+                        alert(errorMsg);
+                    }
+                },
+                formatCurrency(val) {
+                    return '$' + (Number(val || 0)).toFixed(2);
                 },
                 async excel() {
                     this.exportLoading = true;
