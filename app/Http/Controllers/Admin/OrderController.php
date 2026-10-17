@@ -940,6 +940,16 @@ class OrderController extends Controller
         $productId = (int) ($cart->product_id ?? 0);
         $qty = max(1, (int) ($cart->product_qty ?? 1));
         $itemData = $cart->itemData ?? (object) [];
+        $discount = $itemData->discount ?? 0;
+        if ($discount === '') {
+            $discount = 0;
+        }
+
+        if (!is_numeric($discount) || !is_finite((float) $discount) || (float) $discount < 0) {
+            throw ValidationException::withMessages([
+                'dataCarts' => __('order.validation.discount_invalid'),
+            ]);
+        }
 
         if (!in_array($type, ['product', 'service']) || !$productId) {
             throw ValidationException::withMessages([
@@ -965,9 +975,9 @@ class OrderController extends Controller
             'qty' => $type === 'service' ? 1 : $qty,
             'type' => $type,
             'point' => $shopItem->point ?? 0,
-            'product_discount' => $type === 'product' ? ($itemData->discount ?? 0) : 0,
+            'product_discount' => $type === 'product' ? $discount : 0,
             'product_discount_type' => $type === 'product' ? ($itemData->discountType ?? null) : null,
-            'service_discount' => $type === 'service' ? ($itemData->discount ?? 0) : 0,
+            'service_discount' => $type === 'service' ? $discount : 0,
             'service_discount_type' => $type === 'service' ? ($itemData->discountType ?? null) : null,
             'product_commission' => $type === 'product' ? ($itemData->commission ?? 0) : 0,
             'product_commission_type' => $type === 'product' ? ($itemData->commissionType ?? 'usd') : null,

@@ -46,8 +46,8 @@
                         <div class="form-row custom-select">
                             <select name="payment_status">
                                 <option value="">{{ __('global.filter.all_status') }}</option>
-                                <option value="Pending" {!! request('payment_status') == 'Pending' ? 'selected' : '' !!}> Pending</option>
-                                <option value="Paid" {!! request('payment_status') == 'Paid' ? 'selected' : '' !!}> Paid</option>
+                                <option value="Pending" {!! request('payment_status') == 'Pending' ? 'selected' : '' !!}> {{ $paymentStatusLabels['Pending'] ?? 'Pending' }}</option>
+                                <option value="Paid" {!! request('payment_status') == 'Paid' ? 'selected' : '' !!}> {{ $paymentStatusLabels['Paid'] ?? 'Paid' }}</option>
                             </select>
                         </div>
                     @endif

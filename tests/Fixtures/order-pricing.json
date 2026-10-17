@@ -62,5 +62,14 @@
     ],
     "lines": [10, 1.01],
     "subtotal": 22, "discount": 10.99, "commission": 0, "total": 11.01
+  },
+  {
+    "name": "Fifty-cent dollar discounts on products and services",
+    "items": [
+      {"product_id": 4, "product_type": "product", "product_qty": 3, "itemData": {"price": 2.79, "discount": "0.50", "discountType": "usd"}},
+      {"product_id": 1, "product_type": "service", "product_qty": 1, "itemData": {"price": 20, "discount": "0.50", "discountType": "usd"}}
+    ],
+    "lines": [6.87, 19.5],
+    "subtotal": 28.37, "discount": 2, "commission": 0, "total": 26.37
   }
 ]

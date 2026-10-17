@@ -1,16 +1,28 @@
 @extends('admin::shared.layout')
+@php
+    $toastTitles = [
+        'success' => __('global.workspace.success'),
+        'warning' => __('global.workspace.warning'),
+    ];
+@endphp
 @section('layout')
-    @include('admin::shared.header', ['header_name' => 'Position Management'])
+    @include('admin::shared.header', ['header_name' => __('position.title')])
     <div class="content-wrapper" id="app" x-data="xIndex">
         @component('admin::components.listingData', [
             'routeName' => $routeName,
-            'createName' => 'Create Position',
+            'createName' => __('position.button.create'),
             'filterStatus' => true,
+            'paymentStatusLabels' => [
+                'Pending' => __('order.status.pending'),
+                'Paid' => __('order.status.paid'),
+            ],
+            'emptyTitle' => __('position.empty.title'),
+            'emptyMessage' => __('position.empty.description'),
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => 'Nº', 'class' => '', 'colVal' => 5],
-                ['field' => 'title', 'title' => 'Title', 'class' => 'text left', 'colVal' => 90],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
+                ['field' => 'title', 'title' => __('position.form.name.label'), 'class' => 'text left', 'colVal' => 90],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -20,10 +32,10 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
+                                ['url' => 'edit', 'title' => __('global.action.edit'), 'icon' => 'edit', 'type' => 'link'],
                                 [
                                     'url' => 'delete',
-                                    'title' => 'Delete',
+                                    'title' => __('global.action.delete'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -34,7 +46,7 @@
                             'action' => [
                                 [
                                     'url' => 'status',
-                                    'title' => 'Disable',
+                                    'title' => __('global.action.disable'),
                                     'icon' => 'hide_source',
                                     'class' => 'text-danger',
                                 ],
@@ -42,19 +54,19 @@
                         ],
                         [
                             'key' => 'enable',
-                            'action' => [['url' => 'status', 'title' => 'Enable', 'icon' => 'refresh']],
+                            'action' => [['url' => 'status', 'title' => __('global.action.enable'), 'icon' => 'refresh']],
                         ],
                         [
                             'key' => 'trash',
                             'action' => [
                                 [
                                     'url' => 'restore',
-                                    'title' => 'Restore',
+                                    'title' => __('global.action.restore'),
                                     'icon' => 'settings_backup_restore',
                                 ],
                                 [
                                     'url' => 'destroy',
-                                    'title' => 'Destroy',
+                                    'title' => __('global.action.destroy'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -108,14 +120,16 @@
                     });
                 },
                 verifyDialog(data, typeAction, btn) {
-                    console.log(btn, 'btn');
+                    const confirmTemplate = @json(__('global.dialog.confirm_action', ['action' => '__ACTION__']));
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to ${btn} ?`,
-                            btnClose: `{{ __('action_button.cancel') }}`,
+                            message: confirmTemplate.replace('__ACTION__', btn),
+                            btnClose: @json(__('action_button.cancel')),
                             btnSave: btn,
+                            trashLabel: @json(__('dialog.button.move_to_trash')),
+                            requestFailed: @json(__('position.message.request_failed')),
                             item: data,
-                            urlName: 'partner',
+                            urlName: @json($routeName),
                             typeAction: typeAction,
                             digPosition: "posTop",
                             class: "deleteDialog",

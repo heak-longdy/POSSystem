@@ -13,7 +13,7 @@
 <ul class="side-menu">
     @can('dashboard-view')
     <li class="li">
-        <a data-url="{{ route('admin-dashboard') }}" role="link" tabindex="0" class="overView {{ routeActive('admin/dashboard') ? 'active' : '' }}">
+        <a data-url="{{ route('admin-dashboard') }}" data-active-patterns="admin/dashboard" role="link" tabindex="0" class="overView {{ routeActive('admin/dashboard') ? 'active' : '' }}">
             <div class="div">
                 {{-- <i class='bx bxl-stack-overflow icon'></i> --}}
                 {{-- <i class='bx bxs-dashboard icon'></i> --}}
@@ -36,7 +36,7 @@
                     @foreach (($item['listMenu'] ?? $item['list-menu'] ?? []) as $keyListMenu => $itemListMenu)
                         <li class="">
                             <a @if(!isset($itemListMenu['children']) || !$itemListMenu['children']) data-url="{!! isset($itemListMenu['path']) ? url($itemListMenu['path']) : '' !!}" @endif
-                                role="link" tabindex="0"
+                                data-active-patterns="{{ $itemListMenu['active'] }}" role="link" tabindex="0"
                                 class="{{ routeActive($itemListMenu['active']) ? 'active' : '' }}">
                                 {{-- <i class='bx bxs-inbox '></i> --}}
                                 {{-- <i class='bx bx-menu-alt-right icon'></i> --}}
@@ -60,7 +60,7 @@
                                     <ul class="side-dropdown-items">
                                         @foreach ($itemListMenu['children'] as $child)
                                             <li>
-                                                <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
+                                                <a data-url="{!! url($child['path']) !!}" data-active-patterns="{{ $child['active'] }}" role="link" tabindex="0"
                                                     class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                                     <i
                                                         class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
@@ -80,7 +80,7 @@
                 <li class="divider" data-text="{{ \App\Support\Language::translatedValue($item['label']) }}"></li>
                 <div class="navSidber">
                     <li class="">
-                        <a role="button" tabindex="0" class="{{ routeActive($item['active']) ? 'active' : '' }}">
+                        <a data-active-patterns="{{ $item['active'] }}" role="button" tabindex="0" class="{{ routeActive($item['active']) ? 'active' : '' }}">
                             {{-- <i class='bx bxs-inbox '></i> --}}
                             {{-- <i class='bx bx-menu-alt-right icon'></i> --}}
                             {{-- <i class='bx bx-menu icon'></i> --}}
@@ -97,7 +97,7 @@
                             <ul class="side-dropdown-items">
                                 @foreach ($item['children'] as $child)
                                     <li>
-                                        <a data-url="{!! url($child['path']) !!}" role="link" tabindex="0"
+                                        <a data-url="{!! url($child['path']) !!}" data-active-patterns="{{ $child['active'] }}" role="link" tabindex="0"
                                             class="{{ routeActive($child['active']) ? 'active' : '' }}">
                                             <i
                                                 class='bx {{ isset($child['icon']) && $child['icon'] ? $child['icon'] : 'bxs-wrench' }} icon'></i>
@@ -112,7 +112,7 @@
             </div>
         @else
             <li class="li">
-                <a data-url="{!! url($item['path']) !!}" role="link" tabindex="0" class="{{ routeActive($item['active']) ? 'active' : '' }}">
+                <a data-url="{!! url($item['path']) !!}" data-active-patterns="{{ $item['active'] }}" role="link" tabindex="0" class="{{ routeActive($item['active']) ? 'active' : '' }}">
                     <i class='bx {{ isset($item['icon']) && $item['icon'] ? $item['icon'] : 'bxs-wrench' }} icon'></i>
                     {!! Str::limit(\App\Support\Language::translatedValue($item['name']), $showTitleNum, ' ...') !!}
                 </a>

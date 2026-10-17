@@ -385,6 +385,81 @@ class OrderPaymentTest extends TestCase
         $this->assertEquals(0, Order::firstOrFail()->remaining_amount);
     }
 
+    public function test_decimal_item_discounts_survive_create_edit_and_reload(): void
+    {
+        $payload = $this->discountedCartPayload();
+        $items = [
+            ['product_id' => 4, 'product_type' => 'product', 'product_qty' => 3,
+                'itemData' => ['price' => 2.79, 'discount' => '0.50', 'discountType' => 'usd']],
+            ['product_id' => 1, 'product_type' => 'service', 'product_qty' => 1,
+                'itemData' => ['price' => 20, 'discount' => '0.50', 'discountType' => 'usd']],
+        ];
+        $payload['dataCarts'] = json_encode($items);
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order = Order::findOrFail($response->json('id'));
+        $this->assertSame(26.37, $order->total_price);
+        $this->assertSame(2.0, $order->total_discount);
+        $this->assertSame(0.5, $order->orderDetails->first()->product_discount);
+        $this->assertSame(0.5, $order->orderDetails->last()->service_discount);
+        $this->get('/admin/order/detail/' . $order->id)->assertOk()
+            ->assertSee('class="td-disc">-0.50</td>', false)
+            ->assertSee('$26.37');
+
+        $view = app(OrderController::class)->edit($order->id);
+        $this->assertSame('admin::pages.order.createOrder', $view->name());
+        $this->assertSame(0.5, $view->getData()['order']->orderDetails->first()->product_discount);
+        $this->assertSame(0.5, $view->getData()['order']->orderDetails->last()->service_discount);
+
+        $payload['id'] = $order->id;
+        $items[0]['itemData']['discount'] = '0.75';
+        $items[1]['itemData']['discount'] = '12.5';
+        $items[1]['itemData']['discountType'] = 'percent';
+        $payload['dataCarts'] = json_encode($items);
+        $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order->refresh();
+        $this->assertSame(23.62, $order->total_price);
+        $this->assertSame(4.75, $order->total_discount);
+        $this->assertSame(0.75, $order->orderDetails->first()->product_discount);
+        $this->assertSame(12.5, $order->orderDetails->last()->service_discount);
+        $this->assertEquals(97, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+
+        foreach ($items as &$item) {
+            $item['itemData']['discount'] = '';
+        }
+        unset($item);
+        $payload['dataCarts'] = json_encode($items);
+        $this->postJson('/admin/order/save', $payload)->assertOk();
+        $this->assertSame(28.37, $order->fresh()->total_price);
+        $this->assertSame(0.0, $order->fresh()->total_discount);
+    }
+
+    public function test_invalid_item_discounts_cannot_create_or_change_an_order(): void
+    {
+        $payload = $this->creationPayload(0);
+        $items = json_decode($payload['dataCarts'], true);
+        $items[0]['itemData']['discountType'] = 'usd';
+        foreach (['-0.50', 'invalid', '0.5oops', '1e999', true, []] as $discount) {
+            $items[0]['itemData']['discount'] = $discount;
+            $payload['dataCarts'] = json_encode($items);
+            $this->postJson('/admin/order/save', $payload)
+                ->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        }
+        $this->assertSame(0, Order::count());
+        $this->assertSame(0, DB::table('order_details')->count());
+
+        $items[0]['itemData']['discount'] = '0.50';
+        $payload['dataCarts'] = json_encode($items);
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order = Order::findOrFail($response->json('id'));
+        $payload['id'] = $order->id;
+        $items[0]['itemData']['discount'] = '-0.25';
+        $payload['dataCarts'] = json_encode($items);
+        $this->postJson('/admin/order/save', $payload)
+            ->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        $this->assertSame(19.15, $order->fresh()->total_price);
+        $this->assertSame(0.5, $order->fresh()->orderDetails->first()->service_discount);
+    }
+
     public function test_service_percentage_discount_and_commission_are_saved_before_payment(): void
     {
         $payload = $this->creationPayload(16);

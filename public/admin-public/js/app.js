@@ -22448,6 +22448,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _s_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./s-events */ "./resources/admin/ts/workspace/s-events.js");
+/* harmony import */ var _sidebar_active__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sidebar-active */ "./resources/admin/ts/workspace/sidebar-active.js");
+/* harmony import */ var _sidebar_active__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_sidebar_active__WEBPACK_IMPORTED_MODULE_2__);
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -22464,6 +22466,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
  * Enterprise Multiple Document Interface (MDI) Workspace Manager
  * Powering persistent tabs, zero-reload tab switching, dirty state tracking, and keyboard navigation.
  */
+
  // Global Alpine lifecycle hook:
 // If a component registers via document.addEventListener('alpine:init', cb) or window.addEventListener('alpine:init', cb),
 // and Alpine has already initialized/started, invoke cb() synchronously!
@@ -23216,6 +23219,7 @@ window.workspaceMdi = function () {
       var existingPaneCheck = document.getElementById('tab-pane-' + tab.key);
 
       if (tab.key === this.activeTabKey && existingPaneCheck && existingPaneCheck.style.display !== 'none') {
+        this.updateSidebarActive(tab.url);
         return;
       } // Notify components that tab is about to change (e.g. save drafts)
 
@@ -23931,31 +23935,7 @@ window.workspaceMdi = function () {
       }))();
     },
     updateSidebarActive: function updateSidebarActive(url) {
-      if (!url) return;
-
-      try {
-        var currentPath = new URL(url, window.location.origin).pathname;
-        document.querySelectorAll('#sidebar .side-menu a').forEach(function (a) {
-          var linkUrl = a.getAttribute('data-url');
-
-          if (linkUrl) {
-            var linkPath = new URL(linkUrl, window.location.origin).pathname;
-
-            if (linkPath === currentPath) {
-              a.classList.add('active');
-              var parentDropdown = a.closest('.side-dropdown');
-
-              if (parentDropdown) {
-                parentDropdown.classList.add('show');
-                var parentA = parentDropdown.parentElement.querySelector('a:first-child');
-                if (parentA) parentA.classList.add('active');
-              }
-            } else {
-              a.classList.remove('active');
-            }
-          }
-        });
-      } catch (e) {}
+      (0,_sidebar_active__WEBPACK_IMPORTED_MODULE_2__.updateSidebarActive)(url);
     },
     setupLinkInterceptor: function setupLinkInterceptor() {
       var _this16 = this;
@@ -24896,6 +24876,91 @@ function initSMask() {
     }
   });
 }
+
+/***/ }),
+
+/***/ "./resources/admin/ts/workspace/sidebar-active.js":
+/*!********************************************************!*\
+  !*** ./resources/admin/ts/workspace/sidebar-active.js ***!
+  \********************************************************/
+/***/ ((module) => {
+
+// Match the same comma-separated, wildcard paths used by PHP routeActive().
+function matchesSidebarPath(path, patterns) {
+  return patterns.split(',').some(function (pattern) {
+    if (!pattern) return false;
+    var expression = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+    return new RegExp('^' + expression + '$', 'u').test(path);
+  });
+}
+
+function sidebarPath(url) {
+  var path = new URL(url, window.location.origin).pathname.replace(/^\/+|\/+$/g, '') || '/';
+
+  try {
+    return decodeURIComponent(path);
+  } catch (e) {
+    return path;
+  }
+}
+
+function updateSidebarActive(url) {
+  var sidebar = document.getElementById('sidebar');
+  if (!sidebar || !url) return;
+  var currentPath;
+
+  try {
+    currentPath = sidebarPath(url);
+  } catch (e) {
+    return;
+  }
+
+  var links = sidebar.querySelectorAll('.side-menu a');
+  var dropdowns = sidebar.querySelectorAll('.side-dropdown');
+  links.forEach(function (link) {
+    var patterns = link.getAttribute('data-active-patterns');
+    var linkUrl = link.getAttribute('data-url');
+    var active = false;
+
+    if (patterns) {
+      active = matchesSidebarPath(currentPath, patterns);
+    } else if (linkUrl) {
+      try {
+        active = sidebarPath(linkUrl) === currentPath;
+      } catch (e) {}
+    }
+
+    link.dataset.routeActive = String(active);
+    link.classList.toggle('active', active);
+  }); // Highlight ancestors even when a group's own pattern omits a visible child.
+
+  links.forEach(function (link) {
+    if (link.dataset.routeActive !== 'true') return;
+    var dropdown = link.closest('.side-dropdown');
+
+    while (dropdown) {
+      var parentLink = dropdown.parentElement.querySelector('a:first-child');
+
+      if (parentLink) {
+        parentLink.dataset.routeActive = 'true';
+        parentLink.classList.add('active');
+      }
+
+      dropdown = dropdown.parentElement.closest('.side-dropdown');
+    }
+  }); // Keep the closed sidebar rail collapsed; reveal the current group when expanded.
+
+  var collapsed = sidebar.classList.contains('hide') && !sidebar.matches(':hover');
+  dropdowns.forEach(function (dropdown) {
+    var parentLink = dropdown.parentElement.querySelector('a:first-child');
+    dropdown.classList.toggle('show', !collapsed && (parentLink === null || parentLink === void 0 ? void 0 : parentLink.dataset.routeActive) === 'true');
+  });
+}
+
+module.exports = {
+  matchesSidebarPath: matchesSidebarPath,
+  updateSidebarActive: updateSidebarActive
+};
 
 /***/ }),
 

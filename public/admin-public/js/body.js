@@ -5,27 +5,32 @@
 /*!*************************************************!*\
   !*** ./resources/admin/ts/package/sliderBar.js ***!
   \*************************************************/
-/***/ (() => {
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-var menuShowHide = localStorage.getItem("menu"); // SIDEBAR DROPDOWN
+var menuShowHide = localStorage.getItem("menu");
+
+var _require = __webpack_require__(/*! ../workspace/sidebar-active */ "./resources/admin/ts/workspace/sidebar-active.js"),
+    updateSidebarActive = _require.updateSidebarActive; // SIDEBAR DROPDOWN
+
 
 var allDropdown = document.querySelectorAll("#sidebar .side-dropdown");
 var sidebar = document.getElementById("sidebar");
+updateSidebarActive(window.location.href);
 allDropdown.forEach(function (item) {
   var a = item.parentElement.querySelector("a:first-child");
   a.addEventListener("click", function (e) {
     e.preventDefault();
 
-    if (!this.classList.contains("active")) {
+    if (!item.classList.contains("show")) {
       allDropdown.forEach(function (i) {
         var aLink = i.parentElement.querySelector("a:first-child");
-        aLink.classList.remove("active");
+        aLink.classList.toggle("active", aLink.dataset.routeActive === "true");
         i.classList.remove("show");
       });
     }
 
-    this.classList.toggle("active");
     item.classList.toggle("show");
+    this.classList.toggle("active", item.classList.contains("show") || this.dataset.routeActive === "true");
   });
 }); // SIDEBAR LINK NAVIGATION (Suppresses browser bottom-left URL preview)
 
@@ -108,7 +113,7 @@ if (sidebar.classList.contains("hide")) {
   });
   allDropdown.forEach(function (item) {
     var a = item.parentElement.querySelector("a:first-child");
-    a.classList.remove("active");
+    a.classList.toggle("active", a.dataset.routeActive === "true");
     item.classList.remove("show");
   });
 } else {
@@ -127,7 +132,7 @@ toggleSidebar.addEventListener("click", function () {
     });
     allDropdown.forEach(function (item) {
       var a = item.parentElement.querySelector("a:first-child");
-      a.classList.remove("active");
+      a.classList.toggle("active", a.dataset.routeActive === "true");
       item.classList.remove("show");
     });
   } else {
@@ -135,13 +140,14 @@ toggleSidebar.addEventListener("click", function () {
     allSideDivider.forEach(function (item) {
       item.textContent = item.dataset.text;
     });
+    updateSidebarActive(window.location.href);
   }
 });
 sidebar.addEventListener("mouseleave", function () {
   if (this.classList.contains("hide")) {
     allDropdown.forEach(function (item) {
       var a = item.parentElement.querySelector("a:first-child");
-      a.classList.remove("active");
+      a.classList.toggle("active", a.dataset.routeActive === "true");
       item.classList.remove("show");
     });
     allSideDivider.forEach(function (item) {
@@ -153,7 +159,7 @@ sidebar.addEventListener("mouseenter", function () {
   if (this.classList.contains("hide")) {
     allDropdown.forEach(function (item) {
       var a = item.parentElement.querySelector("a:first-child");
-      a.classList.remove("active");
+      a.classList.toggle("active", a.dataset.routeActive === "true");
       item.classList.remove("show");
     });
     allSideDivider.forEach(function (item) {
@@ -446,6 +452,91 @@ function initSMask() {
     }
   });
 }
+
+/***/ }),
+
+/***/ "./resources/admin/ts/workspace/sidebar-active.js":
+/*!********************************************************!*\
+  !*** ./resources/admin/ts/workspace/sidebar-active.js ***!
+  \********************************************************/
+/***/ ((module) => {
+
+// Match the same comma-separated, wildcard paths used by PHP routeActive().
+function matchesSidebarPath(path, patterns) {
+  return patterns.split(',').some(function (pattern) {
+    if (!pattern) return false;
+    var expression = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+    return new RegExp('^' + expression + '$', 'u').test(path);
+  });
+}
+
+function sidebarPath(url) {
+  var path = new URL(url, window.location.origin).pathname.replace(/^\/+|\/+$/g, '') || '/';
+
+  try {
+    return decodeURIComponent(path);
+  } catch (e) {
+    return path;
+  }
+}
+
+function updateSidebarActive(url) {
+  var sidebar = document.getElementById('sidebar');
+  if (!sidebar || !url) return;
+  var currentPath;
+
+  try {
+    currentPath = sidebarPath(url);
+  } catch (e) {
+    return;
+  }
+
+  var links = sidebar.querySelectorAll('.side-menu a');
+  var dropdowns = sidebar.querySelectorAll('.side-dropdown');
+  links.forEach(function (link) {
+    var patterns = link.getAttribute('data-active-patterns');
+    var linkUrl = link.getAttribute('data-url');
+    var active = false;
+
+    if (patterns) {
+      active = matchesSidebarPath(currentPath, patterns);
+    } else if (linkUrl) {
+      try {
+        active = sidebarPath(linkUrl) === currentPath;
+      } catch (e) {}
+    }
+
+    link.dataset.routeActive = String(active);
+    link.classList.toggle('active', active);
+  }); // Highlight ancestors even when a group's own pattern omits a visible child.
+
+  links.forEach(function (link) {
+    if (link.dataset.routeActive !== 'true') return;
+    var dropdown = link.closest('.side-dropdown');
+
+    while (dropdown) {
+      var parentLink = dropdown.parentElement.querySelector('a:first-child');
+
+      if (parentLink) {
+        parentLink.dataset.routeActive = 'true';
+        parentLink.classList.add('active');
+      }
+
+      dropdown = dropdown.parentElement.closest('.side-dropdown');
+    }
+  }); // Keep the closed sidebar rail collapsed; reveal the current group when expanded.
+
+  var collapsed = sidebar.classList.contains('hide') && !sidebar.matches(':hover');
+  dropdowns.forEach(function (dropdown) {
+    var parentLink = dropdown.parentElement.querySelector('a:first-child');
+    dropdown.classList.toggle('show', !collapsed && (parentLink === null || parentLink === void 0 ? void 0 : parentLink.dataset.routeActive) === 'true');
+  });
+}
+
+module.exports = {
+  matchesSidebarPath: matchesSidebarPath,
+  updateSidebarActive: updateSidebarActive
+};
 
 /***/ })
 

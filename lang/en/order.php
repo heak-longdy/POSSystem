@@ -404,6 +404,7 @@ return [
         'cart_required' => 'Shopping cart is required',
         'cart_invalid' => 'Shopping cart format invalid',
         'cart_item_invalid' => 'Shopping cart item is invalid.',
+        'discount_invalid' => 'Item discount must be a non-negative number.',
         'shop_required' => 'Shop is required',
         'shop_invalid' => 'Shop is invalid',
         'barber_invalid' => 'Barber is invalid',

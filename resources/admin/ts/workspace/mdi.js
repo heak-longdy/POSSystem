@@ -4,6 +4,7 @@
  */
 
 import { initSEvents, initSMask } from "./s-events";
+import { updateSidebarActive } from "./sidebar-active";
 
 // Global Alpine lifecycle hook:
 // If a component registers via document.addEventListener('alpine:init', cb) or window.addEventListener('alpine:init', cb),
@@ -576,6 +577,7 @@ window.workspaceMdi = function () {
             this.hideTooltip();
             const existingPaneCheck = document.getElementById('tab-pane-' + tab.key);
             if (tab.key === this.activeTabKey && existingPaneCheck && existingPaneCheck.style.display !== 'none') {
+                this.updateSidebarActive(tab.url);
                 return;
             }
 
@@ -1149,27 +1151,7 @@ window.workspaceMdi = function () {
         },
 
         updateSidebarActive(url) {
-            if (!url) return;
-            try {
-                const currentPath = new URL(url, window.location.origin).pathname;
-                document.querySelectorAll('#sidebar .side-menu a').forEach(a => {
-                    const linkUrl = a.getAttribute('data-url');
-                    if (linkUrl) {
-                        const linkPath = new URL(linkUrl, window.location.origin).pathname;
-                        if (linkPath === currentPath) {
-                            a.classList.add('active');
-                            const parentDropdown = a.closest('.side-dropdown');
-                            if (parentDropdown) {
-                                parentDropdown.classList.add('show');
-                                const parentA = parentDropdown.parentElement.querySelector('a:first-child');
-                                if (parentA) parentA.classList.add('active');
-                            }
-                        } else {
-                            a.classList.remove('active');
-                        }
-                    }
-                });
-            } catch(e) {}
+            updateSidebarActive(url);
         },
 
         setupLinkInterceptor() {

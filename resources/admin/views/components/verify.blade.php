@@ -23,7 +23,7 @@
                         <input :checked="statusTrash" type="checkbox" x-model="statusTrash">
                         <div class="checkmark"></div>
                     </label>
-                    <label>Move to trash.</label>
+                    <label x-text="data?.trashLabel || 'Move to trash.'"></label>
                 </div>
             </template>
         </div>
@@ -109,7 +109,7 @@
                             if (res.data.message == "success" || res.data.status == 200) {
                                 this.$store?.confirmDialog?.close(true);
                             } else {
-                                const message = res.data?.error || res.data?.message || 'Request failed.';
+                                const message = res.data?.error || res.data?.message || this.data?.requestFailed || 'Request failed.';
                                 alert(message);
                                 this.disabled = false;
                                 this.loading = false;
@@ -118,7 +118,7 @@
                             this.validate = e.response?.data?.errors;
                             const message = e.response?.data?.error ||
                                 Object.values(e.response?.data?.errors || {})?.[0]?.[0] ||
-                                'Request failed.';
+                                this.data?.requestFailed || 'Request failed.';
                             alert(message);
                             this.disabled = false;
                             this.loading = false;

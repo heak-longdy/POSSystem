@@ -1815,8 +1815,8 @@
                                                             <option value="usd">$</option>
                                                             <option value="percent">%</option>
                                                         </select>
-                                                        <input type="number" min="0" step="1"
-                                                            x-model="item.itemData.discount"
+                                                        <input type="number" min="0" step="any" inputmode="decimal"
+                                                            x-model.unintrusive="item.itemData.discount"
                                                             :disabled="!canEditOrderItems()"
                                                             x-on:input="discountRealTiemAction(item)">
                                                     </div>
@@ -2925,7 +2925,6 @@
                     this.calculatorProductPrice();
                 },
                 discountSelectOpton($event, item) {
-                    item.itemData.discount = parseFloat(item.itemData.discount || 0);
                     item.itemData.total = this.totalDiscount(item?.itemData.discountType, item.itemData.price, item?.itemData.discount);
                     this.calculatorProductPrice();
                 },
@@ -2933,7 +2932,7 @@
                     if (!item.itemData.discountType || item.itemData.discountType === null || item.itemData.discountType === 'null') {
                         item.itemData.discountType = 'usd';
                     }
-                    item.itemData.discount = parseFloat(item.itemData.discount || 0);
+                    // Preserve the typed decimal; totalDiscount converts it for calculation.
                     item.itemData.total = this.totalDiscount(item?.itemData.discountType, item.itemData.price, item?.itemData.discount);
                     this.calculatorProductPrice();
                 },
@@ -3450,6 +3449,12 @@
                         errors.dataCarts = [@json(__('order.validation.cart_required'))];
                     } else if (this.dataCart.some((item) => !item?.product_id || !item?.product_type)) {
                         errors.dataCarts = [@json(__('order.validation.cart_item_invalid'))];
+                    } else if (this.dataCart.some((item) => {
+                        const discount = Number(item?.itemData?.discount ?? 0);
+                        return !Number.isFinite(discount) || discount < 0;
+                    }) || Array.from(this.$el?.querySelectorAll('.booking-discount-group input') || [])
+                        .some((input) => !input.validity.valid)) {
+                        errors.dataCarts = [@json(__('order.validation.discount_invalid'))];
                     }
 
                     const partialPayment = Number(this.formData.partial_payment_amount || 0);

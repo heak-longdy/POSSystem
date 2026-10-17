@@ -53,23 +53,38 @@ class PositionController extends Controller
     }
     public function Save(PositionRequest $req, $id = "")
     {
-        return $this->tools->onSave($this->table, $req, $id, $this->routeName);
+        return $this->tools->onSave($this->table, $req, $id, $this->routeName, null, [
+            'success' => __($id ? 'position.message.update_success' : 'position.message.create_success'),
+            'warning' => __('position.message.save_failed'),
+        ]);
     }
     public function updateStatus($id,$status)
     {
-        return $this->tools->onUpdateStatus($this->table, $id, $status);
+        return $this->tools->onUpdateStatus($this->table, $id, $status, [
+            'success' => __($status == 2 ? 'position.message.disable_success' : 'position.message.enable_success'),
+            'warning' => __('position.message.status_failed'),
+        ]);
     }
     public function restore($id = "")
     {
-        return $this->tools->onRestore($this->table, $id);
+        return $this->tools->onRestore($this->table, $id, [
+            'success' => __('position.message.restore_success'),
+            'warning' => __('position.message.restore_failed'),
+        ]);
     }
     public function destroy($id = "")
     {
-        return $this->tools->onDestroy($this->table, $id);
+        return $this->tools->onDestroy($this->table, $id, [
+            'success' => __('position.message.delete_success'),
+            'warning' => __('position.message.delete_failed'),
+        ]);
     }
 
     public function delete($id = "")
     {
-        return $this->tools->onDelete($this->table, $id);
+        return $this->tools->onDelete($this->table, $id, [
+            'success' => __('position.message.delete_success'),
+            'warning' => __('position.message.delete_failed'),
+        ]);
     }
 }

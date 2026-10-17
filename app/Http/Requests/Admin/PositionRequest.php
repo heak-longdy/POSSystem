@@ -32,12 +32,12 @@ class PositionRequest extends FormRequest
     public function messages()
     {
         return [
-            'title.required' => "Title is required",
-            'title.max' => "Title must not exceed 50 characters.",
-            'status.required' => "Status is required",
-            'status.max' => "Status must not exceed 1 characters.",
-            'status.numeric'   => "Status format invalid",
-            'image.required' => "Image is required",
+            'title.required' => __('position.validation.title_required'),
+            'title.max' => __('position.validation.title_max'),
+            'status.required' => __('position.validation.status_required'),
+            'status.max' => __('position.validation.status_max'),
+            'status.numeric' => __('position.validation.status_numeric'),
+            'image.required' => __('position.validation.image_required'),
         ];
     }
 }

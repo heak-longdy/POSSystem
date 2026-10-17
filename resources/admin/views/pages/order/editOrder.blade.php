@@ -200,8 +200,8 @@
                                                         <option value="usd">$</option>
                                                         <option value="percent">%</option>
                                                     </select>
-                                                    <input type="number" min="1" step="1"
-                                                        x-model="item.itemData.discount"
+                                                    <input type="number" min="0" step="any" inputmode="decimal"
+                                                        x-model.unintrusive="item.itemData.discount"
                                                         x-on:input="discountRealTiemAction(item)" />
                                                 </div>
                                             </div>
@@ -683,7 +683,6 @@
                     this.calculatorProductPrice();
                 },
                 discountSelectOpton($event, item) {
-                    item.itemData.discount = parseFloat(item.itemData.discount);
                     item.itemData.total = this.totalDiscount(item?.itemData.discountType, item.itemData
                         .price, item?.itemData.discount);
                     this.calculatorProductPrice();
@@ -693,7 +692,7 @@
                         .itemData.discountType == "null") {
                         item.itemData.discountType = "usd";
                     }
-                    item.itemData.discount = parseFloat(item.itemData.discount);
+                    // Preserve the typed decimal; totalDiscount converts it for calculation.
                     item.itemData.total = this.totalDiscount(item?.itemData.discountType, item.itemData
                         .price, item?.itemData.discount);
                     this.calculatorProductPrice();

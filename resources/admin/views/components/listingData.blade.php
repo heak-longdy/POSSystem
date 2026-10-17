@@ -5,6 +5,7 @@
     'routeName' => $routeName,
     'createName' => $createName,
     'filterStatus' => $filterStatus,
+    'paymentStatusLabels' => $paymentStatusLabels ?? [],
     'exportUrl' => $exportUrl ?? '',
     'exportAction' => $exportAction ?? null,
     'exportLabel' => $exportLabel ?? null,
@@ -236,8 +237,8 @@
             </div>
         @else
             @component('admin::components.empty', [
-                'name' => __('No data'),
-                'msg' => ($showCreate ?? true) ? 'You can create a new ' . $routeName . ' by clicking the button below' : null,
+                'name' => $emptyTitle ?? __('No data'),
+                'msg' => ($showCreate ?? true) ? ($emptyMessage ?? 'You can create a new ' . $routeName . ' by clicking the button below') : null,
                 'permission' => ($showCreate ?? true) ? ($createPermission) : null,
                 'url' => ($showCreate ?? true) ? route('admin-' . $routeName . '-create') : null,
                 'button' => ($showCreate ?? true) ? $createName : null,
