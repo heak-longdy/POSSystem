@@ -119,7 +119,7 @@ class SlideController extends Controller
         if ($item) {
             $item->forceDelete();
         }
-        Session::flash('success', 'Delete success!');
+        Session::flash('success', __('global.message.delete_success'));
         return redirect()->back();
     }
 

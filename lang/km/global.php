@@ -154,6 +154,8 @@ return [
     // Messages
     'message' => [
         'delete_success'     => 'លុបបានជោគជ័យ!',
+        'delete_failed'      => 'មិនអាចលុបកំណត់ត្រាបានទេ។',
+        'request_failed'     => 'សំណើមិនបានជោគជ័យទេ។',
         'restore_success'    => 'ស្តារឡើងវិញបានជោគជ័យ!',
         'save_success'       => 'រក្សាទុកបានជោគជ័យ!',
         'exporting_excel'    => 'កំពុងនាំចេញ Excel...',

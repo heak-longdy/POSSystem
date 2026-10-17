@@ -96,6 +96,8 @@ return [
     'delete-file' => [
         'title' => 'Delete',
         'confirm' => 'Are you sure to delete ',
+        'items' => 'files and folders',
+        'all_items' => 'All files and folders',
         'form' => [
             'to_trash' => [
                 'label' => 'Move to Trash',

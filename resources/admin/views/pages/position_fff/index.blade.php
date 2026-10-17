@@ -61,12 +61,12 @@
             Swal.fire({
                 customClass: "confirm-message",
                 icon: "warning",
-                html: `Are you sure to delete <b>${$(this).data('name')}</b>?`,
+                html: @json(__('dialog.msg.delete', ['name' => '__NAME__'])).replace('__NAME__', $('<span>').text($(this).data('name') ?? '').html()),
                 input: 'checkbox',
                 inputValue: 1,
-                inputPlaceholder: 'Move to trash.',
-                confirmButtonText: "Delete",
-                cancelButtonText: "Cancel",
+                inputPlaceholder: @json(__('dialog.button.move_to_trash')),
+                confirmButtonText: @json(__('action_button.delete')),
+                cancelButtonText: @json(__('action_button.cancel')),
             }).then(result => {
                 if (result.isConfirmed) {
                     if (result.value == 1) {
@@ -76,8 +76,8 @@
                             success: function(data) {
                                 row.remove();
                                 Toast({
-                                    title: 'Success Message',
-                                    message: 'Delete Successfully',
+                                    title: @json(__('global.workspace.success')),
+                                    message: @json(__('global.message.delete_success')),
                                     status: 'success',
                                     duration: 5000,
                                 });
@@ -90,8 +90,8 @@
                             success: function(data) {
                                 row.remove();
                                 Toast({
-                                    title: 'Success Message',
-                                    message: 'Delete Successfully',
+                                    title: @json(__('global.workspace.success')),
+                                    message: @json(__('global.message.delete_success')),
                                     status: 'success',
                                     duration: 5000,
                                 });

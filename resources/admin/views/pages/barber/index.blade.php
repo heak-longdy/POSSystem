@@ -135,9 +135,9 @@
             Swal.fire({
                 customClass: "confirm-message",
                 icon: "warning",
-                html: `Are you sure to delete <b>${$(this).data('name')}</b>?`,
-                confirmButtonText: "Delete",
-                cancelButtonText: "Cancel",
+                html: @json(__('dialog.msg.delete', ['name' => '__NAME__'])).replace('__NAME__', $('<span>').text($(this).data('name') ?? '').html()),
+                confirmButtonText: @json(__('action_button.delete')),
+                cancelButtonText: @json(__('action_button.cancel')),
             }).then(result => {
                 if (result.isConfirmed) {
                     if (result.value == 1) {
@@ -147,8 +147,8 @@
                             success: function(data) {
                                 row.remove();
                                 Toast({
-                                    title: 'Success Message',
-                                    message: 'Delete Successfully',
+                                    title: @json(__('global.workspace.success')),
+                                    message: @json(__('global.message.delete_success')),
                                     status: 'success',
                                     duration: 5000,
                                 });

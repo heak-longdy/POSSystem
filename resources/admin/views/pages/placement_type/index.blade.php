@@ -23,7 +23,7 @@
                                 ['url' => 'edit', 'title' => 'Edit', 'icon' => 'edit', 'type' => 'link'],
                                 [
                                     'url' => 'delete',
-                                    'title' => 'Delete',
+                                    'title' => __('global.action.delete'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -54,7 +54,7 @@
                                 ],
                                 [
                                     'url' => 'destroy',
-                                    'title' => 'Destroy',
+                                    'title' => __('global.action.destroy'),
                                     'icon' => 'Delete',
                                     'class' => 'text-danger',
                                 ],
@@ -111,7 +111,7 @@
                     console.log(btn, 'btn');
                     this.$store.confirmDialog.open({
                         data: {
-                            message: `Are you sure want to ${btn} ?`,
+                            message: @json(__('global.dialog.confirm_action', ['action' => '__ACTION__'])).replace('__ACTION__', btn),
                             btnClose: `{{ __('action_button.cancel') }}`,
                             btnSave: btn,
                             item: data,

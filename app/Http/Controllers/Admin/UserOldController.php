@@ -168,14 +168,14 @@ class UserController extends Controller
 
     public function onDelete(Request $req)
     {
-        $status = "Delete successful!";
+        $status = __('global.message.delete_success');
         try {
             if ($req->to_trash) {
                 User::find($req->id)->delete();
             }
             $status = true;
         } catch (Exception $error) {
-            $status = "Delete unsuccess!";
+            $status = __('global.message.delete_failed');
         }
         Session::flash("success", $status);
         return redirect()->back();

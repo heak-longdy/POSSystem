@@ -136,6 +136,7 @@
                                 message: confirmMsg,
                                 btnClose: `{{ __('action_button.cancel') }}`,
                                 btnSave: btn,
+                                trashLabel: @json(__('dialog.button.move_to_trash')),
                                 item: data,
                                 urlName:`{{$routeName}}`,
                                 typeAction: typeAction,

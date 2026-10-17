@@ -13,11 +13,11 @@
                         </template>
                     </template> --}}
                     <template x-if="!data?.delete_all">
-                        <p>@lang('file-manager.delete-file.confirm') <b
-                                x-text="deleteFiles?.length+' files and folders'"></b>?</p>
+                        <p>@lang('file-manager.delete-file.confirm') <b><span
+                                x-text="deleteFiles?.length"></span> @lang('file-manager.delete-file.items')</b>?</p>
                     </template>
                     <template x-if="data?.delete_all">
-                        <p>@lang('file-manager.delete-file.confirm') <b>All files and folders</b>?</p>
+                        <p>@lang('file-manager.delete-file.confirm') <b>@lang('file-manager.delete-file.all_items')</b>?</p>
                     </template>
                 </div>
             </div>

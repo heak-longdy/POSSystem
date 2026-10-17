@@ -81,18 +81,18 @@ class Tools
         try {
             $table::where('id', $id)->delete();
             DB::commit();
-            Session::flash('success', $messages['success'] ?? 'Delete success!');
+            Session::flash('success', $messages['success'] ?? __('global.message.delete_success'));
             return response()->json([
                 'message'=>'success',
                 'status'=>200
             ]);
         } catch (Exception $e) {
             DB::rollback();
-            Session::flash('warning', $messages['warning'] ?? 'Delete unsuccess!');
+            Session::flash('warning', $messages['warning'] ?? __('global.message.delete_failed'));
             return response()->json([
                 'message'=>'unsuccess',
                 'status'=>404,
-                'error'=>$messages['warning'] ?? $e
+                'error'=>$messages['warning'] ?? __('global.message.delete_failed')
             ]);
         }
     }
@@ -101,18 +101,18 @@ class Tools
         try {
             $table::where('id', $id)->forceDelete();
             DB::commit();
-            Session::flash('success', $messages['success'] ?? 'Delete success!');
+            Session::flash('success', $messages['success'] ?? __('global.message.delete_success'));
             return response()->json([
                 'message'=>'success',
                 'status'=>200
             ]);
         } catch (\Exception $e) {
             DB::rollback();
-            Session::flash('warning', $messages['warning'] ?? 'Delete unsuccess!');
+            Session::flash('warning', $messages['warning'] ?? __('global.message.delete_failed'));
             return response()->json([
                 'message'=>'unsuccess',
                 'status'=>404,
-                'error'=>$messages['warning'] ?? $e
+                'error'=>$messages['warning'] ?? __('global.message.delete_failed')
             ]);
         }
     }

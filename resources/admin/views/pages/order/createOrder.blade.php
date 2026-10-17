@@ -166,7 +166,7 @@
                                         <div class="booking-pos-product-media">
                                             <img :src="catalogImage(item)" :alt="catalogName(item)"
                                                 onerror="this.src='{{ asset('images/logo/default.png') }}'">
-                                            <span class="booking-pos-type-badge" :class="catalogBadge(item).toLowerCase()" x-text="catalogBadge(item)"></span>
+                                            <span class="booking-pos-type-badge" :class="item?.product_type === 'service' ? 'service' : 'product'" x-text="catalogBadge(item)"></span>
                                             <template x-if="isItemInCart(item)">
                                                 <span class="booking-pos-product-selected">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -2057,7 +2057,7 @@
                     customer_id: null,
                     disable: false,
                     order_date: moment().locale('en').format('YYYY-MM-DD'),
-                    delivery_date: moment().locale('en').add(2, 'days').format('YYYY-MM-DD'),
+                    delivery_date: moment().locale('en').format('YYYY-MM-DD'),
                     pay_way: 'Cash',
                     partial_payment_amount: null,
                     partial_payment_note: '',
@@ -2121,9 +2121,11 @@
                         : moment().locale('en').format('YYYY-MM-DD');
                     this.formData.delivery_date = order?.delivery_date
                         ? moment(order.delivery_date).locale('en').format('YYYY-MM-DD')
-                        : (orderDateVal
-                            ? moment(orderDateVal).locale('en').add(2, 'days').format('YYYY-MM-DD')
-                            : moment().locale('en').add(2, 'days').format('YYYY-MM-DD'));
+                        : (!order?.id
+                            ? moment().locale('en').format('YYYY-MM-DD')
+                            : (orderDateVal
+                                ? moment(orderDateVal).locale('en').add(2, 'days').format('YYYY-MM-DD')
+                                : moment().locale('en').add(2, 'days').format('YYYY-MM-DD')));
                     this.formData.pay_way = order?.pay_way || 'Cash';
                     this.dataCart = [];
 

@@ -154,6 +154,8 @@ return [
     // Messages
     'message' => [
         'delete_success'     => 'Deleted successfully!',
+        'delete_failed'      => 'Unable to delete the record.',
+        'request_failed'     => 'Request failed.',
         'restore_success'    => 'Restored successfully!',
         'save_success'       => 'Saved successfully!',
         'exporting_excel'    => 'Exporting Excel...',

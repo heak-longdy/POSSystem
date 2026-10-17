@@ -23,24 +23,30 @@
                         <input :checked="statusTrash" type="checkbox" x-model="statusTrash">
                         <div class="checkmark"></div>
                     </label>
-                    <label x-text="data?.trashLabel || 'Move to trash.'"></label>
+                    <label x-text="data?.trashLabel || labels.trash"></label>
                 </div>
             </template>
         </div>
         <div class="dialog-form-footer" style="padding: 0px 30px 15px;width: 100%;">
             <button type="button" class="close" @click="$store?.confirmDialog?.close(false)"
-                x-text="data?.btnClose || 'Close'" x-bind:disabled="disabled || loading"
+                x-text="data?.btnClose || labels.close" x-bind:disabled="disabled || loading"
                 style="margin-right: 10px;background: none !important;"></button>
             <button type="button" @click="onConfirm" x-bind:disabled="disabled || loading" :class="data?.btnSaveClass || ''" style="border-radius: 25px;">
                 <span class='bx bx-loader-alt spinLoading bx-spin' x-show="loading"
                     style="margin-right: 10px;display: none;"></span>
-                <span x-text="data?.btnSave || 'Save'"></span>
+                <span x-text="data?.btnSave || labels.save"></span>
             </button>
         </div>
     </div>
     <script>
         var verifyConfirmDialogDefinition = () => ({
             data: null,
+            labels: {
+                trash: @json(__('dialog.button.move_to_trash')),
+                close: @json(__('global.button.close')),
+                save: @json(__('global.button.save')),
+                requestFailed: @json(__('global.message.request_failed')),
+            },
             disabled: false,
             loading: false,
             statusTrash: true,
@@ -109,7 +115,7 @@
                             if (res.data.message == "success" || res.data.status == 200) {
                                 this.$store?.confirmDialog?.close(true);
                             } else {
-                                const message = res.data?.error || res.data?.message || this.data?.requestFailed || 'Request failed.';
+                                const message = res.data?.error || res.data?.message || this.data?.requestFailed || this.labels.requestFailed;
                                 alert(message);
                                 this.disabled = false;
                                 this.loading = false;
@@ -118,7 +124,7 @@
                             this.validate = e.response?.data?.errors;
                             const message = e.response?.data?.error ||
                                 Object.values(e.response?.data?.errors || {})?.[0]?.[0] ||
-                                this.data?.requestFailed || 'Request failed.';
+                                this.data?.requestFailed || this.labels.requestFailed;
                             alert(message);
                             this.disabled = false;
                             this.loading = false;
