@@ -539,7 +539,7 @@
                         var option = "<option selected></option>";
                         var selectOptionHTML = $(option).val(shop?.id ? shop.id : null).text(shop?.name ?
                             shop.name : shop?.phone);
-                        $('.SelectShop').append(selectOptionHTML).trigger('change');
+                        $(this.$root).find('.SelectShop').append(selectOptionHTML).trigger('change');
 
                         var SelectChartShop = $(option).val(chartShop?.id ? chartShop.id : null).text(
                             chartShop?.name ?
@@ -547,7 +547,7 @@
                         $('.SelectChartShop').append(SelectChartShop).trigger('change');
                     },
                     fetchSelectShop($shopId) {
-                        $(`#${$shopId}`).select2({
+                        $(this.$root).find(`#${$shopId}`).select2({
                             placeholder: `Select shop...`,
                             ajax: {
                                 url: '{{ route('admin-select-shop') }}',
@@ -572,7 +572,7 @@
                                 }
                             }
                         }).on('select2:open', (e) => {
-                            document.querySelector('.select2-search__field').focus();
+                            window.$select2FocusInputSearch();
 
                         }).on('select2:close', async (eventClose) => {
                             const _id = eventClose.target.value;

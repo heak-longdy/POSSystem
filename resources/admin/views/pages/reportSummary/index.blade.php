@@ -322,7 +322,7 @@
                     var selectOptionHTML = $(option).val(dataProduct?.id ? dataProduct.id : null).text(
                         dataProduct?.name ?
                         dataProduct.name : dataProduct?.phone);
-                    $('.SelectProductOrService').append(selectOptionHTML).trigger('change');
+                    $(this.$root).find('.SelectProductOrService').append(selectOptionHTML).trigger('change');
 
                 },
                 selectChangeType($event) {
@@ -339,7 +339,7 @@
                     var url = type == "product" ? '{{ route('admin-select-product') }}' :
                         '{{ route('admin-select-service') }}';
                     console.log('url', url);
-                    $(`#${$shopId}`).select2({
+                    $(this.$root).find(`#${$shopId}`).off('.summarySelect2').select2({
                         placeholder: `Select ${type} ...`,
                         ajax: {
                             url: type != "all" ? url : "",
@@ -363,17 +363,16 @@
                                 };
                             }
                         }
-                    }).on('select2:open', (e) => {
-                        document.querySelector('.select2-search__field').focus();
-                    }).on('select2:close', async (eventClose) => {
+                    }).on('select2:open.summarySelect2', (e) => {
+                        window.$select2FocusInputSearch();
+                    }).on('select2:close.summarySelect2', async (eventClose) => {
                         const _id = eventClose.target.value;
                     });
                 },
                 resetSelect2(Item) {
                     if (Item.length > 0) {
                         Item.map(val => {
-                            $("#" + val).val('');
-                            $("#" + val).select2();
+                            $(this.$root).find("#" + val).val('');
                         });
                     }
                 },

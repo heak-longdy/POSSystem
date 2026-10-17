@@ -19,7 +19,7 @@
                             <select name="category_id" class="SelectCategory" id="category_id" x-init="fetchSelectCategory()">
                                 <option value=""> {{ __('product.form.category.placeholder') }}</option>
                             </select>
-                            <div class="select2Reset" x-show="category?.id" @click="$select2Data('#category_id'); category = {id: '', text: ''}">
+                            <div class="select2Reset" x-show="category?.id" @click="$select2Data($($root).find('#category_id')); category = {id: '', text: ''}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path
                                         d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -41,7 +41,7 @@
                             <select name="uom_id" class="SelectUom" id="uom_id" x-init="fetchSelectUOM()">
                                 <option value=""> {{ __('product.form.uom.placeholder') }}</option>
                             </select>
-                            <div class="select2Reset" x-show="uom?.id" @click="$select2Data('#uom_id'); uom = {id: '', text: ''}">
+                            <div class="select2Reset" x-show="uom?.id" @click="$select2Data($($root).find('#uom_id')); uom = {id: '', text: ''}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path
                                         d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -172,11 +172,11 @@
                     clientErrors: {},
 
                     init() {
-                        $('#status').select2();
+                        $(this.$root).find('#status').select2();
                     },
 
                     fetchSelectCategory() {
-                        const $cat = $(`#category_id`);
+                        const $cat = $(this.$root).find(`#category_id`);
                         $cat.select2({
                             placeholder: `{{ __('product.form.category.placeholder') }}`,
                             ajax: {
@@ -212,12 +212,12 @@
                         });
 
                         if (this.category.id && this.category.text) {
-                            $select2Data('#category_id', this.category.id, this.category.text);
+                            $select2Data($(this.$root).find('#category_id'), this.category.id, this.category.text);
                         }
                     },
 
                     fetchSelectUOM() {
-                        const $uom = $(`#uom_id`);
+                        const $uom = $(this.$root).find(`#uom_id`);
                         $uom.select2({
                             placeholder: `{{ __('product.form.uom.placeholder') }}`,
                             ajax: {
@@ -250,7 +250,7 @@
                         });
 
                         if (this.uom.id && this.uom.text) {
-                            $select2Data('#uom_id', this.uom.id, this.uom.text);
+                            $select2Data($(this.$root).find('#uom_id'), this.uom.id, this.uom.text);
                         }
                     },
 
@@ -273,13 +273,13 @@
                         if (!this.category.id) {
                             errors.category_id = @json(__('product.validation.category_required'));
                             isValid = false;
-                            if (!firstErrorEl) firstErrorEl = $('#category_id');
+                            if (!firstErrorEl) firstErrorEl = $(this.$root).find('#category_id');
                         }
 
                         if (!this.uom.id) {
                             errors.uom_id = @json(__('product.validation.uom_required'));
                             isValid = false;
-                            if (!firstErrorEl) firstErrorEl = $('#uom_id');
+                            if (!firstErrorEl) firstErrorEl = $(this.$root).find('#uom_id');
                         }
 
                         const nameVal = (this.name !== null && this.name !== undefined) ? String(this.name).trim() : '';

@@ -131,11 +131,11 @@
                 init() {
                     const data = @json($data ?? '');
                     this.image = data?.image ?? `{{ old('image') }}`;
-                    if ($('#position_id').length) {
-                        $('#position_id').select2();
+                    if ($(this.$root).find('#position_id').length) {
+                        $(this.$root).find('#position_id').select2();
                     }
-                    if ($('#status').length) {
-                        $('#status').select2();
+                    if ($(this.$root).find('#status').length) {
+                        $(this.$root).find('#status').select2();
                     }
                 },
                 selectImage() {

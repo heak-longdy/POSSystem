@@ -28,6 +28,11 @@
                                     <option value="{{ $selectedShop->id }}" selected>{{ $selectedShop->name }}</option>
                                 @endif
                             </select>
+                            <div class="select2Reset" x-show="!isReadonly && selectedValues.shop_id" @click.stop="resetSelect('shop_id')" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                </svg>
+                            </div>
                         </div>
                         @error('shop_id')
                             <label class="error">{{ $message }}</label>
@@ -42,6 +47,11 @@
                                     <option value="{{ $selectedProduct->id }}" selected>{{ $selectedProduct->name }}</option>
                                 @endif
                             </select>
+                            <div class="select2Reset" x-show="!isReadonly && selectedValues.product_id" @click.stop="resetSelect('product_id')" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                </svg>
+                            </div>
                         </div>
                         @error('product_id')
                             <label class="error">{{ $message }}</label>
@@ -73,6 +83,11 @@
                                     <option value="{{ $selectedToShop->id }}" selected>{{ $selectedToShop->name }}</option>
                                 @endif
                             </select>
+                            <div class="select2Reset" x-show="!isReadonly && selectedValues.to_shop_id" @click.stop="resetSelect('to_shop_id')" style="display: none;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                </svg>
+                            </div>
                         </div>
                         @error('to_shop_id')
                             <label class="error">{{ $message }}</label>
@@ -130,24 +145,37 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('xStockTransferForm', () => ({
                 isReadonly: @json($readonly),
+                selectedValues: { shop_id: '', product_id: '', to_shop_id: '' },
                 init() {
                     this.initShop('#shop_id', @json(__('stock_transfer.form.select_from_shop')));
                     this.initShop('#to_shop_id', @json(__('stock_transfer.form.select_to_shop')));
                     this.initProduct();
 
+                    const $selects = $(this.$root).find('#shop_id, #product_id, #to_shop_id');
+                    const syncValue = (select) => {
+                        this.selectedValues[select.name] = $(select).val() || '';
+                    };
+                    $selects.each((index, select) => syncValue(select))
+                        .on('change select2:select select2:clear select2:unselect', (event) => syncValue(event.target));
+
                     if (this.isReadonly) {
                         return;
                     }
 
-                    $('#shop_id').on('change', () => {
-                        $('#product_id').val(null).trigger('change');
-                        $('#current_stock').val(0);
+                    $(this.$root).find('#shop_id').on('change', () => {
+                        $(this.$root).find('#product_id').val(null).trigger('change');
+                        $(this.$root).find('#current_stock').val(0);
                     });
-                    $('#product_id').on('change', () => this.fetchCurrentStock());
+                    $(this.$root).find('#product_id').on('change', () => this.fetchCurrentStock());
+                },
+                resetSelect(field) {
+                    if (this.isReadonly) return;
+                    $(this.$root).find(`#${field}`).val(null).trigger('change');
                 },
                 initShop(selector, placeholder) {
-                    $(selector).select2({
+                    $(this.$root).find(selector).select2({
                         placeholder: placeholder,
+                        width: '100%',
                         ajax: this.isReadonly ? null : {
                             url: '{{ route('admin-select-stock-shop') }}',
                             dataType: 'json',
@@ -164,8 +192,9 @@
                     });
                 },
                 initProduct() {
-                    $('#product_id').select2({
+                    $(this.$root).find('#product_id').select2({
                         placeholder: @json(__('stock_transfer.form.select_product')),
+                        width: '100%',
                         ajax: this.isReadonly ? null : {
                             url: '{{ route('admin-select-shop-product') }}',
                             dataType: 'json',
@@ -173,7 +202,7 @@
                             quietMillis: 50,
                             data: (param) => ({
                                 search: param.term,
-                                shop_id: $('#shop_id').val(),
+                                shop_id: $(this.$root).find('#shop_id').val(),
                                 product_id: JSON.stringify([]),
                             }),
                             processResults: (data) => ({
@@ -186,10 +215,10 @@
                     });
                 },
                 async fetchCurrentStock() {
-                    const productId = $('#product_id').val();
-                    const shopId = $('#shop_id').val();
+                    const productId = $(this.$root).find('#product_id').val();
+                    const shopId = $(this.$root).find('#shop_id').val();
                     if (!productId || !shopId) {
-                        $('#current_stock').val(0);
+                        $(this.$root).find('#current_stock').val(0);
                         return;
                     }
 
@@ -201,8 +230,8 @@
                         }
                     })
                         .then((response) => response.json())
-                        .then((response) => $('#current_stock').val(response?.current_stock ?? 0))
-                        .catch(() => $('#current_stock').val(0));
+                        .then((response) => $(this.$root).find('#current_stock').val(response?.current_stock ?? 0))
+                        .catch(() => $(this.$root).find('#current_stock').val(0));
                 },
             }));
         });

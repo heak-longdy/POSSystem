@@ -117,8 +117,8 @@
                 init() {
                     const data = @json($data ?? '');
                     this.profile = data?.profile ?? `{{ old('profile') }}`;
-                    if ($('#status').length) {
-                        $('#status').select2();
+                    if ($(this.$root).find('#status').length) {
+                        $(this.$root).find('#status').select2();
                     }
                 },
                 profileSrc() {

@@ -8,11 +8,13 @@ import { updateSidebarActive } from "./sidebar-active";
 
 // Global Alpine lifecycle hook:
 // If a component registers via document.addEventListener('alpine:init', cb) or window.addEventListener('alpine:init', cb),
-// and Alpine has already initialized/started, invoke cb() synchronously!
+// after the real alpine:init event, invoke cb() synchronously for fetched pages.
 const originalDocumentAddEventListener = document.addEventListener.bind(document);
+let alpineInitialized = !!window.AlpineStarted;
+originalDocumentAddEventListener('alpine:init', () => { alpineInitialized = true; }, { once: true });
 document.addEventListener = function (type, listener, options) {
     if (type === 'alpine:init') {
-        if (window.AlpineStarted || (window.Alpine && (window.Alpine.initialized || window.Alpine.version))) {
+        if (alpineInitialized) {
             try {
                 listener();
             } catch (err) {
@@ -27,7 +29,7 @@ document.addEventListener = function (type, listener, options) {
 const originalWindowAddEventListener = window.addEventListener.bind(window);
 window.addEventListener = function (type, listener, options) {
     if (type === 'alpine:init') {
-        if (window.AlpineStarted || (window.Alpine && (window.Alpine.initialized || window.Alpine.version))) {
+        if (alpineInitialized) {
             try {
                 listener();
             } catch (err) {
@@ -38,6 +40,28 @@ window.addEventListener = function (type, listener, options) {
     }
     return originalWindowAddEventListener(type, listener, options);
 };
+
+const workspaceScriptLoads = new Map();
+const workspaceTabLoads = new Map();
+function loadWorkspaceScript(scriptEl) {
+    const src = new URL(scriptEl.getAttribute('src'), document.baseURI).href;
+    if (workspaceScriptLoads.has(src)) return workspaceScriptLoads.get(src);
+    if (Array.from(document.scripts).some(script => script.src === src)) return Promise.resolve();
+
+    const pending = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        Array.from(scriptEl.attributes).forEach(attr => script.setAttribute(attr.name, attr.value));
+        script.onload = resolve;
+        script.onerror = () => {
+            script.remove();
+            workspaceScriptLoads.delete(src);
+            reject(new Error(`Could not load workspace script: ${src}`));
+        };
+        document.head.appendChild(script);
+    });
+    workspaceScriptLoads.set(src, pending);
+    return pending;
+}
 
 window.workspaceMdi = function () {
     return {
@@ -781,9 +805,16 @@ window.workspaceMdi = function () {
          * Dynamically fetch page HTML and mount into #workspace-viewport
          */
         fetchAndMountTab(tab) {
+            const pending = workspaceTabLoads.get(tab.key);
+            if (pending && pending.url === tab.url) return pending.promise;
+
+            const request = { url: tab.url };
+            workspaceTabLoads.set(tab.key, request);
+            const isCurrent = () => workspaceTabLoads.get(tab.key) === request
+                && this.tabs.some(current => current.key === tab.key);
             this.setTabLoading(tab.key, true);
 
-            fetch(tab.url, {
+            request.promise = fetch(request.url, {
                 headers: {
                     'X-MDI-Partial': '1'
                 }
@@ -797,10 +828,8 @@ window.workspaceMdi = function () {
                 }
                 return res.text();
             })
-            .then(html => {
-                if (html === null) return;
-                this.setTabLoading(tab.key, false);
-
+            .then(async html => {
+                if (html === null || !isCurrent()) return;
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
 
@@ -868,15 +897,6 @@ window.workspaceMdi = function () {
                     newPane.appendChild(styleEl.cloneNode(true));
                 });
 
-                // If this tab IS active, ensure all other panes are hidden
-                if (isActive) {
-                    const allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
-                    allPanes.forEach(pane => {
-                        pane.classList.remove('active');
-                        pane.style.setProperty('display', 'none', 'important');
-                    });
-                }
-
                 // Remove any existing stale pane for this tab key
                 const existingSamePane = document.getElementById('tab-pane-' + tab.key);
                 if (existingSamePane) {
@@ -886,19 +906,23 @@ window.workspaceMdi = function () {
                 // Strip dormant <script> tags from newPane so inert script elements don't clutter the DOM
                 newPane.querySelectorAll('script').forEach(s => s.remove());
 
-                // 1. Extract and execute scripts from fetched document BEFORE mounting newPane to the DOM!
-                // This guarantees Alpine components (Alpine.data) and page functions are registered
-                // BEFORE Alpine's DOM mutation observer scans and initializes the new elements.
-                this.executeScriptsFromDoc(doc, newPane);
-
-                // 2. Mount newPane into the live DOM
-                if (window.Alpine && typeof window.Alpine.mutateDom === 'function') {
-                    window.Alpine.mutateDom(() => {
-                        viewport.appendChild(newPane);
-                    });
-                } else {
+                // Load dependencies, then mount and register components with Alpine's
+                // observer paused. Immediate page scripts can now find their own DOM.
+                await this.executeScriptsFromDoc(doc, newPane, () => {
+                    if (!isCurrent()) return false;
+                    // The user may have switched tabs while dependencies were loading.
+                    const active = this.activeTabKey === tab.key;
+                    newPane.classList.toggle('active', active);
+                    newPane.style.setProperty('display', active ? 'flex' : 'none', 'important');
+                    if (active) {
+                        viewport.querySelectorAll('.workspace-tab-pane').forEach(pane => {
+                            pane.classList.remove('active');
+                            pane.style.setProperty('display', 'none', 'important');
+                        });
+                    }
                     viewport.appendChild(newPane);
-                }
+                });
+                if (!newPane.isConnected) return;
 
                 // Initialize s-event and s-mask on the newly mounted pane
                 if (typeof initSEvents === 'function') {
@@ -929,6 +953,7 @@ window.workspaceMdi = function () {
                 this.saveSession();
             })
             .catch(err => {
+                if (!isCurrent()) return;
                 this.setTabLoading(tab.key, false);
                 console.error('Error loading tab content:', err);
                 const viewport = document.getElementById('workspace-viewport');
@@ -964,11 +989,15 @@ window.workspaceMdi = function () {
                 }
             })
             .finally(() => {
-                this.setTabLoading(tab.key, false);
+                if (workspaceTabLoads.get(tab.key) === request) {
+                    workspaceTabLoads.delete(tab.key);
+                    this.setTabLoading(tab.key, false);
+                }
             });
+            return request.promise;
         },
 
-        executeScriptsFromDoc(doc, targetPane) {
+        async executeScriptsFromDoc(doc, targetPane, mount = () => {}) {
             if (!doc) return;
             const allScripts = [];
 
@@ -1007,38 +1036,29 @@ window.workspaceMdi = function () {
                 allScripts.push(s);
             });
 
-            allScripts.forEach(scriptEl => {
+            // Await external dependencies before evaluating page initializers. Share
+            // in-flight loads when two tabs request the same dependency concurrently.
+            for (const scriptEl of allScripts) {
                 const src = scriptEl.getAttribute('src');
-                if (src) {
-                    // Skip core bundles already loaded in index.blade.php
-                    if (!src.includes('app.js') && !src.includes('body.js') && !src.includes('jquery') && !document.querySelector(`script[src="${src}"]`)) {
-                        const extScript = document.createElement('script');
-                        Array.from(scriptEl.attributes).forEach(attr => extScript.setAttribute(attr.name, attr.value));
-                        document.head.appendChild(extScript);
-                    }
-                } else if (scriptEl.textContent.trim()) {
-                    // Inline script (Alpine components, xIndex, xComponent, etc.)
-                    // Execute in document.head so it runs synchronously in global scope BEFORE newPane is attached to DOM
-                    try {
-                        const inlineScript = document.createElement('script');
-                        inlineScript.textContent = scriptEl.textContent;
-                        document.head.appendChild(inlineScript);
-                        inlineScript.remove();
-                    } catch (err) {
-                        try {
-                            (1, eval)(scriptEl.textContent);
-                        } catch (e) {
-                            console.warn('Script execution warning:', e);
-                        }
-                    }
-                }
-            });
+                if (!src || /(?:app|body|jquery|feather|tinymce|select2)(?:\.min)?\.js/i.test(src)) continue;
+                await loadWorkspaceScript(scriptEl);
+            }
 
-            // Dispatch alpine:init so any lingering listeners fire
-            try {
-                document.dispatchEvent(new CustomEvent('alpine:init'));
-                window.dispatchEvent(new CustomEvent('alpine:init'));
-            } catch (e) {}
+            const mountAndRegister = () => {
+                if (mount() === false) return;
+                allScripts.forEach(scriptEl => {
+                    if (scriptEl.getAttribute('src') || !scriptEl.textContent.trim()) return;
+                    const inlineScript = document.createElement('script');
+                    inlineScript.textContent = scriptEl.textContent;
+                    document.head.appendChild(inlineScript);
+                    inlineScript.remove();
+                });
+            };
+            if (window.Alpine && typeof window.Alpine.mutateDom === 'function') {
+                window.Alpine.mutateDom(mountAndRegister);
+            } else {
+                mountAndRegister();
+            }
         },
 
         async closeTab(tab, event, shouldSwitch = true) {
@@ -1445,10 +1465,15 @@ window.workspaceMdi = function () {
                                     try {
                                         window.Alpine.destroyTree(currentPane);
                                     } catch (e) {}
+                                } else {
+                                    // Older Alpine releases expose cleanup through their
+                                    // observer. Remove the old tree before pausing it.
+                                    currentPane.replaceChildren();
                                 }
-                                // Execute scripts FIRST so Alpine.data is updated before new DOM is injected
-                                this.executeScriptsFromDoc(doc, currentPane);
-                                currentPane.innerHTML = newContent.innerHTML;
+                                await this.executeScriptsFromDoc(doc, currentPane, () => {
+                                    currentPane.innerHTML = newContent.innerHTML;
+                                    currentPane.querySelectorAll('script').forEach(script => script.remove());
+                                });
                                 if (window.feather && typeof window.feather.replace === 'function') {
                                     try { window.feather.replace(); } catch (e) {}
                                 }

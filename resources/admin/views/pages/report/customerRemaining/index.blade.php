@@ -180,19 +180,19 @@
                         },
                         resetCustomer() {
                             this.customerId = '';
-                            const $cust = $('#cr-customer');
+                            const $cust = $(this.$root).find('#cr-customer');
                             if ($cust.length) {
                                 $cust.val('').trigger('change');
                             }
-                            $('#cr-customer-reset').removeClass('is-visible').css('display', 'none').hide();
+                            $(this.$root).find('#cr-customer-reset').removeClass('is-visible').css('display', 'none').hide();
                         },
                         resetShop() {
                             this.shopId = '';
-                            const $shop = $('#cr-shop');
+                            const $shop = $(this.$root).find('#cr-shop');
                             if ($shop.length) {
                                 $shop.val('').trigger('change');
                             }
-                            $('#cr-shop-reset').removeClass('is-visible').css('display', 'none').hide();
+                            $(this.$root).find('#cr-shop-reset').removeClass('is-visible').css('display', 'none').hide();
                         }
                     }));
                 }
@@ -294,18 +294,6 @@
 
                 syncState();
             };
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
-                    window.initCustomerRemainingFilters();
-                });
-            } else {
-                window.initCustomerRemainingFilters();
-            }
-
-            window.addEventListener('workspace:tab-activated', function() {
-                window.initCustomerRemainingFilters();
-            });
         })();
     </script>
 @endsection

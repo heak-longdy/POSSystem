@@ -206,18 +206,18 @@
                 init() {
                     const self = this;
                     if ($.fn.select2) {
-                        $('#separator, #date_format, #digit_length, #reset_cycle').select2();
+                        $(this.$root).find('#separator, #date_format, #digit_length, #reset_cycle').select2();
                     }
-                    $('#separator').val(this.separator).on('change', function() {
+                    $(this.$root).find('#separator').val(this.separator).on('change', function() {
                         self.separator = this.value;
                     });
-                    $('#date_format').val(this.dateFormat).on('change', function() {
+                    $(this.$root).find('#date_format').val(this.dateFormat).on('change', function() {
                         self.dateFormat = this.value;
                     });
-                    $('#digit_length').val(this.digitLength).on('change', function() {
+                    $(this.$root).find('#digit_length').val(this.digitLength).on('change', function() {
                         self.digitLength = parseInt(this.value, 10);
                     });
-                    $('#reset_cycle').val(this.resetCycle).on('change', function() {
+                    $(this.$root).find('#reset_cycle').val(this.resetCycle).on('change', function() {
                         self.resetCycle = this.value;
                     });
                 },

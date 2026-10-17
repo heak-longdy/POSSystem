@@ -2340,27 +2340,10 @@
                     if (this.$refs && selector === '#customer_id' && this.$refs.customerSelect) {
                         return $(this.$refs.customerSelect);
                     }
-                    if (this.$el) {
-                        if ($(this.$el).is(selector)) {
-                            return $(this.$el);
-                        }
-                        const $foundInEl = $(this.$el).find(selector);
-                        if ($foundInEl.length) {
-                            return $foundInEl;
-                        }
-                        const $pane = $(this.$el).closest('.workspace-tab-pane, .form-admin');
-                        if ($pane.length) {
-                            const $foundInPane = $pane.find(selector);
-                            if ($foundInPane.length) {
-                                return $foundInPane;
-                            }
-                        }
+                    if (this.$el && $(this.$el).is(selector)) {
+                        return $(this.$el);
                     }
-                    const $active = $('.workspace-tab-pane.active ' + selector);
-                    if ($active.length) {
-                        return $active;
-                    }
-                    return $(selector);
+                    return $(this.$root).find(selector);
                 },
                 setSelect2Value(selector, value, text) {
                     const $select = this.getScopeEl(selector);

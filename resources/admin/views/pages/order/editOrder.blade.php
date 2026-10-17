@@ -437,7 +437,7 @@
                     this.fiterProduct();
                 },
                 fetchSelectCustomer() {
-                    $('#customer_id').select2({
+                    $(this.$root).find('#customer_id').select2({
                         placeholder: `Select customer...`,
                         ajax: {
                             url: '{{ route('admin-select-customer') }}',
@@ -462,7 +462,7 @@
                             }
                         }
                     }).on('select2:open', (e) => {
-                        document.querySelector('.select2-search__field').focus();
+                        window.$select2FocusInputSearch();
                     }).on('select2:close', async (eventClose) => {
                         const customer_id = eventClose.target.value;
                         if (!customer_id) {

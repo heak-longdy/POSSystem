@@ -272,6 +272,48 @@ menu_listDom === null || menu_listDom === void 0 ? void 0 : menu_listDom.scrollT
 
 /***/ }),
 
+/***/ "./resources/admin/ts/select2-lifecycle.js":
+/*!*************************************************!*\
+  !*** ./resources/admin/ts/select2-lifecycle.js ***!
+  \*************************************************/
+/***/ (() => {
+
+// Page components own Select2 options and bindings. Only manage shared teardown
+// here; automatically enhancing every select would discard AJAX configuration.
+var $ = window.jQuery;
+$(document).on('select2:open.workspaceSelect2', function () {
+  window.$select2FocusInputSearch();
+});
+window.addEventListener('workspace:tab-change', function () {
+  $('select.select2-hidden-accessible').each(function () {
+    var instance = $(this).data('select2');
+    if (instance && instance.isOpen()) instance.close();
+  });
+}); // Covers closed/refreshed tabs, validation replacements and Alpine x-if content.
+// A moved node remains connected and must retain its selection and handlers.
+
+new MutationObserver(function (records) {
+  records.forEach(function (record) {
+    return record.removedNodes.forEach(function (node) {
+      if (node.nodeType !== 1 || node.isConnected) return;
+      $(node).find('select.select2-hidden-accessible').add($(node).filter('select.select2-hidden-accessible')).each(function () {
+        var instance = $(this).data('select2');
+
+        if (instance) {
+          // Select2 4.0 removes its detached dropdown wrapper on close.
+          if (instance.isOpen()) instance.close();
+          instance.destroy();
+        }
+      });
+    });
+  });
+}).observe(document.body, {
+  childList: true,
+  subtree: true
+});
+
+/***/ }),
+
 /***/ "./resources/admin/ts/workspace/s-events.js":
 /*!**************************************************!*\
   !*** ./resources/admin/ts/workspace/s-events.js ***!
@@ -603,6 +645,9 @@ var __webpack_exports__ = {};
   !*** ./resources/admin/ts/body.js ***!
   \************************************/
 feather.replace();
+
+__webpack_require__(/*! ./select2-lifecycle */ "./resources/admin/ts/select2-lifecycle.js");
+
 Alpine.start();
 window.AlpineStarted = true;
 

@@ -17287,7 +17287,7 @@ window.$select2Data = function () {
 };
 
 window.$select2FocusInputSearch = function () {
-  var inputSearch = document.querySelectorAll(".select2-search__field");
+  var inputSearch = document.querySelectorAll(".select2-container--open .select2-search__field");
   inputSearch.forEach(function (val) {
     val.focus();
     val.setAttribute("placeholder", "Search ...");
@@ -22469,13 +22469,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
  // Global Alpine lifecycle hook:
 // If a component registers via document.addEventListener('alpine:init', cb) or window.addEventListener('alpine:init', cb),
-// and Alpine has already initialized/started, invoke cb() synchronously!
+// after the real alpine:init event, invoke cb() synchronously for fetched pages.
 
 var originalDocumentAddEventListener = document.addEventListener.bind(document);
+var alpineInitialized = !!window.AlpineStarted;
+originalDocumentAddEventListener('alpine:init', function () {
+  alpineInitialized = true;
+}, {
+  once: true
+});
 
 document.addEventListener = function (type, listener, options) {
   if (type === 'alpine:init') {
-    if (window.AlpineStarted || window.Alpine && (window.Alpine.initialized || window.Alpine.version)) {
+    if (alpineInitialized) {
       try {
         listener();
       } catch (err) {
@@ -22493,7 +22499,7 @@ var originalWindowAddEventListener = window.addEventListener.bind(window);
 
 window.addEventListener = function (type, listener, options) {
   if (type === 'alpine:init') {
-    if (window.AlpineStarted || window.Alpine && (window.Alpine.initialized || window.Alpine.version)) {
+    if (alpineInitialized) {
       try {
         listener();
       } catch (err) {
@@ -22506,6 +22512,34 @@ window.addEventListener = function (type, listener, options) {
 
   return originalWindowAddEventListener(type, listener, options);
 };
+
+var workspaceScriptLoads = new Map();
+var workspaceTabLoads = new Map();
+
+function loadWorkspaceScript(scriptEl) {
+  var src = new URL(scriptEl.getAttribute('src'), document.baseURI).href;
+  if (workspaceScriptLoads.has(src)) return workspaceScriptLoads.get(src);
+  if (Array.from(document.scripts).some(function (script) {
+    return script.src === src;
+  })) return Promise.resolve();
+  var pending = new Promise(function (resolve, reject) {
+    var script = document.createElement('script');
+    Array.from(scriptEl.attributes).forEach(function (attr) {
+      return script.setAttribute(attr.name, attr.value);
+    });
+    script.onload = resolve;
+
+    script.onerror = function () {
+      script.remove();
+      workspaceScriptLoads["delete"](src);
+      reject(new Error("Could not load workspace script: ".concat(src)));
+    };
+
+    document.head.appendChild(script);
+  });
+  workspaceScriptLoads.set(src, pending);
+  return pending;
+}
 
 window.workspaceMdi = function () {
   return {
@@ -23463,8 +23497,21 @@ window.workspaceMdi = function () {
     fetchAndMountTab: function fetchAndMountTab(tab) {
       var _this13 = this;
 
+      var pending = workspaceTabLoads.get(tab.key);
+      if (pending && pending.url === tab.url) return pending.promise;
+      var request = {
+        url: tab.url
+      };
+      workspaceTabLoads.set(tab.key, request);
+
+      var isCurrent = function isCurrent() {
+        return workspaceTabLoads.get(tab.key) === request && _this13.tabs.some(function (current) {
+          return current.key === tab.key;
+        });
+      };
+
       this.setTabLoading(tab.key, true);
-      fetch(tab.url, {
+      request.promise = fetch(request.url, {
         headers: {
           'X-MDI-Partial': '1'
         }
@@ -23477,146 +23524,188 @@ window.workspaceMdi = function () {
         }
 
         return res.text();
-      }).then(function (html) {
-        var _doc$querySelector, _doc$querySelector$ge, _doc$querySelector2, _doc$querySelector2$i, _doc$querySelector3, _doc$querySelector3$i;
+      }).then( /*#__PURE__*/function () {
+        var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3(html) {
+          var _doc$querySelector, _doc$querySelector$ge, _doc$querySelector2, _doc$querySelector2$i, _doc$querySelector3, _doc$querySelector3$i;
 
-        if (html === null) return;
+          var parser, doc, docTitle, idx, contentHtml, initialPane, fetchedContent, viewport, isActive, newPane, existingSamePane;
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+            while (1) {
+              switch (_context3.prev = _context3.next) {
+                case 0:
+                  if (!(html === null || !isCurrent())) {
+                    _context3.next = 2;
+                    break;
+                  }
 
-        _this13.setTabLoading(tab.key, false);
+                  return _context3.abrupt("return");
 
-        var parser = new DOMParser();
-        var doc = parser.parseFromString(html, 'text/html'); // Extract title and clean any icon ligatures (e.g. "visibility View Details", "arrow-left Create Product")
+                case 2:
+                  parser = new DOMParser();
+                  doc = parser.parseFromString(html, 'text/html'); // Extract title and clean any icon ligatures (e.g. "visibility View Details", "arrow-left Create Product")
 
-        var docTitle = ((_doc$querySelector = doc.querySelector('.header-name-meta')) === null || _doc$querySelector === void 0 ? void 0 : (_doc$querySelector$ge = _doc$querySelector.getAttribute('data-header-name')) === null || _doc$querySelector$ge === void 0 ? void 0 : _doc$querySelector$ge.trim()) || ((_doc$querySelector2 = doc.querySelector('.navHeaderRight')) === null || _doc$querySelector2 === void 0 ? void 0 : (_doc$querySelector2$i = _doc$querySelector2.innerText) === null || _doc$querySelector2$i === void 0 ? void 0 : _doc$querySelector2$i.trim()) || ((_doc$querySelector3 = doc.querySelector('.form-header h3')) === null || _doc$querySelector3 === void 0 ? void 0 : (_doc$querySelector3$i = _doc$querySelector3.innerText) === null || _doc$querySelector3$i === void 0 ? void 0 : _doc$querySelector3$i.trim()) || doc.title.replace('ADMIN |', '').replace('ADMIN', '').trim();
+                  docTitle = ((_doc$querySelector = doc.querySelector('.header-name-meta')) === null || _doc$querySelector === void 0 ? void 0 : (_doc$querySelector$ge = _doc$querySelector.getAttribute('data-header-name')) === null || _doc$querySelector$ge === void 0 ? void 0 : _doc$querySelector$ge.trim()) || ((_doc$querySelector2 = doc.querySelector('.navHeaderRight')) === null || _doc$querySelector2 === void 0 ? void 0 : (_doc$querySelector2$i = _doc$querySelector2.innerText) === null || _doc$querySelector2$i === void 0 ? void 0 : _doc$querySelector2$i.trim()) || ((_doc$querySelector3 = doc.querySelector('.form-header h3')) === null || _doc$querySelector3 === void 0 ? void 0 : (_doc$querySelector3$i = _doc$querySelector3.innerText) === null || _doc$querySelector3$i === void 0 ? void 0 : _doc$querySelector3$i.trim()) || doc.title.replace('ADMIN |', '').replace('ADMIN', '').trim();
 
-        if (docTitle) {
-          docTitle = docTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
+                  if (docTitle) {
+                    docTitle = docTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
+                    idx = _this13.tabs.findIndex(function (t) {
+                      return t.key === tab.key;
+                    });
 
-          var idx = _this13.tabs.findIndex(function (t) {
-            return t.key === tab.key;
-          });
-
-          if (idx !== -1 && docTitle) {
-            _this13.tabs[idx].title = docTitle;
-          }
-        } // Extract external stylesheet and font links (e.g., Google Fonts, ApexCharts)
-
-
-        doc.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(function (linkEl) {
-          var href = linkEl.getAttribute('href');
-
-          if (href && !document.querySelector("link[href=\"".concat(href, "\"]"))) {
-            document.head.appendChild(linkEl.cloneNode(true));
-          }
-        }); // Extract content: prefer #workspace-viewport .workspace-tab-pane or #content
-
-        var contentHtml = '';
-        var initialPane = doc.querySelector('#workspace-viewport .workspace-tab-pane');
-
-        if (initialPane) {
-          contentHtml = initialPane.innerHTML;
-        } else {
-          var fetchedContent = doc.querySelector('#content');
-
-          if (fetchedContent) {
-            fetchedContent.querySelectorAll('.mdi-workspace-tabs-container, #jsScroll, .scroll').forEach(function (el) {
-              return el.remove();
-            });
-            contentHtml = fetchedContent.innerHTML;
-          }
-        }
-
-        if (!contentHtml || !contentHtml.trim()) {
-          throw new Error('Could not parse tab content');
-        }
-
-        var viewport = document.getElementById('workspace-viewport');
-        if (!viewport) return;
-        var isActive = _this13.activeTabKey === tab.key; // Create new tab pane container
-
-        var newPane = document.createElement('div');
-        newPane.id = 'tab-pane-' + tab.key;
-        newPane.className = 'workspace-tab-pane' + (isActive ? ' active' : '');
-        newPane.setAttribute('data-tab-key', tab.key);
-        newPane.style.width = '100%';
-        newPane.style.flex = '1';
-        newPane.style.flexDirection = 'column';
-        newPane.style.setProperty('display', isActive ? 'flex' : 'none', 'important');
-        newPane.innerHTML = contentHtml; // Strip any duplicate global singletons inside the pane
-
-        newPane.querySelectorAll('#file-manager-popup-container, [data-file-manager-popup], [x-data*="confirmDialog"], [x-data*="verifyConfirmDialog"], template[x-if*="confirmDialog"], template[x-if*="componentSearchMenu"], template[x-if*="page?.active"]').forEach(function (el) {
-          var _el$closest;
-
-          ((_el$closest = el.closest('.dialog')) === null || _el$closest === void 0 ? void 0 : _el$closest.remove()) || el.remove();
-        }); // Extract and attach all <style> tags (including page-specific styles in @section('script'))
-
-        doc.querySelectorAll('style').forEach(function (styleEl) {
-          newPane.appendChild(styleEl.cloneNode(true));
-        }); // If this tab IS active, ensure all other panes are hidden
-
-        if (isActive) {
-          var allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
-          allPanes.forEach(function (pane) {
-            pane.classList.remove('active');
-            pane.style.setProperty('display', 'none', 'important');
-          });
-        } // Remove any existing stale pane for this tab key
+                    if (idx !== -1 && docTitle) {
+                      _this13.tabs[idx].title = docTitle;
+                    }
+                  } // Extract external stylesheet and font links (e.g., Google Fonts, ApexCharts)
 
 
-        var existingSamePane = document.getElementById('tab-pane-' + tab.key);
+                  doc.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(function (linkEl) {
+                    var href = linkEl.getAttribute('href');
 
-        if (existingSamePane) {
-          existingSamePane.remove();
-        } // Strip dormant <script> tags from newPane so inert script elements don't clutter the DOM
+                    if (href && !document.querySelector("link[href=\"".concat(href, "\"]"))) {
+                      document.head.appendChild(linkEl.cloneNode(true));
+                    }
+                  }); // Extract content: prefer #workspace-viewport .workspace-tab-pane or #content
+
+                  contentHtml = '';
+                  initialPane = doc.querySelector('#workspace-viewport .workspace-tab-pane');
+
+                  if (initialPane) {
+                    contentHtml = initialPane.innerHTML;
+                  } else {
+                    fetchedContent = doc.querySelector('#content');
+
+                    if (fetchedContent) {
+                      fetchedContent.querySelectorAll('.mdi-workspace-tabs-container, #jsScroll, .scroll').forEach(function (el) {
+                        return el.remove();
+                      });
+                      contentHtml = fetchedContent.innerHTML;
+                    }
+                  }
+
+                  if (!(!contentHtml || !contentHtml.trim())) {
+                    _context3.next = 12;
+                    break;
+                  }
+
+                  throw new Error('Could not parse tab content');
+
+                case 12:
+                  viewport = document.getElementById('workspace-viewport');
+
+                  if (viewport) {
+                    _context3.next = 15;
+                    break;
+                  }
+
+                  return _context3.abrupt("return");
+
+                case 15:
+                  isActive = _this13.activeTabKey === tab.key; // Create new tab pane container
+
+                  newPane = document.createElement('div');
+                  newPane.id = 'tab-pane-' + tab.key;
+                  newPane.className = 'workspace-tab-pane' + (isActive ? ' active' : '');
+                  newPane.setAttribute('data-tab-key', tab.key);
+                  newPane.style.width = '100%';
+                  newPane.style.flex = '1';
+                  newPane.style.flexDirection = 'column';
+                  newPane.style.setProperty('display', isActive ? 'flex' : 'none', 'important');
+                  newPane.innerHTML = contentHtml; // Strip any duplicate global singletons inside the pane
+
+                  newPane.querySelectorAll('#file-manager-popup-container, [data-file-manager-popup], [x-data*="confirmDialog"], [x-data*="verifyConfirmDialog"], template[x-if*="confirmDialog"], template[x-if*="componentSearchMenu"], template[x-if*="page?.active"]').forEach(function (el) {
+                    var _el$closest;
+
+                    ((_el$closest = el.closest('.dialog')) === null || _el$closest === void 0 ? void 0 : _el$closest.remove()) || el.remove();
+                  }); // Extract and attach all <style> tags (including page-specific styles in @section('script'))
+
+                  doc.querySelectorAll('style').forEach(function (styleEl) {
+                    newPane.appendChild(styleEl.cloneNode(true));
+                  }); // Remove any existing stale pane for this tab key
+
+                  existingSamePane = document.getElementById('tab-pane-' + tab.key);
+
+                  if (existingSamePane) {
+                    existingSamePane.remove();
+                  } // Strip dormant <script> tags from newPane so inert script elements don't clutter the DOM
 
 
-        newPane.querySelectorAll('script').forEach(function (s) {
-          return s.remove();
-        }); // 1. Extract and execute scripts from fetched document BEFORE mounting newPane to the DOM!
-        // This guarantees Alpine components (Alpine.data) and page functions are registered
-        // BEFORE Alpine's DOM mutation observer scans and initializes the new elements.
+                  newPane.querySelectorAll('script').forEach(function (s) {
+                    return s.remove();
+                  }); // Load dependencies, then mount and register components with Alpine's
+                  // observer paused. Immediate page scripts can now find their own DOM.
 
-        _this13.executeScriptsFromDoc(doc, newPane); // 2. Mount newPane into the live DOM
+                  _context3.next = 32;
+                  return _this13.executeScriptsFromDoc(doc, newPane, function () {
+                    if (!isCurrent()) return false; // The user may have switched tabs while dependencies were loading.
+
+                    // The user may have switched tabs while dependencies were loading.
+                    var active = _this13.activeTabKey === tab.key;
+                    newPane.classList.toggle('active', active);
+                    newPane.style.setProperty('display', active ? 'flex' : 'none', 'important');
+
+                    if (active) {
+                      viewport.querySelectorAll('.workspace-tab-pane').forEach(function (pane) {
+                        pane.classList.remove('active');
+                        pane.style.setProperty('display', 'none', 'important');
+                      });
+                    }
+
+                    viewport.appendChild(newPane);
+                  });
+
+                case 32:
+                  if (newPane.isConnected) {
+                    _context3.next = 34;
+                    break;
+                  }
+
+                  return _context3.abrupt("return");
+
+                case 34:
+                  // Initialize s-event and s-mask on the newly mounted pane
+                  if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
+                    try {
+                      (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents)(newPane);
+                    } catch (e) {}
+                  }
+
+                  if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask === 'function') {
+                    try {
+                      (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask)(newPane);
+                    } catch (e) {}
+                  } // Initialize Feather icons & Alpine
 
 
-        if (window.Alpine && typeof window.Alpine.mutateDom === 'function') {
-          window.Alpine.mutateDom(function () {
-            viewport.appendChild(newPane);
-          });
-        } else {
-          viewport.appendChild(newPane);
-        } // Initialize s-event and s-mask on the newly mounted pane
+                  if (window.feather && typeof window.feather.replace === 'function') {
+                    try {
+                      window.feather.replace();
+                    } catch (e) {}
+                  }
 
+                  if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                    try {
+                      window.Alpine.initTree(newPane);
+                    } catch (e) {
+                      console.warn('Alpine.initTree warning:', e);
+                    }
+                  }
 
-        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
-          try {
-            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents)(newPane);
-          } catch (e) {}
-        }
+                  _this13.saveSession();
 
-        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask === 'function') {
-          try {
-            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask)(newPane);
-          } catch (e) {}
-        } // Initialize Feather icons & Alpine
+                case 39:
+                case "end":
+                  return _context3.stop();
+              }
+            }
+          }, _callee3);
+        }));
 
+        return function (_x) {
+          return _ref.apply(this, arguments);
+        };
+      }())["catch"](function (err) {
+        if (!isCurrent()) return;
 
-        if (window.feather && typeof window.feather.replace === 'function') {
-          try {
-            window.feather.replace();
-          } catch (e) {}
-        }
-
-        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-          try {
-            window.Alpine.initTree(newPane);
-          } catch (e) {
-            console.warn('Alpine.initTree warning:', e);
-          }
-        }
-
-        _this13.saveSession();
-      })["catch"](function (err) {
         _this13.setTabLoading(tab.key, false);
 
         console.error('Error loading tab content:', err);
@@ -23652,95 +23741,137 @@ window.workspaceMdi = function () {
           viewport.appendChild(errorPane);
         }
       })["finally"](function () {
-        _this13.setTabLoading(tab.key, false);
+        if (workspaceTabLoads.get(tab.key) === request) {
+          workspaceTabLoads["delete"](tab.key);
+
+          _this13.setTabLoading(tab.key, false);
+        }
       });
+      return request.promise;
     },
     executeScriptsFromDoc: function executeScriptsFromDoc(doc, targetPane) {
-      if (!doc) return;
-      var allScripts = []; // 1. Collect scripts from the tab's content container
+      var _arguments = arguments;
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
+        var mount, allScripts, contentContainer, _i, _allScripts, scriptEl, src, mountAndRegister;
 
-      var contentContainer = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                mount = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : function () {};
 
-      if (contentContainer) {
-        contentContainer.querySelectorAll('script').forEach(function (s) {
-          return allScripts.push(s);
-        });
-      } // 2. Also collect page-specific scripts that were in @section('script') at the end of body or elsewhere
+                if (doc) {
+                  _context4.next = 3;
+                  break;
+                }
+
+                return _context4.abrupt("return");
+
+              case 3:
+                allScripts = []; // 1. Collect scripts from the tab's content container
+
+                contentContainer = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
+
+                if (contentContainer) {
+                  contentContainer.querySelectorAll('script').forEach(function (s) {
+                    return allScripts.push(s);
+                  });
+                } // 2. Also collect page-specific scripts that were in @section('script') at the end of body or elsewhere
 
 
-      doc.querySelectorAll('body script').forEach(function (s) {
-        if (allScripts.includes(s)) return;
-        var text = s.textContent || '';
-        var src = s.getAttribute('src') || '';
-        if (src.includes('app.js') || src.includes('body.js') || src.includes('jquery') || src.includes('feather') || src.includes('tinymce') || src.includes('select2')) return; // Page-specific Alpine component definitions must NEVER be skipped!
+                doc.querySelectorAll('body script').forEach(function (s) {
+                  if (allScripts.includes(s)) return;
+                  var text = s.textContent || '';
+                  var src = s.getAttribute('src') || '';
+                  if (src.includes('app.js') || src.includes('body.js') || src.includes('jquery') || src.includes('feather') || src.includes('tinymce') || src.includes('select2')) return; // Page-specific Alpine component definitions must NEVER be skipped!
 
-        var isPageComponent = (text.includes('Alpine.data(') || text.includes('Alpine.data("') || text.includes('XDatacreateorder') || text.includes('xIndex') || text.includes('xComponent')) && !text.includes('xHeader') && !text.includes('componentSearchMenu');
+                  var isPageComponent = (text.includes('Alpine.data(') || text.includes('Alpine.data("') || text.includes('XDatacreateorder') || text.includes('xIndex') || text.includes('xComponent')) && !text.includes('xHeader') && !text.includes('componentSearchMenu');
 
-        if (!isPageComponent) {
-          // Only filter out the specific global layout/framework scripts from index.blade.php / layout components
-          if (/^\s*window\.workspaceTranslations\s*=/m.test(text)) return;
-          if (text.includes('Global Keyboard Shortcuts')) return;
-          if (text.includes('var notifications =') || text.includes('let notifications =') || text.includes('const notifications =')) return;
-          if (text.includes("Alpine.store('componentSearchMenu'") || text.includes('Alpine.store("componentSearchMenu"')) return;
-          if (text.includes("Alpine.data('xHeader'") || text.includes('Alpine.data("xHeader"')) return;
-          if (text.includes('localStorage.getItem("menu")') && text.includes('sidebar')) return;
-        }
+                  if (!isPageComponent) {
+                    // Only filter out the specific global layout/framework scripts from index.blade.php / layout components
+                    if (/^\s*window\.workspaceTranslations\s*=/m.test(text)) return;
+                    if (text.includes('Global Keyboard Shortcuts')) return;
+                    if (text.includes('var notifications =') || text.includes('let notifications =') || text.includes('const notifications =')) return;
+                    if (text.includes("Alpine.store('componentSearchMenu'") || text.includes('Alpine.store("componentSearchMenu"')) return;
+                    if (text.includes("Alpine.data('xHeader'") || text.includes('Alpine.data("xHeader"')) return;
+                    if (text.includes('localStorage.getItem("menu")') && text.includes('sidebar')) return;
+                  }
 
-        allScripts.push(s);
-      }); // 3. Also check head for page-specific scripts (e.g. pushed scripts)
+                  allScripts.push(s);
+                }); // 3. Also check head for page-specific scripts (e.g. pushed scripts)
 
-      doc.querySelectorAll('head script').forEach(function (s) {
-        if (allScripts.includes(s)) return;
-        var src = s.getAttribute('src') || '';
-        if (src.includes('app.js') || src.includes('body.js') || src.includes('jquery') || src.includes('feather') || src.includes('tinymce') || src.includes('select2') || src.includes('toastr') || src.includes('iziToast') || src.includes('icheck') || src.includes('jqueryUi')) return;
-        allScripts.push(s);
-      });
-      allScripts.forEach(function (scriptEl) {
-        var src = scriptEl.getAttribute('src');
+                doc.querySelectorAll('head script').forEach(function (s) {
+                  if (allScripts.includes(s)) return;
+                  var src = s.getAttribute('src') || '';
+                  if (src.includes('app.js') || src.includes('body.js') || src.includes('jquery') || src.includes('feather') || src.includes('tinymce') || src.includes('select2') || src.includes('toastr') || src.includes('iziToast') || src.includes('icheck') || src.includes('jqueryUi')) return;
+                  allScripts.push(s);
+                }); // Await external dependencies before evaluating page initializers. Share
+                // in-flight loads when two tabs request the same dependency concurrently.
 
-        if (src) {
-          // Skip core bundles already loaded in index.blade.php
-          if (!src.includes('app.js') && !src.includes('body.js') && !src.includes('jquery') && !document.querySelector("script[src=\"".concat(src, "\"]"))) {
-            var extScript = document.createElement('script');
-            Array.from(scriptEl.attributes).forEach(function (attr) {
-              return extScript.setAttribute(attr.name, attr.value);
-            });
-            document.head.appendChild(extScript);
-          }
-        } else if (scriptEl.textContent.trim()) {
-          // Inline script (Alpine components, xIndex, xComponent, etc.)
-          // Execute in document.head so it runs synchronously in global scope BEFORE newPane is attached to DOM
-          try {
-            var inlineScript = document.createElement('script');
-            inlineScript.textContent = scriptEl.textContent;
-            document.head.appendChild(inlineScript);
-            inlineScript.remove();
-          } catch (err) {
-            try {
-              (1, eval)(scriptEl.textContent);
-            } catch (e) {
-              console.warn('Script execution warning:', e);
+                _i = 0, _allScripts = allScripts;
+
+              case 9:
+                if (!(_i < _allScripts.length)) {
+                  _context4.next = 19;
+                  break;
+                }
+
+                scriptEl = _allScripts[_i];
+                src = scriptEl.getAttribute('src');
+
+                if (!(!src || /(?:app|body|jquery|feather|tinymce|select2)(?:\.min)?\.js/i.test(src))) {
+                  _context4.next = 14;
+                  break;
+                }
+
+                return _context4.abrupt("continue", 16);
+
+              case 14:
+                _context4.next = 16;
+                return loadWorkspaceScript(scriptEl);
+
+              case 16:
+                _i++;
+                _context4.next = 9;
+                break;
+
+              case 19:
+                mountAndRegister = function mountAndRegister() {
+                  if (mount() === false) return;
+                  allScripts.forEach(function (scriptEl) {
+                    if (scriptEl.getAttribute('src') || !scriptEl.textContent.trim()) return;
+                    var inlineScript = document.createElement('script');
+                    inlineScript.textContent = scriptEl.textContent;
+                    document.head.appendChild(inlineScript);
+                    inlineScript.remove();
+                  });
+                };
+
+                if (window.Alpine && typeof window.Alpine.mutateDom === 'function') {
+                  window.Alpine.mutateDom(mountAndRegister);
+                } else {
+                  mountAndRegister();
+                }
+
+              case 21:
+              case "end":
+                return _context4.stop();
             }
           }
-        }
-      }); // Dispatch alpine:init so any lingering listeners fire
-
-      try {
-        document.dispatchEvent(new CustomEvent('alpine:init'));
-        window.dispatchEvent(new CustomEvent('alpine:init'));
-      } catch (e) {}
+        }, _callee4);
+      }))();
     },
     closeTab: function closeTab(tab, event) {
-      var _arguments = arguments,
+      var _arguments2 = arguments,
           _this14 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
         var shouldSwitch, template, title, safeTitle, message, confirmed, closingIndex, pane, wasActive, nextTab;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
-                shouldSwitch = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : true;
+                shouldSwitch = _arguments2.length > 2 && _arguments2[2] !== undefined ? _arguments2[2] : true;
 
                 _this14.hideTooltip();
 
@@ -23750,15 +23881,15 @@ window.workspaceMdi = function () {
                 }
 
                 if (!(!tab || tab.isPinned)) {
-                  _context3.next = 5;
+                  _context5.next = 5;
                   break;
                 }
 
-                return _context3.abrupt("return");
+                return _context5.abrupt("return");
 
               case 5:
                 if (!(tab.isDirty && event && _this14.isFormTab(tab))) {
-                  _context3.next = 15;
+                  _context5.next = 15;
                   break;
                 }
 
@@ -23766,21 +23897,21 @@ window.workspaceMdi = function () {
                 title = tab.title || window.workspaceTranslations && window.workspaceTranslations.tab || 'Tab';
                 safeTitle = (title + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 message = template.replace(':title', safeTitle).replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
-                _context3.next = 12;
+                _context5.next = 12;
                 return _this14.confirmAction(message, {
                   confirmText: window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close tab',
                   cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
                 });
 
               case 12:
-                confirmed = _context3.sent;
+                confirmed = _context5.sent;
 
                 if (confirmed) {
-                  _context3.next = 15;
+                  _context5.next = 15;
                   break;
                 }
 
-                return _context3.abrupt("return");
+                return _context5.abrupt("return");
 
               case 15:
                 closingIndex = _this14.tabs.findIndex(function (t) {
@@ -23788,11 +23919,11 @@ window.workspaceMdi = function () {
                 });
 
                 if (!(closingIndex < 0)) {
-                  _context3.next = 18;
+                  _context5.next = 18;
                   break;
                 }
 
-                return _context3.abrupt("return");
+                return _context5.abrupt("return");
 
               case 18:
                 // Remove DOM pane
@@ -23827,31 +23958,31 @@ window.workspaceMdi = function () {
 
               case 24:
               case "end":
-                return _context3.stop();
+                return _context5.stop();
             }
           }
-        }, _callee3);
+        }, _callee5);
       }))();
     },
     closeAllTabs: function closeAllTabs() {
       var _this15 = this;
 
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
         var closableTabs, hasDirty, rawMsg, message, confirmed, currentClosable, dashboardUrl, dashboardKey, dashTitle, dashTab;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 closableTabs = _this15.tabs.filter(function (t) {
                   return !t.isPinned;
                 });
 
                 if (!(closableTabs.length === 0)) {
-                  _context4.next = 3;
+                  _context6.next = 3;
                   break;
                 }
 
-                return _context4.abrupt("return");
+                return _context6.abrupt("return");
 
               case 3:
                 hasDirty = closableTabs.some(function (t) {
@@ -23859,27 +23990,27 @@ window.workspaceMdi = function () {
                 });
 
                 if (!hasDirty) {
-                  _context4.next = 12;
+                  _context6.next = 12;
                   break;
                 }
 
                 rawMsg = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?';
                 message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
-                _context4.next = 9;
+                _context6.next = 9;
                 return _this15.confirmAction(message, {
                   confirmText: window.workspaceTranslations && window.workspaceTranslations.closeAllTabs || window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close all tabs',
                   cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
                 });
 
               case 9:
-                confirmed = _context4.sent;
+                confirmed = _context6.sent;
 
                 if (confirmed) {
-                  _context4.next = 12;
+                  _context6.next = 12;
                   break;
                 }
 
-                return _context4.abrupt("return");
+                return _context6.abrupt("return");
 
               case 12:
                 currentClosable = _this15.tabs.filter(function (t) {
@@ -23928,10 +24059,10 @@ window.workspaceMdi = function () {
 
               case 20:
               case "end":
-                return _context4.stop();
+                return _context6.stop();
             }
           }
-        }, _callee4);
+        }, _callee6);
       }))();
     },
     updateSidebarActive: function updateSidebarActive(url) {
@@ -24157,12 +24288,12 @@ window.workspaceMdi = function () {
             'X-MDI-Form': '1'
           }
         }).then( /*#__PURE__*/function () {
-          var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5(response) {
+          var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee7(response) {
             var finalUrl, responseText, json, title, msg, parser, doc, hasSuccessToast, isRedirectedToList, renderedFormErrors, hasServerValidationErrors, isValidationError, currentPane, newContent, _title2, _msg, _title3, _msg2, _targetUrl, modName, targetPath, listKey, existingListTab, listPane;
 
-            return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
+            return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee7$(_context7) {
               while (1) {
-                switch (_context5.prev = _context5.next) {
+                switch (_context7.prev = _context7.next) {
                   case 0:
                     if (submitter) {
                       submitter.disabled = false;
@@ -24175,26 +24306,26 @@ window.workspaceMdi = function () {
                     _this17.setTabLoading(currentTabKey, false);
 
                     finalUrl = response.url;
-                    _context5.next = 5;
+                    _context7.next = 5;
                     return response.text();
 
                   case 5:
-                    responseText = _context5.sent;
+                    responseText = _context7.sent;
 
                     if (!(finalUrl.includes('/login') || finalUrl.includes('/auth'))) {
-                      _context5.next = 9;
+                      _context7.next = 9;
                       break;
                     }
 
                     window.location.href = finalUrl;
-                    return _context5.abrupt("return");
+                    return _context7.abrupt("return");
 
                   case 9:
-                    _context5.prev = 9;
+                    _context7.prev = 9;
                     json = JSON.parse(responseText);
 
                     if (!(json.status === 'success' || json.message === 'success' || json.status === 200)) {
-                      _context5.next = 16;
+                      _context7.next = 16;
                       break;
                     }
 
@@ -24217,15 +24348,15 @@ window.workspaceMdi = function () {
                       _this17.openUrlInTab(json.redirect || json.url);
                     }
 
-                    return _context5.abrupt("return");
+                    return _context7.abrupt("return");
 
                   case 16:
-                    _context5.next = 20;
+                    _context7.next = 20;
                     break;
 
                   case 18:
-                    _context5.prev = 18;
-                    _context5.t0 = _context5["catch"](9);
+                    _context7.prev = 18;
+                    _context7.t0 = _context7["catch"](9);
 
                   case 20:
                     // Parse HTML response
@@ -24233,12 +24364,12 @@ window.workspaceMdi = function () {
                     doc = parser.parseFromString(responseText, 'text/html'); // Check if redirected to login page in document
 
                     if (!doc.querySelector('form[action*="login"]')) {
-                      _context5.next = 25;
+                      _context7.next = 25;
                       break;
                     }
 
                     window.location.href = finalUrl;
-                    return _context5.abrupt("return");
+                    return _context7.abrupt("return");
 
                   case 25:
                     // Success indicators:
@@ -24253,57 +24384,72 @@ window.workspaceMdi = function () {
                     isValidationError = !response.ok || hasServerValidationErrors && !hasSuccessToast;
 
                     if (!isValidationError) {
-                      _context5.next = 36;
+                      _context7.next = 45;
                       break;
                     }
 
                     // Re-render form with error highlights in active pane
                     currentPane = document.getElementById('tab-pane-' + currentTabKey);
 
-                    if (currentPane) {
-                      newContent = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
+                    if (!currentPane) {
+                      _context7.next = 42;
+                      break;
+                    }
 
-                      if (newContent) {
-                        // Destroy old Alpine tree first to prevent corrupted state
-                        if (window.Alpine && typeof window.Alpine.destroyTree === 'function') {
-                          try {
-                            window.Alpine.destroyTree(currentPane);
-                          } catch (e) {}
-                        } // Execute scripts FIRST so Alpine.data is updated before new DOM is injected
+                    newContent = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
 
+                    if (!newContent) {
+                      _context7.next = 42;
+                      break;
+                    }
 
-                        _this17.executeScriptsFromDoc(doc, currentPane);
+                    // Destroy old Alpine tree first to prevent corrupted state
+                    if (window.Alpine && typeof window.Alpine.destroyTree === 'function') {
+                      try {
+                        window.Alpine.destroyTree(currentPane);
+                      } catch (e) {}
+                    } else {
+                      // Older Alpine releases expose cleanup through their
+                      // observer. Remove the old tree before pausing it.
+                      currentPane.replaceChildren();
+                    }
 
-                        currentPane.innerHTML = newContent.innerHTML;
+                    _context7.next = 38;
+                    return _this17.executeScriptsFromDoc(doc, currentPane, function () {
+                      currentPane.innerHTML = newContent.innerHTML;
+                      currentPane.querySelectorAll('script').forEach(function (script) {
+                        return script.remove();
+                      });
+                    });
 
-                        if (window.feather && typeof window.feather.replace === 'function') {
-                          try {
-                            window.feather.replace();
-                          } catch (e) {}
-                        }
+                  case 38:
+                    if (window.feather && typeof window.feather.replace === 'function') {
+                      try {
+                        window.feather.replace();
+                      } catch (e) {}
+                    }
 
-                        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
-                          try {
-                            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents)(currentPane);
-                          } catch (e) {}
-                        }
+                    if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
+                      try {
+                        (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents)(currentPane);
+                      } catch (e) {}
+                    }
 
-                        if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask === 'function') {
-                          try {
-                            (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask)(currentPane);
-                          } catch (e) {}
-                        }
+                    if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask === 'function') {
+                      try {
+                        (0,_s_events__WEBPACK_IMPORTED_MODULE_1__.initSMask)(currentPane);
+                      } catch (e) {}
+                    }
 
-                        if (window.Alpine && typeof window.Alpine.initTree === 'function') {
-                          try {
-                            window.Alpine.initTree(currentPane);
-                          } catch (e) {
-                            console.warn('Alpine.initTree warning on error re-render:', e);
-                          }
-                        }
+                    if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                      try {
+                        window.Alpine.initTree(currentPane);
+                      } catch (e) {
+                        console.warn('Alpine.initTree warning on error re-render:', e);
                       }
                     }
 
+                  case 42:
                     if (window.iziToast) {
                       _title2 = window.workspaceTranslations && window.workspaceTranslations.warning || 'Warning';
                       _msg = window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields || 'Please check the required fields.';
@@ -24313,10 +24459,10 @@ window.workspaceMdi = function () {
                       });
                     }
 
-                    _context5.next = 51;
+                    _context7.next = 60;
                     break;
 
-                  case 36:
+                  case 45:
                     // Success!
                     doc.querySelectorAll('script').forEach(function (sc) {
                       var text = sc.textContent || '';
@@ -24339,15 +24485,15 @@ window.workspaceMdi = function () {
 
 
                     if (!(submitter && submitter.value === 'save_new')) {
-                      _context5.next = 41;
+                      _context7.next = 50;
                       break;
                     }
 
                     _this17.refreshTab(currentTabKey);
 
-                    return _context5.abrupt("return");
+                    return _context7.abrupt("return");
 
-                  case 41:
+                  case 50:
                     // Determine target list URL
                     _targetUrl = finalUrl;
                     modName = currentTabKey ? currentTabKey.replace(/^admin-/, '').replace(/-create$/, '').replace(/-edit.*$/, '') : '';
@@ -24388,16 +24534,16 @@ window.workspaceMdi = function () {
 
                     _this17.openUrlInTab(targetPath);
 
-                  case 51:
+                  case 60:
                   case "end":
-                    return _context5.stop();
+                    return _context7.stop();
                 }
               }
-            }, _callee5, null, [[9, 18]]);
+            }, _callee7, null, [[9, 18]]);
           }));
 
-          return function (_x) {
-            return _ref.apply(this, arguments);
+          return function (_x2) {
+            return _ref2.apply(this, arguments);
           };
         }())["catch"](function (err) {
           if (submitter) {
@@ -24559,14 +24705,14 @@ window.workspaceMdi = function () {
       var _this20 = this;
 
       document.addEventListener('keydown', /*#__PURE__*/function () {
-        var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6(e) {
+        var _ref3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee8(e) {
           var activeTab, currentIndex, nextIndex, targetIndex;
-          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
+          return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee8$(_context8) {
             while (1) {
-              switch (_context6.prev = _context6.next) {
+              switch (_context8.prev = _context8.next) {
                 case 0:
                   if (!((e.ctrlKey || e.metaKey) && e.key === 'w' && !e.shiftKey)) {
-                    _context6.next = 6;
+                    _context8.next = 6;
                     break;
                   }
 
@@ -24575,12 +24721,12 @@ window.workspaceMdi = function () {
                   });
 
                   if (!(activeTab && !activeTab.isPinned)) {
-                    _context6.next = 6;
+                    _context8.next = 6;
                     break;
                   }
 
                   e.preventDefault();
-                  _context6.next = 6;
+                  _context8.next = 6;
                   return _this20.closeTab(activeTab, e);
 
                 case 6:
@@ -24622,14 +24768,14 @@ window.workspaceMdi = function () {
 
                 case 9:
                 case "end":
-                  return _context6.stop();
+                  return _context8.stop();
               }
             }
-          }, _callee6);
+          }, _callee8);
         }));
 
-        return function (_x2) {
-          return _ref2.apply(this, arguments);
+        return function (_x3) {
+          return _ref3.apply(this, arguments);
         };
       }());
     },

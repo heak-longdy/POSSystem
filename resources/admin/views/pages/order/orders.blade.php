@@ -603,7 +603,7 @@
                     }
                 },
                 fetchSelectBarber() {
-                    $('#barber_id').select2({
+                    $(this.$root).find('#barber_id').select2({
                         placeholder: '{{ __('order.select_barber') }}',
                         ajax: {
                             url: '{{ route('admin-select-barber') }}',
@@ -619,7 +619,7 @@
                             })
                         }
                     }).on('select2:open', () => {
-                        document.querySelector('.select2-search__field').focus();
+                        window.$select2FocusInputSearch();
                     });
                 },
                 verifyDialog(data, typeAction, btn) {

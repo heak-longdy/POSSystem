@@ -77,10 +77,10 @@
                 init() {
                     const data = @json($data ?? '');
                     this.image = data?.image ?? "";
-                    $select2Data('#position_id', data?.position_id, data?.pos_title)
+                    $select2Data($(this.$root).find('#position_id'), data?.position_id, data?.pos_title)
                 },
                 fetchSelectPosition() {
-                    $(`#position_id`).select2({
+                    $(this.$root).find(`#position_id`).select2({
                         placeholder: `Select Position`,
                         language: {
                             searching: () => {

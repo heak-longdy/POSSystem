@@ -766,14 +766,14 @@
                     const barber = @json($barber);
 
                     if (shop?.id) {
-                        $select2Data('#shop_id', shop.id, shop.name || shop.phone);
+                        $select2Data($(this.$root).find('#shop_id'), shop.id, shop.name || shop.phone);
                     }
                     if (barber?.id) {
-                        $select2Data('#barber_id', barber.id, barber.name || barber.phone);
+                        $select2Data($(this.$root).find('#barber_id'), barber.id, barber.name || barber.phone);
                     }
                 },
                 fetchSelectShop() {
-                    $('#shop_id').select2({
+                    $(this.$root).find('#shop_id').select2({
                         placeholder: @json(__('order.select_shop')),
                         ajax: {
                             url: '{{ route('admin-select-shop') }}',
@@ -789,11 +789,11 @@
                             })
                         }
                     }).on('select2:open', () => {
-                        document.querySelector('.select2-search__field').focus();
+                        window.$select2FocusInputSearch();
                     });
                 },
                 fetchSelectBarber() {
-                    $('#barber_id').select2({
+                    $(this.$root).find('#barber_id').select2({
                         placeholder: @json(__('order.select_barber')),
                         ajax: {
                             url: '{{ route('admin-select-barber') }}',
@@ -809,7 +809,7 @@
                             })
                         }
                     }).on('select2:open', () => {
-                        document.querySelector('.select2-search__field').focus();
+                        window.$select2FocusInputSearch();
                     });
                 },
                 paymentStatusLabel(status) {

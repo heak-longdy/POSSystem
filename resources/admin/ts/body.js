@@ -1,4 +1,5 @@
 feather.replace();
+require("./select2-lifecycle");
 Alpine.start();
 window.AlpineStarted = true;
 

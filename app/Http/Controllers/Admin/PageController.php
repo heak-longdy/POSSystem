@@ -29,7 +29,7 @@ class PageController extends Controller
 
     public function onSave(Request $req)
     {
-        $req->type = $req->type == 'term-condition' ? 'term_condition' : $req->type;
+        $req->type == 'term-condition' ? 'term_condition' : $req->type;
         $data = Page::where('type', $req->type)->where('id', $req->id)->first();
         $items = [
             'title' => $req->title,

@@ -141,17 +141,17 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data("xComponent", () => ({
                 init() {
-                    if ($('#staff_id').length) {
-                        $('#staff_id').select2();
+                    if ($(this.$root).find('#staff_id').length) {
+                        $(this.$root).find('#staff_id').select2();
                     }
-                    if ($('#type').length) {
-                        $('#type').select2();
+                    if ($(this.$root).find('#type').length) {
+                        $(this.$root).find('#type').select2();
                     }
-                    if ($('#shop_id').length) {
-                        $('#shop_id').select2();
+                    if ($(this.$root).find('#shop_id').length) {
+                        $(this.$root).find('#shop_id').select2();
                     }
-                    if ($('#status').length) {
-                        $('#status').select2();
+                    if ($(this.$root).find('#status').length) {
+                        $(this.$root).find('#status').select2();
                     }
                     if ($('#expense_date').length) {
                         $("#expense_date").datepicker({

@@ -116,17 +116,17 @@
                     this.start_month = data?.start_month ?? `{{ old('start_month') }}`;
                     this.to_month = data?.to_month ?? `{{ old('to_month') }}`;
 
-                    $select2Data('#position_id', this.position.id, this.position.text);
-                    $select2Data('#sector_id', this.sector.id, this.sector.text);
+                    $select2Data($(this.$root).find('#position_id'), this.position.id, this.position.text);
+                    $select2Data($(this.$root).find('#sector_id'), this.sector.id, this.sector.text);
                     this.number_of_day = data?.number_of_day ?? `{{ old('number_of_day') }}`;
                     this.close_date = data?.close_date ?? `{{ old('close_date') }}`;
 
                     this.monthList = @json(config('dummy.months'));
 
-                    $(`#start_month`).select2();
-                    $(`#to_month`).select2();
-                    $(`#placement_type_id`).select2();
-                    $(`#status`).select2();
+                    $(this.$root).find(`#start_month`).select2();
+                    $(this.$root).find(`#to_month`).select2();
+                    $(this.$root).find(`#placement_type_id`).select2();
+                    $(this.$root).find(`#status`).select2();
 
                     //Date
                     $("#post_date").datepicker({
@@ -252,7 +252,7 @@
 
                 },
                 fetchSelectPosition() {
-                    $(`#position_id`).select2({
+                    $(this.$root).find(`#position_id`).select2({
                         placeholder: `Select Position`,
                         ajax: {
                             url: '{{ route('admin-select-position') }}',
@@ -290,13 +290,13 @@
                     }).on('select2:close', async (eventClose) => {
                         const ID = eventClose?.target?.value ?? "";
                         if (this.position.id != ID) {
-                            $select2Data('#sector_id')
+                            $select2Data($(this.$root).find('#sector_id'))
                         }
 
                     });
                 },
                 fetchSelectSector() {
-                    $(`#sector_id`).select2({
+                    $(this.$root).find(`#sector_id`).select2({
                         placeholder: `Select Sector`,
                         ajax: {
                             url: '{{ route('admin-select-sector') }}',

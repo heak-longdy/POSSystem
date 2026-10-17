@@ -29,7 +29,7 @@
                             <select name="position_id" class="SelectPosition" id="position_id" x-init="fetchSelectPosition()">
                                 <option value=""> Select Position</option>
                             </select>
-                            <div class="select2Reset" x-show="position?.id" @click="$select2Data('#position_id');position='';sector='';$select2Data('#sector_id')">
+                            <div class="select2Reset" x-show="position?.id" @click="$select2Data($($root).find('#position_id'));position='';sector='';$select2Data($($root).find('#sector_id'))">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path
                                         d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -51,7 +51,7 @@
                             <select name="sector_id" class="SelectPosition" id="sector_id" x-init="fetchSelectSector()">
                                 <option value=""> Select Position</option>
                             </select>
-                            <div class="select2Reset" x-show="sector?.id" @click="$select2Data('#sector_id')">
+                            <div class="select2Reset" x-show="sector?.id" @click="$select2Data($($root).find('#sector_id'))">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path
                                         d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -270,17 +270,17 @@
                     this.start_month = data?.start_month ?? `{{ old('start_month') }}`;
                     this.to_month = data?.to_month ?? `{{ old('to_month') }}`;
 
-                    $select2Data('#position_id', this.position.id, this.position.text);
-                    $select2Data('#sector_id', this.sector.id, this.sector.text);
+                    $select2Data($(this.$root).find('#position_id'), this.position.id, this.position.text);
+                    $select2Data($(this.$root).find('#sector_id'), this.sector.id, this.sector.text);
                     this.number_of_day = data?.number_of_day ?? `{{ old('number_of_day') }}`;
                     this.close_date = data?.close_date ?? `{{ old('close_date') }}`;
 
                     this.monthList = @json(config('dummy.months'));
 
-                    $(`#start_month`).select2();
-                    $(`#to_month`).select2();
-                    $(`#placement_type_id`).select2();
-                    $(`#status`).select2();
+                    $(this.$root).find(`#start_month`).select2();
+                    $(this.$root).find(`#to_month`).select2();
+                    $(this.$root).find(`#placement_type_id`).select2();
+                    $(this.$root).find(`#status`).select2();
 
                     //Date
                     $("#post_date").datepicker({
@@ -406,7 +406,7 @@
 
                 },
                 fetchSelectPosition() {
-                    $(`#position_id`).select2({
+                    $(this.$root).find(`#position_id`).select2({
                         placeholder: `Select Position`,
                         ajax: {
                             url: '{{ route('admin-select-position') }}',
@@ -444,13 +444,13 @@
                     }).on('select2:close', async (eventClose) => {
                         const ID = eventClose?.target?.value ?? "";
                         if (this.position.id != ID) {
-                            $select2Data('#sector_id')
+                            $select2Data($(this.$root).find('#sector_id'))
                         }
 
                     });
                 },
                 fetchSelectSector() {
-                    $(`#sector_id`).select2({
+                    $(this.$root).find(`#sector_id`).select2({
                         placeholder: `Select Sector`,
                         ajax: {
                             url: '{{ route('admin-select-sector') }}',

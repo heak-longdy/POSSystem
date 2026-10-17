@@ -1954,14 +1954,7 @@
                     if (this.$el && $(this.$el).is(selector)) {
                         return $(this.$el);
                     }
-                    if (this.$root && $(this.$root).find(selector).length) {
-                        return $(this.$root).find(selector);
-                    }
-                    const $active = $('.workspace-tab-pane.active ' + selector);
-                    if ($active.length) {
-                        return $active;
-                    }
-                    return $(selector);
+                    return $(this.$root).find(selector);
                 },
 
                 setSelect2Value(selector, value, text) {

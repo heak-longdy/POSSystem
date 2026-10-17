@@ -532,7 +532,7 @@
             <div class="cp-header">
                 <h3 class="cp-title">
                     <i class='bx bx-command'></i>
-                    <span x-text="options?.title || @json(__('global.header.quick_search_menu'))">{{ __('global.header.quick_search_menu') }}</span>
+                    <span x-text="options?.title || '{{ addslashes(__('global.header.quick_search_menu')) }}'">{{ __('global.header.quick_search_menu') }}</span>
                 </h3>
                 <button type="button" class="cp-close-btn" id="cp-close-btn" @click="close()" title="{{ __('global.button.close') }} (Esc)">
                     <i class='bx bx-x'></i>
@@ -547,7 +547,7 @@
                     x-model="searchQuery"
                     @input="onSearchInput()"
                     class="cp-search-input"
-                    :placeholder="options?.placeholder || @json(__('global.header.quick_search_placeholder'))"
+                    :placeholder="options?.placeholder || '{{ addslashes(__('global.header.quick_search_placeholder')) }}'"
                     autocomplete="off"
                     spellcheck="false">
                 
@@ -578,7 +578,7 @@
                                             <div class="cp-item-info">
                                                 <div class="cp-item-title" x-text="item.title || item.name?.en || item.name"></div>
                                                 <div class="cp-item-subtitle">
-                                                    <span class="cp-badge-category" x-text="item.category || @json(__('global.header.general'))"></span>
+                                                    <span class="cp-badge-category" x-text="item.category || '{{ addslashes(__('global.header.general')) }}'"></span>
                                                     <template x-if="item.title_km && item.title_km !== item.title">
                                                         <span x-text="'• ' + item.title_km" style="color: #94a3b8;"></span>
                                                     </template>
@@ -631,7 +631,7 @@
                     </div>
                 </div>
                 <div class="cp-footer-count">
-                    <span x-text="visibleItems.length + ' ' + (visibleItems.length === 1 ? @json(__('global.header.item')) : @json(__('global.header.items')))"></span>
+                    <span x-text="visibleItems.length + ' ' + (visibleItems.length === 1 ? '{{ addslashes(__('global.header.item')) }}' : '{{ addslashes(__('global.header.items')) }}')"></span>
                 </div>
             </div>
         </div>

@@ -19,7 +19,7 @@
                             <select name="customer_id" class="SelectPosition" id="customer_id" x-init="fetchSelectCustomer()">
                                 <option value=""> Select Customer</option>
                             </select>
-                            <div class="select2Reset" x-show="customer?.id" @click="$select2Data('#customer_id')">
+                            <div class="select2Reset" x-show="customer?.id" @click="$select2Data($($root).find('#customer_id'))">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path
                                         d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z">
@@ -170,7 +170,7 @@
                     this.image = data?.image ?? `{{ old('image') }}`;
                     this.customer.id = data?.customer_id ?? `{{ old('customer_id') }}`;
                     this.customer.text = data?.customer_title ?? `{{ old('customer_name') }}`;
-                    $select2Data('#customer_id', this.customer.id, this.customer.text);
+                    $select2Data($(this.$root).find('#customer_id'), this.customer.id, this.customer.text);
 
                     //Editor
                     tinymce.init({
@@ -275,7 +275,7 @@
 
                 },
                 fetchSelectPosition() {
-                    $(`#position_id`).select2({
+                    $(this.$root).find(`#position_id`).select2({
                         placeholder: `Select Position`,
                         ajax: {
                             url: '{{ route('admin-select-position') }}',
@@ -313,13 +313,13 @@
                     }).on('select2:close', async (eventClose) => {
                         const ID = eventClose?.target?.value ?? "";
                         if (this.position.id != ID) {
-                            $select2Data('#sector_id')
+                            $select2Data($(this.$root).find('#sector_id'))
                         }
 
                     });
                 },
                 fetchSelectCustomer(){
-                    $(`#customer_id`).select2({
+                    $(this.$root).find(`#customer_id`).select2({
                         placeholder: `Select Customer`,
                         ajax: {
                             url: '{{ route('admin-select-customer') }}',
@@ -360,7 +360,7 @@
                     });
                 },
                 fetchSelectSector() {
-                    $(`#sector_id`).select2({
+                    $(this.$root).find(`#sector_id`).select2({
                         placeholder: `Select Sector`,
                         ajax: {
                             url: '{{ route('admin-select-sector') }}',

@@ -35170,7 +35170,6 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   width: 100%;
   max-width: 60rem;
   flex: 1;
-  display: flex;
   flex-direction: column;
   box-sizing: border-box;
 }

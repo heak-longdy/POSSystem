@@ -86,7 +86,7 @@ window.$select2Data = function (
 };
 
 window.$select2FocusInputSearch = function () {
-  var inputSearch = document.querySelectorAll(".select2-search__field");
+  var inputSearch = document.querySelectorAll(".select2-container--open .select2-search__field");
   inputSearch.forEach((val) => {
     val.focus();
     val.setAttribute("placeholder", "Search ...");

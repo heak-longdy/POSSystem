@@ -472,10 +472,10 @@
                         var option = "<option selected></option>";
                         var selectOptionHTML = $(option).val(shop?.id ? shop.id : null).text(shop?.name ?
                             shop.name : shop?.phone);
-                        $('.SelectShop').append(selectOptionHTML).trigger('change');
+                        $(this.$root).find('.SelectShop').append(selectOptionHTML).trigger('change');
                     },
                     fetchSelectShop() {
-                        $('#shop_id').select2({
+                        $(this.$root).find('#shop_id').select2({
                             placeholder: `Select shop...`,
                             ajax: {
                                 url: '{{ route('admin-select-shop') }}',
@@ -500,7 +500,7 @@
                                 }
                             }
                         }).on('select2:open', (e) => {
-                            document.querySelector('.select2-search__field').focus();
+                            window.$select2FocusInputSearch();
                         }).on('select2:close', async (eventClose) => {
                             const _id = eventClose.target.value;
                             console.log(_id, 'idiiii');

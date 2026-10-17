@@ -11,7 +11,7 @@ use App\Services\Tools;
 class PositionController extends Controller
 {
     protected $layout = 'admin::pages.position.';
-    private $tools = "";
+    private $tools;
     private $table = Position::class;
     private $routeName = "position";
     public function __construct(Tools $tools)

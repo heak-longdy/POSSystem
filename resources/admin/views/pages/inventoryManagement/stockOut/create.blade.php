@@ -138,20 +138,20 @@
                 init() {
                     this.initShop();
                     this.initProduct();
-                    $('#to_id').select2({ placeholder: @json(__('stock_out.form.select_stock_type')) });
+                    $(this.$root).find('#to_id').select2({ placeholder: @json(__('stock_out.form.select_stock_type')) });
 
                     if (this.isReadonly) {
                         return;
                     }
 
-                    $('#shop_id').on('change', () => {
-                        $('#product_id').val(null).trigger('change');
-                        $('#current_stock').val(0);
+                    $(this.$root).find('#shop_id').on('change', () => {
+                        $(this.$root).find('#product_id').val(null).trigger('change');
+                        $(this.$root).find('#current_stock').val(0);
                     });
-                    $('#product_id').on('change', () => this.fetchCurrentStock());
+                    $(this.$root).find('#product_id').on('change', () => this.fetchCurrentStock());
                 },
                 initShop() {
-                    $('#shop_id').select2({
+                    $(this.$root).find('#shop_id').select2({
                         placeholder: @json(__('stock_out.form.select_shop')),
                         ajax: this.isReadonly ? null : {
                             url: '{{ route('admin-select-stock-shop') }}',
@@ -169,7 +169,7 @@
                     });
                 },
                 initProduct() {
-                    $('#product_id').select2({
+                    $(this.$root).find('#product_id').select2({
                         placeholder: @json(__('stock_out.form.select_product')),
                         ajax: this.isReadonly ? null : {
                             url: '{{ route('admin-select-shop-product') }}',
@@ -178,7 +178,7 @@
                             quietMillis: 50,
                             data: (param) => ({
                                 search: param.term,
-                                shop_id: $('#shop_id').val(),
+                                shop_id: $(this.$root).find('#shop_id').val(),
                                 product_id: JSON.stringify([]),
                             }),
                             processResults: (data) => ({
@@ -191,10 +191,10 @@
                     });
                 },
                 async fetchCurrentStock() {
-                    const productId = $('#product_id').val();
-                    const shopId = $('#shop_id').val();
+                    const productId = $(this.$root).find('#product_id').val();
+                    const shopId = $(this.$root).find('#shop_id').val();
                     if (!productId || !shopId) {
-                        $('#current_stock').val(0);
+                        $(this.$root).find('#current_stock').val(0);
                         return;
                     }
 
@@ -206,8 +206,8 @@
                         }
                     })
                         .then((response) => response.json())
-                        .then((response) => $('#current_stock').val(response?.current_stock ?? 0))
-                        .catch(() => $('#current_stock').val(0));
+                        .then((response) => $(this.$root).find('#current_stock').val(response?.current_stock ?? 0))
+                        .catch(() => $(this.$root).find('#current_stock').val(0));
                 },
             }));
         });
