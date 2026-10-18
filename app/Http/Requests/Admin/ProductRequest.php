@@ -28,6 +28,12 @@ class ProductRequest extends FormRequest
         return [
             'category_id' => 'required|integer',
             'uom_id' => 'required|integer',
+            'code' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('products', 'code')->ignore($this->route('id'))->whereNull('deleted_at'),
+            ],
             'name' => [
                 'required',
                 'max:50',
@@ -44,6 +50,8 @@ class ProductRequest extends FormRequest
         return [
             'category_id.required' => __('product.validation.category_required'),
             'uom_id.required' => __('product.validation.uom_required'),
+            'code.max' => __('product.validation.code_max'),
+            'code.unique' => __('product.validation.code_unique'),
             'name.required' => __('product.validation.name_required'),
             'name.max' => __('product.validation.name_max'),
             'name.unique' => __('product.validation.name_unique'),

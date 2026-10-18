@@ -39,6 +39,7 @@ class StockOnHandController extends Controller
             'product.uom',
             'user',
             'barber',
+            'shopProducts',
         ])->find($req->id);
 
         if (!$stockOnHand) {
@@ -87,6 +88,8 @@ class StockOnHandController extends Controller
             __('stock_on_hand.table.category'),
             __('stock_on_hand.table.uom'),
             __('stock_on_hand.table.current_stock'),
+            __('stock_on_hand.table.total_cost'),
+            __('stock_on_hand.table.total_amount'),
             __('stock_on_hand.table.date'),
             __('stock_on_hand.table.shop'),
             __('stock_on_hand.table.requested_by'),
@@ -104,6 +107,8 @@ class StockOnHandController extends Controller
                     $item->category_title ?? ($item->category->name ?? '---'),
                     $item->uom_title ?? ($item->uom->name ?? '---'),
                     $item->current_stock ?? 0,
+                    $item->total_cost_title ?? '$0.00',
+                    $item->total_amount_title ?? '$0.00',
                     $item->created_date ?? '',
                     $item->shop_title ?? ($item->shop->name ?? '---'),
                     $item->request_by_title ?? ($item->user->name ?? '---'),
@@ -124,6 +129,7 @@ class StockOnHandController extends Controller
             'product.uom',
             'user',
             'barber',
+            'shopProducts',
         ]);
 
         $getData = $query

@@ -18,6 +18,26 @@ class ProductController extends Controller
     {
         $this->tools = $serTool;
     }
+    private function queryProducts(Request $req)
+    {
+        $status = $req->status ?? 1;
+        if ($status !== 'trash') {
+            $query = Product::with(['category', 'uom'])->where('status', $status);
+        } else {
+            $query = Product::with(['category', 'uom'])->onlyTrashed();
+        }
+
+        if ($req->filled('search')) {
+            $search = trim($req->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('code', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        return $query->orderBy('id', 'desc');
+    }
+
     public function index(Request $req)
     {
         $data['status'] = $req->status;
@@ -25,14 +45,20 @@ class ProductController extends Controller
         if (!$req->status) {
             return redirect()->route('admin-'.$this->routeName.'-list', 1);
         }
-        if ($req->status != 'trash') {
-            $query = Product::where('status', $req->status);
-        } else {
-            $query = Product::onlyTrashed();
-        }
-        $data['data'] = $query->orderBy('id', 'desc')->paginate(50);
-        $data['exportUrl'] = route('admin-product-export');
+        $query = $this->queryProducts($req);
+        $data['data'] = $query->paginate(50);
+        $data['exportUrl'] = route('admin-product-export', request()->query());
         return view($this->layout . 'index', $data);
+    }
+
+    public function report(Request $req)
+    {
+        $products = $this->queryProducts($req)->get();
+
+        return response()->json([
+            'status' => $req->status ?? 1,
+            'rows'   => $products,
+        ]);
     }
     public function onCreate()
     {
@@ -75,31 +101,45 @@ class ProductController extends Controller
     public function export(Request $req)
     {
         $fileName = 'products_export_' . date('Y-m-d_H-i-s') . '.csv';
-        $products = Product::all(); // You might want to apply filters here if needed
+        $products = $this->queryProducts($req)->get();
 
         $headers = array(
-            "Content-type"        => "text/csv",
+            "Content-type"        => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$fileName",
             "Pragma"              => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
             "Expires"             => "0"
         );
 
-        $columns = array('ID', 'Name', 'Cost', 'Price', 'Commission', 'Created At');
+        $columns = array(
+            __('product.export.id'),
+            __('product.export.code'),
+            __('product.export.name'),
+            __('global.table.category'),
+            __('global.table.uom'),
+            __('product.export.cost'),
+            __('product.export.price'),
+            __('product.export.commission'),
+            __('product.export.created_at'),
+        );
 
         $callback = function() use($products, $columns) {
             $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
             fputcsv($file, $columns);
 
-            foreach ($products as $product) {
-                $row['ID']  = $product->id;
-                $row['Name']    = $product->name;
-                $row['Cost'] = $product->cost;
-                $row['Price'] = $product->price;
-                $row['Commission'] = $product->commission;
-                $row['Created At']  = $product->created_at;
-
-                fputcsv($file, array($row['ID'], $row['Name'], $row['Cost'], $row['Price'], $row['Commission'], $row['Created At']));
+            foreach ($products as $index => $product) {
+                fputcsv($file, array(
+                    $index + 1,
+                    $product->code ?? '',
+                    $product->name ?? '',
+                    $product->category_title ?? ($product->category->name ?? ''),
+                    $product->uom_title ?? ($product->uom->name ?? ''),
+                    $product->cost ?? 0,
+                    $product->price ?? 0,
+                    $product->commission ?? 0,
+                    $product->created_at ? $product->created_at->format('Y-m-d H:i:s') : '',
+                ));
             }
 
             fclose($file);

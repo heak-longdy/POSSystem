@@ -18,6 +18,23 @@ class UomController extends Controller
     {
         $this->tools = $serTool;
     }
+    private function queryUoms(Request $req)
+    {
+        $status = $req->status ?? 1;
+        if ($status !== 'trash') {
+            $query = UOM::where('status', $status);
+        } else {
+            $query = UOM::onlyTrashed();
+        }
+
+        if ($req->filled('search')) {
+            $search = trim($req->search);
+            $query->where('name', 'LIKE', '%' . $search . '%');
+        }
+
+        return $query->orderBy('id', 'desc');
+    }
+
     public function index(Request $req)
     {
         $data['status'] = $req->status;
@@ -25,14 +42,21 @@ class UomController extends Controller
         if (!$req->status) {
             return redirect()->route('admin-'.$this->routeName.'-list', 1);
         }
-        if ($req->status != 'trash') {
-            $query = UOM::where('status', $req->status);
-        } else {
-            $query = UOM::onlyTrashed();
-        }
-        $data['data'] = $query->orderBy('id', 'desc')->paginate(50);
-        $data['exportUrl'] = route('admin-uom-export');
+
+        $query = $this->queryUoms($req);
+        $data['data'] = $query->paginate(50);
+        $data['exportUrl'] = route('admin-uom-export', request()->query());
         return view($this->layout . 'index', $data);
+    }
+
+    public function report(Request $req)
+    {
+        $uoms = $this->queryUoms($req)->get();
+
+        return response()->json([
+            'status' => $req->status ?? 1,
+            'rows'   => $uoms,
+        ]);
     }
     public function onCreate()
     {
@@ -75,31 +99,37 @@ class UomController extends Controller
     public function export(Request $req)
     {
         $fileName = 'uoms_export_' . date('Y-m-d_H-i-s') . '.csv';
-        $uoms = UOM::all(); // You might want to apply filters here if needed
+        $uoms = $this->queryUoms($req)->get();
 
         $headers = array(
-            "Content-type"        => "text/csv",
+            "Content-type"        => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$fileName",
             "Pragma"              => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
             "Expires"             => "0"
         );
 
-        $columns = array('ID', 'Name', 'Phone', 'Email', 'Address', 'Created At');
+        $columns = array(
+            __('global.table.no'),
+            __('uom.table.name'),
+            __('uom.table.status'),
+            __('global.table.created_at'),
+        );
 
         $callback = function() use($uoms, $columns) {
             $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
             fputcsv($file, $columns);
 
-            foreach ($uoms as $uom) {
-                $row['ID']  = $uom->id;
-                $row['Name']    = $uom->name;
-                $row['Phone']    = $uom->phone;
-                $row['Email']  = $uom->email;
-                $row['Address']  = $uom->address;
-                $row['Created At']  = $uom->created_at;
+            foreach ($uoms as $index => $uom) {
+                $statusLabel = $uom->status == 1 ? __('uom.form.status.active') : __('uom.form.status.disable');
 
-                fputcsv($file, array($row['ID'], $row['Name'], $row['Phone'], $row['Email'], $row['Address'], $row['Created At']));
+                fputcsv($file, array(
+                    $index + 1,
+                    $uom->name ?? '',
+                    $statusLabel,
+                    $uom->created_at ? $uom->created_at->format('Y-m-d H:i:s') : '',
+                ));
             }
 
             fclose($file);

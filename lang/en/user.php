@@ -3,6 +3,7 @@
 return [
     'name' => 'User',
     'title' => 'User Management',
+    'user_report' => 'User Report',
     'customer_report' => 'Customer Report',
     'tab' => [
         'active' => 'Active',

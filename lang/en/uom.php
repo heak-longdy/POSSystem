@@ -3,6 +3,7 @@
 return [
     'name' => 'UOM',
     'title' => 'UOM Management',
+    'uom_report' => 'UOM Report',
 
     'tab' => [
         'active' => 'Active',

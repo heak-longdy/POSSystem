@@ -70,3 +70,18 @@ Whenever creating, converting, or fixing date picker fields, you MUST read and f
 - Reuse existing input styling and the calendar icon pattern. Keep the report calendar above report content with a scoped popup class and `z-index: 9999 !important`; add the class in `beforeShow` and remove it in `onClose`.
 - Verify actual calendar interaction, including date selection and month/year navigation. Syntax checks alone do not confirm that the popup is visible or clickable.
 - Apply changes only to the requested fields and pages.
+
+## Report Management & Excel Export Standard Rules (Activation Mode: Manual)
+
+> **Activation Mode:** `Manual` (Activated when creating, modifying, updating, or debugging report modules or Excel export functionality, or when the user mentions "report" or "update report").
+
+Whenever working on report modules or Excel export functionality across any report in this project, you MUST read and follow [Report Management & Excel Export Standard Rules](.agents/rules/report-standards.md).
+
+- **Order Module Reference:** Replicate the Order module's two-stage export workflow (`resources/admin/views/pages/order/orders.blade.php`): button triggers `excel()`, UI displays the full-screen `<div class="loadingFullSizeLayout">` spinner overlay, and a dedicated `runExcelExport(reportData)` builder formats and downloads the spreadsheet. Maintain `exportExcel()` as an alias returning `this.excel()` for backward compatibility.
+- **Strict Filter Fidelity:** Exported Excel files must strictly match the user's currently applied filters. Never export un-filtered records when filters are active. If no filters are selected, follow the default listing behavior.
+- **MDI Tab Filter Synchronization:** In the MDI tab workspace, filtering is AJAX-driven and does NOT alter the browser's top-level `window.location.search`. Never rely solely on `window.location.search`. Implement `getExportParams()` to systematically harvest active filters from the active MDI tab URL, DOM form inputs via `FormData`, tracked Select2 values, and datepickers.
+- **Remove Pagination from Export Queries:** Always remove the `page` parameter (`params.delete('page')`) before requesting export data so that the backend exports the complete dataset matching the filters rather than truncating to page 1.
+- **Preserve Report Calculations & Formatting:** Keep all existing report columns, calculations, mathematical totals, header labels, widths, number formatting, and sheet names intact. Do not alter business logic or financial calculations.
+- **Local & Production Reliability:** Use registered named routes (`admin-report-{module}-report`), load local assets via `@include('admin::pages.report.partials.excel-assets')` (no CDNs), and use `@include('admin::pages.report.partials.excel-request')` for robust handling of session expirations, route 404s, permission 403s, and server errors.
+- **Scope Control:** Modify only the requested report pages and components. Never alter unrelated modules or global styles.
+

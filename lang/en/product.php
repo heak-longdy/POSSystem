@@ -6,6 +6,7 @@ return [
     'title' => 'Product Management',
     'cost' => 'Cost',
     'price' => 'Price',
+    'code' => 'Code',
     'uom' => 'UOM',
     'category' => 'Category',
     'real_estate_title' => 'Real Estate Management',
@@ -16,6 +17,7 @@ return [
         'child' => 'Child',
     ],
     'table' => [
+        'code' => 'Code',
         'category' => 'Category',
         'uom' => 'UOM',
         'cost' => 'Cost',
@@ -31,6 +33,7 @@ return [
     ],
     'export' => [
         'id' => 'ID',
+        'code' => 'Code',
         'name' => 'Name',
         'cost' => 'Cost',
         'price' => 'Price',
@@ -38,6 +41,8 @@ return [
         'created_at' => 'Created At',
     ],
     'validation' => [
+        'code_max' => 'Code must not exceed 50 characters.',
+        'code_unique' => 'Product code already exists.',
         'category_required' => 'Category is required',
         'uom_required' => 'UOM is required',
         'name_required' => 'Name is required',
@@ -82,6 +87,10 @@ return [
             'label' => 'Image',
             'thumbnail' => 'Thumbnail',
             'placeholder' => 'Enter thumbnail',
+        ],
+        'code' => [
+            'label' => 'Product Code',
+            'placeholder' => 'Enter product code ...',
         ],
         'name' => [
             'label' => 'Name',

@@ -27,6 +27,35 @@ class StaffExpenseController extends Controller
         $this->expenseService = $expenseService;
     }
 
+    private function queryStaffExpenses(Request $req)
+    {
+        $status = $req->status ?? 1;
+        if ($status !== 'trash') {
+            $query = StaffExpense::with(['staff', 'shop', 'createdBy'])->where('status', $status);
+        } else {
+            $query = StaffExpense::with(['staff', 'shop', 'createdBy'])->onlyTrashed();
+        }
+
+        $query->dateBetween($req->from_date, $req->to_date)
+              ->ofStaff($req->staff_id ? (int) $req->staff_id : null)
+              ->ofType($req->type)
+              ->ofShop($req->shop_id ? (int) $req->shop_id : null);
+
+        if ($req->filled('search')) {
+            $search = trim($req->search);
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('staff', function ($sq) use ($search) {
+                    $sq->where('name', 'LIKE', '%' . $search . '%')
+                       ->orWhere('phone_number', 'LIKE', '%' . $search . '%');
+                })->orWhere('description', 'LIKE', '%' . $search . '%')
+                  ->orWhere('type', 'LIKE', '%' . $search . '%')
+                  ->orWhere('amount', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        return $query->orderBy('expense_date', 'desc')->orderBy('id', 'desc');
+    }
+
     /**
      * Staff Expense Listing.
      */
@@ -34,7 +63,6 @@ class StaffExpenseController extends Controller
     {
         $data['status'] = $req->status;
         $data['routeName'] = $this->routeName;
-        $search = $req->search ? $req->search : '';
 
         if (!$req->status) {
             return redirect()->route('admin-' . $this->routeName . '-list', 1);
@@ -48,38 +76,26 @@ class StaffExpenseController extends Controller
             'shop_id'   => $req->get('shop_id'),
         ];
 
-        $onlyTrashed = ($req->status == 'trash');
+        $query = $this->queryStaffExpenses($req);
 
-        if (!$onlyTrashed) {
-            $query = StaffExpense::with(['staff', 'shop', 'createdBy'])->where('status', $req->status);
-        } else {
-            $query = StaffExpense::with(['staff', 'shop', 'createdBy'])->onlyTrashed();
-        }
-
-        $query->dateBetween($filters['from_date'], $filters['to_date'])
-              ->ofStaff($filters['staff_id'])
-              ->ofType($filters['type'])
-              ->ofShop($filters['shop_id']);
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('staff', function ($sq) use ($search) {
-                    $sq->where('name', 'like', '%' . $search . '%')
-                       ->orWhere('phone_number', 'like', '%' . $search . '%');
-                })->orWhere('description', 'like', '%' . $search . '%')
-                  ->orWhere('type', 'like', '%' . $search . '%')
-                  ->orWhere('amount', 'like', '%' . $search . '%');
-            });
-        }
-
-        $data['data']      = $query->orderBy('expense_date', 'desc')->orderBy('id', 'desc')->paginate(50);
+        $data['data']      = $query->paginate(50);
         $data['staffList'] = Staff::where('status', 1)->orderBy('name')->get();
         $data['shops']     = Shop::where('status', 1)->orderBy('name')->get();
         $data['types']     = ExpenseType::cases();
         $data['filters']   = $filters;
-        $data['exportUrl'] = route('admin-' . $this->routeName . '-export');
+        $data['exportUrl'] = route('admin-' . $this->routeName . '-export', request()->query());
 
         return view($this->layout . 'index', $data);
+    }
+
+    public function report(Request $req)
+    {
+        $expenses = $this->queryStaffExpenses($req)->get();
+
+        return response()->json([
+            'status' => $req->status ?? 1,
+            'rows'   => $expenses,
+        ]);
     }
 
     /**
@@ -160,37 +176,47 @@ class StaffExpenseController extends Controller
     public function export(Request $req)
     {
         $fileName = 'staff_expenses_export_' . date('Y-m-d_H-i-s') . '.csv';
-        $expenses = StaffExpense::with(['staff', 'shop', 'createdBy'])->orderBy('expense_date', 'desc')->get();
+        $expenses = $this->queryStaffExpenses($req)->get();
 
         $headers = [
-            "Content-type"        => "text/csv",
+            "Content-type"        => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$fileName",
             "Pragma"              => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
             "Expires"             => "0"
         ];
 
-        $columns = ['ID', 'Staff Name', 'Shop', 'Expense Type', 'Amount ($)', 'Expense Date', 'Description', 'Created By', 'Status', 'Created At'];
+        $columns = [
+            __('global.table.no'),
+            __('staff_expense.table.staff_name'),
+            __('staff_expense.table.shop'),
+            __('staff_expense.table.type'),
+            __('staff_expense.table.amount'),
+            __('staff_expense.table.expense_date'),
+            __('staff_expense.table.remarks'),
+            __('staff_expense.table.recorded_by'),
+            __('global.table.created_at'),
+        ];
 
         $callback = function () use ($expenses, $columns) {
             $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
             fputcsv($file, $columns);
 
-            foreach ($expenses as $expense) {
-                $row = [
-                    'ID'           => $expense->id,
-                    'Staff Name'   => $expense->staff?->name ?? '---',
-                    'Shop'         => $expense->shop?->name ?? '---',
-                    'Expense Type' => is_object($expense->type) ? $expense->type->value : $expense->type,
-                    'Amount ($)'   => number_format($expense->amount, 2),
-                    'Expense Date' => $expense->expense_date?->format('Y-m-d') ?? $expense->expense_date,
-                    'Description'  => $expense->description,
-                    'Created By'   => $expense->createdBy?->name ?? '---',
-                    'Status'       => $expense->status == 1 ? 'Active' : 'Disabled',
-                    'Created At'   => $expense->created_at,
-                ];
-
-                fputcsv($file, array_values($row));
+            foreach ($expenses as $index => $expense) {
+                $typeLabel = $expense->type instanceof ExpenseType ? $expense->type->label() : ($expense->type ?? '');
+                $expenseDate = $expense->expense_date instanceof Carbon ? $expense->expense_date->format('Y-m-d') : ($expense->expense_date ?? '');
+                fputcsv($file, [
+                    $index + 1,
+                    $expense->staff?->name ?? '---',
+                    $expense->shop?->name ?? __('staff_expense.all_shops'),
+                    $typeLabel,
+                    number_format((float) $expense->amount, 2),
+                    $expenseDate,
+                    $expense->description ?? '',
+                    $expense->createdBy?->name ?? '---',
+                    $expense->created_at ? $expense->created_at->format('Y-m-d H:i:s') : '',
+                ]);
             }
 
             fclose($file);

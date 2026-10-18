@@ -26,6 +26,14 @@ class StockOnHand extends Model
         'category_title',
         'uom_title',
         'request_by_title',
+        'total_cost',
+        'total_cost_title',
+        'total_amount',
+        'total_amount_title',
+        'unit_cost',
+        'unit_cost_title',
+        'unit_price',
+        'unit_price_title',
     ];
     public function product()
     {
@@ -34,6 +42,10 @@ class StockOnHand extends Model
     public function shop()
     {
         return $this->hasOne(Shop::class, 'id', 'shop_id');
+    }
+    public function shopProducts()
+    {
+        return $this->hasMany(ShopProduct::class, 'product_id', 'product_id');
     }
     public function getCreatedDateAttribute()
     {
@@ -58,6 +70,61 @@ class StockOnHand extends Model
     public function getRequestByTitleAttribute()
     {
         return $this->user ? $this->user->name : null;
+    }
+    public function getUnitCostAttribute()
+    {
+        return (float) ($this->product ? $this->product->cost : 0.0);
+    }
+    public function getUnitCostTitleAttribute()
+    {
+        $val = $this->unit_cost;
+        return $val < 0 ? '-$' . number_format(abs($val), 2) : '$' . number_format($val, 2);
+    }
+    public function getUnitPriceAttribute()
+    {
+        if ($this->relationLoaded('shopProducts') && $this->shopProducts) {
+            $sp = $this->shopProducts->firstWhere('shop_id', $this->shop_id);
+            if ($sp && $sp->price !== null && $sp->price > 0) {
+                return (float) $sp->price;
+            }
+        } else {
+            $sp = ShopProduct::where('shop_id', $this->shop_id)->where('product_id', $this->product_id)->first();
+            if ($sp && $sp->price !== null && $sp->price > 0) {
+                return (float) $sp->price;
+            }
+        }
+        return (float) ($this->product ? $this->product->price : 0.0);
+    }
+    public function getUnitPriceTitleAttribute()
+    {
+        $val = $this->unit_price;
+        return $val < 0 ? '-$' . number_format(abs($val), 2) : '$' . number_format($val, 2);
+    }
+    public function getTotalCostAttribute()
+    {
+        return (float) (($this->current_stock ?? 0) * $this->unit_cost);
+    }
+    public function getTotalCostTitleAttribute()
+    {
+        $val = $this->total_cost;
+        return $val < 0 ? '-$' . number_format(abs($val), 2) : '$' . number_format($val, 2);
+    }
+    public function getTotalAmountAttribute()
+    {
+        return (float) (($this->current_stock ?? 0) * $this->unit_price);
+    }
+    public function getTotalAmountTitleAttribute()
+    {
+        $val = $this->total_amount;
+        return $val < 0 ? '-$' . number_format(abs($val), 2) : '$' . number_format($val, 2);
+    }
+    public function getTotalPriceAttribute()
+    {
+        return $this->total_amount;
+    }
+    public function getTotalPriceTitleAttribute()
+    {
+        return $this->total_amount_title;
     }
     public function user()
     {

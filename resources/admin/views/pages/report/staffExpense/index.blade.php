@@ -579,7 +579,7 @@
                 </div>
                 <div class="header-action-button">
                     @can('report-staff-expense-excel')
-                    <button type="button" @click="exportExcel()" class="btn-excel-export" :disabled="exportLoading">
+                    <button type="button" @click="excel()" class="btn-excel-export" :disabled="exportLoading">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M252.31-180Q222-180 201-201q-21-21-21-51.31v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46q0 4.62 3.85 8.46 3.84 3.85 8.46 3.85h455.38q4.62 0 8.46-3.85 3.85-3.84 3.85-8.46v-78.46q0-12.77 8.62-21.38 8.61-8.62 21.38-8.62t21.38 8.62q8.62 8.61 8.62 21.38v78.46Q780-222 759-201q-21 21-51.31 21H252.31ZM450-664.46l-76.92 76.92q-8.93 8.92-21.19 8.81-12.27-.12-21.58-9.43-8.69-9.3-9-21.07-.31-11.77 9-21.08l124.38-124.38q5.62-5.62 11.85-7.92 6.23-2.31 13.46-2.31t13.46 2.31q6.23 2.3 11.85 7.92l124.38 124.38q8.92 8.92 8.81 20.89-.12 11.96-8.81 21.26-9.31 9.31-21.38 9.62-12.08.31-21.39-9L510-664.46v306q0 12.77-8.62 21.38-8.61 8.62-21.38 8.62t-21.38-8.62q-8.62-8.61-8.62-21.38v-306Z"/></svg>
                         <span x-text="exportLoading ? '{{ __('staff_expense_report.excel.exporting') }}' : '{{ __('global.button.export') }}'">{{ __('global.button.export') }}</span>
                     </button>
@@ -1242,14 +1242,19 @@
                 </div>
             </div>
         </template>
+        <template x-if="exportLoading">
+            <div class="loadingFullSizeLayout">
+                <div class="loading loadingSubmit">
+                    <span id="spinner"></span>
+                    <label>{{ __('order.export_excel') }}</label>
+                </div>
+            </div>
+        </template>
     </div>
 @stop
 
 @section('script')
-    <!-- Local Assets for Excel Export -->
-    <script src="{{ asset('admin-public/js/exceljs.min.js') }}"></script>
-    <script src="{{ asset('admin-public/js/FileSaver.min.js') }}"></script>
-
+    @include('admin::pages.report.partials.excel-assets')
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('xStaffExpenseReport', () => ({
@@ -1377,147 +1382,231 @@
                     this.periodData = null;
                 },
 
-                async exportExcel() {
+                @include('admin::pages.report.partials.excel-request')
+                getExportParams() {
+                    const params = new URLSearchParams(window.location.search);
+
+                    // If running inside an MDI workspace tab, capture current tab URL query params
+                    if (window.MDI && Array.isArray(window.MDI.tabs) && window.MDI.activeTabKey) {
+                        const currentTab = window.MDI.tabs.find(t => t.key === window.MDI.activeTabKey);
+                        if (currentTab && currentTab.url && currentTab.url.includes('?')) {
+                            const tabParams = new URLSearchParams(currentTab.url.split('?')[1]);
+                            for (const [key, value] of tabParams.entries()) {
+                                if (value !== '' && !params.has(key)) {
+                                    params.set(key, value);
+                                }
+                            }
+                        }
+                    }
+
+                    // Merge server-rendered initial query params if not already set
+                    const initialQuery = @json(request()->query());
+                    if (initialQuery && typeof initialQuery === 'object') {
+                        for (const [key, value] of Object.entries(initialQuery)) {
+                            if (value !== null && value !== undefined && value !== '' && !params.has(key)) {
+                                params.set(key, value);
+                            }
+                        }
+                    }
+
+                    // Capture current values from the tab's filter form controls
+                    const form = (this.$root ? this.$root.querySelector('#expenseFilterForm') : null)
+                        || document.getElementById('expenseFilterForm');
+                    if (form) {
+                        const formData = new FormData(form);
+                        for (const [key, value] of formData.entries()) {
+                            const trimmed = typeof value === 'string' ? value.trim() : value;
+                            if (trimmed !== null && trimmed !== undefined && trimmed !== '') {
+                                params.set(key, trimmed);
+                            } else if (params.has(key)) {
+                                params.delete(key);
+                            }
+                        }
+                    }
+
+                    // Sync Select2 filter values tracked in Alpine component state
+                    if (this.filterValues && typeof this.filterValues === 'object') {
+                        for (const [key, value] of Object.entries(this.filterValues)) {
+                            const trimmed = typeof value === 'string' ? value.trim() : value;
+                            if (trimmed) {
+                                params.set(key, trimmed);
+                            } else if (value === '' && params.has(key)) {
+                                params.delete(key);
+                            }
+                        }
+                    }
+
+                    // Ensure daily date inputs are captured if present in DOM
+                    if (this.viewMode === 'daily') {
+                        const fromDateInput = this.$refs.fromDate || (form ? form.querySelector('input[name="from_date"]') : null);
+                        const toDateInput = this.$refs.toDate || (form ? form.querySelector('input[name="to_date"]') : null);
+                        if (fromDateInput && fromDateInput.value && fromDateInput.value.trim()) {
+                            params.set('from_date', fromDateInput.value.trim());
+                        } else if (!params.get('from_date') && '{{ $from_date ?? '' }}') {
+                            params.set('from_date', '{{ $from_date ?? '' }}');
+                        }
+                        if (toDateInput && toDateInput.value && toDateInput.value.trim()) {
+                            params.set('to_date', toDateInput.value.trim());
+                        } else if (!params.get('to_date') && '{{ $to_date ?? '' }}') {
+                            params.set('to_date', '{{ $to_date ?? '' }}');
+                        }
+                    }
+
+                    // Ensure view_mode and grouping always reflect the current Alpine component state
+                    params.set('view_mode', this.viewMode);
+                    params.set('grouping', this.grouping);
+
+                    // Remove pagination parameter so export retrieves the full matching dataset
+                    params.delete('page');
+
+                    return params;
+                },
+
+                async excel() {
                     this.exportLoading = true;
                     try {
-                        const currentParams = new URLSearchParams(window.location.search);
-                        currentParams.set('view_mode', this.viewMode);
-                        currentParams.set('grouping', this.grouping);
-
-                        const response = await Axios.get(`{{ route('admin-report-staff-expense-report') }}?` + currentParams.toString());
-                        const reportData = response.data;
-
-                        const workbook = new ExcelJS.Workbook();
-                        let sheetName = '';
-                        if (this.grouping === 'ungrouped') {
-                            sheetName = '{{ __('staff_expense_report.excel.sheet_ungrouped') }}';
-                        } else if (this.viewMode === 'monthly') {
-                            sheetName = '{{ __('staff_expense_report.excel.sheet_monthly') }}';
-                        } else {
-                            sheetName = '{{ __('staff_expense_report.excel.sheet_daily') }}';
-                        }
-                        const worksheet = workbook.addWorksheet(sheetName);
-
-                        if (this.grouping === 'ungrouped') {
-                            worksheet.columns = [
-                                { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
-                                { header: '{{ __('staff_expense_report.excel.date') }}', key: 'expense_date_formatted', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.staff_name') }}', key: 'staff_name', width: 22 },
-                                { header: '{{ __('staff_expense_report.excel.phone') }}', key: 'staff_phone', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.position') }}', key: 'position_name', width: 18 },
-                                { header: '{{ __('staff_expense_report.excel.shop') }}', key: 'shop_name', width: 20 },
-                                { header: '{{ __('staff_expense_report.excel.type') }}', key: 'type_label', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.amount') }}', key: 'amount', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.description') }}', key: 'description', width: 30 },
-                                { header: '{{ __('staff_expense_report.excel.created_by') }}', key: 'created_by_name', width: 18 },
-                                { header: '{{ __('staff_expense_report.excel.status') }}', key: 'status_label', width: 14 },
-                            ];
-
-                            reportData.rows.forEach((r, idx) => {
-                                worksheet.addRow({
-                                    index: idx + 1,
-                                    expense_date_formatted: r.expense_date_formatted,
-                                    staff_name: r.staff_name,
-                                    staff_phone: r.staff_phone,
-                                    position_name: r.position_name,
-                                    shop_name: r.shop_name,
-                                    type_label: r.type_label,
-                                    amount: (r.is_deduction ? -1 : 1) * Number(r.amount || 0),
-                                    description: r.description,
-                                    created_by_name: r.created_by_name,
-                                    status_label: r.status_label,
-                                });
-                            });
-                        } else if (this.viewMode === 'daily') {
-                            worksheet.columns = [
-                                { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
-                                { header: '{{ __('staff_expense_report.excel.date') }}', key: 'date', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.day') }}', key: 'day_name', width: 10 },
-                                { header: '{{ __('staff_expense_report.excel.records_count') }}', key: 'transactions_count', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.salary') }} ($)', key: 'salary_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.bonus') }} ($)', key: 'bonus_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.deductions') }} ($)', key: 'deduction_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.other') }} ($)', key: 'other_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.gross_total') }} ($)', key: 'gross_total', width: 18 },
-                                { header: '{{ __('staff_expense_report.excel.net_expense') }} ($)', key: 'net_total', width: 18 },
-                                { header: '{{ __('staff_expense_report.excel.top_staff') }}', key: 'top_staff', width: 26 },
-                                { header: '{{ __('staff_expense_report.excel.top_branch') }}', key: 'top_shop', width: 20 },
-                            ];
-
-                            reportData.rows.forEach((r) => {
-                                worksheet.addRow({
-                                    index: r.index,
-                                    date: r.date,
-                                    day_name: r.day_name,
-                                    transactions_count: r.transactions_count,
-                                    salary_total: Number(r.salary_total || 0),
-                                    bonus_total: Number(r.bonus_total || 0),
-                                    deduction_total: Number(r.deduction_total || 0),
-                                    other_total: Number(r.other_total || 0),
-                                    gross_total: Number(r.gross_total || 0),
-                                    net_total: Number(r.net_total || 0),
-                                    top_staff: r.top_staff,
-                                    top_shop: r.top_shop,
-                                });
-                            });
-                        } else {
-                            worksheet.columns = [
-                                { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
-                                { header: '{{ __('staff_expense_report.excel.month') }}', key: 'month_name', width: 18 },
-                                { header: '{{ __('staff_expense_report.excel.active_days') }}', key: 'active_days', width: 14 },
-                                { header: '{{ __('staff_expense_report.excel.records_count') }}', key: 'transactions_count', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.salary') }} ($)', key: 'salary_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.bonus') }} ($)', key: 'bonus_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.deductions') }} ($)', key: 'deduction_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.other') }} ($)', key: 'other_total', width: 16 },
-                                { header: '{{ __('staff_expense_report.excel.gross_total') }} ($)', key: 'gross_total', width: 18 },
-                                { header: '{{ __('staff_expense_report.excel.net_expense') }} ($)', key: 'net_total', width: 18 },
-                                { header: '{{ __('staff_expense_report.excel.avg_daily') }} ($)', key: 'avg_daily_expense', width: 20 },
-                                { header: '{{ __('staff_expense_report.excel.top_staff') }}', key: 'top_staff', width: 26 },
-                                { header: '{{ __('staff_expense_report.excel.top_branch') }}', key: 'top_shop', width: 20 },
-                            ];
-
-                            reportData.rows.forEach((r) => {
-                                worksheet.addRow({
-                                    index: r.index,
-                                    month_name: r.month_name,
-                                    active_days: r.active_days,
-                                    transactions_count: r.transactions_count,
-                                    salary_total: Number(r.salary_total || 0),
-                                    bonus_total: Number(r.bonus_total || 0),
-                                    deduction_total: Number(r.deduction_total || 0),
-                                    other_total: Number(r.other_total || 0),
-                                    gross_total: Number(r.gross_total || 0),
-                                    net_total: Number(r.net_total || 0),
-                                    avg_daily_expense: Number(r.avg_daily_expense || 0),
-                                    top_staff: r.top_staff,
-                                    top_shop: r.top_shop,
-                                });
-                            });
-                        }
-
-                        worksheet.getRow(1).font = { bold: true };
-                        worksheet.getRow(1).fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFE2E8F0' }
-                        };
-
-                        const buffer = await workbook.xlsx.writeBuffer();
-                        const blob = new Blob([buffer], {
-                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                        });
-                        const filePrefix = this.grouping === 'ungrouped'
-                            ? '{{ __('staff_expense_report.excel.file_ungrouped_prefix') }}'
-                            : (this.viewMode === 'monthly' ? '{{ __('staff_expense_report.excel.file_monthly_prefix') }}' : '{{ __('staff_expense_report.excel.file_daily_prefix') }}');
-                        const filename = filePrefix + moment().format('YYYY_MM_DD_HHmmss');
-                        saveAs(blob, filename);
+                        const currentParams = this.getExportParams();
+                        const reportData = await this.requestReportExport(currentParams);
+                        await this.runExcelExport(reportData);
                     } catch (err) {
-                        console.error('Export failed:', err);
-                        alert('{{ __('staff_expense_report.excel.export_failed') }}');
+                        this.showReportExportError(err);
                     } finally {
                         this.exportLoading = false;
                     }
+                },
+
+                async exportExcel() {
+                    return this.excel();
+                },
+
+                async runExcelExport(reportData) {
+                    const workbook = new ExcelJS.Workbook();
+                    let sheetName = '';
+                    if (this.grouping === 'ungrouped') {
+                        sheetName = '{{ __('staff_expense_report.excel.sheet_ungrouped') }}';
+                    } else if (this.viewMode === 'monthly') {
+                        sheetName = '{{ __('staff_expense_report.excel.sheet_monthly') }}';
+                    } else {
+                        sheetName = '{{ __('staff_expense_report.excel.sheet_daily') }}';
+                    }
+                    const worksheet = workbook.addWorksheet(sheetName);
+
+                    const rows = Array.isArray(reportData) ? reportData : (reportData?.rows || []);
+
+                    if (this.grouping === 'ungrouped') {
+                        worksheet.columns = [
+                            { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
+                            { header: '{{ __('staff_expense_report.excel.date') }}', key: 'expense_date_formatted', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.staff_name') }}', key: 'staff_name', width: 22 },
+                            { header: '{{ __('staff_expense_report.excel.phone') }}', key: 'staff_phone', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.position') }}', key: 'position_name', width: 18 },
+                            { header: '{{ __('staff_expense_report.excel.shop') }}', key: 'shop_name', width: 20 },
+                            { header: '{{ __('staff_expense_report.excel.type') }}', key: 'type_label', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.amount') }}', key: 'amount', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.description') }}', key: 'description', width: 30 },
+                            { header: '{{ __('staff_expense_report.excel.created_by') }}', key: 'created_by_name', width: 18 },
+                            { header: '{{ __('staff_expense_report.excel.status') }}', key: 'status_label', width: 14 },
+                        ];
+
+                        rows.forEach((r, idx) => {
+                            worksheet.addRow({
+                                index: idx + 1,
+                                expense_date_formatted: r.expense_date_formatted,
+                                staff_name: r.staff_name,
+                                staff_phone: r.staff_phone,
+                                position_name: r.position_name,
+                                shop_name: r.shop_name,
+                                type_label: r.type_label,
+                                amount: (r.is_deduction ? -1 : 1) * Number(r.amount || 0),
+                                description: r.description,
+                                created_by_name: r.created_by_name,
+                                status_label: r.status_label,
+                            });
+                        });
+                    } else if (this.viewMode === 'daily') {
+                        worksheet.columns = [
+                            { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
+                            { header: '{{ __('staff_expense_report.excel.date') }}', key: 'date', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.day') }}', key: 'day_name', width: 10 },
+                            { header: '{{ __('staff_expense_report.excel.records_count') }}', key: 'transactions_count', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.salary') }} ($)', key: 'salary_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.bonus') }} ($)', key: 'bonus_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.deductions') }} ($)', key: 'deduction_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.other') }} ($)', key: 'other_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.gross_total') }} ($)', key: 'gross_total', width: 18 },
+                            { header: '{{ __('staff_expense_report.excel.net_expense') }} ($)', key: 'net_total', width: 18 },
+                            { header: '{{ __('staff_expense_report.excel.top_staff') }}', key: 'top_staff', width: 26 },
+                            { header: '{{ __('staff_expense_report.excel.top_branch') }}', key: 'top_shop', width: 20 },
+                        ];
+
+                        rows.forEach((r) => {
+                            worksheet.addRow({
+                                index: r.index,
+                                date: r.date,
+                                day_name: r.day_name,
+                                transactions_count: r.transactions_count,
+                                salary_total: Number(r.salary_total || 0),
+                                bonus_total: Number(r.bonus_total || 0),
+                                deduction_total: Number(r.deduction_total || 0),
+                                other_total: Number(r.other_total || 0),
+                                gross_total: Number(r.gross_total || 0),
+                                net_total: Number(r.net_total || 0),
+                                top_staff: r.top_staff,
+                                top_shop: r.top_shop,
+                            });
+                        });
+                    } else {
+                        worksheet.columns = [
+                            { header: '{{ __('staff_expense_report.excel.no') }}', key: 'index', width: 8 },
+                            { header: '{{ __('staff_expense_report.excel.month') }}', key: 'month_name', width: 18 },
+                            { header: '{{ __('staff_expense_report.excel.active_days') }}', key: 'active_days', width: 14 },
+                            { header: '{{ __('staff_expense_report.excel.records_count') }}', key: 'transactions_count', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.salary') }} ($)', key: 'salary_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.bonus') }} ($)', key: 'bonus_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.deductions') }} ($)', key: 'deduction_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.other') }} ($)', key: 'other_total', width: 16 },
+                            { header: '{{ __('staff_expense_report.excel.gross_total') }} ($)', key: 'gross_total', width: 18 },
+                            { header: '{{ __('staff_expense_report.excel.net_expense') }} ($)', key: 'net_total', width: 18 },
+                            { header: '{{ __('staff_expense_report.excel.avg_daily') }} ($)', key: 'avg_daily_expense', width: 20 },
+                            { header: '{{ __('staff_expense_report.excel.top_staff') }}', key: 'top_staff', width: 26 },
+                            { header: '{{ __('staff_expense_report.excel.top_branch') }}', key: 'top_shop', width: 20 },
+                        ];
+
+                        rows.forEach((r) => {
+                            worksheet.addRow({
+                                index: r.index,
+                                month_name: r.month_name,
+                                active_days: r.active_days,
+                                transactions_count: r.transactions_count,
+                                salary_total: Number(r.salary_total || 0),
+                                bonus_total: Number(r.bonus_total || 0),
+                                deduction_total: Number(r.deduction_total || 0),
+                                other_total: Number(r.other_total || 0),
+                                gross_total: Number(r.gross_total || 0),
+                                net_total: Number(r.net_total || 0),
+                                avg_daily_expense: Number(r.avg_daily_expense || 0),
+                                top_staff: r.top_staff,
+                                top_shop: r.top_shop,
+                            });
+                        });
+                    }
+
+                    worksheet.getRow(1).font = { bold: true };
+                    worksheet.getRow(1).fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFE2E8F0' }
+                    };
+
+                    const buffer = await workbook.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], {
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    });
+                    const filePrefix = this.grouping === 'ungrouped'
+                        ? '{{ __('staff_expense_report.excel.file_ungrouped_prefix') }}'
+                        : (this.viewMode === 'monthly' ? '{{ __('staff_expense_report.excel.file_monthly_prefix') }}' : '{{ __('staff_expense_report.excel.file_daily_prefix') }}');
+                    const filename = filePrefix + moment().format('YYYY_MM_DD_HHmmss');
+                    saveAs(blob, filename);
                 }
             }));
         });

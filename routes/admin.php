@@ -86,7 +86,11 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
 
 
         CRUD(ProductController::class, 'product');
+        Route::get('product/report', [ProductController::class, 'report'])->name('product-report');
+        Route::get('report/product/report', [ProductController::class, 'report'])->name('report-product-report');
         CRUD(ShopController::class, 'shop');
+        Route::get('shop/report', [ShopController::class, 'report'])->name('shop-report');
+        Route::get('report/shop/report', [ShopController::class, 'report'])->name('report-shop-report');
         Route::group([
             'prefix' => 'shop',
             'as'     => 'shop-'
@@ -104,12 +108,20 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         CRUD(CategoryController::class, 'category');
 
         CRUD(SupplierController::class, 'supplier');
+        Route::get('supplier/report', [SupplierController::class, 'report'])->name('supplier-report');
+        Route::get('report/supplier/report', [SupplierController::class, 'report'])->name('report-supplier-report');
 
         CRUD(PartnerController::class, 'partner');
         CRUD(SectorController::class, 'sector');
         CRUD(PositionController::class, 'position');
+        Route::get('position/report', [PositionController::class, 'report'])->name('position-report');
+        Route::get('report/position/report', [PositionController::class, 'report'])->name('report-position-report');
         CRUD(StaffController::class, 'staff');
+        Route::get('staff/report', [StaffController::class, 'report'])->name('staff-report');
+        Route::get('report/staff/report', [StaffController::class, 'report'])->name('report-staff-report');
         CRUD(UserController::class, 'user');
+        Route::get('user/report', [UserController::class, 'report'])->name('user-report');
+        Route::get('report/user/report', [UserController::class, 'report'])->name('report-user-report');
 
         CRUD(JobController::class, 'internships');
         CRUD(BlogController::class, 'blog');
@@ -119,6 +131,8 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         CRUD(TestimonialController::class, 'testimonial');
 
         CRUD(CustomerController::class, 'customer');
+        Route::get('customer/report', [CustomerController::class, 'report'])->name('customer-report');
+        Route::get('report/customer/report', [CustomerController::class, 'report'])->name('report-customer-report');
 
         CRUD(CustomerPaidController::class, 'customer-paid');
         Route::get('customer-paid/export', [CustomerPaidController::class, 'export'])->name('customer-paid-export');
@@ -209,6 +223,8 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
 
         //Setting
         CRUD(UomController::class, 'uom');
+        Route::get('uom/report', [UomController::class, 'report'])->name('uom-report');
+        Route::get('report/uom/report', [UomController::class, 'report'])->name('report-uom-report');
 
         //Select
         Route::group([
@@ -357,6 +373,7 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
 
         // Staff Expense Management
         CRUD(Admin\StaffExpenseController::class, 'staff-expense');
+        Route::get('staff-expense/report', [Admin\StaffExpenseController::class, 'report'])->name('staff-expense-report');
         Route::group([
             'prefix' => 'staff-expense',
             'as'     => 'staff-expense-',
@@ -406,6 +423,7 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             'as' => 'report-customer-remaining-amount-',
         ], function () {
             Route::get('/', [CustomerRemainingAmountReportController::class, 'index'])->name('index');
+            Route::get('report', [CustomerRemainingAmountReportController::class, 'report'])->name('report');
             Route::get('details/{customer}', [CustomerRemainingAmountReportController::class, 'show'])
                 ->whereNumber('customer')->name('details');
         });

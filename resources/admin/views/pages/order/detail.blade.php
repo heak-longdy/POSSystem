@@ -205,9 +205,13 @@
                                         @forelse ($order->orderDetails as $index => $detail)
                                             @php
                                                 $isService = $detail->type === 'service';
-                                                $itemName = $isService
+                                                $rawItemName = $isService
                                                     ? ($detail->service?->name ?? '---')
                                                     : ($detail->product?->name ?? '---');
+                                                $itemCode = ! $isService ? ($detail->product?->code ?? null) : null;
+                                                $itemName = ($itemCode && ! str_starts_with($rawItemName, $itemCode . ' - '))
+                                                    ? ($itemCode . ' - ' . $rawItemName)
+                                                    : $rawItemName;
                                                 $unitPrice = (float) ($detail->price ?? 0);
                                                 $qty = (int) ($detail->qty ?: 1);
                                                 $line = app(\App\Services\OrderPricing::class)->line($detail);

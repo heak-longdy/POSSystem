@@ -56,6 +56,30 @@
                 </div>
                 <div class="row-2">
                     <div class="form-row iconInput">
+                        <label>{{ __('stock_on_hand.form.total_cost') }}</label>
+                        <input type="text" value="{{ $data->total_cost_title ?? '$0.00' }}" readonly style="font-weight: 600; color: #2563eb;">
+                        <i class='bx bx-wallet'></i>
+                    </div>
+                    <div class="form-row iconInput">
+                        <label>{{ __('stock_on_hand.form.total_amount') }}</label>
+                        <input type="text" value="{{ $data->total_amount_title ?? '$0.00' }}" readonly style="font-weight: 600; color: #16a34a;">
+                        <i class='bx bx-dollar-circle'></i>
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="form-row iconInput">
+                        <label>{{ __('stock_on_hand.form.unit_cost') }}</label>
+                        <input type="text" value="{{ $data->unit_cost_title ?? '$0.00' }}" readonly>
+                        <i class='bx bx-purchase-tag'></i>
+                    </div>
+                    <div class="form-row iconInput">
+                        <label>{{ __('stock_on_hand.form.unit_price') }}</label>
+                        <input type="text" value="{{ $data->unit_price_title ?? '$0.00' }}" readonly>
+                        <i class='bx bx-tag-alt'></i>
+                    </div>
+                </div>
+                <div class="row-2">
+                    <div class="form-row iconInput">
                         <label>{{ __('stock_on_hand.form.date') }}</label>
                         <input type="text" value="{{ $data->created_date ?? '---' }}" readonly>
                         <i class='bx bx-calendar'></i>

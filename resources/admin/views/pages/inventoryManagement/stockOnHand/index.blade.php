@@ -110,6 +110,60 @@
         .select2-filter-wrap .select2Group .select2Reset:hover svg {
             fill: #ef4444 !important;
         }
+
+        .table-wrapper .table-row-4 {
+            width: 4% !important;
+            flex-basis: 4% !important;
+        }
+
+        /* Clean padding & alignment for Product, Shop, and Category */
+        .table-header .row.text.left,
+        .table-body .column .row.text.left {
+            text-align: left !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            padding-left: 10px !important;
+            padding-right: 15px !important;
+            box-sizing: border-box !important;
+        }
+
+        .table-header .row.text.left span,
+        .table-body .column .row.text.left span {
+            text-align: left !important;
+            padding-right: 0 !important;
+        }
+
+        /* Right-align Total Cost & Total Amount */
+        .table-header .row.text.right,
+        .table-body .column .row.text.right {
+            text-align: right !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            padding-right: 20px !important;
+            box-sizing: border-box !important;
+        }
+
+        .table-header .row.text.right span,
+        .table-body .column .row.text.right span {
+            text-align: right !important;
+            padding-right: 0 !important;
+            display: block !important;
+            width: 100% !important;
+        }
+
+        /* Move the Action column (3 dots) to the far right edge to eliminate empty space */
+        .table-header .row:last-child,
+        .table-body .column .row:last-child {
+            margin-left: auto !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            text-align: right !important;
+            padding-right: 15px !important;
+            box-sizing: border-box !important;
+        }
     </style>
     @include('admin::shared.header', ['header_name' => __('stock_on_hand.title')])
     <div class="content-wrapper" id="app" x-data="xStockOnHand">
@@ -135,14 +189,15 @@
             'data' => $data,
             'status' => $status,
             'tbHeader' => [
-                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
-                ['field' => 'product_title', 'title' => __('stock_on_hand.table.product'), 'class' => 'text left', 'colVal' => 18],
-                ['field' => 'category_title', 'title' => __('stock_on_hand.table.category'), 'class' => 'text left', 'colVal' => 12],
-                ['field' => 'uom_title', 'title' => __('stock_on_hand.table.uom'), 'class' => '', 'colVal' => 8],
-                ['field' => 'current_stock', 'title' => __('stock_on_hand.table.current_stock'), 'class' => '', 'colVal' => 12],
-                ['field' => 'created_date', 'title' => __('stock_on_hand.table.date'), 'class' => '', 'colVal' => 14],
-                ['field' => 'shop_title', 'title' => __('stock_on_hand.table.shop'), 'class' => 'text left', 'colVal' => 14],
-                ['field' => 'request_by_title', 'title' => __('stock_on_hand.table.requested_by'), 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 4],
+                ['field' => 'product_title', 'title' => __('stock_on_hand.table.product'), 'class' => 'text left', 'colVal' => 20],
+                ['field' => 'shop_title', 'title' => __('stock_on_hand.table.shop'), 'class' => 'text left', 'colVal' => 11],
+                ['field' => 'category_title', 'title' => __('stock_on_hand.table.category'), 'class' => 'text left', 'colVal' => 13],
+                ['field' => 'uom_title', 'title' => __('stock_on_hand.table.uom'), 'class' => '', 'colVal' => 6],
+                ['field' => 'current_stock', 'title' => __('stock_on_hand.table.current_stock'), 'class' => '', 'colVal' => 9],
+                ['field' => 'total_cost_title', 'title' => __('stock_on_hand.table.total_cost'), 'class' => 'text right', 'colVal' => 12],
+                ['field' => 'total_amount_title', 'title' => __('stock_on_hand.table.total_amount'), 'class' => 'text right', 'colVal' => 12],
+                ['field' => 'created_date', 'title' => __('stock_on_hand.table.date'), 'class' => '', 'colVal' => 8],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -238,18 +293,17 @@
                     $select.val(null).trigger('change');
                     this.shopId = '';
                 },
+                @include('admin::pages.inventoryManagement.partials.excel-request')
                 async excel() {
                     this.exportLoading = true;
                     try {
-                        const response = await Axios.get('{{ \Illuminate\Support\Facades\Route::has('admin-stock-on-hand-report') ? route('admin-stock-on-hand-report') : url('admin/stock-on-hand/report') }}', {
-                            params: {
-                                search: $(this.$root).find('input[name="search"]').val() || @json(request('search')),
-                                shop_id: $(this.$root).find('select[name="shop_id"]').val() || @json(request('shop_id')),
-                            }
+                        const data = await this.requestInventoryExport({
+                            search: $(this.$root).find('input[name="search"]').val() || @json(request('search')),
+                            shop_id: $(this.$root).find('select[name="shop_id"]').val() || @json(request('shop_id')),
                         });
-                        await this.runExcelExport(response.data);
+                        await this.runExcelExport(data);
                     } catch (error) {
-                        console.error('Export Excel failed:', error);
+                        this.showInventoryExportError(error);
                     } finally {
                         this.exportLoading = false;
                     }
@@ -257,7 +311,7 @@
                 async runExcelExport(datas) {
                     let workbook = new ExcelJS.Workbook();
                     const worksheet = workbook.addWorksheet(@json(__('stock_on_hand.excel.sheet_name') ?? 'Stock On Hand'));
-                    const dataColumn = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+                    const dataColumn = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
                     let lastColumn = dataColumn[dataColumn.length - 1];
 
                     const style_font = {
@@ -288,6 +342,11 @@
                         horizontal: "left",
                         wrapText: true,
                     };
+                    const align_right = {
+                        vertical: "middle",
+                        horizontal: "right",
+                        wrapText: true,
+                    };
 
                     const titleTopRow = worksheet.addRow([@json(__('stock_on_hand.excel.title') ?? 'STOCK ON HAND REPORT')]);
                     titleTopRow.font = style_font_header;
@@ -301,6 +360,8 @@
                         @json(__('stock_on_hand.table.category')),
                         @json(__('stock_on_hand.table.uom')),
                         @json(__('stock_on_hand.table.current_stock')),
+                        @json(__('stock_on_hand.table.total_cost')),
+                        @json(__('stock_on_hand.table.total_amount')),
                         @json(__('stock_on_hand.table.date')),
                         @json(__('stock_on_hand.table.shop')),
                         @json(__('stock_on_hand.table.requested_by')),
@@ -324,13 +385,27 @@
                         cell.alignment = align_center;
                     });
 
+                    let totalUnits = 0;
+                    let totalCostSum = 0;
+                    let totalAmountSum = 0;
+
                     (datas || []).forEach((item, index) => {
+                        const stockQty = Number(item?.current_stock ?? 0);
+                        const costVal = Number(item?.total_cost ?? 0);
+                        const amountVal = Number(item?.total_amount ?? 0);
+
+                        totalUnits += stockQty;
+                        totalCostSum += costVal;
+                        totalAmountSum += amountVal;
+
                         const row = worksheet.addRow([
                             index + 1,
                             item?.product_title || item?.product?.name || '---',
                             item?.category_title || item?.category?.name || item?.product?.category?.name || '---',
                             item?.uom_title || item?.uom?.name || item?.product?.uom?.name || '---',
-                            item?.current_stock ?? 0,
+                            stockQty,
+                            costVal,
+                            amountVal,
                             item?.created_date || (item?.created_at ? moment(item.created_at).format('YYYY-MM-DD HH:mm') : ''),
                             item?.shop_title || item?.shop?.name || '---',
                             item?.request_by_title || (item?.request_by_type === 'admin' ? item?.user?.username : item?.barber?.name) || '---',
@@ -339,12 +414,45 @@
                         row.eachCell((cell, colNumber) => {
                             cell.border = style_border;
                             cell.font = style_font;
-                            if ([2, 3, 7, 8].includes(colNumber)) {
+                            if ([2, 3, 9, 10].includes(colNumber)) {
                                 cell.alignment = align_left;
+                            } else if ([6, 7].includes(colNumber)) {
+                                cell.alignment = align_right;
+                                cell.numFmt = '$#,##0.00';
                             } else {
                                 cell.alignment = align_center;
                             }
                         });
+                    });
+
+                    const totalRow = worksheet.addRow([
+                        '',
+                        @json(__('global.table.total') ?? 'Total'),
+                        '',
+                        '',
+                        totalUnits,
+                        totalCostSum,
+                        totalAmountSum,
+                        '',
+                        '',
+                        '',
+                    ]);
+                    worksheet.mergeCells('B' + totalRow.number + ':D' + totalRow.number);
+                    totalRow.eachCell((cell, colNumber) => {
+                        cell.border = style_border;
+                        cell.font = {
+                            name: "Khmer OS System",
+                            size: 10,
+                            bold: true,
+                        };
+                        if ([2, 3, 9, 10].includes(colNumber)) {
+                            cell.alignment = align_left;
+                        } else if ([6, 7].includes(colNumber)) {
+                            cell.alignment = align_right;
+                            cell.numFmt = '$#,##0.00';
+                        } else {
+                            cell.alignment = align_center;
+                        }
                     });
 
                     worksheet.columns = [
@@ -352,6 +460,8 @@
                         { width: 28 },
                         { width: 18 },
                         { width: 12 },
+                        { width: 16 },
+                        { width: 16 },
                         { width: 16 },
                         { width: 20 },
                         { width: 22 },

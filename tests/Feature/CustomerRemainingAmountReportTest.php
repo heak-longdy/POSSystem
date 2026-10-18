@@ -364,4 +364,65 @@ class CustomerRemainingAmountReportTest extends TestCase
         $response->assertSee('Partial');
         $response->assertSee('Paid');
     }
+
+    public function test_export_endpoint_returns_json_and_respects_filters(): void
+    {
+        $this->order(['paid_amount' => 30, 'payment_status' => 'Partial']); // Customer 1, Shop 1
+        $this->order(['total_price' => 50, 'shop_id' => 2]); // Customer 1, Shop 2
+        $this->order(['customer_id' => 2, 'paid_amount' => 100, 'payment_status' => 'Paid']); // Settled
+        $this->order(['customer_id' => 3, 'total_price' => 20, 'paid_amount' => 5, 'payment_status' => 'Partial']); // Customer 3
+
+        $allResponse = $this->getJson(self::REPORT . '/report')->assertOk();
+        $allResponse->assertJsonPath('status', 'success');
+        $allResponse->assertJsonCount(2, 'rows');
+        $this->assertEquals(135, $allResponse->json('summary.remaining_amount'));
+        $this->assertEquals(2, $allResponse->json('summary.customer_count'));
+
+        // Filter by shop_id
+        $shop1Response = $this->getJson(self::REPORT . '/report?shop_id=1')->assertOk();
+        $this->assertSame(2, $shop1Response->json('summary.customer_count'));
+        $this->assertEquals(85, $shop1Response->json('summary.remaining_amount'));
+
+        // Filter by customer_id
+        $custResponse = $this->getJson(self::REPORT . '/report?customer_id=1')->assertOk();
+        $custResponse->assertJsonCount(1, 'rows');
+        $this->assertSame(1, $custResponse->json('rows.0.customer_id'));
+        $this->assertEquals(120, $custResponse->json('summary.remaining_amount'));
+
+        // Filter by search
+        $searchResponse = $this->getJson(self::REPORT . '/report?search=012345678')->assertOk();
+        $searchResponse->assertJsonCount(1, 'rows');
+        $this->assertSame(1, $searchResponse->json('rows.0.customer_id'));
+    }
+
+    public function test_export_endpoint_returns_unpaginated_results(): void
+    {
+        for ($id = 4; $id <= 35; $id++) {
+            DB::table('customers')->insert(['id' => $id, 'name' => 'Customer ' . $id]);
+            $this->order(['customer_id' => $id, 'paid_amount' => 25, 'payment_status' => 'Partial']);
+        }
+
+        // Even if page=2 is passed in query, report endpoint ignores pagination and returns all records
+        $response = $this->getJson(self::REPORT . '/report?page=2')->assertOk();
+        $this->assertSame(32, count($response->json('rows')));
+        $this->assertSame(32, $response->json('summary.customer_count'));
+    }
+
+    public function test_export_endpoint_requires_report_sales_excel_permission(): void
+    {
+        DB::table('users')->insert(['id' => 2, 'name' => 'Sales staff']);
+        $user = User::findOrFail(2)->forceFill(['role' => 'staff', 'language_preference' => 'en']);
+        foreach (['report-sales-view', 'report-sales-excel'] as $permission) {
+            \Spatie\Permission\Models\Permission::create(['name' => $permission, 'guard_name' => 'web']);
+        }
+        $user->givePermissionTo('report-sales-view');
+        $this->actingAs($user);
+
+        // Has report-sales-view but not report-sales-excel -> forbidden for report export
+        $this->getJson(self::REPORT . '/report')->assertForbidden();
+
+        // Grant report-sales-excel -> allowed
+        $user->givePermissionTo('report-sales-excel');
+        $this->getJson(self::REPORT . '/report')->assertOk();
+    }
 }

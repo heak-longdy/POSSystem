@@ -35,36 +35,56 @@ class UserController extends Controller
         return view("admin::auth.login");
         return view("admin::auth.sign-in");
     }
-    public function index(Request $req)
+    private function queryUsers(Request $req)
     {
-        $data['status'] = $req->status;
-        $data['routeName'] = $this->routeName;
-        $search = $req->search ? $req->search : '';
-        if (!$req->status) {
-            return redirect()->route('admin-' . $this->routeName . '-list', 1);
-        }
-
-        if ($req->status != 'trash') {
-            $query = $this->table::where('status', $req->status);
+        $status = $req->status ?? 1;
+        if ($status !== 'trash') {
+            $query = $this->table::where('status', $status);
         } else {
             $query = $this->table::onlyTrashed();
         }
 
-        $data['data'] = $query->when($search, function ($q) {
-            $q->where(function ($q, $search) {
-                $q->where('name', 'like', '%' . $search . '%');
-                $q->orWhere('email', 'like', '%' . $search . '%');
+        if ($req->filled('role')) {
+            $query->where('role', $req->role);
+        }
+
+        if ($req->filled('search')) {
+            $search = trim($req->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('email', 'LIKE', '%' . $search . '%')
+                  ->orWhere('phone', 'LIKE', '%' . $search . '%');
             });
-        })
-            ->when(request('role'), function ($q) {
-                $q->where('role', request('role'));
-            })
-            ->where('role', '!=', 'super_admin')
-            ->orderByDesc("created_at")
-            ->paginate(50);
-            
+        }
+
+        return $query->where('role', '!=', 'super_admin')
+            ->orderByDesc("created_at");
+    }
+
+    public function index(Request $req)
+    {
+        $data['status'] = $req->status;
+        $data['routeName'] = $this->routeName;
+        if (!$req->status) {
+            return redirect()->route('admin-' . $this->routeName . '-list', 1);
+        }
+
+        $query = $this->queryUsers($req);
+        $data['data'] = $query->paginate(50);
+        $data['exportUrl'] = route('admin-user-export', request()->query());
 
         return view($this->layout . 'index', $data);
+    }
+
+    public function report(Request $req)
+    {
+        $users = $this->queryUsers($req)->get();
+        $users->makeVisible(['created_at']);
+
+        return response()->json([
+            'status' => $req->status ?? 1,
+            'rows'   => $users,
+        ]);
     }
     public function onCreate()
     {
@@ -216,5 +236,61 @@ class UserController extends Controller
             }
             return redirect()->back()->withInput()->with('warning', __('user.message.permission_error'));
         }
+    }
+
+    public function export(Request $req)
+    {
+        $fileName = 'users_export_' . date('Y-m-d_H-i-s') . '.csv';
+        $users = $this->queryUsers($req)->get();
+        $users->makeVisible(['created_at']);
+
+        $headers = array(
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array(
+            __('user.table.no'),
+            __('user.table.name'),
+            __('user.table.email'),
+            __('user.form.phone.label'),
+            __('user.table.language'),
+            __('user.table.role'),
+            __('user.table.status'),
+            __('user.table.post_date'),
+        );
+
+        $callback = function() use($users, $columns) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
+            fputcsv($file, $columns);
+
+            foreach ($users as $index => $user) {
+                $statusLabel = $user->status == 1 ? __('user.form.status.active') : __('user.form.status.disable');
+                $roleKey = 'user.roles.' . $user->role;
+                $roleLabel = __($roleKey);
+                if ($roleLabel === $roleKey) {
+                    $roleLabel = ucfirst(str_replace('_', ' ', $user->role ?? ''));
+                }
+
+                fputcsv($file, array(
+                    $index + 1,
+                    $user->name ?? '',
+                    $user->email ?? '',
+                    $user->phone ?? '',
+                    $user->language_preference_label ?? '',
+                    $roleLabel,
+                    $statusLabel,
+                    $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : '',
+                ));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

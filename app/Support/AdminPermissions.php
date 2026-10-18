@@ -63,7 +63,7 @@ class AdminPermissions
         if (str_starts_with($name ?? '', 'admin-shop-product')) {
             return [$name === 'admin-shop-product' ? 'shop-view' : 'shop-update'];
         }
-        if (in_array($name, ['admin-stock-on-hand-report', 'admin-stock-movement-report'])) {
+        if (in_array($name, ['admin-stock-on-hand-report', 'admin-stock-movement-report', 'admin-product-report', 'admin-staff-expense-report'])) {
             return [str_replace(['admin-', '-report'], ['', '-excel'], $name)];
         }
         if ($name === 'admin-stock-on-hand-onFind') {
@@ -77,6 +77,15 @@ class AdminPermissions
             'admin-report-order-transaction-report' => 'report-transaction-excel',
             'admin-report-inventory-movement-report' => 'report-inventory-excel',
             'admin-report-staff-expense-report' => 'report-staff-expense-excel',
+            'admin-report-customer-remaining-amount-report' => 'report-sales-excel',
+            'admin-report-product-report' => 'product-excel',
+            'admin-report-shop-report' => 'shop-view',
+            'admin-report-customer-report' => 'customer-view',
+            'admin-report-position-report' => 'position-view',
+            'admin-report-staff-report' => 'staff-view',
+            'admin-report-user-report' => 'user-view',
+            'admin-report-supplier-report' => 'supplier-view',
+            'admin-report-uom-report' => 'uom-view',
         ];
         if (isset($exports[$name])) {
             return [$exports[$name]];

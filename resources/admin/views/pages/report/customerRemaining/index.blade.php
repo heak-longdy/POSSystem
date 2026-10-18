@@ -165,7 +165,19 @@
             </div>
             <p class="report-note">{{ __('customer_remaining_report.scope_note') }}</p>
         </div>
+        <template x-if="exportLoading">
+            <div class="loadingFullSizeLayout">
+                <div class="loading loadingSubmit">
+                    <span id="spinner"></span>
+                    <label>{{ __('order.export_excel') }}</label>
+                </div>
+            </div>
+        </template>
     </div>
+@stop
+
+@section('script')
+    @include('admin::pages.report.partials.excel-assets')
     <script>
         (function() {
             function registerCustomerRemainingAlpine() {
@@ -173,6 +185,8 @@
                     window.Alpine.data('xCustomerRemainingReport', () => ({
                         customerId: '{{ $filters['customer_id'] ?? '' }}',
                         shopId: '{{ $filters['shop_id'] ?? '' }}',
+                        exportLoading: false,
+
                         init() {
                             this.$nextTick(() => {
                                 if (typeof window.initCustomerRemainingFilters === 'function') {
@@ -195,6 +209,172 @@
                                 $shop.val('').trigger('change');
                             }
                             $(this.$root).find('#cr-shop-reset').removeClass('is-visible').css('display', 'none').hide();
+                        },
+
+                        @include('admin::pages.report.partials.excel-request')
+
+                        getExportParams() {
+                            // 1. Start with top-level browser query (for direct navigation and automated tests)
+                            const params = new URLSearchParams(window.location.search);
+
+                            // 2. Capture active MDI workspace tab query if running inside the MDI tab manager
+                            if (window.MDI && Array.isArray(window.MDI.tabs) && window.MDI.activeTabKey) {
+                                const currentTab = window.MDI.tabs.find(t => t.key === window.MDI.activeTabKey);
+                                if (currentTab && currentTab.url && currentTab.url.includes('?')) {
+                                    const tabParams = new URLSearchParams(currentTab.url.split('?')[1]);
+                                    for (const [key, value] of tabParams.entries()) {
+                                        if (value !== '' && !params.has(key)) {
+                                            params.set(key, value);
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 3. Merge server-rendered initial query parameters
+                            const initialQuery = @json($filters ?? []);
+                            if (initialQuery && typeof initialQuery === 'object') {
+                                for (const [key, value] of Object.entries(initialQuery)) {
+                                    if (value !== null && value !== undefined && value !== '' && !params.has(key)) {
+                                        params.set(key, value);
+                                    }
+                                }
+                            }
+
+                            // 4. Capture current values from the tab's active filter form DOM controls
+                            const form = (this.$root ? this.$root.querySelector('#cr-filter-form') : null)
+                                || document.getElementById('cr-filter-form');
+                            if (form) {
+                                const formData = new FormData(form);
+                                for (const [key, value] of formData.entries()) {
+                                    const trimmed = typeof value === 'string' ? value.trim() : value;
+                                    if (trimmed !== null && trimmed !== undefined && trimmed !== '') {
+                                        params.set(key, trimmed);
+                                    } else if (params.has(key)) {
+                                        params.delete(key);
+                                    }
+                                }
+                            }
+
+                            // 5. Sync tracked filter values in Alpine component state
+                            if (this.customerId && String(this.customerId).trim() !== '') {
+                                params.set('customer_id', String(this.customerId).trim());
+                            } else {
+                                params.delete('customer_id');
+                            }
+
+                            if (this.shopId && String(this.shopId).trim() !== '') {
+                                params.set('shop_id', String(this.shopId).trim());
+                            } else {
+                                params.delete('shop_id');
+                            }
+
+                            // 6. CRITICAL: Remove pagination parameter so export retrieves the complete matching dataset
+                            params.delete('page');
+
+                            return params;
+                        },
+
+                        async excel() {
+                            this.exportLoading = true;
+                            try {
+                                const currentParams = this.getExportParams();
+                                const reportData = await this.requestReportExport(currentParams);
+                                await this.runExcelExport(reportData);
+                            } catch (err) {
+                                this.showReportExportError(err);
+                            } finally {
+                                this.exportLoading = false;
+                            }
+                        },
+
+                        async exportExcel() {
+                            return this.excel();
+                        },
+
+                        async runExcelExport(reportData) {
+                            const workbook = new ExcelJS.Workbook();
+                            const sheetName = '{{ __('customer_remaining_report.excel.sheet_name') }}';
+                            const worksheet = workbook.addWorksheet(sheetName);
+
+                            const rows = Array.isArray(reportData) ? reportData : (reportData?.rows || []);
+
+                            worksheet.columns = [
+                                { header: '{{ __('customer_remaining_report.excel.no') }}', key: 'index', width: 8 },
+                                { header: '{{ __('customer_remaining_report.excel.customer') }}', key: 'customer_name', width: 24 },
+                                { header: '{{ __('customer_remaining_report.excel.phone') }}', key: 'phone', width: 16 },
+                                { header: '{{ __('customer_remaining_report.excel.shop') }}', key: 'shop_name', width: 22 },
+                                { header: '{{ __('customer_remaining_report.excel.orders') }}', key: 'order_count', width: 14 },
+                                { header: '{{ __('customer_remaining_report.excel.outstanding_orders') }}', key: 'outstanding_orders', width: 18 },
+                                { header: '{{ __('customer_remaining_report.excel.total_amount') }}', key: 'total_amount', width: 18 },
+                                { header: '{{ __('customer_remaining_report.excel.paid_amount') }}', key: 'paid_amount', width: 18 },
+                                { header: '{{ __('customer_remaining_report.excel.remaining_amount') }}', key: 'remaining_amount', width: 18 },
+                                { header: '{{ __('customer_remaining_report.excel.last_order') }}', key: 'last_order_date', width: 18 },
+                            ];
+
+                            rows.forEach((r, idx) => {
+                                worksheet.addRow({
+                                    index: r.index ?? (idx + 1),
+                                    customer_name: r.customer_name ?? '',
+                                    phone: r.phone ?? '—',
+                                    shop_name: r.shop_name ?? '—',
+                                    order_count: Number(r.order_count || 0),
+                                    outstanding_orders: Number(r.outstanding_orders || 0),
+                                    total_amount: Number(r.total_amount || 0),
+                                    paid_amount: Number(r.paid_amount || 0),
+                                    remaining_amount: Number(r.remaining_amount || 0),
+                                    last_order_date: r.last_order_date_formatted || r.last_order_date || '—',
+                                });
+                            });
+
+                            worksheet.getColumn('order_count').numFmt = '#,##0';
+                            worksheet.getColumn('outstanding_orders').numFmt = '#,##0';
+                            worksheet.getColumn('total_amount').numFmt = '$#,##0.00';
+                            worksheet.getColumn('paid_amount').numFmt = '$#,##0.00';
+                            worksheet.getColumn('remaining_amount').numFmt = '$#,##0.00';
+
+                            worksheet.getColumn('index').alignment = { horizontal: 'center' };
+                            worksheet.getColumn('order_count').alignment = { horizontal: 'center' };
+                            worksheet.getColumn('outstanding_orders').alignment = { horizontal: 'center' };
+                            worksheet.getColumn('total_amount').alignment = { horizontal: 'right' };
+                            worksheet.getColumn('paid_amount').alignment = { horizontal: 'right' };
+                            worksheet.getColumn('remaining_amount').alignment = { horizontal: 'right' };
+                            worksheet.getColumn('last_order_date').alignment = { horizontal: 'center' };
+
+                            worksheet.getRow(1).font = { bold: true };
+                            worksheet.getRow(1).fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFE2E8F0' }
+                            };
+
+                            if (rows.length > 0) {
+                                const summary = reportData?.summary;
+                                const totalRow = worksheet.addRow({
+                                    index: '',
+                                    customer_name: '{{ __('sales_report.table.total_summary') }}',
+                                    phone: '',
+                                    shop_name: '',
+                                    order_count: '',
+                                    outstanding_orders: '',
+                                    total_amount: summary ? Number(summary.total_amount || 0) : rows.reduce((s, r) => s + Number(r.total_amount || 0), 0),
+                                    paid_amount: summary ? Number(summary.paid_amount || 0) : rows.reduce((s, r) => s + Number(r.paid_amount || 0), 0),
+                                    remaining_amount: summary ? Number(summary.remaining_amount || 0) : rows.reduce((s, r) => s + Number(r.remaining_amount || 0), 0),
+                                    last_order_date: '',
+                                });
+                                totalRow.font = { bold: true };
+                                totalRow.fill = {
+                                    type: 'pattern',
+                                    pattern: 'solid',
+                                    fgColor: { argb: 'FFF8FAFC' }
+                                };
+                            }
+
+                            const buffer = await workbook.xlsx.writeBuffer();
+                            const blob = new Blob([buffer], {
+                                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            });
+                            const filename = '{{ __('customer_remaining_report.excel.file_prefix') }}' + moment().format('YYYY_MM_DD_HHmmss');
+                            saveAs(blob, filename);
                         }
                     }));
                 }
@@ -298,4 +478,4 @@
             };
         })();
     </script>
-@endsection
+@stop

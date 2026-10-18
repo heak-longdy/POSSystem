@@ -58,7 +58,18 @@
                         @enderror
                     </div>
                 </div>
-                <div class="row">
+                <div class="row-2">
+                    <div class="form-row iconInput">
+                        <label>{{ __('product.form.code.label') }}</label>
+                        <input type="text" name="code" x-model="code" placeholder="{{ __('product.form.code.placeholder') }}" @input="delete clientErrors.code">
+                        <i class='bx bx-barcode'></i>
+                        <template x-if="clientErrors?.code">
+                            <label class="error" x-text="clientErrors.code"></label>
+                        </template>
+                        @error('code')
+                            <label class="error" x-show="!clientErrors?.code">{{ $message }}</label>
+                        @enderror
+                    </div>
                     <div class="form-row iconInput">
                         <label>{{ __('product.form.name.label') }} <span>*</span> </label>
                         <input type="text" name="name" x-model="name" placeholder="{{ __('product.form.name.placeholder') }}" @input="delete clientErrors.name">
@@ -157,6 +168,7 @@
                 Alpine.data("xProductStore", () => ({
                     baseImageUrl: "{{ asset('file_manager') }}",
                     image: "{!! request('id') ? ($data?->image ?? '') : (old('image') ?? '') !!}",
+                    code: "{!! request('id') ? addslashes($data?->code ?? '') : addslashes(old('code') ?? '') !!}",
                     name: "{!! request('id') ? addslashes($data?->name ?? '') : addslashes(old('name') ?? '') !!}",
                     cost: "{!! request('id') ? ($data?->cost ?? '') : (old('cost') ?? '') !!}",
                     price: "{!! request('id') ? ($data?->price ?? '') : (old('price') ?? '') !!}",
@@ -280,6 +292,13 @@
                             errors.uom_id = @json(__('product.validation.uom_required'));
                             isValid = false;
                             if (!firstErrorEl) firstErrorEl = $(this.$root).find('#uom_id');
+                        }
+
+                        const codeVal = (this.code !== null && this.code !== undefined) ? String(this.code).trim() : '';
+                        if (codeVal.length > 50) {
+                            errors.code = @json(__('product.validation.code_max'));
+                            isValid = false;
+                            if (!firstErrorEl) firstErrorEl = $('input[name="code"]');
                         }
 
                         const nameVal = (this.name !== null && this.name !== undefined) ? String(this.name).trim() : '';

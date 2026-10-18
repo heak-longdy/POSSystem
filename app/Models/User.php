@@ -66,7 +66,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(ModelHasPermission::class, 'model_id');
     }
-   protected $appends = ['image_url', 'language_preference_label'];
+   protected $appends = ['image_url', 'language_preference_label', 'created_date'];
     public function getImageUrlAttribute()
     {
         if ($this->image != null) {
@@ -78,5 +78,10 @@ class User extends Authenticatable
     public function getLanguagePreferenceLabelAttribute()
     {
         return Language::label(Language::resolve($this->language_preference));
+    }
+
+    public function getCreatedDateAttribute()
+    {
+        return $this->created_at ? \Carbon\Carbon::parse($this->created_at)->format('d/M/Y h:i A') : null;
     }
 }

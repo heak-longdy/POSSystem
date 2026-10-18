@@ -22,6 +22,7 @@ use App\Models\UOM;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Schema;
 
 class SelectController extends Controller
 {
@@ -51,22 +52,43 @@ class SelectController extends Controller
         $query = $req->type == "product" ?
             ShopProduct::where('shop_id', $req->shop_id)->with(['product'])->whereHas('product', function ($product) use ($req) {
                 if ($req->search) {
-                    $product->where('name', 'LIKE', '%' . $req->search . '%');
-                    $product->where('status', 1);
+                    $product->where(function ($p) use ($req) {
+                        $p->where('name', 'LIKE', '%' . $req->search . '%')
+                          ->orWhere('code', 'LIKE', '%' . $req->search . '%');
+                    });
                 }
+                $product->where('status', 1);
             })
             : ShopService::where('shop_id', $req->shop_id)->with(['service'])->whereHas('service', function ($product) use ($req) {
                 if ($req->search) {
                     $product->where('name', 'LIKE', '%' . $req->search . '%');
-                    $product->where('status', 1);
                 }
+                $product->where('status', 1);
             });
 
-        $data = $query->orderBy('created_at', 'desc')->take(12)->get();
+        // The order picker opts into pagination; existing catalog callers keep their response.
+        $perPage = (int) ($req->input('per_page') ?: 12);
+        $page = $req->has('page')
+            ? $query->orderBy('created_at', 'desc')->orderBy('id', 'desc')->paginate($perPage, ['*'], 'page', (int) $req->input('page', 1))
+            : null;
+        $data = $page ? $page->getCollection() : $query->orderBy('created_at', 'desc')->take(12)->get();
 
         $currentDate = Carbon::now()->toDate();
         $numberCurrentDate = (int)Carbon::parse($currentDate)->format('Ymd');
         if (count($data) > 0) {
+            if ($req->type == "product" || !$req->has('type')) {
+                $productIds = $data->pluck('product_id')->filter()->unique();
+                $stocks = Schema::hasTable('stock_on_hands')
+                    ? StockOnHand::where('shop_id', $req->shop_id)
+                        ->whereIn('product_id', $productIds)
+                        ->pluck('current_stock', 'product_id')
+                    : [];
+
+                foreach ($data as $val) {
+                    $val->current_stock = (int) ($stocks[$val->product_id] ?? 0);
+                }
+            }
+
             foreach ($data as $val) {
                 $from_date = $val->from_date ? (int)Carbon::parse($val->from_date)->format('Ymd') : null;
                 $to_date = $val->to_date ? (int)Carbon::parse($val->to_date)->format('Ymd') : null;
@@ -80,7 +102,17 @@ class SelectController extends Controller
             }
         }
         try {
-            return response()->json(['data' => $data, 'message' => 200]);
+            $response = ['data' => $data, 'message' => 200];
+            if ($page) {
+                $response['has_more'] = $page->hasMorePages();
+                $response['total'] = $page->total();
+                $response['last_page'] = $page->lastPage();
+                $response['current_page'] = $page->currentPage();
+                $response['from'] = $page->firstItem() ?? 0;
+                $response['to'] = $page->lastItem() ?? 0;
+                $response['per_page'] = $page->perPage();
+            }
+            return response()->json($response);
         } catch (\Exception $e) {
             return response()->json([
                 'message'   => 'error'
@@ -268,7 +300,10 @@ class SelectController extends Controller
         $data = Product::where(function ($q) use ($req) {
             $q->where('status', 1);
             if ($req->search) {
-                $q->where('name', 'LIKE', '%' . $req->search . '%');
+                $q->where(function ($sub) use ($req) {
+                    $sub->where('name', 'LIKE', '%' . $req->search . '%')
+                        ->orWhere('code', 'LIKE', '%' . $req->search . '%');
+                });
             }
         })->orderBy('id', 'asc')->take(12)->get();
 

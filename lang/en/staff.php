@@ -4,6 +4,7 @@ return [
     'name' => 'Staff',
     'title' => 'Staff Management',
     'subtitle' => 'Manage staff members and information',
+    'staff_report' => 'Staff Report',
 
     'button' => [
         'create' => 'Create Staff',

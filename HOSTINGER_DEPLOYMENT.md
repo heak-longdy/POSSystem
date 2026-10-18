@@ -4,6 +4,10 @@ Prepared on 12 October 2026 for Hostinger Web or Cloud hosting with hPanel.
 
 This guide covers deploying the existing POSSystem application and database. The route and Blade cache errors were fixed and both cache commands passed locally. Server deployment and browser testing are still required. This document does not make changes to your Hostinger account.
 
+For inventory Excel exports returning HTTP 404, see the [verified route investigation and targeted recovery steps](docs/inventory-export-production-404.md). The missing production routes must be restored in the active application and its route cache rebuilt.
+
+For Report Management's generic Excel export failure, see the [report library-loading fix and deployment checks](docs/report-export-production.md). These report routes resolve on production; three report pages were missing their Excel library includes.
+
 Replace `example.com`, `u12345678`, database credentials, and paths with your actual values. Unless a step says **on your Mac**, run terminal commands **over SSH on Hostinger**. Stop when a command fails and resolve that error before continuing.
 
 1. **Prepare the Hostinger website.**

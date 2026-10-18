@@ -16,6 +16,7 @@ return [
     'items' => 'items',
     'unit_price' => 'Unit Price',
     'discount' => 'Discount',
+    'current_stock' => 'Current Stock',
     'commission' => 'Commission',
     'commission_short' => 'Comm',
     'qty' => 'Qty',
@@ -43,6 +44,31 @@ return [
     'more_items' => 'more',
     'collapse_items' => 'Collapse',
     'all_items' => 'All Items',
+
+    'product_picker' => [
+        'add_product' => 'Add Product',
+        'add_item' => 'Add Item',
+        'description' => 'Choose products from the selected shop to add to this order.',
+        'code' => 'Code',
+        'search' => 'Search products by name or code...',
+        'selected' => 'selected',
+        'select_page' => 'Select all available products on this page',
+        'already_added' => 'Already in order',
+        'select_shop_first' => 'Select a shop to browse its products',
+        'shop_help' => 'Choose a shop above to browse its products.',
+        'loading' => 'Loading products...',
+        'load_failed' => 'Products could not be loaded. Please try again.',
+        'retry' => 'Try again',
+        'no_products' => 'No products found',
+        'search_help' => 'Try another product name or code. Your selections are kept.',
+        'empty_shop' => 'There are no products available for this shop.',
+        'pages' => 'Product pages',
+        'page' => 'Page',
+        'previous' => 'Previous',
+        'next' => 'Next',
+        'edit_hint' => 'Quantity, price and discounts can be edited in Order Items.',
+        'current_stock' => 'Current Stock',
+    ],
 
 
     'tab' => [
@@ -119,6 +145,7 @@ return [
         'pay_date' => 'Pay Date',
         'customer_phone' => 'Customer Phone',
         'actions' => 'Actions',
+        'current_stock' => 'Current Stock',
         'note' => 'Note',
     ],
 
@@ -371,7 +398,7 @@ return [
 
     'empty_cart' => [
         'title' => 'No items added yet',
-        'description' => 'Select items from catalog on left to build order.',
+        'description' => 'Click "Add Product" to select and add items to this order.',
     ],
 
     'confirm' => [

@@ -8,23 +8,26 @@
                 <div class="row table-row-20 textLeft">
                     <span>{{ __('stock_on_hand.table.product') }}</span>
                 </div>
-                <div class="row table-row-15">
+                <div class="row table-row-14">
                     <span>{{ __('stock_on_hand.table.category') }}</span>
                 </div>
-                <div class="row table-row-10">
+                <div class="row table-row-6">
                     <span>{{ __('stock_on_hand.table.uom') }}</span>
                 </div>
-                <div class="row table-row-15">
+                <div class="row table-row-9">
                     <span>{{ __('stock_on_hand.table.current_stock') }}</span>
                 </div>
-                <div class="row table-row-10">
-                    <span>{{ __('stock_on_hand.table.date') }}</span>
+                <div class="row table-row-12 text right">
+                    <span>{{ __('stock_on_hand.table.total_cost') }}</span>
                 </div>
-                <div class="row table-row-15">
+                <div class="row table-row-12 text right">
+                    <span>{{ __('stock_on_hand.table.total_amount') }}</span>
+                </div>
+                <div class="row table-row-14">
                     <span>{{ __('stock_on_hand.table.shop') }}</span>
                 </div>
-                <div class="row table-row-10">
-                    <span>{{ __('stock_on_hand.table.requested_by') }}</span>
+                <div class="row table-row-8">
+                    <span>{{ __('stock_on_hand.table.date') }}</span>
                 </div>
             </div>
             <div class="table-body">
@@ -37,29 +40,27 @@
                             <span class="textView">{!! isset($item->product->name) ? $item->product->name : '--' !!}</span>
                         </div>
                        
-                        <div class="row table-row-15">
+                        <div class="row table-row-14">
                             <span>{!! isset($item->product->category->name) ? $item->product->category->name : '--' !!}</span>
                         </div>
-                        <div class="row table-row-10">
+                        <div class="row table-row-6">
                             <span>{!! isset($item->product->uom->name) ? $item->product->uom->name : '--' !!}</span>
                         </div>
-                        <div class="row table-row-15">
+                        <div class="row table-row-9">
                             <span>{!! isset($item->current_stock) ? $item->current_stock : 0 !!}</span>
                         </div>
-                        <div class="row table-row-10">
-                            <span>{!! isset($item->created_date) ? $item->created_date : '--' !!}</span>
+                        <div class="row table-row-12 text right">
+                            <span>{!! $item->total_cost_title ?? '$0.00' !!}</span>
                         </div>
-                        <div class="row table-row-15">
+                        <div class="row table-row-12 text right">
+                            <span>{!! $item->total_amount_title ?? '$0.00' !!}</span>
+                        </div>
+                        <div class="row table-row-14">
                             <span>{!! isset($item->shop->name) ? $item->shop->name : '--' !!}</span>
                         </div>
-                        <div class="row table-row-10">
-                            @if ($item->request_by_type == 'admin')
-                                <span>{!! isset($item->user->username) && $item->user->username ? $item->user->username : '--' !!}</span>
-                            @elseif ($item->request_by_type == 'barber')
-                                <span>{!! isset($item->barber->name) && $item->barber->name ? $item->barber->name : '--' !!}</span>
-                            @endif
+                        <div class="row table-row-8">
+                            <span>{!! isset($item->created_date) ? $item->created_date : '--' !!}</span>
                         </div>
-                        
                     </div>
                 @endforeach
             </div>

@@ -1,7 +1,9 @@
 <?php
 
 return [
+    'name' => 'Staff Expense',
     'title' => 'Staff Expense Management',
+    'staff_expense_report' => 'Staff Expense Report',
     'subtitle' => 'Track and manage staff expenses',
     'all_shops' => 'All Shops',
 

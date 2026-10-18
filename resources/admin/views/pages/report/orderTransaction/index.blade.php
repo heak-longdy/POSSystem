@@ -1352,6 +1352,7 @@
 @stop
 
 @section('script')
+    @include('admin::pages.report.partials.excel-assets')
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('xOrderTransactionReport', () => ({
@@ -1498,6 +1499,7 @@
                     this.periodData = null;
                 },
 
+                @include('admin::pages.report.partials.excel-request')
                 async exportExcel() {
                     this.exportLoading = true;
                     try {
@@ -1505,8 +1507,7 @@
                         currentParams.set('view_mode', this.viewMode);
                         currentParams.set('grouping', this.grouping);
 
-                        const response = await Axios.get(`{{ route('admin-report-order-transaction-report') }}?` + currentParams.toString());
-                        const reportData = response.data;
+                        const reportData = await this.requestReportExport(currentParams);
 
                         const workbook = new ExcelJS.Workbook();
                         let sheetName = '';
@@ -1651,8 +1652,7 @@
                         const filename = filePrefix + moment().format('YYYY_MM_DD_HHmmss');
                         saveAs(blob, filename);
                     } catch (err) {
-                        console.error('Export failed:', err);
-                        alert('{{ __('order_transaction.excel.export_failed') }}');
+                        this.showReportExportError(err);
                     } finally {
                         this.exportLoading = false;
                     }

@@ -240,19 +240,18 @@
                     $select.val(null).trigger('change');
                     this.shopId = '';
                 },
+                @include('admin::pages.inventoryManagement.partials.excel-request')
                 async excel() {
                     this.exportLoading = true;
                     try {
-                        const response = await Axios.get('{{ \Illuminate\Support\Facades\Route::has('admin-stock-movement-report') ? route('admin-stock-movement-report') : url('admin/stock-movement/report') }}', {
-                            params: {
-                                status_type: $(this.$root).find('select[name="status_type"]').val() || @json(request('status_type')),
-                                search: $(this.$root).find('input[name="search"]').val() || @json(request('search')),
-                                shop_id: $(this.$root).find('select[name="shop_id"]').val() || @json(request('shop_id')),
-                            }
+                        const data = await this.requestInventoryExport({
+                            status_type: $(this.$root).find('select[name="status_type"]').val() || @json(request('status_type')),
+                            search: $(this.$root).find('input[name="search"]').val() || @json(request('search')),
+                            shop_id: $(this.$root).find('select[name="shop_id"]').val() || @json(request('shop_id')),
                         });
-                        await this.RunExcelJSExport(response.data);
+                        await this.RunExcelJSExport(data);
                     } catch (error) {
-                        console.error('Export Excel failed:', error);
+                        this.showInventoryExportError(error);
                     } finally {
                         this.exportLoading = false;
                     }

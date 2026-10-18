@@ -527,6 +527,34 @@
     .customer-remaining-report .filter-select { box-sizing: border-box; }
     .customer-remaining-report a:focus-visible,
     .customer-remaining-report button:focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+    .customer-remaining-report .btn-excel-export,
+    .btn-excel-export {
+        height: 38px;
+        padding: 0 14px;
+        background: #059669;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .customer-remaining-report .btn-excel-export:hover,
+    .btn-excel-export:hover {
+        background: #047857;
+    }
+
+    .customer-remaining-report .btn-excel-export:disabled,
+    .btn-excel-export:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
     @media (max-width: 600px) {
         .customer-remaining-report .kpi-grid { grid-template-columns: 1fr; }
         .customer-remaining-report .filter-form-grid { grid-template-columns: 1fr; }

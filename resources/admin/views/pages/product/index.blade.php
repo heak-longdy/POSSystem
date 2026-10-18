@@ -6,6 +6,8 @@
             'routeName' => $routeName,
             'createName' => __('product.button.create'),
             'filterStatus' => true,
+            'exportAction' => 'excel()',
+            'exportLabel' => __('global.button.export'),
             'exportUrl' => $exportUrl ?? '',
             'data' => $data,
             'status' => $status,
@@ -32,11 +34,12 @@
             'tbHeader' => [
                 ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
                 ['field' => 'image_url', 'title' => __('global.table.image'), 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 25],
+                ['field' => 'code', 'title' => __('product.table.code'), 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 20],
                 ['field' => 'category_title', 'title' => __('global.table.category'), 'class' => 'text left', 'colVal' => 15],
                 ['field' => 'uom_title', 'title' => __('global.table.uom'), 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'CostUsdFor', 'title' => __('global.table.cost'), 'class' => 'text left', 'colVal' => 15],
-                ['field' => 'PriceUsdFor', 'title' => __('global.table.price'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'CostUsdFor', 'title' => __('global.table.cost'), 'class' => 'text left', 'colVal' => 11],
+                ['field' => 'PriceUsdFor', 'title' => __('global.table.price'), 'class' => 'text left', 'colVal' => 12],
                 [
                     'field' => 'action',
                     'title' => "",
@@ -91,14 +94,25 @@
             ],
         ])
         @endcomponent
+
+        <template x-if="exportLoading">
+            <div class="loadingFullSizeLayout">
+                <div class="loading loadingSubmit">
+                    <span id="spinner"></span>
+                    <label>{{ __('order.export_excel') }}</label>
+                </div>
+            </div>
+        </template>
     </div>
 @stop
 
 @section('script')
+    @include('admin::pages.report.partials.excel-assets')
     <script lang="ts">
         (function() {
             const registerXIndex = () => {
                 Alpine.data('xIndex', () => ({
+                    exportLoading: false,
                     loading: null,
                     selected_id: null,
                     groupClassList: [],
@@ -106,6 +120,115 @@
                     async init() {
                         this.loading = true;
                         this.loading = false;
+                    },
+                    @include('admin::pages.report.partials.excel-request')
+                    getExportParams() {
+                        const params = new URLSearchParams(window.location.search);
+
+                        if (window.MDI && Array.isArray(window.MDI.tabs) && window.MDI.activeTabKey) {
+                            const currentTab = window.MDI.tabs.find(t => t.key === window.MDI.activeTabKey);
+                            if (currentTab && currentTab.url && currentTab.url.includes('?')) {
+                                const tabParams = new URLSearchParams(currentTab.url.split('?')[1]);
+                                for (const [key, value] of tabParams.entries()) {
+                                    if (value !== '' && !params.has(key)) {
+                                        params.set(key, value);
+                                    }
+                                }
+                            }
+                        }
+
+                        const initialQuery = @json(request()->query());
+                        if (initialQuery && typeof initialQuery === 'object') {
+                            for (const [key, value] of Object.entries(initialQuery)) {
+                                if (value !== null && value !== undefined && value !== '' && !params.has(key)) {
+                                    params.set(key, value);
+                                }
+                            }
+                        }
+
+                        const form = (this.$root ? this.$root.querySelector('form.filter') : null)
+                            || document.querySelector('form.filter');
+                        if (form) {
+                            const formData = new FormData(form);
+                            for (const [key, value] of formData.entries()) {
+                                const trimmed = typeof value === 'string' ? value.trim() : value;
+                                if (trimmed !== null && trimmed !== undefined && trimmed !== '') {
+                                    params.set(key, trimmed);
+                                } else if (params.has(key)) {
+                                    params.delete(key);
+                                }
+                            }
+                        }
+
+                        if (!params.has('status')) {
+                            params.set('status', '{{ $status }}');
+                        }
+
+                        params.delete('page');
+
+                        return params;
+                    },
+                    async excel() {
+                        this.exportLoading = true;
+                        try {
+                            const currentParams = this.getExportParams();
+                            const reportData = await this.requestReportExport(currentParams);
+                            await this.runExcelExport(reportData);
+                        } catch (err) {
+                            this.showReportExportError(err);
+                        } finally {
+                            this.exportLoading = false;
+                        }
+                    },
+                    async exportExcel() {
+                        return this.excel();
+                    },
+                    async runExcelExport(reportData) {
+                        const workbook = new ExcelJS.Workbook();
+                        const sheetName = @json(__('product.name'));
+                        const worksheet = workbook.addWorksheet(sheetName);
+
+                        const rows = Array.isArray(reportData) ? reportData : (reportData?.rows || []);
+
+                        worksheet.columns = [
+                            { header: @json(__('global.table.no')), key: 'index', width: 8 },
+                            { header: @json(__('product.table.code')), key: 'code', width: 16 },
+                            { header: @json(__('global.table.name')), key: 'name', width: 28 },
+                            { header: @json(__('global.table.category')), key: 'category', width: 20 },
+                            { header: @json(__('global.table.uom')), key: 'uom', width: 12 },
+                            { header: @json(__('global.table.cost')), key: 'cost', width: 14 },
+                            { header: @json(__('global.table.price')), key: 'price', width: 14 },
+                            { header: @json(__('product.export.commission')), key: 'commission', width: 14 },
+                            { header: @json(__('product.export.created_at')), key: 'created_at', width: 20 },
+                        ];
+
+                        rows.forEach((item, index) => {
+                            worksheet.addRow({
+                                index: index + 1,
+                                code: item?.code || '',
+                                name: item?.name || '',
+                                category: item?.category_title || item?.category?.name || '',
+                                uom: item?.uom_title || item?.uom?.name || '',
+                                cost: Number(item?.cost || 0),
+                                price: Number(item?.price || 0),
+                                commission: Number(item?.commission || 0),
+                                created_at: item?.created_at ? moment(item.created_at).format('YYYY-MM-DD HH:mm:ss') : '',
+                            });
+                        });
+
+                        worksheet.getRow(1).font = { bold: true };
+                        worksheet.getRow(1).fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFE2E8F0' }
+                        };
+
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], {
+                            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        });
+                        const filename = 'Product_Report_' + moment().format('YYYY_MM_DD_HHmmss') + '.xlsx';
+                        saveAs(blob, filename);
                     },
                     async fetchData(url, callback) {
                         await fetch(url, {

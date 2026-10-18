@@ -1,6 +1,10 @@
 @if(!defined('ADMIN_VERIFY_POPUP_LOADED'))
 @php define('ADMIN_VERIFY_POPUP_LOADED', true); @endphp
 @component('admin::components.dialog', ['dialog' => 'confirmDialog'])
+    <template x-if="$store?.confirmDialog?.data?.typeAction === 'order-products'">
+        @include('admin::pages.order.product-picker')
+    </template>
+    <template x-if="$store?.confirmDialog?.data?.typeAction !== 'order-products'">
     <div x-data="verifyConfirmDialog" class="dialog-form" x-bind:style="{ width: data?.width }"
         style="text-align: center;align-items: center;">
         <div class="dialog-form-header" style="justify-content: center;">
@@ -38,6 +42,7 @@
             </button>
         </div>
     </div>
+    </template>
     <script>
         var verifyConfirmDialogDefinition = () => ({
             data: null,

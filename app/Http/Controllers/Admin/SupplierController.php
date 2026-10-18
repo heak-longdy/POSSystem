@@ -18,6 +18,23 @@ class SupplierController extends Controller
     {
         $this->tools = $serTool;
     }
+    private function querySuppliers(Request $req)
+    {
+        $status = $req->status ?? 1;
+        if ($status !== 'trash') {
+            $query = Supplier::where('status', $status);
+        } else {
+            $query = Supplier::onlyTrashed();
+        }
+
+        if ($req->filled('search')) {
+            $search = trim($req->search);
+            $query->where('name', 'LIKE', '%' . $search . '%');
+        }
+
+        return $query->orderBy('id', 'desc');
+    }
+
     public function index(Request $req)
     {
         $data['status'] = $req->status;
@@ -25,14 +42,21 @@ class SupplierController extends Controller
         if (!$req->status) {
             return redirect()->route('admin-'.$this->routeName.'-list', 1);
         }
-        if ($req->status != 'trash') {
-            $query = Supplier::where('status', $req->status);
-        } else {
-            $query = Supplier::onlyTrashed();
-        }
-        $data['data'] = $query->orderBy('id', 'desc')->paginate(50);
-        $data['exportUrl'] = route('admin-supplier-export');
+
+        $query = $this->querySuppliers($req);
+        $data['data'] = $query->paginate(50);
+        $data['exportUrl'] = route('admin-supplier-export', request()->query());
         return view($this->layout . 'index', $data);
+    }
+
+    public function report(Request $req)
+    {
+        $suppliers = $this->querySuppliers($req)->get();
+
+        return response()->json([
+            'status' => $req->status ?? 1,
+            'rows'   => $suppliers,
+        ]);
     }
     public function onCreate()
     {
@@ -75,31 +99,39 @@ class SupplierController extends Controller
     public function export(Request $req)
     {
         $fileName = 'suppliers_export_' . date('Y-m-d_H-i-s') . '.csv';
-        $suppliers = Supplier::all(); // You might want to apply filters here if needed
+        $suppliers = $this->querySuppliers($req)->get();
 
         $headers = array(
-            "Content-type"        => "text/csv",
+            "Content-type"        => "text/csv; charset=UTF-8",
             "Content-Disposition" => "attachment; filename=$fileName",
             "Pragma"              => "no-cache",
             "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
             "Expires"             => "0"
         );
 
-        $columns = array('ID', 'Name', 'Phone', 'Email', 'Address', 'Created At');
+        $columns = array(
+            __('global.table.no'),
+            __('supplier.table.name'),
+            __('supplier.table.ordering'),
+            __('supplier.table.status'),
+            __('global.table.created_at'),
+        );
 
         $callback = function() use($suppliers, $columns) {
             $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
             fputcsv($file, $columns);
 
-            foreach ($suppliers as $supplier) {
-                $row['ID']  = $supplier->id;
-                $row['Name']    = $supplier->name;
-                $row['Phone']    = $supplier->phone;
-                $row['Email']  = $supplier->email;
-                $row['Address']  = $supplier->address;
-                $row['Created At']  = $supplier->created_at;
+            foreach ($suppliers as $index => $supplier) {
+                $statusLabel = $supplier->status == 1 ? __('supplier.form.status.active') : __('supplier.form.status.disable');
 
-                fputcsv($file, array($row['ID'], $row['Name'], $row['Phone'], $row['Email'], $row['Address'], $row['Created At']));
+                fputcsv($file, array(
+                    $index + 1,
+                    $supplier->name ?? '',
+                    $supplier->ordering ?? '',
+                    $statusLabel,
+                    $supplier->created_at ? $supplier->created_at->format('Y-m-d H:i:s') : '',
+                ));
             }
 
             fclose($file);

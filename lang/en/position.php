@@ -1,7 +1,9 @@
 <?php
 
 return [
+    'name' => 'Position',
     'title' => 'Position Management',
+    'position_report' => 'Position Report',
     'button' => [
         'create' => 'Create Position',
     ],

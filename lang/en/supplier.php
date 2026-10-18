@@ -3,6 +3,7 @@
 return [
     'name' => 'Supplier',
     'title' => 'Supplier Management',
+    'supplier_report' => 'Supplier Report',
 
     'tab' => [
         'active' => 'Active',

@@ -19,27 +19,45 @@ class PositionController extends Controller
         $this->tools = $tools;
     }
 
+    private function queryPositions(Request $req)
+    {
+        $status = $req->status ?? 1;
+        if ($status !== 'trash') {
+            $query = Position::where('status', $status);
+        } else {
+            $query = Position::onlyTrashed();
+        }
+
+        if ($req->filled('search')) {
+            $search = trim($req->search);
+            $query->where('title', 'LIKE', '%' . $search . '%');
+        }
+
+        return $query->orderBy('order', 'desc')->orderBy('id', 'desc');
+    }
+
     public function index(Request $req)
     {
         $data['status'] = $req->status;
         $data['routeName'] = $this->routeName;
-        $search = $req->search ? $req->search : '';
         if (!$req->status) {
             return redirect()->route('admin-'.$this->routeName.'-list', 1);
         }
-        if ($req->status != 'trash') {
-            $query = $this->table::where('status', $req->status);
-        } else {
-            $query = $this->table::onlyTrashed();
-        }
-        $data['data'] = $query->where(function ($q) use ($search) {
-            if ($search) {
-                $q->where('name', 'like', '%' . $search . '%');
-                $q->orWhere('phone', 'like', '%' . $search . '%');
-            }
-        })->orderBy('order', 'desc')->paginate(50);
+        $query = $this->queryPositions($req);
+        $data['data'] = $query->paginate(50);
+        $data['exportUrl'] = route('admin-position-export', request()->query());
 
         return view($this->layout . 'index', $data);
+    }
+
+    public function report(Request $req)
+    {
+        $positions = $this->queryPositions($req)->get();
+
+        return response()->json([
+            'status' => $req->status ?? 1,
+            'rows'   => $positions,
+        ]);
     }
     public function onCreate()
     {
@@ -86,5 +104,43 @@ class PositionController extends Controller
             'success' => __('position.message.delete_success'),
             'warning' => __('position.message.delete_failed'),
         ]);
+    }
+
+    public function export(Request $req)
+    {
+        $fileName = 'positions_export_' . date('Y-m-d_H-i-s') . '.csv';
+        $positions = $this->queryPositions($req)->get();
+
+        $headers = array(
+            "Content-type"        => "text/csv; charset=UTF-8",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        );
+
+        $columns = array(
+            __('global.table.no'),
+            __('position.form.name.label'),
+            __('global.table.created_at'),
+        );
+
+        $callback = function() use($positions, $columns) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
+            fputcsv($file, $columns);
+
+            foreach ($positions as $index => $position) {
+                fputcsv($file, array(
+                    $index + 1,
+                    $position->title ?? '',
+                    $position->created_at ? $position->created_at->format('Y-m-d H:i:s') : '',
+                ));
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
