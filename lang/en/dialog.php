@@ -13,7 +13,7 @@ return [
         'restore' => 'Are you sure to restore <b>:name</b> ?',
         'pending' => 'Are you want to move <b>:name</b> to pending?',
         'move_to_trash' => 'Are you sure move to trash.',
-        'sign_out' => 'Are you want to Sign Out?',
+        'sign_out' => 'Are you sure you want to sign out?',
         'discard' => 'Are you sure to cancel?',
         'promote_to_student' => 'Are you sure to promote <b>:name</b> to student?',
         'promote_to_agency' => 'Are you sure to promote <b>:name</b> to agency?',

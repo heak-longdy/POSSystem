@@ -1,83 +1,49 @@
 <template x-data="{}" x-if="$store.logOut.active">
-    <div class="dialog confirmDialogLayout" x-data="selectOption"
+    <div class="dialog confirmDialogLayout" x-data="logoutDialog"
         x-bind:style="{ zIndex: $store.libs.getLastIndex() + 1 }" :class="$store.logOut.active ? 'dialogAnimation':''">
         <div class="dialog-container modal-background hidden">
             <div class="confirmDialog modal" id="select-option">
                 <i class='bx bx-help-circle'></i>
-                <h3>Sing Out</h3>
-                <div class="textDelete">Are you want to Sing Out ?</div>
+                <h3 x-text="$store.logOut.options?.title || @json(__('setting.sign_out'))">@lang('setting.sign_out')</h3>
+                <div class="textDelete" x-text="$store.logOut.options?.message || $store.logOut.options?.msg || @json(__('dialog.msg.sign_out'))">@lang('dialog.msg.sign_out')</div>
                 <div class="btnActionConfirmDialog">
-                <a href="{!! route('admin-sign-out') !!}"><button class="btnConfirm" s-click-link="">Yes</button></a>
-                <button class="btnCancel" @click="close(false)">Cancel</button>
+                    <a href="{!! route('admin-sign-out') !!}">
+                        <button class="btnConfirm" s-click-link="">
+                            <span x-text="$store.logOut.options?.btnConfirm || $store.logOut.options?.confirm || @json(__('global.dialog.yes'))">@lang('global.dialog.yes')</span>
+                        </button>
+                    </a>
+                    <button class="btnCancel" @click="close(false)" x-text="$store.logOut.options?.btnCancel || $store.logOut.options?.cancel || @json(__('dialog.button.cancel'))">@lang('dialog.button.cancel')</button>
                 </div>
             </div>
         </div>
         <script>
-            Alpine.data('selectOption', () => ({
-                data: null,
-                loading: true,
-                options: null,
-                selected: [],
-                init() {
-                    // this.options = Alpine.store('logOut').options;
-                    // this.data = this.options.data;
-                    // this.selected = this.options.selected;
-                    // Alpine.store('animate').enter(this.$root.children[0], () => {
-                    //     this.onReady();
-                    // });
-                    console.log(this.$store.logOut.active,'$store.logOut.active');
-                },
-                onReady() {
-                    this.$store.logOut.options.onReady((data) => {
-                        if (!data) return;
-                        this.loading = false;
-                        this.data = data;
-                    });
-                },
-                onInput(e) {
-                    this.data = [];
-                    this.loading = true;
-                    this.$store.logOut.options.onSearch(e.target.value, (data) => {
-                        if (!data) return;
-                        this.loading = false;
-                        this.data = data;
-                    });
-                },
-                onSelect(data) {
-                    if (this.options.multiple) {
-                        if (this.isSelected(data)) {
-                            this.selected = this.selected.filter(item => item._id !== data._id);
-                        } else {
-                            this.selected.push(data);
-                        }
-                    } else {
-                        this.onClose(data);
-                    }
-                },
-                isSelected(data, call_back) {
-                    return this.selected?.find(item => item._id == data._id) ? call_back ?? true : false;
-                },
-                selectedIndex(data) {
-                    return this.selected.findIndex(item => item._id == data._id) + 1;
-                },
-                onClose(data = null) {
-                    if (typeof this.$store.logOut.options.beforeClose === 'undefined') {
-                        this.close(data);
-                        return;
-                    }
-                    this.$store.logOut.options.beforeClose(data, (close) => {
-                        if (close) {
-                            this.close(data);
-                        }
-                    });
-                },
+            Alpine.data('logoutDialog', () => ({
                 close(data = null) {
-                    Alpine
-                        .store('animate')
-                        .leave(this.$root.children[0], () => {
+                    const doClose = () => {
+                        if (Alpine.store('animate')) {
+                            Alpine.store('animate').leave(this.$root.children[0], () => {
+                                this.$store.logOut.active = false;
+                                if (typeof this.$store.logOut.options?.afterClose === 'function') {
+                                    this.$store.logOut.options.afterClose(data);
+                                }
+                            });
+                        } else {
                             this.$store.logOut.active = false;
-                            this.$store.logOut.options.afterClose(data);
+                            if (typeof this.$store.logOut.options?.afterClose === 'function') {
+                                this.$store.logOut.options.afterClose(data);
+                            }
+                        }
+                    };
+
+                    if (typeof this.$store.logOut.options?.beforeClose === 'function') {
+                        this.$store.logOut.options.beforeClose(data, (proceed) => {
+                            if (proceed) {
+                                doClose();
+                            }
                         });
+                    } else {
+                        doClose();
+                    }
                 }
             }));
         </script>
@@ -87,19 +53,15 @@
     Alpine.store('logOut', {
         active: false,
         options: {
-            data: null,
-            selected: null,
-            multiple: false,
-            title: 'Choose an option',
-            placeholder: 'Type to search...',
+            title: null,
+            message: null,
+            btnConfirm: null,
+            btnCancel: null,
             allow_close: true,
-            onReady: () => {},
-            onSearch: () => {},
-            // beforeClose: () => {},
             afterClose: () => {}
         }
     });
-    window.logOut = (options) => {
+    window.logOut = (options = {}) => {
         Alpine.store('logOut', {
             active: true,
             options: {
