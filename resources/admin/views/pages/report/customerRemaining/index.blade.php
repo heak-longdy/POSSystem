@@ -104,6 +104,7 @@
                                 <th scope="col" class="text-center" style="width: 45px;">{{ __('sales_report.table.no') }}</th>
                                 <th scope="col">{{ __('customer_remaining_report.customer') }}</th>
                                 <th scope="col">{{ __('customer_remaining_report.phone') }}</th>
+                                <th scope="col">{{ __('customer_remaining_report.shop') }}</th>
                                 <th scope="col" class="text-center">{{ __('customer_remaining_report.orders') }}</th>
                                 <th scope="col" class="text-center">{{ __('customer_remaining_report.outstanding_orders') }}</th>
                                 <th scope="col" class="text-right">{{ __('customer_remaining_report.total_amount') }}</th>
@@ -124,6 +125,7 @@
                                         @endif
                                     </td>
                                     <td class="report-nowrap">{{ $customer->phone ?: '—' }}</td>
+                                    <td>{{ $customerShops->get($customer->id) ?: '—' }}</td>
                                     <td class="text-center">{{ number_format($customer->order_count) }}</td>
                                     <td class="text-center">{{ number_format($customer->outstanding_orders) }}</td>
                                     <td class="text-right text-primary font-weight-bold">${{ number_format($customer->total_amount, 2) }}</td>
@@ -139,7 +141,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="10" class="empty-placeholder">
+                                    <td colspan="11" class="empty-placeholder">
                                         <i class="bx bx-user-x"></i>
                                         <p>{{ __('customer_remaining_report.no_customers') }}</p>
                                     </td>
@@ -149,7 +151,7 @@
                         @if ($customers->count())
                             <tfoot>
                                 <tr>
-                                    <td colspan="5">{{ __('sales_report.table.total_summary') }}</td>
+                                    <td colspan="6">{{ __('sales_report.table.total_summary') }}</td>
                                     <td class="text-right text-primary">${{ number_format($summary->total_amount, 2) }}</td>
                                     <td class="text-right text-success">${{ number_format($summary->paid_amount, 2) }}</td>
                                     <td class="text-right text-danger">${{ number_format($summary->remaining_amount, 2) }}</td>

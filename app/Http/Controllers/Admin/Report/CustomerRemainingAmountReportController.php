@@ -32,9 +32,17 @@ class CustomerRemainingAmountReportController extends Controller
             ->first();
         $customers = $query->orderByDesc('balances.remaining_amount')->orderBy('customers.id')
             ->paginate(25)->withQueryString();
+        $customerShops = $report->outstandingOrders($filters['shop_id'] ?? null)
+            ->whereIn('orders.customer_id', $customers->pluck('id'))
+            ->leftJoin('shops', 'shops.id', '=', 'orders.shop_id')
+            ->select('orders.customer_id', 'shops.name')
+            ->distinct()->orderBy('shops.name')->get()
+            ->groupBy('customer_id')
+            ->map(fn ($shops) => $shops->pluck('name')->filter()->implode(', '));
 
         return view('admin::pages.report.customerRemaining.index', [
             'customers' => $customers,
+            'customerShops' => $customerShops,
             'summary' => $summary,
             'filters' => $filters,
             'shops' => Shop::withTrashed()->orderBy('name')->get(['id', 'name']),
