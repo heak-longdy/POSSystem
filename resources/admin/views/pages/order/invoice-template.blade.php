@@ -186,7 +186,7 @@
                     </div>
                 </td>
                 <td class="inv-foot-calc-label">{{ __('order.invoice.prev_balance', [], $printLocale) }}</td>
-                <td class="inv-foot-calc-value">0.00</td>
+                <td class="inv-foot-calc-value">{{ number_format((float) ($invoicePreviousBalance ?? 0), 2) }}</td>
             </tr>
             <tr>
                 <td class="inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>

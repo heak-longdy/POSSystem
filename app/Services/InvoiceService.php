@@ -11,6 +11,27 @@ use Illuminate\Support\Facades\Schema;
 
 class InvoiceService
 {
+    public function previousBalance(Order $order): float
+    {
+        if (!$order->customer_id) {
+            return 0;
+        }
+
+        // Use current debts on every other invoice, including when reprinting an older one.
+        return Order::where('customer_id', $order->customer_id)
+            ->whereIn('payment_status', ['Pending', 'Partial'])
+            ->where('id', '!=', $order->id)
+            ->select(['total_price', 'paid_amount'])
+            ->cursor()
+            ->sum(function (Order $otherOrder) {
+                // Match payment calculations in cents; overpayments cannot offset other debts.
+                $totalCents = (int) round((float) ($otherOrder->total_price ?? 0) * 100);
+                $paidCents = (int) round((float) ($otherOrder->paid_amount ?? 0) * 100);
+
+                return max(0, $totalCents - $paidCents);
+            }) / 100;
+    }
+
     /**
      * Generate the next unique invoice number in a concurrency-safe atomic transaction.
      */

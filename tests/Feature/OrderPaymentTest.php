@@ -136,6 +136,111 @@ class OrderPaymentTest extends TestCase
         ];
     }
 
+    private function assertPrintedInvoiceSummary($response, array $expected): void
+    {
+        $document = new \DOMDocument();
+        @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
+        $xpath = new \DOMXPath($document);
+
+        foreach (['en', 'km'] as $locale) {
+            $cells = $xpath->query('//div[@id="posInvoicePrintArea_' . $locale . '"]//tfoot//td[contains(@class, "inv-foot-calc-value")]');
+            $values = array_map(fn ($cell) => trim($cell->textContent), iterator_to_array($cells));
+            $this->assertSame($expected, $values, 'Printed invoice summary for ' . $locale);
+        }
+    }
+
+    public function test_printed_previous_balance_sums_only_customer_pending_and_partial_unpaid_amounts(): void
+    {
+        $this->order(100, [])->update(['customer_id' => 1]);
+        $this->order(80, [20, 15])->update(['customer_id' => 1, 'shop_id' => 2]);
+        $this->order(19.65, [10])->update(['customer_id' => 1]);
+        // Even a Pending order with a saved payment contributes only its unpaid amount.
+        $this->order(30, [5])->update(['customer_id' => 1, 'payment_status' => 'Pending']);
+
+        $this->order(500, [500])->update(['customer_id' => 1]);
+        $this->order(500, [])->update(['customer_id' => 1, 'payment_status' => 'Paid']);
+        $this->order(500, [])->update(['customer_id' => 1, 'payment_status' => 'Cancel']);
+        $deleted = $this->order(500, []);
+        $deleted->update(['customer_id' => 1]);
+        $deleted->delete();
+        $this->order(500, [])->update(['customer_id' => 2]);
+        $this->order(500, []);
+
+        $current = $this->order(200, [40]);
+        $current->update(['customer_id' => 1]);
+        // Reprinting an older invoice includes the customer's other current debts too.
+        $this->order(500, [])->update(['customer_id' => 1]);
+        $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
+        $this->assertPrintedInvoiceSummary($response, ['679.65', '200.00', '40.00', '160.00']);
+
+        $current->update(['paid_amount' => 0, 'payment_status' => 'Pending']);
+        $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
+        $this->assertPrintedInvoiceSummary($response, ['679.65', '200.00', '', '200.00']);
+    }
+
+    /** @dataProvider invoiceDetailPages */
+    public function test_no_0014_prints_no_0015_unpaid_balance_from_both_detail_pages(string $page): void
+    {
+        DB::table('orders')->insert([
+            ['id' => 13, 'invoice_number' => 'NO-0013', 'customer_id' => 1, 'total_price' => 41.28, 'paid_amount' => 41.28, 'payment_status' => 'Paid'],
+            ['id' => 14, 'invoice_number' => 'NO-0014', 'customer_id' => 1, 'total_price' => 29.10, 'paid_amount' => 0, 'payment_status' => 'Pending'],
+            ['id' => 15, 'invoice_number' => 'NO-0015', 'customer_id' => 1, 'total_price' => 62.77, 'paid_amount' => 10, 'payment_status' => 'Partial'],
+        ]);
+
+        $this->assertPrintedInvoiceSummary($this->get('/admin/' . $page . '/detail/14')->assertOk(), ['52.77', '29.10', '', '29.10']);
+        $this->assertPrintedInvoiceSummary($this->get('/admin/' . $page . '/detail/15')->assertOk(), ['29.10', '62.77', '10.00', '52.77']);
+    }
+
+    public static function invoiceDetailPages(): array
+    {
+        return [['order'], ['remaining-amount']];
+    }
+
+    public function test_printed_previous_balance_refreshes_after_prior_order_payments_change(): void
+    {
+        $previous = $this->order(19.65, []);
+        $previous->update(['customer_id' => 1]);
+        $current = $this->order(50, []);
+        $current->update(['customer_id' => 1]);
+        $url = '/admin/order/detail/' . $current->id;
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['19.65', '50.00', '', '50.00']);
+
+        $this->postJson('/admin/order/add-payment/' . $previous->id, ['amount' => 10])
+            ->assertOk()->assertJsonPath('payment_status', 'Partial');
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['9.65', '50.00', '', '50.00']);
+
+        $this->postJson('/admin/order/add-payment/' . $previous->id, ['amount' => 9.65])
+            ->assertOk()->assertJsonPath('payment_status', 'Paid');
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['0.00', '50.00', '', '50.00']);
+
+        $this->deleteJson('/admin/order/delete-payment/' . $previous->payments()->first()->id)->assertOk();
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['10.00', '50.00', '', '50.00']);
+    }
+
+    public function test_printed_previous_balance_preserves_cents_and_does_not_offset_other_debts_with_overpayments(): void
+    {
+        $this->order(0.30, [0.10])->update(['customer_id' => 1]);
+        $this->order(0.80, [0.10, 0.70])->update(['customer_id' => 1, 'payment_status' => 'Partial']);
+        $this->order(100, [110])->update(['customer_id' => 1, 'payment_status' => 'Partial']);
+        $current = $this->order(50, []);
+        $current->update(['customer_id' => 1]);
+
+        $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
+        $this->assertPrintedInvoiceSummary($response, ['0.20', '50.00', '', '50.00']);
+    }
+
+    public function test_printed_previous_balance_is_zero_for_walk_ins_and_customers_without_prior_debt(): void
+    {
+        $this->order(500, []);
+        $this->order(500, [])->update(['customer_id' => 2]);
+        $current = $this->order(50, []);
+        $url = '/admin/order/detail/' . $current->id;
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['0.00', '50.00', '', '50.00']);
+
+        $current->update(['customer_id' => 1]);
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['0.00', '50.00', '', '50.00']);
+    }
+
     public function test_exact_displayed_balance_settles_no_0009_and_preserves_payment_details(): void
     {
         $order = $this->order();

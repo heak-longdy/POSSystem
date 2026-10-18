@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\OrderPayment;
 use App\Models\Shop;
+use App\Services\InvoiceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -141,6 +142,7 @@ class RemainingAmountController extends Controller
 
         $data['order'] = $order;
         $data['routeName'] = $this->routeName;
+        $data['invoicePreviousBalance'] = app(InvoiceService::class)->previousBalance($order);
         $data['canEdit'] = $order->payment_status === 'Pending' && !$order->trashed();
         $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && (float) $order->remaining_amount > 0;
         $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0;

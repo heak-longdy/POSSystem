@@ -183,6 +183,7 @@ class OrderController extends Controller
         $data['order'] = $order;
         $data['routeName'] = $this->routeName;
         $data['paymentRemainingAmount'] = $this->remainingPaymentCents($order) / 100;
+        $data['invoicePreviousBalance'] = app(InvoiceService::class)->previousBalance($order);
         $data['canEdit'] = $order->payment_status === 'Pending' && !$order->trashed();
         $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && $data['paymentRemainingAmount'] > 0;
         $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0;
