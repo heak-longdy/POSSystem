@@ -2,6 +2,29 @@
 
 Investigated on 18 October 2026. Production was probed using read-only, unauthenticated GET requests. No server files, caches, configuration, or inventory data were changed.
 
+## Follow-up: deployed source verified
+
+The connected Hostinger API now confirms the active website root is `/home/u138795580/domains/forestgreen-donkey-748531.hostingersite.com/public_html`. Its `public/index.php` loads the application from that root. Reading the deployed `routes/admin.php` confirms that all ten inventory `report`/`export` registrations are already present. The Stock In, Stock Out, and Stock Transfer controllers also contain their `report()` and `export()` methods; the shared inventory request partial and `inventory:check-export-routes` command are deployed.
+
+Fresh public probes still return Laravel compiled-router 404 responses for Stock In, Stock Out, and Stock Transfer `/report`. Stock On Hand and Stock Movement `/report` redirect to login. Hostinger lists the generated `bootstrap/cache/routes-v7.php` file. Together these findings establish that the active route cache is stale even though the route source has been uploaded. Another frontend change or route-source upload is not needed for this specific failure.
+
+Run this sequence **once over SSH on Hostinger**, stopping on any failure:
+
+```bash
+cd /home/u138795580/domains/forestgreen-donkey-748531.hostingersite.com/public_html &&
+php artisan route:clear &&
+php artisan view:clear &&
+php artisan inventory:check-export-routes &&
+php artisan route:cache &&
+php artisan inventory:check-export-routes
+```
+
+Both route checks must show all ten endpoints as `OK`. Close old inventory workspace tabs and reload the website after the commands succeed, because an already-open page can retain a missing-route value rendered before the cache was cleared. Then sign in and verify all five Excel downloads with their current filters. Laravel documents the need to regenerate route caches after route changes in its [route caching guidance](https://laravel.com/docs/9.x/routing#route-caching).
+
+The available hosting connector supports file inspection and scheduled jobs, but no one-time shell execution. Automatic approval review rejected a temporary every-minute cache-clear job because of the risk of repeated production cache clearing. A subsequent job listing was empty: no job was installed and no server caches were changed. Finish through SSH or the File Manager recovery described below; do not schedule recurring cache clears.
+
+Local follow-up verification: all ten route checks passed both uncached and with a freshly generated temporary route cache; 11 PHP tests / 641 assertions and all 11 JavaScript tests passed. The JavaScript suite initially found a stale expectation for the Stock On Hand workbook (eight columns / no total row). Its test now checks the existing ten columns, total row, cost/amount values, and currency formatting; the workbook implementation is unchanged.
+
 ## Confirmed cause
 
 Hostinger's active compiled Laravel route collection does not contain the new inventory export routes. The production JSON response to `GET /admin/stock-transfer/report?status=1` states:
@@ -15,7 +38,7 @@ Illuminate\Routing\AbstractRouteCollection -> handleMatchedRoute
 
 The exception occurs during route matching, before the controller or Excel generation runs. All eight missing endpoints were added in local commit `696e4758d296069efc194c96dc8b9e147eb9599b` on 16 October 2026. The two report routes that existed before that commit still resolve on production. Both the current local `routes/admin.php` and local `bootstrap/cache/routes-v7.php` contain all ten endpoints.
 
-This confirms a mismatch between production's effective route table and the local source. Remote HTTP responses cannot establish whether production has an old `routes/admin.php`, an old compiled cache, or both. Compare the active source and cache on the server before clearing anything; no SSH connection was available during this investigation.
+This initially confirmed a mismatch between production's effective route table and the local source. HTTP responses alone could not distinguish old source from an old compiled cache. The follow-up file inspection above confirms that the required route source is deployed and the effective cache remains stale.
 
 | Inventory module | `/report` (Excel data) | `/export` (CSV) |
 | --- | --- | --- |
@@ -140,4 +163,4 @@ After deployment, check each applicable filter individually and together with an
 
 Preserve the current UI's submitted filter set; date parameters above also cover existing endpoint behavior. In the browser Network panel, `/report` must return HTTP 200 and a JSON array. Open each downloaded `.xlsx`, compare rows and quantities to the filtered report, and check each CSV endpoint separately. Also test empty results, signed-out sessions, a user without export permissions, and multiple workspace tabs with different filters. Confirm no database records change during export.
 
-**Production status:** root cause and route availability verified by remote HTTP probes; server source/cache repair and authenticated downloads remain pending Hostinger access. Do not treat the local passing tests as proof of a production repair.
+**Production status:** stale route cache confirmed by remote HTTP probes and deployed-source inspection. Clearing/rebuilding the server route cache, clearing compiled views, and verifying authenticated downloads remain pending one-time server command access. Do not treat local passing tests as proof of a production repair.

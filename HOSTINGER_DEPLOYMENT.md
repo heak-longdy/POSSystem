@@ -4,7 +4,7 @@ Prepared on 12 October 2026 for Hostinger Web or Cloud hosting with hPanel.
 
 This guide covers deploying the existing POSSystem application and database. The route and Blade cache errors were fixed and both cache commands passed locally. Server deployment and browser testing are still required. This document does not make changes to your Hostinger account.
 
-For inventory Excel exports returning HTTP 404, see the [verified route investigation and targeted recovery steps](docs/inventory-export-production-404.md). The missing production routes must be restored in the active application and its route cache rebuilt.
+For inventory Excel exports returning HTTP 404, follow step 15 below. The deployed route source was verified to contain the export routes, while the active route cache remained stale. See the [verified route investigation and targeted recovery steps](docs/inventory-export-production-404.md) for the evidence.
 
 For Report Management's generic Excel export failure, see the [report library-loading fix and deployment checks](docs/report-export-production.md). These report routes resolve on production; three report pages were missing their Excel library includes.
 
@@ -254,6 +254,7 @@ Replace `example.com`, `u12345678`, database credentials, and paths with your ac
     | Database connection error | Verify database host, full database/user names, password, and user access. Rebuild configuration cache after changing `.env`. |
     | CSS or JavaScript missing | Check assets, `public_html/mix-manifest.json`, the `path.public` binding, and absence of a `hot` file. |
     | 404 at the admin login URL | Check `public_html/.htaccess`, the `index.php` paths, and deployed route files. |
+    | Inventory Excel export says the report could not be found | Follow step 15 to clear the stale route cache through SSH or File Manager, then reopen the inventory tabs. |
     | Login error 419 | Check HTTPS, session directory permissions, cookie domain, and old browser cookies. |
     | Upload fails or images disappear | Check the public-path binding, upload-directory permissions, copied files, and PHP upload limits. |
     | Duplicate route name | Confirm the fixed `routes/admin.php` was uploaded; clear and rebuild route cache. |
@@ -333,3 +334,44 @@ Replace `example.com`, `u12345678`, database credentials, and paths with your ac
     Reload the admin login page while configuration and route caching are still disabled. Once it works, rebuild the caches on Hostinger with the commands in step 9. Laravel [configuration caching](https://laravel.com/docs/9.x/configuration#configuration-caching) stores resolved settings, so deployment must use server-generated configuration rather than a copy from the Mac.
 
     Exclude `bootstrap/cache/*.php` and generated runtime files when preparing the next upload. Reuploading the same unfiltered archive would restore the stale caches.
+
+15. **Clear the cache when Inventory Management export cannot find its report.**
+
+    Use this procedure for the message: “Excel export is unavailable because the report could not be found on this server. Please contact your administrator.” The investigation confirmed that Hostinger had the updated inventory route definitions and controllers, but its compiled route cache still omitted export endpoints.
+
+    The verified application root for this website is:
+
+    ```text
+    /home/u138795580/domains/forestgreen-donkey-748531.hostingersite.com/public_html
+    ```
+
+    This is the directory containing `artisan`, `routes`, and `bootstrap`. Use this active application root for the repair; the `POSSystem` directory used earlier in this guide is an example deployment layout. If the website is moved, check the application path loaded by its `index.php` first.
+
+    **Option A — SSH from your Mac**
+
+    Open **Hostinger hPanel → Websites → Dashboard** beside this website. Search the sidebar for **SSH Access** under **Advanced**, enable it, and copy the SSH command displayed there. On your Mac, press **Cmd + Space**, open **Terminal**, paste that command, and press **Enter**. Confirm the first-connection prompt and enter your SSH password when requested; password characters are not displayed. See Hostinger's [SSH setup](https://www.hostinger.com/support/1583645-how-to-enable-ssh-access-in-hostinger/) and [connection instructions](https://www.hostinger.com/support/1583245-how-to-connect-to-a-hosting-plan-via-ssh-in-hostinger/).
+
+    After connecting, run this sequence once on Hostinger:
+
+    ```bash
+    cd /home/u138795580/domains/forestgreen-donkey-748531.hostingersite.com/public_html &&
+    php artisan route:clear &&
+    php artisan view:clear &&
+    php artisan inventory:check-export-routes &&
+    php artisan route:cache &&
+    php artisan inventory:check-export-routes
+    ```
+
+    `route:clear` removes the old route cache, `view:clear` clears compiled Blade views, and `route:cache` rebuilds routes from the deployed source. Both inventory checks must show all ten endpoints as `OK`. The `&&` operators stop the sequence on a failure; resolve that error before continuing. If routes remain missing after clearing, check the deployed route/controller files and active application directory using the [inventory recovery guide](docs/inventory-export-production-404.md).
+
+    **Option B — Hostinger File Manager**
+
+    Open this website's File Manager, enter `public_html`, then open `bootstrap/cache`. Delete **only `routes-v7.php`**. Keep `packages.php`, `services.php`, `.gitignore`, and the directory itself. If the deployment uses an `APP_ROUTES_CACHE` override, clear that configured route-cache file instead.
+
+    Laravel will load the deployed route definitions without a compiled route cache. When SSH becomes available, use Option A to clear compiled views, rebuild the route cache, and verify the endpoints.
+
+    **Verify the export after either option**
+
+    Close all existing Inventory Management workspace tabs, refresh the website with **Cmd + Shift + R**, and reopen Stock In, Stock Out, Stock Transfer, Stock On Hand, and Stock Movement. Test Export on each page with the current filters and open the downloaded spreadsheet. Already-open tabs can retain the missing-route value rendered before the cache was cleared.
+
+    Perform this cache repair once after deploying route changes. Keep generated local caches out of future uploads and rebuild the route cache on Hostinger as described in [Laravel's route caching guidance](https://laravel.com/docs/9.x/routing#route-caching). Use SSH or File Manager for this repair; do not configure recurring cache-clear cron jobs or use public cache-clearing URLs.

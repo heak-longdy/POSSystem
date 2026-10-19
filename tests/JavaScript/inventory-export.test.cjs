@@ -43,7 +43,8 @@ for (const module of modules) {
         const { instance, context, downloads, alerts, calls, fields } = component(module);
         const item = {
             product_title: 'Green Tea & ទឹកតែ', category_title: 'Beverages', uom_title: 'Box',
-            qty: 12, current_stock: 24, created_date: '18/Oct/2026 10:00 AM',
+            qty: 12, current_stock: 24, total_cost: 60.5, total_amount: 96.75,
+            created_date: '18/Oct/2026 10:00 AM',
             shop_title: 'Central Shop', destination_shop_title: 'West Shop', supplier_title: 'Supplier',
             destination_title: 'Customer', request_by_title: 'Admin', stock_status_title: 'Confirmed',
             from_title: 'Central Shop', to_title: 'West Shop', remark: 'Test export',
@@ -65,11 +66,24 @@ for (const module of modules) {
         await workbook.xlsx.load(await downloads[0].blob.arrayBuffer());
         const sheet = workbook.worksheets[0];
         assert.equal(workbook.worksheets.length, 1);
-        assert.equal(sheet.columnCount, module === 'stockOnHand' ? 8 : module === 'stockMovement' ? 10 : 11);
-        assert.equal(sheet.rowCount, 4);
+        assert.equal(sheet.columnCount, ['stockOnHand', 'stockMovement'].includes(module) ? 10 : 11);
+        assert.equal(sheet.rowCount, module === 'stockOnHand' ? 5 : 4);
         assert.equal(sheet.getCell('B4').value, item.product_title);
         const qtyColumn = module === 'stockIn' ? 'G' : 'E';
         assert.equal(sheet.getCell(qtyColumn + '4').value, module === 'stockOnHand' ? 24 : 12);
+        if (module === 'stockOnHand') {
+            // The existing valuation export includes cost/amount columns and a totals row.
+            assert.equal(sheet.getCell('F4').value, item.total_cost);
+            assert.equal(sheet.getCell('G4').value, item.total_amount);
+            assert.equal(sheet.getCell('E5').value, item.current_stock);
+            assert.equal(sheet.getCell('F5').value, item.total_cost);
+            assert.equal(sheet.getCell('G5').value, item.total_amount);
+            for (const cell of ['F4', 'G4', 'F5', 'G5']) {
+                assert.equal(sheet.getCell(cell).numFmt, '$#,##0.00');
+            }
+            assert.equal(sheet.getCell('I4').value, item.shop_title);
+            assert.equal(sheet.getCell('J4').value, item.request_by_title);
+        }
         assert.equal(sheet.getCell('A1').font.size, 16);
         assert.equal(sheet.getCell('A3').border.top.style, 'thin');
         assert.equal(sheet.getCell('A4').font.size, 10);

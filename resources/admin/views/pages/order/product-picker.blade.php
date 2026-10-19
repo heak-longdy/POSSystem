@@ -79,6 +79,8 @@
                         <th scope="col" class="order-product-picker__no">Nº</th>
                         <th scope="col" class="order-product-picker__code">{{ __('order.product_picker.code') }}</th>
                         <th scope="col" class="order-product-picker__th-product">{{ __('order.table.product') }}</th>
+                        <th scope="col" class="order-product-picker__metadata order-product-picker__uom">{{ __('product.uom') }}</th>
+                        <th scope="col" class="order-product-picker__metadata order-product-picker__category">{{ __('product.category') }}</th>
                         <th scope="col" class="order-product-picker__numeric">{{ __('order.unit_price') }}</th>
                         <th scope="col" class="order-product-picker__numeric">{{ __('order.product_picker.current_stock') }}</th>
                     </tr>
@@ -105,8 +107,14 @@
                                     </span>
                                 </button>
                             </td>
-                            <td class="order-product-picker__numeric" data-label="{{ __('order.unit_price') }}" x-text="price(item)"></td>
-                            <td class="order-product-picker__numeric" data-label="{{ __('order.product_picker.current_stock') }}">
+                            <td class="order-product-picker__metadata order-product-picker__uom" data-label="{{ __('product.uom') }}">
+                                <span x-text="item?.product?.uom_title || '—'"></span>
+                            </td>
+                            <td class="order-product-picker__metadata order-product-picker__category" data-label="{{ __('product.category') }}">
+                                <span x-text="item?.product?.category_title || '—'"></span>
+                            </td>
+                            <td class="order-product-picker__numeric order-product-picker__price" data-label="{{ __('order.unit_price') }}" x-text="price(item)"></td>
+                            <td class="order-product-picker__numeric order-product-picker__stock-cell" data-label="{{ __('order.product_picker.current_stock') }}">
                                 <span :class="stock(item) <= 0 ? 'order-product-picker__stock--out' : 'order-product-picker__stock'"
                                     x-text="stock(item)"></span>
                             </td>
@@ -169,7 +177,7 @@
     </footer>
     <style>
         .dialog .dialog-container.order-product-picker-container {
-            width: min(960px, calc(100vw - 32px)); padding: 0; border: 1px solid #e2e8f0;
+            width: min(1080px, calc(100vw - 32px)); padding: 0; border: 1px solid #e2e8f0;
             border-radius: 18px; overflow: hidden; box-shadow: 0 24px 72px rgba(15, 23, 42, .22);
         }
         .order-product-picker {
@@ -227,6 +235,10 @@
         .order-product-picker__code { width: 124px; font-variant-numeric: tabular-nums; }
         .order-product-picker__code-text { display: inline-block; max-width: 130px; padding: 3px 7px; border: 1px solid var(--order-border); border-radius: 5px; background: var(--order-soft); color: #475569; font-size: 11px; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
         .order-product-picker__code-empty { color: #94a3b8; }
+        .order-product-picker__metadata { overflow-wrap: anywhere; }
+        .order-product-picker__uom { width: 96px; }
+        .order-product-picker__category { width: 148px; }
+        .order-product-picker td.order-product-picker__metadata { color: #475569; font-size: 12px; line-height: 1.6; }
         .order-product-picker input[type="checkbox"] { display: inline-block; width: 18px; height: 18px; margin: 0; accent-color: #2563eb; cursor: pointer; vertical-align: middle; }
         .order-product-picker input[type="checkbox"]:disabled { cursor: not-allowed; }
         .order-product-picker__numeric { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -325,6 +337,10 @@
         .order-product-picker button.order-product-picker__primary:hover:not(:disabled) { background: #1d4ed8; border-color: #1d4ed8; }
         .order-product-picker button.order-product-picker__secondary:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
         .order-product-picker__primary span { display: inline-flex; align-items: center; justify-content: center; padding: 1px 6px; border-radius: 5px; background: rgba(255, 255, 255, .18); font-size: 11px; font-variant-numeric: tabular-nums; }
+        @media (min-width: 641px) {
+            .order-product-picker table { min-width: 960px; }
+            .order-product-picker__name { min-width: 200px; }
+        }
         @media (max-width: 640px) {
             .dialog .dialog-container.order-product-picker-container { width: calc(100vw - 24px); border-radius: 14px; }
             .order-product-picker { max-height: calc(100dvh - 32px); }
@@ -342,6 +358,7 @@
             .order-product-picker th.order-product-picker__th-product { flex: 1; padding-left: 0; }
             .order-product-picker thead .order-product-picker__no,
             .order-product-picker thead .order-product-picker__code,
+            .order-product-picker thead .order-product-picker__metadata,
             .order-product-picker thead .order-product-picker__numeric { display: none; }
             .order-product-picker tbody { padding: 10px; background: var(--order-soft); }
             .order-product-picker tbody tr {
@@ -356,8 +373,10 @@
             .order-product-picker tbody .order-product-picker__check { grid-column: 1; grid-row: 1; align-self: center; }
             .order-product-picker tbody .order-product-picker__name { grid-column: 2 / 5; grid-row: 1; }
             .order-product-picker tbody .order-product-picker__code { grid-column: 2; grid-row: 2; }
-            .order-product-picker tbody td:nth-child(4) { grid-column: 3; grid-row: 2; }
-            .order-product-picker tbody td:nth-child(5) { grid-column: 4; grid-row: 2; }
+            .order-product-picker tbody .order-product-picker__price { grid-column: 3; grid-row: 2; }
+            .order-product-picker tbody .order-product-picker__stock-cell { grid-column: 4; grid-row: 2; }
+            .order-product-picker tbody .order-product-picker__uom { grid-column: 2; grid-row: 3; }
+            .order-product-picker tbody .order-product-picker__category { grid-column: 3 / 5; grid-row: 3; }
             .order-product-picker td.order-product-picker__numeric { text-align: left; white-space: normal; overflow-wrap: anywhere; }
             .order-product-picker td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 5px; font-size: 10px; font-weight: 500; line-height: 1.5; color: var(--order-muted); }
             .order-product-picker__product img { width: 38px; height: 38px; border-radius: 8px; }

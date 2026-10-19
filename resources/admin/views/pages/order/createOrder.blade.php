@@ -165,8 +165,21 @@
                                                         <div class="product-details">
                                                             <h4 class="product-name" x-text="cartItemDisplayName(item)"></h4>
                                                             <div class="product-meta">
-                                                                <span class="item-type-badge" :class="item.product_type"
-                                                                    x-text="item.product_type === 'service' ? lblTabService : lblTabProduct"></span>
+                                                                <template x-if="item.product_type === 'product'">
+                                                                    <span class="item-type-badge item-type-badge--uom">
+                                                                        <span class="item-meta-label">{{ __('product.uom') }}:</span>
+                                                                        <span x-text="item.uom_title || '—'"></span>
+                                                                    </span>
+                                                                </template>
+                                                                <template x-if="item.product_type === 'product'">
+                                                                    <span class="item-type-badge item-type-badge--category">
+                                                                        <span class="item-meta-label">{{ __('product.category') }}:</span>
+                                                                        <span x-text="item.category_title || '—'"></span>
+                                                                    </span>
+                                                                </template>
+                                                                <template x-if="item.product_type === 'service'">
+                                                                    <span class="item-type-badge service" x-text="lblTabService"></span>
+                                                                </template>
                                                             </div>
                                                             <template x-if="item?.error">
                                                                 <div class="item-stock-error">
@@ -505,12 +518,15 @@
                         margin: 0 !important; font-size: 13px !important; font-weight: 600 !important; color: var(--order-ink) !important;
                         line-height: 1.6 !important; white-space: normal !important; overflow-wrap: anywhere;
                     }
-                    .booking-order-ui .order-items-table .product-meta { display: flex; align-items: center; gap: 6px; }
+                    .booking-order-ui .order-items-table .product-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
                     .booking-order-ui .order-items-table .item-type-badge {
-                        display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 5px;
-                        font-size: 10px; font-weight: 600; line-height: 1.5; width: fit-content;
+                        display: inline-flex; align-items: baseline; gap: 4px; padding: 2px 7px; border-radius: 5px;
+                        font-size: 10px; font-weight: 600; line-height: 1.5; width: fit-content; max-width: 100%;
+                        min-width: 0; overflow-wrap: anywhere;
                     }
-                    .booking-order-ui .order-items-table .item-type-badge.product { background: var(--order-accent-soft); color: #1d4ed8; }
+                    .booking-order-ui .order-items-table .item-meta-label { flex-shrink: 0; font-weight: 500; }
+                    .booking-order-ui .order-items-table .item-type-badge--uom { background: var(--order-accent-soft); color: #1d4ed8; }
+                    .booking-order-ui .order-items-table .item-type-badge--category { background: #f0fdfa; color: #0f766e; }
                     .booking-order-ui .order-items-table .item-type-badge.service { background: #f0fdfa; color: #0f766e; }
                     .booking-order-ui .order-items-table .item-stock-error { display: flex; align-items: center; gap: 5px; color: #be123c; font-size: 11px; line-height: 1.5; }
                     .booking-order-ui .order-items-table .item-stock-error svg { width: 14px; height: 14px; flex-shrink: 0; }
@@ -1817,6 +1833,8 @@
                         product_id: productId,
                         code: item?.code || detail?.code || '',
                         name: item?.name || '---',
+                        uom_title: type === 'product' ? (item?.uom_title || '') : '',
+                        category_title: type === 'product' ? (item?.category_title || '') : '',
                         image: item?.image_url || '{{ asset('images/logo/default.png') }}',
                         current_stock: currentStock,
                         itemData: {
@@ -2584,6 +2602,8 @@
                         product_id: productId,
                         code: this.catalogCode(item),
                         name: this.catalogName(item),
+                        uom_title: type === 'product' ? (source?.uom_title || '') : '',
+                        category_title: type === 'product' ? (source?.category_title || '') : '',
                         product_type: type,
                         image: this.catalogImage(item),
                         current_stock: currentStock,
