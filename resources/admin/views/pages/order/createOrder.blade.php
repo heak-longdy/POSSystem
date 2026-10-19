@@ -28,18 +28,60 @@
             <!-- Left Main Column (Catalog & Recent Bookings) -->
             <div class="booking-pos-main-col">
                 <!-- Recent Bookings Reel -->
-                <section class="booking-pos-recent-section">
+                <section class="booking-pos-recent-section" x-data="{
+                    canScrollBack: false,
+                    canScrollForward: false,
+                    resizeObserver: null,
+                    init() {
+                        this.$nextTick(() => {
+                            this.updateScroll();
+                            this.resizeObserver = new ResizeObserver(() => this.updateScroll());
+                            this.resizeObserver.observe(this.$refs.recentOrders);
+                        });
+                    },
+                    destroy() {
+                        this.resizeObserver?.disconnect();
+                    },
+                    updateScroll() {
+                        const reel = this.$refs.recentOrders;
+                        this.canScrollBack = reel.scrollLeft > 1;
+                        this.canScrollForward = reel.scrollLeft + reel.clientWidth < reel.scrollWidth - 1;
+                    },
+                    scrollOrders(direction) {
+                        const reel = this.$refs.recentOrders;
+                        const card = reel.querySelector('.booking-pos-order-card');
+                        if (!card) return;
+                        const step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(reel).columnGap);
+                        reel.scrollBy({ left: direction * step });
+                    }
+                }" x-id="['recent-orders']">
                     <div class="booking-pos-section-header">
                         <div class="title-wrap">
                             <i data-feather="clock"></i>
                             <h2>{{ __('order.recent_orders') }}</h2>
                         </div>
-                        <button type="button" class="btn-link-all" s-click-link="{{ route('admin-' . ($routeName ?? 'order') . '-list', 'Pending') }}">
-                            <span>{{ __('order.view_all') }}</span>
-                            <i data-feather="arrow-right"></i>
-                        </button>
+                        <div class="booking-pos-recent-actions">
+                            <div class="booking-pos-recent-navigation" x-show="canScrollBack || canScrollForward" x-cloak>
+                                <button type="button" class="booking-pos-recent-scroll" @click="scrollOrders(-1)"
+                                    :disabled="!canScrollBack" :aria-controls="$id('recent-orders')"
+                                    aria-label="{{ __('order.recent_orders_previous') }}" title="{{ __('order.recent_orders_previous') }}">
+                                    <i data-feather="chevron-left" aria-hidden="true"></i>
+                                </button>
+                                <button type="button" class="booking-pos-recent-scroll" @click="scrollOrders(1)"
+                                    :disabled="!canScrollForward" :aria-controls="$id('recent-orders')"
+                                    aria-label="{{ __('order.recent_orders_next') }}" title="{{ __('order.recent_orders_next') }}">
+                                    <i data-feather="chevron-right" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                            <button type="button" class="btn-link-all" s-click-link="{{ route('admin-' . ($routeName ?? 'order') . '-list', 'Pending') }}">
+                                <span>{{ __('order.view_all') }}</span>
+                                <i data-feather="arrow-right"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="booking-pos-recent-cards">
+                    <div class="booking-pos-recent-cards" x-ref="recentOrders" :id="$id('recent-orders')"
+                        role="region" aria-label="{{ __('order.recent_orders') }}" tabindex="0"
+                        @scroll.passive="updateScroll()">
                         @php
                             $recentOrdersList = $recentOrders ?? collect([]);
                         @endphp
@@ -57,7 +99,7 @@
                                     'Paid' => __('order.status.ready'),
                                     'Partial' => __('order.status.partial'),
                                     'Cancel' => __('order.status.canceled'),
-                                    default => __('order.status.waiting'),
+                                    default => __('order.status.pending'),
                                 };
                                 $recentCustomer = $recentOrder->customer?->name
                                     ?: ($recentOrder->customer?->phone ?: __('order.walk_in_customer'));
@@ -66,7 +108,8 @@
                                     ? \Carbon\Carbon::parse($recentOrder->order_date)->format('d M Y, h:i a')
                                     : '---';
                             @endphp
-                            <article class="booking-pos-order-card"
+                            <article class="booking-pos-order-card" role="link" tabindex="0"
+                                @keydown.enter.prevent="$el.click()"
                                 s-click-link="{{ route('admin-' . ($routeName ?? 'order') . '-edit', $recentOrder->id) }}">
                                 <div class="booking-pos-order-card-top">
                                     <div class="order-customer-avatar">
@@ -391,6 +434,112 @@
                 </div>
 
                 <style>
+                    /* Keep the recent-order reel contained within the main column. */
+                    .booking-dashboard.booking-order-ui .booking-pos-recent-section {
+                        min-width: 0;
+                        max-width: 100%;
+                        box-sizing: border-box;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-section-header {
+                        flex-wrap: wrap;
+                        gap: 10px;
+                    }
+                    .booking-order-ui .booking-pos-recent-actions,
+                    .booking-order-ui .booking-pos-recent-navigation {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+                    .booking-order-ui .booking-pos-recent-actions {
+                        margin-left: auto;
+                    }
+                    .booking-order-ui .booking-pos-recent-navigation[style*="display: none"] {
+                        display: none !important;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-recent-scroll {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 32px;
+                        min-width: 32px;
+                        height: 32px;
+                        padding: 0;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 9px;
+                        background: #fff;
+                        color: #475569;
+                        cursor: pointer;
+                        transition: border-color .2s ease, background-color .2s ease;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-recent-scroll svg {
+                        width: 18px;
+                        height: 18px;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-recent-scroll:hover:not(:disabled) {
+                        border-color: #2563eb;
+                        background: #eff6ff;
+                        color: #2563eb;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-recent-scroll:disabled {
+                        background: #f8fafc !important;
+                        color: #94a3b8 !important;
+                        opacity: .5;
+                        cursor: default !important;
+                    }
+                    .booking-dashboard.booking-order-ui .booking-pos-recent-section .booking-pos-recent-cards {
+                        display: flex;
+                        flex-wrap: nowrap;
+                        gap: 10px;
+                        min-width: 0;
+                        max-width: 100%;
+                        overflow-x: auto;
+                        padding: 3px 2px 10px;
+                        scroll-behavior: smooth;
+                        scroll-snap-type: x proximity;
+                        scroll-padding-inline: 2px;
+                        overscroll-behavior-x: contain;
+                        scrollbar-width: thin;
+                        scrollbar-color: #cbd5e1 transparent;
+                    }
+                    .booking-order-ui .booking-pos-recent-cards::-webkit-scrollbar {
+                        height: 6px;
+                    }
+                    .booking-order-ui .booking-pos-recent-cards::-webkit-scrollbar-thumb {
+                        border-radius: 999px;
+                        background: #cbd5e1;
+                    }
+                    .booking-dashboard.booking-order-ui .booking-pos-recent-section .booking-pos-order-card {
+                        flex: 0 0 224px;
+                        min-width: 0;
+                        max-width: 100%;
+                        box-sizing: border-box;
+                        scroll-snap-align: start;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .invoice-num {
+                        flex-shrink: 0;
+                        max-width: 45%;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-order-date span {
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-order-date svg {
+                        flex-shrink: 0;
+                    }
+                    .booking-order-ui .booking-pos-recent-section .booking-pos-order-empty {
+                        flex: 1 1 100%;
+                    }
+                    .booking-order-ui .booking-pos-recent-section :is(.booking-pos-recent-scroll, .booking-pos-order-card, .booking-pos-recent-cards):focus-visible {
+                        outline: 2px solid #2563eb;
+                        outline-offset: -2px;
+                    }
+                    @media (prefers-reduced-motion: reduce) {
+                        .booking-dashboard.booking-order-ui .booking-pos-recent-section .booking-pos-recent-cards {
+                            scroll-behavior: auto;
+                        }
+                    }
+
                     /* Shared visual language for the order items and product picker. */
                     .booking-order-ui .booking-pos-items-section,
                     .order-product-picker {

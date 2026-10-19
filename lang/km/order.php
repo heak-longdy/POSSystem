@@ -6,6 +6,8 @@ return [
     'report_title' => 'របាយការណ៍ការបញ្ជាទិញ',
     'product_order' => 'ការកុម្ម៉ង់ផលិតផល',
     'recent_orders' => 'ការបញ្ជាទិញថ្មីៗ',
+    'recent_orders_previous' => 'រំកិលការបញ្ជាទិញថ្មីៗទៅឆ្វេង',
+    'recent_orders_next' => 'រំកិលការបញ្ជាទិញថ្មីៗទៅស្តាំ',
     'view_all' => 'មើលទាំងអស់',
     'walk_in_customer' => 'អតិថិជនទូទៅ',
     'no_recent_orders' => 'មិនមានការបញ្ជាទិញថ្មីៗទេ',

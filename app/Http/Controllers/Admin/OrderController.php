@@ -886,14 +886,14 @@ class OrderController extends Controller
                 $query->where('shop_id', $shop->id);
             })
             ->latest('id')
-            ->take(3)
+            ->take(10)
             ->get();
 
         if ($recentOrders->isEmpty()) {
             $recentOrders = Order::with(['customer'])
                 ->withCount('orderDetails')
                 ->latest('id')
-                ->take(3)
+                ->take(10)
                 ->get();
         }
 

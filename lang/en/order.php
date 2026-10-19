@@ -6,6 +6,8 @@ return [
     'report_title' => 'Order Reports',
     'product_order' => 'Product Order',
     'recent_orders' => 'Recent Orders',
+    'recent_orders_previous' => 'Scroll recent orders left',
+    'recent_orders_next' => 'Scroll recent orders right',
     'view_all' => 'View all',
     'walk_in_customer' => 'Walk-in customer',
     'no_recent_orders' => 'No recent orders',
