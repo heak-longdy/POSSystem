@@ -207,6 +207,18 @@ class UserPermissionTest extends TestCase
         $this->postJson(route('admin-setting-invoice-save'), [])->assertForbidden();
     }
 
+    public function test_order_bulk_print_access_can_be_granted_and_revoked_through_permission_configuration(): void
+    {
+        $this->staff->update(['role' => 'admin']);
+        $this->staff->givePermissionTo('dashboard-view');
+        $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))->assertOk()
+            ->assertSee('value="order-bulk-print-view"', false);
+        $this->postJson($this->saveUrl(), ['permission' => ['dashboard-view', 'order-bulk-print-view']])->assertOk();
+        $this->assertTrue($this->staff->fresh()->can('order-bulk-print-view'));
+        $this->actingAs($this->manager)->postJson($this->saveUrl(), ['permission' => ['dashboard-view']])->assertOk();
+        $this->assertFalse($this->staff->fresh()->can('order-bulk-print-view'));
+    }
+
     public function test_create_ignores_submitted_roles_and_permissions_including_for_super_admin_creators(): void
     {
         $super = User::create(['name' => 'Super', 'email' => 'super@example.test', 'role' => 'super_admin']);
@@ -426,7 +438,7 @@ class UserPermissionTest extends TestCase
         $response = $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))->assertOk();
         $menu = $response['permissionMenu'];
         $names = PermissionModuleSelection::flatten($menu)->pluck('name')->all();
-        $expected = ['Dashboard', 'Product', 'Order', 'Shop', 'Customer', 'Stock In', 'Stock Out',
+        $expected = ['Dashboard', 'Product', 'Order', 'Order Bulk Print', 'Shop', 'Customer', 'Stock In', 'Stock Out',
             'Stock Transfer', 'Stock On Hand', 'Stock Movement', 'Report Sales', 'Report Inventory Movement',
             'Staff Expense Report', 'Position', 'Staff', 'Staff Expense', 'User', 'File Manager', 'Category', 'Supplier', 'UOM', 'Invoice Setting'];
         $this->assertSame($expected, $names);

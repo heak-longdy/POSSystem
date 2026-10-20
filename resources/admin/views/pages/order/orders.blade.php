@@ -140,12 +140,19 @@
             color: #94a3b8;
             cursor: pointer;
             padding: 4px;
-            border-radius: 6px;
+            border-radius: 7px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
             transition: all 0.15s ease;
+            padding: 4px !important;
+            min-width: auto !important;
+            width: 37px !important;
+            height: 35px !important;
+        }
+        .order-listing-wrapper .filter-popover-close i.bx{
+            margin-right:0 !important;
         }
         .order-listing-wrapper .filter-popover-close:hover {
             background: #f1f5f9;

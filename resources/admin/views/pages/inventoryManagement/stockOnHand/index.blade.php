@@ -7,13 +7,13 @@
             min-width: 200px !important;
             max-width: 260px !important;
             width: 220px !important;
-            margin-left: 5px !important;
+            margin-left: 10px !important;
             display: flex !important;
             align-items: center !important;
             position: relative !important;
         }
 
-        .select2-filter-wrap .select2Group {
+        /* .select2-filter-wrap .select2Group {
             width: 100% !important;
             position: relative !important;
         }
@@ -109,7 +109,7 @@
 
         .select2-filter-wrap .select2Group .select2Reset:hover svg {
             fill: #ef4444 !important;
-        }
+        } */
 
         .table-wrapper .table-row-4 {
             width: 4% !important;

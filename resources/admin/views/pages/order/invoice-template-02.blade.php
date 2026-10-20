@@ -23,9 +23,10 @@
     $details = $order->orderDetails ?: collect();
     $minRows = 3;
     $emptyRowsCount = max(0, min(3, $minRows - $details->count()));
+    $printAreaId = $printAreaId ?? "posSlipPrintArea_{$printLocale}";
 @endphp
 
-<div class="pos-slip-sheet" id="posSlipPrintArea_{{ $printLocale }}">
+<div class="pos-slip-sheet" id="{{ $printAreaId }}">
     <!-- Header Top Section -->
     <div class="slip-top-row">
         <div class="slip-top-left"></div>

@@ -30440,7 +30440,7 @@ button:not(.text-gray-400):not(.fancybox-button) {
   min-width: 64px;
   line-height: 36px;
   padding: 0 16px;
-  border-radius: 4px;
+  border-radius: 7px;
   overflow: visible;
   color: #fff;
   align-items: center;
@@ -32394,7 +32394,7 @@ nav .divider {
   display: flex;
   align-items: center;
   border: 1px solid rgba(112, 112, 112, 0.2);
-  border-radius: 15px !important;
+  border-radius: 7px !important;
   margin-left: 5px;
   min-width: 150px;
   background-color: #fff;
@@ -32445,7 +32445,7 @@ nav .divider {
   max-width: 100px;
   font-size: 0.9rem;
   border: 1px #eee solid;
-  border-radius: 25px 0 0 25px;
+  border-radius: 7px 0 0 7px;
 }
 .header-tab .header-tab-wrapper .menu-row .filter button {
   font-size: 0.9rem;
@@ -32476,7 +32476,7 @@ nav .divider {
   border: none;
   border: 1px solid rgba(152, 152, 152, 0.2);
   padding: 5px 5px;
-  border-radius: 25px;
+  border-radius: 7px;
   margin-left: 5px;
   min-width: 150px;
 }
@@ -32523,12 +32523,12 @@ nav .divider {
   color: #7d7d7d;
 }
 .header-tab .header-action-button button {
-  border-radius: 25px !important;
+  border-radius: 7px !important;
   border: 1px solid #ccc;
   background: #fff;
   margin-left: 10px;
   color: #333;
-  border-radius: 25px !important;
+  border-radius: 7px !important;
   padding: 0 10px !important;
   border: 1px solid rgba(152, 152, 152, 0.2);
   display: flex;
@@ -32547,7 +32547,7 @@ nav .divider {
   color: #fff;
   background: #3C91E6 !important;
   color: #fff;
-  border-radius: 25px !important;
+  border-radius: 7px !important;
   box-shadow: unset !important;
   padding: 0 14px 0px 10px !important;
 }
@@ -32557,7 +32557,7 @@ nav .divider {
   border: 1px solid rgba(51, 51, 51, 0.2);
   border: 1px solid rgba(152, 152, 152, 0.2);
   background: #fff !important;
-  border-radius: 25px !important;
+  border-radius: 7px !important;
   padding: 0 12px;
   width: 45px;
   height: 100%;
@@ -32936,13 +32936,13 @@ nav .divider {
   background-color: #fff;
   padding: 5px;
   margin-bottom: 0.5rem;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .table .filter .form-row {
   display: flex;
   align-items: center;
   border: 1px solid rgba(112, 112, 112, 0.2);
-  border-radius: 25px;
+  border-radius: 7px;
   margin-left: 5px;
   min-width: 150px;
   background-color: #fff;
@@ -32993,7 +32993,7 @@ nav .divider {
   max-width: 100px;
   font-size: 0.9rem;
   border: 1px #eee solid;
-  border-radius: 25px 0 0 25px;
+  border-radius: 7px 0 0 7px;
 }
 .table .filter button {
   font-size: 0.9rem;
@@ -33067,8 +33067,8 @@ nav .divider {
 .table-body {
   width: 100%;
   padding-right: 0;
-  border-bottom-left-radius: 25px;
-  border-bottom-right-radius: 25px;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
   box-sizing: border-box;
 }
 .table-body .column {
@@ -33247,7 +33247,7 @@ nav .divider {
   height: 100%;
   -o-object-fit: cover;
      object-fit: cover;
-  border-radius: 25px;
+  border-radius: 7px;
   border: 1px solid rgba(187, 187, 187, 0.168627451);
 }
 .table-body .column .row .thumbnail[data-fancybox] {
@@ -33269,7 +33269,7 @@ nav .divider {
   height: 50px;
   margin-top: 10px;
   background: #fff;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .table-footer.table-footer-top {
   margin-top: 0px !important;
@@ -33348,7 +33348,7 @@ nav .divider {
 .table.top-prefix .table-top-prefix {
   height: 80px;
   margin-top: 20px;
-  border-radius: 25px;
+  border-radius: 7px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -33482,7 +33482,7 @@ nav .divider {
   align-items: center;
   border: 1px solid rgba(51, 51, 51, 0.2);
   padding: 10px 15px;
-  border-radius: 25px;
+  border-radius: 7px;
   background: #fff;
   position: relative;
 }
@@ -33572,7 +33572,7 @@ nav .divider {
   display: flex;
   padding: 30px 40px;
   background: #fff;
-  border-radius: 25px;
+  border-radius: 7px;
   box-shadow: 0px 3px 8px -3px rgba(0, 0, 0, 0.2);
 }
 .dashboard-admin .dashboard-wrapper .dashboard-body .welcome h2 {
@@ -35196,7 +35196,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   box-sizing: border-box;
   background: #ffffff;
   padding: 28px;
-  border-radius: 25px;
+  border-radius: 7px;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -35422,7 +35422,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .form-admin .form-wrapper .form-body .switch-form-row {
   padding: 0 15px;
   margin-bottom: 5px;
-  border-radius: 25px;
+  border-radius: 7px;
   background: #f1f1f1;
 }
 .form-admin .form-wrapper .form-body .switch-form-row .mat-ink-bar {
@@ -35432,7 +35432,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   flex: auto;
   padding: 0 15px;
   height: 40px;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .form-admin .form-wrapper .form-body .switch-form-row .mat-tab-label.mat-tab-label-active {
   color: #024de3;
@@ -35616,7 +35616,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 25px;
+  border-radius: 7px;
   opacity: 0;
 }
 .form-admin .form-wrapper .form-body .form-select-photo .image-view.active {
@@ -35727,7 +35727,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 25px;
+  border-radius: 7px;
   opacity: 0;
   display: flex;
   flex-direction: row;
@@ -35819,7 +35819,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .form-admin .form-wrapper .form-body .form-button button {
   height: 40px;
   font-size: 14px;
-  border-radius: 25px;
+  border-radius: 7px;
   box-sizing: border-box;
   color: #231f20;
   border: 1px solid #231f20;
@@ -35912,7 +35912,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 }
 .form-admin .form-wrapper .form-body .tab-content {
   border: 2px solid #d8dce5;
-  border-radius: 25px;
+  border-radius: 7px;
   padding: 15px 25px;
   margin-bottom: 15px;
 }
@@ -35926,7 +35926,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   display: flex;
   height: 70px;
   border: 1px solid #ddd;
-  border-radius: 25px;
+  border-radius: 7px;
   overflow: hidden;
   margin-bottom: 10px;
 }
@@ -36020,7 +36020,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   padding: 10px;
   box-sizing: border-box;
   border: 1px solid #f1f1f1;
-  border-radius: 25px;
+  border-radius: 7px;
   cursor: pointer;
   display: flex;
   height: -webkit-fit-content;
@@ -36039,7 +36039,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   height: 70px;
   margin-right: 10px;
   cursor: pointer;
-  border-radius: 25px;
+  border-radius: 7px;
   overflow: hidden;
 }
 .form-admin .form-wrapper .form-body .radio-group .radio-item .img img {
@@ -36101,7 +36101,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .form-admin .form-wrapper .form-body .map {
   width: 100%;
   height: 300px;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .form-admin .form-wrapper .form-body .form-check .form-check-input[type=checkbox] {
   margin-right: unset;
@@ -36187,7 +36187,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   box-sizing: border-box;
   background: #fff;
   padding: 20px;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .table-form .form-body .row-2 {
   width: 100%;
@@ -36328,7 +36328,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   margin-left: 10px;
   height: 45px;
   font-size: 14px;
-  border-radius: 25px;
+  border-radius: 7px;
   box-sizing: border-box;
   color: #231f20;
   border: 1px solid #231f20;
@@ -36367,7 +36367,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 }
 .table-form .form-body .form-tab {
   width: 100%;
-  border-radius: 25px;
+  border-radius: 7px;
   margin: 15px 0;
 }
 .table-form .form-body .form-tab .menu-row {
@@ -36386,7 +36386,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   justify-content: center;
   flex: auto;
   color: #231f20;
-  border-radius: 25px;
+  border-radius: 7px;
   background: #f0f0f0;
 }
 .table-form .form-body .form-tab .menu-row .menu-item:hover {
@@ -36731,7 +36731,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border-radius: 25px;
+  border-radius: 7px;
   opacity: 0;
 }
 .form-select-photo .image-view.active {
@@ -36897,7 +36897,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   width: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: 25px;
+  border-radius: 7px;
   box-sizing: border-box;
   padding: 20px;
   background: #fff;
@@ -36916,7 +36916,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 }
 .lt-group .lt-group-wrapper .lt-group-item {
   border: 1px solid #d4d4d4;
-  border-radius: 25px;
+  border-radius: 7px;
   min-height: 60px;
   height: 70px;
   display: flex;
@@ -36927,7 +36927,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .lt-group .lt-group-wrapper .lt-group-item .thumbnail {
   width: 60px;
   height: 100%;
-  border-radius: 25px;
+  border-radius: 7px;
   overflow: hidden;
 }
 .lt-group .lt-group-wrapper .lt-group-item .thumbnail img {
@@ -36986,7 +36986,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   box-sizing: border-box;
   background: #fff;
   padding: 40px;
-  border-radius: 25px;
+  border-radius: 7px;
   box-shadow: 0px 3px 8px -3px rgba(0, 0, 0, 0.2);
 }
 .message-admin .message-wrapper .message-body .row-2 {
@@ -37041,7 +37041,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .message-admin .message-wrapper .message-body .list .img {
   width: 100%;
   height: 250px;
-  border-radius: 25px;
+  border-radius: 7px;
   overflow: hidden;
 }
 .message-admin .message-wrapper .message-body .list .img img {
@@ -37233,7 +37233,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   font-weight: 500;
   background: rgba(2, 77, 227, 0.1);
   padding: 3px 10px;
-  border-radius: 25px;
+  border-radius: 7px;
   font-size: 13px;
   color: #024de3;
 }
@@ -37278,7 +37278,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  border-radius: 25px;
+  border-radius: 7px;
   cursor: pointer;
   color: #989898;
 }
@@ -37313,7 +37313,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   align-items: center;
   border: 1px solid #e5e5e5;
   padding: 5px 5px;
-  border-radius: 25px;
+  border-radius: 7px;
   width: 250px;
 }
 .file-manager-wrapper .file-manager-body .file-list .action .form-row input,
@@ -37349,7 +37349,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .file-manager-wrapper .file-manager-body .file-list .action button {
   background: rgba(0, 199, 83, 0.1);
   color: #00c753;
-  border-radius: 25px;
+  border-radius: 7px;
   margin-left: 10px;
   padding: 10px 15px;
 }
@@ -37411,7 +37411,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   box-sizing: border-box;
   transition: 0.2s;
   padding: 10px;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .file-manager-wrapper .file-manager-body .file-list .file-list-wrapper .folder-row .folder-item.selected {
   background: rgba(2, 77, 227, 0.1);
@@ -37427,7 +37427,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   height: auto;
   min-height: 100px;
   overflow: hidden;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .file-manager-wrapper .file-manager-body .file-list .file-list-wrapper .folder-row .folder-item .img img {
   width: 100%;
@@ -37544,7 +37544,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   box-sizing: border-box;
   transition: 0.2s;
   padding: 5px;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .file-manager-wrapper .file-manager-body .file-list .file-list-wrapper .file-row .file-item.selected {
   background: rgba(2, 77, 227, 0.1);
@@ -37560,7 +37560,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   height: 100px;
   overflow: hidden;
   border: 1px solid #e5e5e5;
-  border-radius: 25px;
+  border-radius: 7px;
   background: #e5e5e5;
 }
 .file-manager-wrapper .file-manager-body .file-list .file-list-wrapper .file-row .file-item .img img {
@@ -37685,21 +37685,21 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   box-sizing: border-box;
   transition: 0.2s;
   padding: 10px;
-  border-radius: 25px;
+  border-radius: 7px;
   background: linear-gradient(90deg, rgba(220, 224, 229, 0.2), rgba(240, 242, 244, 0.2), rgba(220, 224, 229, 0.2));
   animation: loader 1s infinite reverse;
 }
 .file-manager-wrapper .file-manager-body .file-list .file-list-wrapper .skeleton-row .skeleton-item .img {
   width: 100%;
   height: 80px;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .file-manager-wrapper .file-manager-body .file-list .file-list-wrapper .skeleton-row .skeleton-item .name {
   width: 100%;
   padding: 5px 0;
   margin-top: 5px;
   box-sizing: border-box;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 @-webkit-keyframes loader {
   from {
@@ -38042,7 +38042,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   color: #989898;
 }
 .data-empty-container .data-empty-wrapper .message button {
-  border-radius: 25px;
+  border-radius: 7px;
   border: 1px solid #ccc;
   background: #fff;
   border: unset;
@@ -38135,7 +38135,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   color: #fff;
   margin-top: 15px;
   background-color: #ff3838;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .no-permission-container .no-permission-wrapper .message button span {
   font-size: 13px;
@@ -38698,7 +38698,7 @@ div button.gm-fullscreen-control {
 }
 .select-option .select-option-footer button {
   background: #024de3;
-  border-radius: 25px;
+  border-radius: 7px;
   color: #fff;
   font-size: 15px;
   font-weight: 500;
@@ -38786,7 +38786,7 @@ div button.gm-fullscreen-control {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: 25px;
+  border-radius: 7px;
 }
 .auth-popup .mat-menu-content button.mat-menu-item svg {
   width: 30px;
@@ -38948,7 +38948,7 @@ div button.gm-fullscreen-control {
   height: -moz-fit-content;
   height: fit-content;
   padding: 25px;
-  border-radius: 25px;
+  border-radius: 7px;
   max-height: 95vh;
   overflow: auto;
 }
@@ -39204,7 +39204,7 @@ div button.gm-fullscreen-control {
 }
 .dialog .dialog-container .dialog-form .dialog-form-footer button {
   background: #024de3;
-  border-radius: 25px;
+  border-radius: 7px;
   color: #fff;
   font-size: 15px;
   font-weight: 500;
@@ -48970,7 +48970,7 @@ span.error {
   display: flex;
 }
 .tabs a {
-  margin-right: 5px;
+  margin-right: 8px;
   font-size: 15px;
   color: #5a5e66;
   font-weight: 400;
@@ -48978,12 +48978,19 @@ span.error {
   background: #fff;
   padding: 5px 10px;
   white-space: nowrap;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
 }
 .tabs a.tabActive {
   border: 1px solid rgba(152, 152, 152, 0.2);
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
   background-color: #3C91E6 !important;
-  border-radius: 35px;
+  border-radius: 7px;
   color: #fff;
 }
 

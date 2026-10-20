@@ -38,6 +38,9 @@ class AdminPermissions
         if ($name === 'admin-dashboard') {
             return ['dashboard-view'];
         }
+        if (str_starts_with($name ?? '', 'admin-order-bulk-print-')) {
+            return ['order-bulk-print-view'];
+        }
         if (str_starts_with($name ?? '', 'admin-file-manager-')) {
             $action = substr($name, strlen('admin-file-manager-'));
             $actions = [

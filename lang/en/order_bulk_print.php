@@ -1,0 +1,98 @@
+<?php
+
+return [
+    'title' => 'Order Bulk Printing',
+    'subtitle' => 'Search, filter, and batch print Invoices and Delivery Slips',
+    'menu_title' => 'Order Bulk Print',
+
+    'filters' => [
+        'title' => 'Filters',
+        'status' => 'Status',
+        'payment_status' => 'Payment Status',
+        'shop' => 'Shop',
+        'select_shop' => 'Select Shop',
+        'all_shops' => 'All Shops',
+        'date_range' => 'Date Range',
+        'from_date' => 'From Date',
+        'to_date' => 'To Date',
+        'search' => 'Search orders...',
+        'search_placeholder' => 'Invoice #, shop, customer, product...',
+        'apply' => 'Apply Filters',
+        'reset' => 'Reset Filters',
+        'all_statuses' => 'All Statuses',
+    ],
+
+    'status' => [
+        'all' => 'All',
+        'pending' => 'Pending',
+        'partial' => 'Partial',
+        'paid' => 'Paid',
+        'rejected' => 'Rejected',
+    ],
+
+    'payment_status_labels' => [
+        'all' => 'All Payment Statuses',
+        'pending' => 'Pending',
+        'partial' => 'Partial',
+        'paid' => 'Paid',
+        'cancel' => 'Cancel',
+    ],
+
+    'table' => [
+        'no' => 'No.',
+        'invoice_number' => 'Invoice #',
+        'date' => 'Order Date',
+        'shop' => 'Shop',
+        'customer' => 'Customer',
+        'total' => 'Total Amount',
+        'payment_status' => 'Status',
+        'no_records' => 'No orders found matching the applied filters.',
+        'showing' => 'Showing :from to :to of :total orders',
+    ],
+
+    'selection' => [
+        'selected_count' => ':count order selected|:count orders selected',
+        'page_selected_notice' => 'All :count orders on this page are selected.',
+        'select_all_matching' => 'Select all :count matching orders',
+        'all_matching_selected' => 'All :count matching orders selected across all pages.',
+        'clear' => 'Clear Selection',
+        'language' => 'Print Language',
+        'khmer' => 'Khmer',
+        'english' => 'English',
+        'print_invoices' => 'Print Selected Invoices',
+        'print_delivery_slips' => 'Print Selected Delivery Slips',
+        'loading_matching' => 'Fetching matching order IDs...',
+    ],
+
+    'preview' => [
+        'title_invoice' => 'Bulk Invoice Preview',
+        'title_delivery_slip' => 'Bulk Delivery Slip Preview',
+        'meta_docs' => ':count documents',
+        'prepared' => 'Prepared: :date',
+        'paper_size' => 'Paper: A5 landscape',
+        'print_all' => 'Print All',
+        'close' => 'Close Preview',
+        'preparing' => 'Preparing documents and loading fonts...',
+        'ready' => 'Ready to print',
+        'doc_separator' => 'Document :current of :total · :invoice',
+        'zoom_in' => 'Zoom In',
+        'zoom_out' => 'Zoom Out',
+        'fit_width' => 'Fit Width',
+    ],
+
+    'validation' => [
+        'no_orders_selected' => 'Please select at least one order to print.',
+        'document_type_required' => 'The document type is required.',
+        'document_type_invalid' => 'The selected document type is invalid.',
+        'print_locale_required' => 'The print language is required.',
+        'print_locale_invalid' => 'The selected print language is invalid.',
+        'order_ids_required' => 'No order IDs were provided.',
+        'order_ids_invalid' => 'The order selection is invalid.',
+        'order_ids_min' => 'Please select at least one order.',
+        'order_ids_max' => 'You cannot select more than :max orders in a single print batch.',
+        'order_id_invalid' => 'One or more selected order IDs are invalid.',
+        'some_orders_unavailable' => 'Some selected orders are no longer available or do not match current filters (IDs: :ids). Please refresh the list.',
+        'detail_rows_exceeded' => 'The selected orders contain :total detail rows, which exceeds the maximum batch limit of :max rows. Please narrow your selection.',
+        'matching_limit_exceeded' => 'There are :total matching orders, which exceeds the limit of :max. Please refine your search filters before printing.',
+    ],
+];

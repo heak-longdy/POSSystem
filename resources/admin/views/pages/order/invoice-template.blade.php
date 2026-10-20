@@ -26,9 +26,10 @@
     $details = $order->orderDetails ?: collect();
     $minRows = 7;
     $emptyRowsCount = max(0, $minRows - $details->count());
+    $printAreaId = $printAreaId ?? "posInvoicePrintArea_{$printLocale}";
 @endphp
 
-<div class="pos-invoice-sheet" id="posInvoicePrintArea_{{ $printLocale }}">
+<div class="pos-invoice-sheet" id="{{ $printAreaId }}">
     <!-- Invoice Header Block -->
     <div class="inv-header-row">
         <!-- Left: Logo & Company Name -->

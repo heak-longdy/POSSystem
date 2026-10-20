@@ -25,6 +25,17 @@ return [
     ],
     [
         'type'  => 'single',
+        'active' => 'admin/order-bulk-print/*',
+        'path' => 'admin/order-bulk-print',
+        'permission' => ['order-bulk-print-view'],
+        'name' => [
+            'en' => 'Order Bulk Print',
+            'km' => 'បោះពុម្ពការបញ្ជាទិញជាច្រើន',
+        ],
+        'icon' => 'bx-printer',
+    ],
+    [
+        'type'  => 'single',
         'active' => 'admin/remaining-amount/*',
         'path' => 'admin/remaining-amount/list/partial',
         'permission' => 'order-view',

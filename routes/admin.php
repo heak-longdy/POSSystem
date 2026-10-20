@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ShopController;
 
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\RemainingAmountController;
+use App\Http\Controllers\Admin\OrderBulkPrintController;
 
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -300,6 +301,16 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::post('send-payment-reminder/{id}', [OrderController::class, 'sendPaymentReminder'])->name('send-payment-reminder');
             Route::post('cancel/{id}', [OrderController::class, 'cancelOrder'])->name('cancel');
             Route::post('update-payment-status/{id}', [OrderController::class, 'updatePaymentStatus'])->name('update-payment-status');
+        });
+
+        // Order Bulk Printing
+        Route::group([
+            'prefix' => 'order-bulk-print',
+            'as'     => 'order-bulk-print-'
+        ], function () {
+            Route::get('/', [OrderBulkPrintController::class, 'index'])->name('index');
+            Route::post('selection', [OrderBulkPrintController::class, 'selection'])->name('selection');
+            Route::match(['get', 'post'], 'preview/{document_type?}', [OrderBulkPrintController::class, 'preview'])->name('preview');
         });
 
         // Remaining Amount Management

@@ -33,6 +33,69 @@ class InvoiceService
     }
 
     /**
+     * Compute previous unpaid balance for multiple orders efficiently.
+     *
+     * @param iterable<Order> $orders
+     * @return array<int, float>
+     */
+    public function previousBalanceForMany(iterable $orders): array
+    {
+        $ordersList = is_array($orders) ? $orders : iterator_to_array($orders);
+        if (empty($ordersList)) {
+            return [];
+        }
+
+        $customerIds = [];
+        foreach ($ordersList as $order) {
+            if (!empty($order->customer_id)) {
+                $customerIds[] = $order->customer_id;
+            }
+        }
+        $customerIds = array_unique($customerIds);
+
+        if (empty($customerIds)) {
+            $result = [];
+            foreach ($ordersList as $order) {
+                $result[$order->id] = 0.0;
+            }
+            return $result;
+        }
+
+        $debtsByCustomer = [];
+        $orderDebts = [];
+
+        $cursor = Order::whereIn('customer_id', $customerIds)
+            ->whereIn('payment_status', ['Pending', 'Partial'])
+            ->select(['id', 'customer_id', 'total_price', 'paid_amount'])
+            ->cursor();
+
+        foreach ($cursor as $o) {
+            $totalCents = (int) round((float) ($o->total_price ?? 0) * 100);
+            $paidCents = (int) round((float) ($o->paid_amount ?? 0) * 100);
+            $debtCents = max(0, $totalCents - $paidCents);
+
+            $debtsByCustomer[$o->customer_id] = ($debtsByCustomer[$o->customer_id] ?? 0) + $debtCents;
+            $orderDebts[$o->id] = $debtCents;
+        }
+
+        $result = [];
+        foreach ($ordersList as $order) {
+            if (!$order->customer_id) {
+                $result[$order->id] = 0.0;
+                continue;
+            }
+
+            $totalCustomerDebtCents = $debtsByCustomer[$order->customer_id] ?? 0;
+            $thisOrderDebtCents = $orderDebts[$order->id] ?? 0;
+            $prevBalanceCents = max(0, $totalCustomerDebtCents - $thisOrderDebtCents);
+
+            $result[$order->id] = $prevBalanceCents / 100;
+        }
+
+        return $result;
+    }
+
+    /**
      * Generate the next unique invoice number in a concurrency-safe atomic transaction.
      */
     public function generateNextInvoiceNumber(?Carbon $date = null): string

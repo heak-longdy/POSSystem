@@ -922,6 +922,7 @@ class PermissionSeeder extends Seeder
 
         $this->completeActiveModules();
         (new FileAndInvoicePermissionSeeder())->run();
+        (new OrderBulkPrintPermissionSeeder())->run();
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
     private function module(array $attributes)
