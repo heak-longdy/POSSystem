@@ -30,18 +30,18 @@
 
     .mdi-tabs-scroll-wrapper {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         height: 100%;
         width: 100%;
         overflow-x: auto;
         overflow-y: hidden;
         scrollbar-width: none; // Firefox
         -ms-overflow-style: none; // IE/Edge
-        gap: 0;
+        gap: 2px;
         flex: 1;
-        // padding-top: 5px;
+        // padding: 4px 6px;
 
-        padding-top: 0;
+        padding: 4px 6px 0px 6px;
 
         &::-webkit-scrollbar {
             display: none; // Chrome/Safari
@@ -118,25 +118,23 @@
     .mdi-tab-item {
         position: relative;
         display: inline-flex;
+        flex: 0 0 200px;
         align-items: center;
-        gap: 8px;
-        // height: 36px;
-        // padding: 0 14px;
-        // border-radius: 8px 8px 0 0;
-
-        height: 100% ;
-        padding: 0 10px;
-        border-radius: 0;
+        gap: 10px;
+        height: 100%;
+        padding: 0 12px;
         background: transparent;
         color: #64748b;
         font-size: 13px;
         font-weight: 500;
         cursor: pointer;
         white-space: nowrap;
-        border-right: 1px solid #e2e8f0;
+        border-right: none;
         border-bottom: none;
         transition: all 0.15s ease-in-out;
-        max-width: 220px;
+        // max-width: 200px;
+        max-width: 170px;
+        border-radius: 7px 7px 0px 0px !important;
 
         .mdi-tab-icon {
             font-size: 16px;
@@ -148,6 +146,8 @@
         }
 
         .mdi-tab-title {
+            flex: 1;
+            min-width: 0;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -167,7 +167,10 @@
 
         /* Close Button - hidden by default, shown on hover or when tab is active */
         .mdi-tab-close-btn {
-            // display: none !important;
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             width: 18px !important;
@@ -183,11 +186,18 @@
             line-height: 1 !important;
             padding: 0 !important;
             cursor: pointer !important;
+            margin-top: -9px !important;
             margin-left: 2px !important;
             flex-shrink: 0 !important;
-            opacity: 0.7;
+            opacity: 0;
+            pointer-events: none;
             box-shadow: none !important;
             transition: all 0.15s ease;
+
+            &:focus-visible {
+                opacity: 1;
+                pointer-events: auto;
+            }
 
             &:hover {
                 background: unset !important;
@@ -205,18 +215,27 @@
             .mdi-tab-icon {
                 color: #64748b;
             }
-
-            .mdi-tab-close-btn {
-                opacity: 1;
-            }
         }
 
-        /* Show close button only on hover or when active (unpinned only) */
+        /* Only visible close buttons reserve title space; the tab width stays fixed. */
+        &:not(.pinned):hover,
+        &:not(.pinned).active,
+        &:not(.pinned):focus-within {
+            padding-right: 40px;
+        }
+
         &:not(.pinned):hover,
         &:not(.pinned).active {
             .mdi-tab-close-btn {
-                display: inline-flex !important;
+                opacity: 1;
+                pointer-events: auto;
             }
+        }
+
+        /* Soft outer shadows lift active and hovered tabs off the strip. */
+        &:hover,
+        &.active {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.025);
         }
 
         /* On hover, close button replaces dirty dot */
@@ -238,7 +257,7 @@
             color: #1e293b;
             font-weight: 600;
             border-color: #e2e8f0;
-            box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.03);
+            
 
             .mdi-tab-icon {
                 color: #3b82f6;
@@ -248,19 +267,18 @@
             &::after {
                 content: '';
                 position: absolute;
-                // bottom: -1px;
                 bottom: 0;
                 left: 0;
-                right: 0;
+                right: 0px;
                 height: 1.5px;
                 background: #3b82f6;
-                // border-radius: 3px 3px 0 0;
-                border-radius: 0;
+                border-radius: 2px;
             }
         }
 
         /* Pinned Tab */
         &.pinned {
+            flex: 0 0 auto;
             padding: 0 12px;
             // border-right: 1px solid #e2e8f0;
             // margin-right: 4px;
@@ -1065,6 +1083,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
         min-height: 40px;
 
         .mdi-tab-item {
+            flex-basis: 140px;
             max-width: 140px;
             padding: 0 8px;
             font-size: 12px;
@@ -1072,6 +1091,16 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 
             .mdi-tab-icon {
                 font-size: 14px;
+            }
+
+            .mdi-tab-close-btn {
+                right: 8px;
+            }
+
+            &:not(.pinned):hover,
+            &:not(.pinned).active,
+            &:not(.pinned):focus-within {
+                padding-right: 32px;
             }
         }
 

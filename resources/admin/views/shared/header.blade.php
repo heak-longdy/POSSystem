@@ -423,7 +423,6 @@
     }
 </style>
 <div class="header-name-meta" data-header-name="{{ $header_name }}" style="display:none;"></div>
-@include('admin::components.search_menu')
 <script>
     // document.addEventListener('DOMContentLoaded', function() {
     //     const nav = document.querySelector('.header');
@@ -605,18 +604,4 @@
             reloadData(url);
         }
     }));
-
-    window.addEventListener('keydown', (e) => {
-        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-            e.preventDefault();
-            if (Alpine.store('componentSearchMenu')?.active) {
-                Alpine.store('componentSearchMenu').active = false;
-            } else {
-                window.SearchMenu({
-                    title: @json(__('global.header.quick_search_menu')),
-                    placeholder: @json(__('global.header.quick_search_placeholder'))
-                });
-            }
-        }
-    });
 </script>

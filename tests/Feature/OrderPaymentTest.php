@@ -138,6 +138,7 @@ class OrderPaymentTest extends TestCase
 
     private function assertPrintedInvoiceSummary($response, array $expected): void
     {
+        $expected = array_map(fn ($amount) => $amount === '' ? '' : '$' . $amount, $expected);
         $document = new \DOMDocument();
         @$document->loadHTML('<?xml encoding="UTF-8">' . $response->getContent());
         $xpath = new \DOMXPath($document);
@@ -171,11 +172,11 @@ class OrderPaymentTest extends TestCase
         // Reprinting an older invoice includes the customer's other current debts too.
         $this->order(500, [])->update(['customer_id' => 1]);
         $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
-        $this->assertPrintedInvoiceSummary($response, ['679.65', '200.00', '40.00', '160.00']);
+        $this->assertPrintedInvoiceSummary($response, ['679.65', '879.65', '40.00', '160.00']);
 
         $current->update(['paid_amount' => 0, 'payment_status' => 'Pending']);
         $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
-        $this->assertPrintedInvoiceSummary($response, ['679.65', '200.00', '', '200.00']);
+        $this->assertPrintedInvoiceSummary($response, ['679.65', '879.65', '', '200.00']);
     }
 
     /** @dataProvider invoiceDetailPages */
@@ -187,8 +188,8 @@ class OrderPaymentTest extends TestCase
             ['id' => 15, 'invoice_number' => 'NO-0015', 'customer_id' => 1, 'total_price' => 62.77, 'paid_amount' => 10, 'payment_status' => 'Partial'],
         ]);
 
-        $this->assertPrintedInvoiceSummary($this->get('/admin/' . $page . '/detail/14')->assertOk(), ['52.77', '29.10', '', '29.10']);
-        $this->assertPrintedInvoiceSummary($this->get('/admin/' . $page . '/detail/15')->assertOk(), ['29.10', '62.77', '10.00', '52.77']);
+        $this->assertPrintedInvoiceSummary($this->get('/admin/' . $page . '/detail/14')->assertOk(), ['52.77', '81.87', '', '29.10']);
+        $this->assertPrintedInvoiceSummary($this->get('/admin/' . $page . '/detail/15')->assertOk(), ['29.10', '91.87', '10.00', '52.77']);
     }
 
     public static function invoiceDetailPages(): array
@@ -203,18 +204,18 @@ class OrderPaymentTest extends TestCase
         $current = $this->order(50, []);
         $current->update(['customer_id' => 1]);
         $url = '/admin/order/detail/' . $current->id;
-        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['19.65', '50.00', '', '50.00']);
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['19.65', '69.65', '', '50.00']);
 
         $this->postJson('/admin/order/add-payment/' . $previous->id, ['amount' => 10])
             ->assertOk()->assertJsonPath('payment_status', 'Partial');
-        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['9.65', '50.00', '', '50.00']);
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['9.65', '59.65', '', '50.00']);
 
         $this->postJson('/admin/order/add-payment/' . $previous->id, ['amount' => 9.65])
             ->assertOk()->assertJsonPath('payment_status', 'Paid');
         $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['0.00', '50.00', '', '50.00']);
 
         $this->deleteJson('/admin/order/delete-payment/' . $previous->payments()->first()->id)->assertOk();
-        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['10.00', '50.00', '', '50.00']);
+        $this->assertPrintedInvoiceSummary($this->get($url)->assertOk(), ['10.00', '60.00', '', '50.00']);
     }
 
     public function test_printed_previous_balance_preserves_cents_and_does_not_offset_other_debts_with_overpayments(): void
@@ -226,7 +227,7 @@ class OrderPaymentTest extends TestCase
         $current->update(['customer_id' => 1]);
 
         $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
-        $this->assertPrintedInvoiceSummary($response, ['0.20', '50.00', '', '50.00']);
+        $this->assertPrintedInvoiceSummary($response, ['0.20', '50.20', '', '50.00']);
     }
 
     public function test_printed_previous_balance_is_zero_for_walk_ins_and_customers_without_prior_debt(): void
@@ -448,12 +449,12 @@ class OrderPaymentTest extends TestCase
         $this->assertEquals(80, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
 
         $this->get('/admin/order/detail/' . $order->id)->assertOk()
-            ->assertSee('$35.80')->assertSee('-$20.00')->assertSee('$61.28')
+            ->assertSee('$35.80')->assertSee('class="text-danger">$20.00</span>', false)->assertSee('$61.28')
             ->assertSee('$41.28')->assertDontSee('$81.28')->assertDontSee('54.80')
-            ->assertSee('class="cell-total">35.80</td>', false)
-            ->assertSee('class="td-disc">-1.00</td>', false)
-            ->assertSee('class="td-net">1.79</td>', false)
-            ->assertSee('class="td-total">35.80</td>', false);
+            ->assertSee('class="cell-total">$35.80</td>', false)
+            ->assertSee('class="td-disc">$1.00</td>', false)
+            ->assertSee('class="td-net">$1.79</td>', false)
+            ->assertSee('class="td-total">$35.80</td>', false);
         $this->getJson('/admin/order/payment-details/' . $order->id)->assertOk()
             ->assertJsonPath('total_price', 41.28)->assertJsonPath('paid_amount', 0)
             ->assertJsonPath('remaining_amount', 41.28);
@@ -507,7 +508,7 @@ class OrderPaymentTest extends TestCase
         $this->assertSame(0.5, $order->orderDetails->first()->product_discount);
         $this->assertSame(0.5, $order->orderDetails->last()->service_discount);
         $this->get('/admin/order/detail/' . $order->id)->assertOk()
-            ->assertSee('class="td-disc">-0.50</td>', false)
+            ->assertSee('class="td-disc">$0.50</td>', false)
             ->assertSee('$26.37');
 
         $view = app(OrderController::class)->edit($order->id);
@@ -581,11 +582,11 @@ class OrderPaymentTest extends TestCase
         $this->assertSame(2.0, $order->total_commission);
         $this->assertSame(16.0, $order->paid_amount);
         $this->get('/admin/order/detail/' . $order->id)->assertOk()
-            ->assertSee('$20.00')->assertSee('$18.00')->assertSee('-$2.00')->assertSee('$16.00')
-            ->assertSee('class="cell-total">18.00</td>', false)
-            ->assertSee('class="td-disc">-2.00</td>', false)
-            ->assertSee('class="td-net">18.00</td>', false)
-            ->assertSee('class="td-total">18.00</td>', false);
+            ->assertSee('$20.00')->assertSee('$18.00')->assertSee('class="text-danger">$2.00</span>', false)->assertSee('$16.00')
+            ->assertSee('class="cell-total">$18.00</td>', false)
+            ->assertSee('class="td-disc">$2.00</td>', false)
+            ->assertSee('class="td-net">$18.00</td>', false)
+            ->assertSee('class="td-total">$18.00</td>', false);
     }
 
     public function test_fully_discounted_order_has_zero_total_and_no_payment_due(): void

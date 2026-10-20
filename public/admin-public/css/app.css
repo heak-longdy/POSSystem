@@ -34154,16 +34154,16 @@ nav .divider {
 }
 .mdi-workspace-tabs-container .mdi-tabs-scroll-wrapper {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   height: 100%;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  gap: 0;
+  gap: 2px;
   flex: 1;
-  padding-top: 0;
+  padding: 4px 6px 0px 6px;
 }
 .mdi-workspace-tabs-container .mdi-tabs-scroll-wrapper::-webkit-scrollbar {
   display: none;
@@ -34229,25 +34229,27 @@ nav .divider {
 .mdi-workspace-tabs-container .mdi-tab-item {
   position: relative;
   display: inline-flex;
+  flex: 0 0 200px;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   height: 100%;
-  padding: 0 10px;
-  border-radius: 0;
+  padding: 0 12px;
   background: transparent;
   color: #64748b;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  border-right: 1px solid #e2e8f0;
+  border-right: none;
   border-bottom: none;
   transition: all 0.15s ease-in-out;
-  max-width: 220px;
+  max-width: 170px;
+  border-radius: 7px 7px 0px 0px !important;
   /* Dirty indicator dot (Unsaved changes) */
   /* Close Button - hidden by default, shown on hover or when tab is active */
   /* Hover State */
-  /* Show close button only on hover or when active (unpinned only) */
+  /* Only visible close buttons reserve title space; the tab width stays fixed. */
+  /* Soft outer shadows lift active and hovered tabs off the strip. */
   /* On hover, close button replaces dirty dot */
   /* Drag over indicator */
   /* Active State */
@@ -34262,6 +34264,8 @@ nav .divider {
   transition: color 0.15s ease;
 }
 .mdi-workspace-tabs-container .mdi-tab-item .mdi-tab-title {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -34277,6 +34281,10 @@ nav .divider {
   transition: transform 0.15s ease;
 }
 .mdi-workspace-tabs-container .mdi-tab-item .mdi-tab-close-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 18px !important;
@@ -34292,11 +34300,17 @@ nav .divider {
   line-height: 1 !important;
   padding: 0 !important;
   cursor: pointer !important;
+  margin-top: -9px !important;
   margin-left: 2px !important;
   flex-shrink: 0 !important;
-  opacity: 0.7;
+  opacity: 0;
+  pointer-events: none;
   box-shadow: none !important;
   transition: all 0.15s ease;
+}
+.mdi-workspace-tabs-container .mdi-tab-item .mdi-tab-close-btn:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 .mdi-workspace-tabs-container .mdi-tab-item .mdi-tab-close-btn:hover {
   background: unset !important;
@@ -34311,11 +34325,15 @@ nav .divider {
 .mdi-workspace-tabs-container .mdi-tab-item:hover .mdi-tab-icon {
   color: #64748b;
 }
-.mdi-workspace-tabs-container .mdi-tab-item:hover .mdi-tab-close-btn {
-  opacity: 1;
+.mdi-workspace-tabs-container .mdi-tab-item:not(.pinned):hover, .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned).active, .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned):focus-within {
+  padding-right: 40px;
 }
 .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned):hover .mdi-tab-close-btn, .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned).active .mdi-tab-close-btn {
-  display: inline-flex !important;
+  opacity: 1;
+  pointer-events: auto;
+}
+.mdi-workspace-tabs-container .mdi-tab-item:hover, .mdi-workspace-tabs-container .mdi-tab-item.active {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.025);
 }
 .mdi-workspace-tabs-container .mdi-tab-item.drag-over {
   background: #eff6ff !important;
@@ -34326,7 +34344,6 @@ nav .divider {
   color: #1e293b;
   font-weight: 600;
   border-color: #e2e8f0;
-  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.03);
   /* Bottom blue accent bar indicator */
 }
 .mdi-workspace-tabs-container .mdi-tab-item.active .mdi-tab-icon {
@@ -34337,12 +34354,13 @@ nav .divider {
   position: absolute;
   bottom: 0;
   left: 0;
-  right: 0;
+  right: 0px;
   height: 1.5px;
   background: #3b82f6;
-  border-radius: 0;
+  border-radius: 2px;
 }
 .mdi-workspace-tabs-container .mdi-tab-item.pinned {
+  flex: 0 0 auto;
   padding: 0 12px;
 }
 .mdi-workspace-tabs-container .mdi-tab-item.pinned .mdi-tab-icon {
@@ -35069,6 +35087,7 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
     min-height: 40px;
   }
   .mdi-workspace-tabs-container .mdi-tab-item {
+    flex-basis: 140px;
     max-width: 140px;
     padding: 0 8px;
     font-size: 12px;
@@ -35076,6 +35095,12 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   }
   .mdi-workspace-tabs-container .mdi-tab-item .mdi-tab-icon {
     font-size: 14px;
+  }
+  .mdi-workspace-tabs-container .mdi-tab-item .mdi-tab-close-btn {
+    right: 8px;
+  }
+  .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned):hover, .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned).active, .mdi-workspace-tabs-container .mdi-tab-item:not(.pinned):focus-within {
+    padding-right: 32px;
   }
   .mdi-workspace-tabs-container .mdi-tabs-actions {
     gap: 4px;

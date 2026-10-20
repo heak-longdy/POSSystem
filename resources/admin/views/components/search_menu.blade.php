@@ -1,5 +1,4 @@
-@if(!defined('ADMIN_SEARCH_MENU_LOADED'))
-@php define('ADMIN_SEARCH_MENU_LOADED', true); @endphp
+@once
 @php
     $rawMenu = \App\Support\AdminPermissions::visibleMenu(config('menu', []));
     $allAdminMenuItems = [];
@@ -635,174 +634,172 @@
                 </div>
             </div>
         </div>
-
-        <script>
-            Alpine.data('xSearchMenu', () => ({
-                searchQuery: '',
-                selectedIndex: 0,
-                options: null,
-                rawItems: @json($allAdminMenuItems),
-
-                init() {
-                    this.options = Alpine.store('componentSearchMenu').options || {};
-                    if (Array.isArray(this.options.data) && this.options.data.length > 0) {
-                        this.rawItems = this.normalizeExternalData(this.options.data);
-                    }
-
-                    this.selectedIndex = 0;
-                    this.searchQuery = '';
-
-                    this.$nextTick(() => {
-                        setTimeout(() => {
-                            if (this.$refs.searchInput) {
-                                this.$refs.searchInput.focus();
-                                this.$refs.searchInput.select();
-                            }
-                        }, 50);
-                    });
-                },
-
-                normalizeExternalData(data) {
-                    if (!Array.isArray(data)) return [];
-                    const normalized = [];
-                    data.forEach((item, index) => {
-                        if (item.type === 'dropdown-multiple' && Array.isArray(item.listMenu)) {
-                            const groupLabel = typeof item.label === 'object' ? (item.label.en || item.label.km || 'Group') : (item.label || 'Group');
-                            item.listMenu.forEach((sub, subIdx) => {
-                                normalized.push({
-                                    id: `ext-${index}-${subIdx}`,
-                                    title: typeof sub.name === 'object' ? (sub.name.en || sub.name.km || '') : (sub.name || ''),
-                                    title_en: typeof sub.name === 'object' ? (sub.name.en || '') : (sub.name || ''),
-                                    title_km: typeof sub.name === 'object' ? (sub.name.km || '') : '',
-                                    category: groupLabel,
-                                    icon: sub.icon || 'bx-circle',
-                                    path: sub.path || '#',
-                                    url: sub.path && sub.path !== '#' ? (sub.path.startsWith('http') ? sub.path : '/' + sub.path.replace(/^\//, '')) : '#',
-                                    keywords: `${sub.name?.en || ''} ${sub.name?.km || ''} ${groupLabel}`
-                                });
-                            });
-                        } else {
-                            const title = typeof item.name === 'object' ? (item.name.en || item.name.km || '') : (item.name || item.title || '');
-                            normalized.push({
-                                id: item.id || `ext-${index}`,
-                                title: title,
-                                title_en: typeof item.name === 'object' ? (item.name.en || '') : title,
-                                title_km: typeof item.name === 'object' ? (item.name.km || '') : '',
-                                category: typeof item.label === 'object' ? (item.label.en || 'General') : (item.category || 'General'),
-                                icon: item.icon || 'bx-circle',
-                                path: item.path || '#',
-                                url: item.path && item.path !== '#' ? (item.path.startsWith('http') ? item.path : '/' + item.path.replace(/^\//, '')) : '#',
-                                keywords: `${title} ${item.category || ''}`
-                            });
-                        }
-                    });
-                    return normalized;
-                },
-
-                get visibleItems() {
-                    const q = this.searchQuery.toLowerCase().trim();
-                    if (!q) {
-                        return this.rawItems.map((item, idx) => ({ ...item, _flatIndex: idx }));
-                    }
-
-                    return this.rawItems.filter(item => {
-                        const title = (item.title || '').toLowerCase();
-                        const titleEn = (item.title_en || '').toLowerCase();
-                        const titleKm = (item.title_km || '').toLowerCase();
-                        const category = (item.category || '').toLowerCase();
-                        const path = (item.path || '').toLowerCase();
-                        const keywords = (item.keywords || '').toLowerCase();
-
-                        return title.includes(q) ||
-                               titleEn.includes(q) ||
-                               titleKm.includes(q) ||
-                               category.includes(q) ||
-                               path.includes(q) ||
-                               keywords.includes(q);
-                    }).map((item, idx) => ({ ...item, _flatIndex: idx }));
-                },
-
-                get groupedItems() {
-                    const list = this.visibleItems;
-                    const groupMap = {};
-                    list.forEach(item => {
-                        const cat = item.category || 'General';
-                        if (!groupMap[cat]) {
-                            groupMap[cat] = {
-                                name: cat,
-                                items: []
-                            };
-                        }
-                        groupMap[cat].items.push(item);
-                    });
-                    return Object.values(groupMap);
-                },
-
-                onSearchInput() {
-                    this.selectedIndex = 0;
-                },
-
-                handleWindowKeydown(e) {
-                    if (e.key === 'Escape') {
-                        e.preventDefault();
-                        this.close();
-                        return;
-                    }
-
-                    const items = this.visibleItems;
-                    if (items.length === 0) return;
-
-                    if (e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        this.selectedIndex = (this.selectedIndex + 1) % items.length;
-                        this.scrollToSelected();
-                    } else if (e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        this.selectedIndex = (this.selectedIndex - 1 + items.length) % items.length;
-                        this.scrollToSelected();
-                    } else if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const selectedItem = items[this.selectedIndex];
-                        if (selectedItem) {
-                            this.navigateTo(selectedItem);
-                        }
-                    }
-                },
-
-                scrollToSelected() {
-                    this.$nextTick(() => {
-                        const el = document.getElementById('cp-item-' + this.selectedIndex);
-                        if (el) {
-                            el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                        }
-                    });
-                },
-
-                navigateTo(item) {
-                    if (!item || !item.url || item.url === '#') return;
-                    this.close();
-                    if (window.MDI && typeof window.MDI.openUrlInTab === 'function' && (item.url.startsWith('/') || item.url.startsWith(window.location.origin))) {
-                        try {
-                            const urlObj = new URL(item.url, window.location.origin);
-                            window.MDI.openUrlInTab(urlObj.pathname + urlObj.search, item.title, 'bx ' + (item.icon || 'bx-file'));
-                            return;
-                        } catch (e) {}
-                    }
-                    window.location.href = item.url;
-                },
-
-                close() {
-                    Alpine.store('componentSearchMenu').active = false;
-                    if (typeof this.options?.afterClose === 'function') {
-                        this.options.afterClose();
-                    }
-                }
-            }));
-        </script>
     </div>
 </template>
 
 <script>
+    Alpine.data('xSearchMenu', () => ({
+        searchQuery: '',
+        selectedIndex: 0,
+        options: null,
+        rawItems: @json($allAdminMenuItems),
+
+        init() {
+            this.options = Alpine.store('componentSearchMenu').options || {};
+            if (Array.isArray(this.options.data) && this.options.data.length > 0) {
+                this.rawItems = this.normalizeExternalData(this.options.data);
+            }
+
+            this.selectedIndex = 0;
+            this.searchQuery = '';
+
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    if (this.$refs.searchInput) {
+                        this.$refs.searchInput.focus();
+                        this.$refs.searchInput.select();
+                    }
+                }, 50);
+            });
+        },
+
+        normalizeExternalData(data) {
+            if (!Array.isArray(data)) return [];
+            const normalized = [];
+            data.forEach((item, index) => {
+                if (item.type === 'dropdown-multiple' && Array.isArray(item.listMenu)) {
+                    const groupLabel = typeof item.label === 'object' ? (item.label.en || item.label.km || 'Group') : (item.label || 'Group');
+                    item.listMenu.forEach((sub, subIdx) => {
+                        normalized.push({
+                            id: `ext-${index}-${subIdx}`,
+                            title: typeof sub.name === 'object' ? (sub.name.en || sub.name.km || '') : (sub.name || ''),
+                            title_en: typeof sub.name === 'object' ? (sub.name.en || '') : (sub.name || ''),
+                            title_km: typeof sub.name === 'object' ? (sub.name.km || '') : '',
+                            category: groupLabel,
+                            icon: sub.icon || 'bx-circle',
+                            path: sub.path || '#',
+                            url: sub.path && sub.path !== '#' ? (sub.path.startsWith('http') ? sub.path : '/' + sub.path.replace(/^\//, '')) : '#',
+                            keywords: `${sub.name?.en || ''} ${sub.name?.km || ''} ${groupLabel}`
+                        });
+                    });
+                } else {
+                    const title = typeof item.name === 'object' ? (item.name.en || item.name.km || '') : (item.name || item.title || '');
+                    normalized.push({
+                        id: item.id || `ext-${index}`,
+                        title: title,
+                        title_en: typeof item.name === 'object' ? (item.name.en || '') : title,
+                        title_km: typeof item.name === 'object' ? (item.name.km || '') : '',
+                        category: typeof item.label === 'object' ? (item.label.en || 'General') : (item.category || 'General'),
+                        icon: item.icon || 'bx-circle',
+                        path: item.path || '#',
+                        url: item.path && item.path !== '#' ? (item.path.startsWith('http') ? item.path : '/' + item.path.replace(/^\//, '')) : '#',
+                        keywords: `${title} ${item.category || ''}`
+                    });
+                }
+            });
+            return normalized;
+        },
+
+        get visibleItems() {
+            const q = this.searchQuery.toLowerCase().trim();
+            if (!q) {
+                return this.rawItems.map((item, idx) => ({ ...item, _flatIndex: idx }));
+            }
+
+            return this.rawItems.filter(item => {
+                const title = (item.title || '').toLowerCase();
+                const titleEn = (item.title_en || '').toLowerCase();
+                const titleKm = (item.title_km || '').toLowerCase();
+                const category = (item.category || '').toLowerCase();
+                const path = (item.path || '').toLowerCase();
+                const keywords = (item.keywords || '').toLowerCase();
+
+                return title.includes(q) ||
+                       titleEn.includes(q) ||
+                       titleKm.includes(q) ||
+                       category.includes(q) ||
+                       path.includes(q) ||
+                       keywords.includes(q);
+            }).map((item, idx) => ({ ...item, _flatIndex: idx }));
+        },
+
+        get groupedItems() {
+            const list = this.visibleItems;
+            const groupMap = {};
+            list.forEach(item => {
+                const cat = item.category || 'General';
+                if (!groupMap[cat]) {
+                    groupMap[cat] = {
+                        name: cat,
+                        items: []
+                    };
+                }
+                groupMap[cat].items.push(item);
+            });
+            return Object.values(groupMap);
+        },
+
+        onSearchInput() {
+            this.selectedIndex = 0;
+        },
+
+        handleWindowKeydown(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.close();
+                return;
+            }
+
+            const items = this.visibleItems;
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.selectedIndex = (this.selectedIndex + 1) % items.length;
+                this.scrollToSelected();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.selectedIndex = (this.selectedIndex - 1 + items.length) % items.length;
+                this.scrollToSelected();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const selectedItem = items[this.selectedIndex];
+                if (selectedItem) {
+                    this.navigateTo(selectedItem);
+                }
+            }
+        },
+
+        scrollToSelected() {
+            this.$nextTick(() => {
+                const el = document.getElementById('cp-item-' + this.selectedIndex);
+                if (el) {
+                    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            });
+        },
+
+        navigateTo(item) {
+            if (!item || !item.url || item.url === '#') return;
+            this.close();
+            if (window.MDI && typeof window.MDI.openUrlInTab === 'function' && (item.url.startsWith('/') || item.url.startsWith(window.location.origin))) {
+                try {
+                    const urlObj = new URL(item.url, window.location.origin);
+                    window.MDI.openUrlInTab(urlObj.pathname + urlObj.search, item.title, 'bx ' + (item.icon || 'bx-file'));
+                    return;
+                } catch (e) {}
+            }
+            window.location.href = item.url;
+        },
+
+        close() {
+            Alpine.store('componentSearchMenu').active = false;
+            if (typeof this.options?.afterClose === 'function') {
+                this.options.afterClose();
+            }
+        }
+    }));
+
     Alpine.store('componentSearchMenu', {
         active: false,
         options: {
@@ -822,5 +819,16 @@
             }
         });
     };
+
+    window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            if (Alpine.store('componentSearchMenu').active) {
+                Alpine.store('componentSearchMenu').active = false;
+            } else {
+                window.SearchMenu();
+            }
+        }
+    });
 </script>
-@endif
+@endonce

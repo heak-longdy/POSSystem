@@ -35,11 +35,8 @@
         <!-- Left: Logo & Company Name -->
         <div class="inv-brand-box">
             @if (!empty($order->shop?->image_url))
-                <img src="{{ $order->shop->image_url }}" alt="{{ $shopName }}" class="inv-shop-logo-img">
-            @else
-                <div class="inv-coca-logo">
-                    <span class="coca-script">Coca-Cola</span>
-                </div>
+                <img src="{{ $order->shop->image_url }}" alt="{{ $shopName }}" class="inv-shop-logo-img"
+                    style="display: none;" onload="this.style.display = '';" onerror="this.style.display = 'none';">
             @endif
 
             <div class="inv-shop-text">
@@ -113,6 +110,7 @@
                 <th class="col-desc">{{ __('order.invoice.col_desc', [], $printLocale) }}</th>
                 <th class="col-qty">{{ __('order.invoice.col_qty', [], $printLocale) }}</th>
                 <th class="col-price">{{ __('order.invoice.col_price', [], $printLocale) }}</th>
+                <th class="col-discount">{{ __('order.invoice.col_discount', [], $printLocale) }}</th>
                 <th class="col-total">{{ __('order.invoice.col_total', [], $printLocale) }}</th>
             </tr>
         </thead>
@@ -129,7 +127,7 @@
                     }
                     $unitPrice = (float) ($detail->price ?? 0);
                     $qty = (int) ($detail->qty ?: 1);
-                    $lineTotal = app(\App\Services\OrderPricing::class)->line($detail)['total'];
+                    $line = app(\App\Services\OrderPricing::class)->line($detail);
                 @endphp
                 <tr class="inv-item-row">
                     <td class="cell-num">{{ $index + 1 }}</td>
@@ -137,8 +135,9 @@
                         <span class="item-name">{{ $itemName }}</span>
                     </td>
                     <td class="cell-qty">{{ $qty }}</td>
-                    <td class="cell-price">{{ number_format($unitPrice, 2) }}</td>
-                    <td class="cell-total">{{ number_format($lineTotal, 2) }}</td>
+                    <td class="cell-price">${{ number_format($unitPrice, 2) }}</td>
+                    <td class="cell-discount">${{ number_format($line['discount'], 2) }}</td>
+                    <td class="cell-total">${{ number_format($line['total'], 2) }}</td>
                 </tr>
             @empty
                 <tr class="inv-item-row">
@@ -147,8 +146,9 @@
                         <span class="item-name">{{ __('order.invoice.sample_coca', [], $printLocale) }}</span>
                     </td>
                     <td class="cell-qty">50</td>
-                    <td class="cell-price">2.26</td>
-                    <td class="cell-total">113.00</td>
+                    <td class="cell-price">$2.26</td>
+                    <td class="cell-discount">$0.00</td>
+                    <td class="cell-total">$113.00</td>
                 </tr>
             @endforelse
 
@@ -159,14 +159,15 @@
                     <td class="cell-desc">&nbsp;</td>
                     <td class="cell-qty">&nbsp;</td>
                     <td class="cell-price">&nbsp;</td>
+                    <td class="cell-discount">&nbsp;</td>
                     <td class="cell-total">&nbsp;</td>
                 </tr>
             @endfor
         </tbody>
         <tfoot>
-            <!-- Dual Signatures (Cols 1-3) & Financial Summary (Cols 4-5) -->
+            <!-- Dual Signatures (Cols 1-4) & Financial Summary (Cols 5-6) -->
             <tr>
-                <td colspan="3" rowspan="4" class="inv-foot-signatures-cell">
+                <td colspan="4" rowspan="4" class="inv-foot-signatures-cell">
                     <div class="inv-signatures-wrap">
                         <div class="inv-signature-col buyer-sig">
                             <div class="sig-header">
@@ -174,7 +175,7 @@
                                 <span class="sig-status-tag">{{ $buyerStatusNote }}</span>
                             </div>
                             <div class="sig-space"></div>
-                            <div class="sig-action-label">{{ __('order.invoice.thumbprint', [], $printLocale) }}</div>
+                            <div class="sig-action-label">{{ __('order.invoice.signature', [], $printLocale) }}</div>
                         </div>
 
                         <div class="inv-signature-col seller-sig">
@@ -187,24 +188,24 @@
                     </div>
                 </td>
                 <td class="inv-foot-calc-label">{{ __('order.invoice.prev_balance', [], $printLocale) }}</td>
-                <td class="inv-foot-calc-value">{{ number_format((float) ($invoicePreviousBalance ?? 0), 2) }}</td>
+                <td class="inv-foot-calc-value">${{ number_format((float) ($invoicePreviousBalance ?? 0), 2) }}</td>
             </tr>
             <tr>
                 <td class="inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value font-bold">
-                    {{ number_format((float) ($order->total_price ?? 0), 2) }}
+                    ${{ number_format((float) ($order->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
                 </td>
             </tr>
             <tr>
                 <td class="inv-foot-calc-label">{{ __('order.invoice.paid', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">
-                    {{ (float) ($order->paid_amount ?? 0) > 0 ? number_format((float) $order->paid_amount, 2) : '' }}
+                    {{ (float) ($order->paid_amount ?? 0) > 0 ? '$' . number_format((float) $order->paid_amount, 2) : '' }}
                 </td>
             </tr>
             <tr>
                 <td class="inv-foot-calc-label">{{ __('order.invoice.balance_due', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">
-                    {{ (float) ($order->remaining_amount ?? 0) > 0 ? number_format((float) $order->remaining_amount, 2) : '0.00' }}
+                    ${{ (float) ($order->remaining_amount ?? 0) > 0 ? number_format((float) $order->remaining_amount, 2) : '0.00' }}
                 </td>
             </tr>
         </tfoot>

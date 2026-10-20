@@ -238,6 +238,7 @@ return [
         'col_desc' => 'Description',
         'col_qty' => 'Qty',
         'col_price' => 'Unit Price',
+        'col_discount' => 'Discount',
         'col_total' => 'Total Amount',
         'buyer_title' => 'Buyer',
         'seller_title' => 'Seller',

@@ -229,7 +229,7 @@
                                                 <td class="text-center">{{ $qty }}</td>
                                                 <td class="text-right">
                                                     @if ($discount > 0)
-                                                        <span class="text-danger">-${{ number_format($discount, 2) }}</span>
+                                                        <span class="text-danger">${{ number_format($discount, 2) }}</span>
                                                     @else
                                                         <span class="text-muted">$0.00</span>
                                                     @endif
@@ -450,7 +450,7 @@
                                 </div>
                                 <div class="billing-row">
                                     <span>{{ __('order.detail.discount') }}</span>
-                                    <span class="text-danger">- ${{ number_format($discount, 2) }}</span>
+                                    <span class="text-danger">${{ number_format($discount, 2) }}</span>
                                 </div>
                                 @if ($commission != 0)
                                     <div class="billing-row">

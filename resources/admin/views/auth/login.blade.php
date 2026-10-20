@@ -179,6 +179,10 @@
             color: #666;
             margin: 0;
         }
+        .q-label-error{
+            color: red;
+            font-size: 14px;
+        }
     </style>
     <div class="login-container">
         <div class="login-box">

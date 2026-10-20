@@ -25,7 +25,7 @@ return [
     ],
     [
         'type'  => 'single',
-        'active' => 'admin/order-bulk-print/*',
+        'active' => 'admin/order-bulk-print,admin/order-bulk-print/*',
         'path' => 'admin/order-bulk-print',
         'permission' => ['order-bulk-print-view'],
         'name' => [

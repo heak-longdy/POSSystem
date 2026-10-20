@@ -158,10 +158,10 @@
                     <td class="td-cans">0</td>
                     <td class="td-cases">{{ $qty }}</td>
                     <td class="td-cans">0</td>
-                    <td class="td-price">{{ number_format($unitPrice, 2) }}</td>
-                    <td class="td-disc">{{ $disc > 0 ? '-' . number_format($disc, 2) : '-0.00' }}</td>
-                    <td class="td-net">{{ number_format($netUnitPrice, 2) }}</td>
-                    <td class="td-total">{{ number_format($lineTotal, 2) }}</td>
+                    <td class="td-price">${{ number_format($unitPrice, 2) }}</td>
+                    <td class="td-disc">${{ $disc > 0 ? number_format($disc, 2) : '0.00' }}</td>
+                    <td class="td-net">${{ number_format($netUnitPrice, 2) }}</td>
+                    <td class="td-total">${{ number_format($lineTotal, 2) }}</td>
                 </tr>
             @empty
                 <tr class="slip-row">
@@ -173,10 +173,10 @@
                     <td class="td-cans">0</td>
                     <td class="td-cases">35</td>
                     <td class="td-cans">0</td>
-                    <td class="td-price">2.40</td>
-                    <td class="td-disc">-0.14</td>
-                    <td class="td-net">2.26</td>
-                    <td class="td-total">79.10</td>
+                    <td class="td-price">$2.40</td>
+                    <td class="td-disc">$0.14</td>
+                    <td class="td-net">$2.26</td>
+                    <td class="td-total">$79.10</td>
                 </tr>
             @endforelse
 
@@ -208,7 +208,7 @@
         <div class="slip-bottom-right">
             <div class="slip-total-pay-box">
                 <span class="pay-lbl">{{ __('order.invoice.slip_total_pay', [], $printLocale) }}</span>
-                <strong class="pay-val">{{ number_format((float) ($order->total_price ?? 0), 2) }}</strong>
+                <strong class="pay-val">${{ number_format((float) ($order->total_price ?? 0), 2) }}</strong>
             </div>
         </div>
     </div>

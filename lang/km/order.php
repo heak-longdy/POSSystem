@@ -204,6 +204,7 @@ return [
         'col_desc' => 'បរិយាយ',
         'col_qty' => 'ចំនួន',
         'col_price' => 'តម្លៃរាយ',
+        'col_discount' => 'បញ្ចុះតម្លៃ',
         'col_total' => 'តម្លៃសរុប',
         'buyer_title' => 'អ្នកទិញ/Buyer',
         'seller_title' => 'អ្នកលក់/Seller',

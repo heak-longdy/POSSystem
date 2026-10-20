@@ -199,7 +199,7 @@
         }
 
         .inv-grid-table .col-desc {
-            width: 50% !important;
+            width: 36% !important;
             text-align: center !important;
         }
 
@@ -209,6 +209,11 @@
         }
 
         .inv-grid-table .col-price {
+            width: 14% !important;
+            text-align: center !important;
+        }
+
+        .inv-grid-table .col-discount {
             width: 16% !important;
             text-align: center !important;
         }
@@ -236,7 +241,8 @@
             text-align: center !important;
         }
 
-        .inv-grid-table tbody td.cell-price {
+        .inv-grid-table tbody td.cell-price,
+        .inv-grid-table tbody td.cell-discount {
             text-align: right !important;
             padding-right: 6px !important;
         }
