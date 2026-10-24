@@ -39,7 +39,7 @@ class OrderBulkPrintRequest extends FormRequest
         $maxOrders = (int) config('order_printing.max_orders', 100);
 
         return [
-            'document_type' => 'required|in:invoice,delivery_slip',
+            'document_type' => 'required|in:invoice,delivery_slip,consolidated',
             'print_locale' => 'required|in:en,km',
             'order_ids' => 'required|array|min:1|max:' . $maxOrders,
             'order_ids.*' => 'required|integer|min:1|distinct',
