@@ -61,16 +61,20 @@ return [
         'english' => 'អង់គ្លេស',
         'print_invoices' => 'បោះពុម្ពវិក្កយបត្រដែលបានជ្រើស',
         'print_delivery_slips' => 'បោះពុម្ពប័ណ្ណប្រគល់ទំនិញដែលបានជ្រើស',
+        'consolidated_product_quantity' => 'បរិមាណទំនិញសរុប',
         'loading_matching' => 'កំពុងទាញយកទិន្នន័យ...',
     ],
 
     'preview' => [
         'title_invoice' => 'មើលគំរូវិក្កយបត្រជាក្រុម',
         'title_delivery_slip' => 'មើលគំរូប័ណ្ណប្រគល់ទំនិញជាក្រុម',
+        'title_consolidated' => 'បរិមាណទំនិញសរុប',
+        'load_report_draft' => 'Load Report (Draft)',
         'meta_docs' => ':count ឯកសារ',
         'prepared' => 'រៀបចំនៅ: :date',
         'paper_size' => 'ក្រដាស: A5 បណ្តោយ (Landscape)',
         'print_all' => 'បោះពុម្ពទាំងអស់',
+        'print' => 'បោះពុម្ព',
         'close' => 'បិទការមើលគំរូ',
         'preparing' => 'កំពុងរៀបចំឯកសារ និងទាញយកពុម្ពអក្សរ...',
         'ready' => 'រួចរាល់សម្រាប់ការបោះពុម្ព',
@@ -78,6 +82,9 @@ return [
         'zoom_in' => 'ពង្រីក',
         'zoom_out' => 'បង្រួម',
         'fit_width' => 'ទំហំល្មមអេក្រង់',
+        'products' => 'មុខទំនិញ',
+        'total_quantity' => 'បរិមាណសរុប',
+        'no_products_found' => 'មិនមានទំនិញនៅក្នុងការបញ្ជាទិញដែលបានជ្រើសរើសនោះទេ។',
     ],
 
     'validation' => [
