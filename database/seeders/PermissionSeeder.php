@@ -948,7 +948,8 @@ class PermissionSeeder extends Seeder
     private function completeActiveModules(): void
     {
         $labels = ['view' => 'View', 'create' => 'Create', 'update' => 'Edit',
-            'delete' => 'Delete', 'restore' => 'Restore', 'force-delete' => 'Destroy', 'excel' => 'Excel'];
+            'delete' => 'Delete', 'restore' => 'Restore', 'force-delete' => 'Destroy', 'excel' => 'Excel',
+            'product' => 'Product'];
         foreach (config('admin_permissions.modules') as $prefix => $name) {
             $module = $this->module(['name' => $name, 'sort_no' => $this->increaseIndex()]);
             $actions = array_merge(['view', 'create', 'update', 'delete'], config('admin_permissions.extra_actions.' . $prefix, []));

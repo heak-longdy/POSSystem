@@ -6,11 +6,15 @@ use App\Models\User;
 use App\Models\ModulePermission;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Support\PermissionModuleSelection;
+use App\Support\AdminPermissions;
+use App\Http\Middleware\CheckAdminPermission;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -45,6 +49,129 @@ class UserPermissionTest extends TestCase
     private function saveUrl(?User $user = null): string
     {
         return route('admin-user-save-permission', ($user ?? $this->staff)->id);
+    }
+
+    public function test_three_module_user_sees_only_assigned_sidebar_and_search_entries(): void
+    {
+        $this->staff->syncPermissions(['dashboard-view', 'order-view', 'order-create', 'order-update',
+            'order-delete', 'customer-view', 'customer-create', 'customer-update', 'customer-delete']);
+        $this->actingAs($this->staff);
+        $sidebar = view('admin::shared.sidebar')->render();
+        $document = new \DOMDocument();
+        @$document->loadHTML($sidebar);
+        $links = (new \DOMXPath($document))->query('//a[@data-url]');
+        $this->assertSame([route('admin-dashboard'), url('admin/order/list/1'), url('admin/customer/list/1')],
+            array_map(fn ($link) => $link->getAttribute('data-url'), iterator_to_array($links)));
+        $search = view('admin::components.search_menu')->render();
+        foreach (['admin/remaining-amount', 'admin/report/', 'admin/user/list', 'admin/product/list', 'admin/order-bulk-print'] as $path) {
+            $this->assertStringNotContainsString($path, $search);
+        }
+
+        // Keep the real route/middleware stack, replacing only business queries
+        // in these three controllers; the permission fixtures are in SQLite memory.
+        foreach ([DashboardController::class, \App\Http\Controllers\Admin\OrderController::class,
+            \App\Http\Controllers\Admin\CustomerController::class] as $controller) {
+            $this->partialMock($controller, fn ($mock) => $mock->shouldReceive('index')->andReturn(response('Allowed')));
+        }
+        foreach (['admin-dashboard', 'admin-order-list', 'admin-customer-list'] as $name) {
+            $this->get(route($name, $name === 'admin-dashboard' ? [] : ['status' => 1]))->assertOk();
+        }
+    }
+
+    public function test_three_module_user_cannot_open_or_submit_any_other_module_route(): void
+    {
+        $this->staff->syncPermissions(['dashboard-view', 'order-view', 'order-create', 'order-update',
+            'order-delete', 'customer-view', 'customer-create', 'customer-update', 'customer-delete']);
+        $this->actingAs($this->staff);
+        $checked = 0;
+        foreach (Route::getRoutes() as $route) {
+            if (!in_array(CheckAdminPermission::class, $route->middleware(), true)) continue;
+            $name = $route->getName();
+            if (in_array($name, ['admin-home', 'admin-dashboard', 'admin-report-customer-report'], true)
+                || str_starts_with($name, 'admin-select-')
+                || preg_match('/^admin-(order-(?!bulk-print-)|customer-(?!paid-))/', $name)) continue;
+            $parameters = array_fill_keys($route->parameterNames(), 1);
+            if (isset($parameters['type'])) $parameters['type'] = 'privacy-policy';
+            foreach (array_diff($route->methods(), ['HEAD']) as $method) {
+                $response = $this->json($method, route($name, $parameters));
+                $this->assertSame(403, $response->status(), $method . ' ' . $name);
+                $checked++;
+            }
+        }
+        $this->assertGreaterThan(300, $checked);
+        $this->get(route('admin-report-sales-daily'))->assertForbidden();
+        $this->get(route('admin-remaining-amount-list', 'partial'), ['X-MDI-Partial' => '1'])->assertForbidden();
+    }
+
+    public function test_all_registered_protected_routes_have_an_explicit_permission_mapping(): void
+    {
+        foreach (Route::getRoutes() as $route) {
+            if (!in_array(CheckAdminPermission::class, $route->middleware(), true) || $route->getName() === 'admin-home') continue;
+            $parameters = array_fill_keys($route->parameterNames(), 1);
+            if (isset($parameters['type'])) $parameters['type'] = 'privacy-policy';
+            $request = Request::create(route($route->getName(), $parameters), $route->methods()[0]);
+            $boundRoute = (clone $route)->bind($request);
+            $request->setRouteResolver(fn () => $boundRoute);
+            $this->assertNotEmpty(AdminPermissions::forRequest($request), $route->getName());
+        }
+        Route::middleware(['AdminGuard', CheckAdminPermission::class])
+            ->get('/admin/unmapped-module', fn () => 'must not run')->name('admin-unmapped-module');
+        $this->actingAs($this->staff)->getJson('/admin/unmapped-module')->assertForbidden();
+    }
+
+    public function test_report_permissions_do_not_grant_other_report_modules(): void
+    {
+        foreach ([
+            'report-sales-view' => ['admin-report-sales-daily', 'admin/report/sales/daily'],
+            'report-inventory-view' => ['admin-report-inventory-movement-daily', 'admin/report/inventory-movement/daily'],
+            'report-staff-expense-view' => ['admin-report-staff-expense-daily', 'admin/report/staff-expense/daily'],
+            'report-transaction-view' => ['admin-report-order-transaction-daily', null],
+        ] as $permission => [$allowedRoute, $path]) {
+            $this->staff->syncPermissions([$permission]);
+            $this->actingAs($this->staff);
+            $request = Request::create(route($allowedRoute));
+            $request->setRouteResolver(fn () => Route::getRoutes()->match($request));
+            $request->setUserResolver(fn () => $this->staff);
+            $this->assertSame('allowed', (new CheckAdminPermission)->handle($request, fn () => 'allowed'));
+            if ($path) $this->assertStringContainsString('data-url="' . url($path) . '"', view('admin::shared.sidebar')->render());
+            foreach (['admin-report-sales-daily', 'admin-report-inventory-movement-daily',
+                'admin-report-staff-expense-daily', 'admin-report-order-transaction-daily'] as $otherRoute) {
+                if ($otherRoute !== $allowedRoute) $this->getJson(route($otherRoute))->assertForbidden();
+            }
+        }
+    }
+
+    public function test_remaining_amount_requires_its_own_permission_and_super_admin_keeps_access(): void
+    {
+        $this->partialMock(\App\Http\Controllers\Admin\RemainingAmountController::class,
+            fn ($mock) => $mock->shouldReceive('index')->andReturn(response('Allowed')));
+        // No live catalog changes: the dedicated grant is deliberately absent.
+        $this->staff->syncPermissions(['order-view', 'order-update', 'order-delete']);
+        $this->actingAs($this->staff)->getJson(route('admin-remaining-amount-list', 'partial'))->assertForbidden();
+        $this->postJson(route('admin-remaining-amount-add-payment', 1))->assertForbidden();
+        $this->deleteJson(route('admin-remaining-amount-delete-payment', 1))->assertForbidden();
+
+        // Model a future explicit grant using disposable test fixtures only.
+        Permission::create(['name' => 'remaining-amount-view', 'guard_name' => 'web']);
+        $this->staff->syncPermissions(['remaining-amount-view']);
+        $this->get(route('admin-remaining-amount-list', 'partial'))->assertOk();
+        $this->postJson(route('admin-remaining-amount-add-payment', 1))->assertForbidden();
+        $this->getJson(route('admin-order-list', 1))->assertForbidden();
+        $this->actingAs(new User(['role' => 'super_admin']))
+            ->get(route('admin-remaining-amount-list', 'partial'))->assertOk();
+    }
+
+    public function test_workspace_scope_changes_when_user_or_effective_permissions_change(): void
+    {
+        $this->actingAs($this->staff);
+        $initial = AdminPermissions::workspaceScope();
+        $this->assertSame($initial, AdminPermissions::workspaceScope());
+        $this->staff->givePermissionTo('order-view');
+        $this->assertNotSame($initial, $granted = AdminPermissions::workspaceScope());
+        $this->staff->syncPermissions([]);
+        $this->assertNotSame($granted, AdminPermissions::workspaceScope());
+        $this->actingAs($this->manager);
+        $this->assertNotSame($initial, AdminPermissions::workspaceScope());
     }
 
     public function test_assignment_reload_replacement_and_revocation_apply_to_access(): void

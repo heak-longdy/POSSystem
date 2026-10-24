@@ -14,6 +14,14 @@ class AdminPermissions
             return [];
         }
 
+        // Shop product links and routes share the same assignment permissions.
+        if ($module === 'shop' && in_array($action, [
+            'product', 'product-create', 'product-edit', 'product-save',
+            'product-delete', 'product-restore', 'product-destroy',
+        ], true)) {
+            return ['shop-product'];
+        }
+
         $actions = [
             'list' => 'view', 'view' => 'view', 'detail' => 'view', 'list-product' => 'view',
             'staff-history' => 'view', 'payment-details' => 'view', 'report' => 'view',
@@ -76,9 +84,6 @@ class AdminPermissions
         }
         if ($name === 'admin-stock-in-products') {
             return ['stock-in-view', 'stock-in-create', 'stock-in-update'];
-        }
-        if (str_starts_with($name ?? '', 'admin-shop-product')) {
-            return [$name === 'admin-shop-product' ? 'shop-view' : 'shop-update'];
         }
         if (in_array($name, ['admin-stock-on-hand-report', 'admin-stock-movement-report', 'admin-product-report', 'admin-staff-expense-report'])) {
             return [str_replace(['admin-', '-report'], ['', '-excel'], $name)];

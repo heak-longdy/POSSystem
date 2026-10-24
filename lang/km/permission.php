@@ -90,6 +90,7 @@ return [
         'shop-create' => 'បង្កើត',
         'shop-update' => 'កែប្រែ',
         'shop-delete' => 'លុប',
+        'shop-product' => 'ផលិតផល',
         'category-view' => 'មើល',
         'category-create' => 'បង្កើត',
         'category-update' => 'កែប្រែ',

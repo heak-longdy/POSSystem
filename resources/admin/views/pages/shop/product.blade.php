@@ -43,7 +43,7 @@
                         </svg>
                         <span>{{ __('global.button.reload') }}</span>
                     </button>
-                    @if ($status != 'trash')
+                    @if ($status != 'trash' && auth()->user()->can('shop-product'))
                         <button class="btn btn-create" s-click-link="{!! route('admin-' . $routeName . '-product-create', $id) !!}">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -153,6 +153,7 @@
                         'msg' => $status == 'trash' ? __('shop.empty.trash_description') : __('shop.empty.description'),
                         'url' => $status == 'trash' ? null : route('admin-' . $routeName . '-product-create', $id),
                         'button' => $status == 'trash' ? null : __('shop.button.add_product'),
+                        'permission' => 'shop-product',
                     ])
                     @endcomponent
                 @endif

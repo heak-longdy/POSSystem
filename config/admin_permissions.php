@@ -27,6 +27,7 @@ return [
     ],
     'extra_actions' => [
         'product' => ['excel'],
+        'shop' => ['product'],
         'customer-paid' => ['excel'],
         'staff' => ['restore', 'force-delete'],
         'staff-expense' => ['restore', 'force-delete', 'excel'],

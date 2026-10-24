@@ -172,6 +172,7 @@ return [
         'shop-create' => 'Create',
         'shop-update' => 'Update',
         'shop-delete' => 'Delete',
+        'shop-product' => 'Product',
         // product
         'product-view' => 'View',
         'product-create' => 'Create',
