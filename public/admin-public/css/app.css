@@ -35382,6 +35382,18 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
   font-weight: 400;
   line-height: 1.5;
 }
+.form-admin .form-wrapper .form-body .form-row input:-moz-read-only {
+  background: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  cursor: no-drop !important;
+}
+.form-admin .form-wrapper .form-body .form-row input:disabled, .form-admin .form-wrapper .form-body .form-row input:read-only, .form-admin .form-wrapper .form-body .form-row input[readonly] {
+  background: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  cursor: no-drop !important;
+}
 .form-admin .form-wrapper .form-body .form-row textarea {
   background-color: #fff;
   border-radius: 7px;
@@ -35406,8 +35418,15 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .form-admin .form-wrapper .form-body .form-row textarea::placeholder {
   color: #b7bac1;
 }
-.form-admin .form-wrapper .form-body .form-row textarea:disabled {
+.form-admin .form-wrapper .form-body .form-row textarea:-moz-read-only {
   background: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  cursor: no-drop !important;
+}
+.form-admin .form-wrapper .form-body .form-row textarea:disabled, .form-admin .form-wrapper .form-body .form-row textarea:read-only, .form-admin .form-wrapper .form-body .form-row textarea[readonly] {
+  background: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
   color: rgba(0, 0, 0, 0.5) !important;
   cursor: no-drop !important;
 }
@@ -36305,8 +36324,17 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 .table-form .form-body .form-row select::placeholder {
   color: #b7bac1;
 }
-.table-form .form-body .form-row textarea:disabled {
+.table-form .form-body .form-row textarea:-moz-read-only {
   background: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  cursor: no-drop !important;
+}
+.table-form .form-body .form-row textarea:disabled,
+.table-form .form-body .form-row textarea:read-only,
+.table-form .form-body .form-row textarea[readonly] {
+  background: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
   color: rgba(0, 0, 0, 0.5) !important;
   cursor: no-drop !important;
 }
@@ -36900,7 +36928,10 @@ body:has(.dialog:not([style*="display: none"])) [data-tooltip]::after {
 }
 .inputReadOnly {
   pointer-events: none !important;
-  background: rgba(158, 158, 158, 0.2588235294) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+  cursor: no-drop !important;
 }
 
 .wLen1 {
