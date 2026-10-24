@@ -424,6 +424,10 @@
                                     <span class="label"><i data-feather="plus-square"></i> {{ __('order.detail.created_at') }}:</span>
                                     <span class="val">{{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d M Y, h:i A') : '---' }}</span>
                                 </div>
+                                <div class="appointment-info-row">
+                                    <span class="label"><i data-feather="user"></i> {{ __('order.detail.created_by') }}:</span>
+                                    <span class="val">{{ $order->createdBy?->name ?: '---' }}</span>
+                                </div>
                             </div>
                         </section>
 
@@ -1289,7 +1293,7 @@
         .info-val {
             font-weight: 600;
             color: #1e293b;
-            text-align: right;
+            text-align: left;
         }
         .points-tag {
             background: #eff6ff;

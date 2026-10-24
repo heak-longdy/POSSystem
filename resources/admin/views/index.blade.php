@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @include('admin::shared.pwa')
     {{-- <link rel="shortcut icon" href="{!! asset('images/logo/ISEA_webicon.png') !!}"/> --}}
     <title>ADMIN @yield('title')</title>
     <link rel="stylesheet" href="{{ mix('admin-public/css/app.css') }}">
@@ -37,15 +38,6 @@
 </body>
 
 <script>
-    // if ('serviceWorker' in navigator) {
-    //     window.addEventListener('load', () => {
-    //         navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-    //             console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    //         }, (error) => {
-    //             console.log('ServiceWorker registration failed: ', error);
-    //         });
-    //     });
-    // }
     // function clearLocalStorage() {
     //       localStorage.clear();
     //       console.log('Local storage cleared');

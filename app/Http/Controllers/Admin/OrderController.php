@@ -168,6 +168,7 @@ class OrderController extends Controller
         $order = Order::withTrashed()->with([
             'customer',
             'shop',
+            'createdBy',
             'barber',
             'orderDetails' => function ($detail) {
                 $detail->withTrashed()->with(['service', 'product']);
@@ -220,6 +221,7 @@ class OrderController extends Controller
             if (!$order->exists) {
                 $order->invoice_number = $this->nextInvoiceNumber();
             }
+            $order->created_by = Auth::id();
             $order->save();
 
             $totalPoint = 0;

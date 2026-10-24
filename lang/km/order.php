@@ -175,6 +175,7 @@ return [
         'grand_total' => 'តម្លៃសរុបរួម',
         'status' => 'ស្ថានភាព',
         'created_at' => 'កាលបរិច្ឆេទទទួលការបញ្ជាទិញ',
+        'created_by' => 'បង្កើតដោយ',
         'appointment_time' => 'ពេលវេលាណាត់ជួប',
         'delivery_date' => 'ថ្ងៃដឹកជញ្ជូន',
         'phone' => 'លេខទូរស័ព្ទ',

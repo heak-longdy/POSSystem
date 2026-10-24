@@ -51,6 +51,11 @@ class Order extends Model
         return $this->belongsTo(Shop::class, 'shop_id', 'id');
     }
 
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
+    }
+
     public function barber()
     {
         return $this->belongsTo(Barber::class, 'barber_id');

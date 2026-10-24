@@ -24,7 +24,7 @@
     };
 
     $details = $order->orderDetails ?: collect();
-    $minRows = 7;
+    $minRows = 0;
     $emptyRowsCount = max(0, $minRows - $details->count());
     $printAreaId = $printAreaId ?? "posInvoicePrintArea_{$printLocale}";
 @endphp

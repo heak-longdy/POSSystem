@@ -234,6 +234,17 @@ $fm: "form";
                     }
                 }
 
+                input{
+                    &:disabled,
+                    &:read-only,
+                    &[readonly] {
+                        background      : rgba(0, 0, 0, 0.05) !important;
+                        background-color: rgba(0, 0, 0, 0.05) !important;
+                        color           : rgba(0, 0, 0, 0.5) !important;
+                        cursor          : no-drop !important;
+                    }
+                }
+
                 textarea {
                     background-color: #fff;
                     border-radius   : 7px;
@@ -252,10 +263,13 @@ $fm: "form";
                     &::placeholder {
                         color: #b7bac1;
                     }
-                    &:disabled {
-                        background: rgba(0, 0, 0, 0.05) !important;
-                        color     : rgba(0, 0, 0, 0.5) !important;
-                        cursor    : no-drop !important;
+                    &:disabled,
+                    &:read-only,
+                    &[readonly] {
+                        background      : rgba(0, 0, 0, 0.05) !important;
+                        background-color: rgba(0, 0, 0, 0.05) !important;
+                        color           : rgba(0, 0, 0, 0.5) !important;
+                        cursor          : no-drop !important;
                     }
                 }
 
@@ -1288,10 +1302,13 @@ $fm: "form";
                 }
             }
 
-            textarea:disabled {
-                background: rgba(0, 0, 0, 0.05) !important;
-                color     : rgba(0, 0, 0, 0.5) !important;
-                cursor    : no-drop !important;
+            textarea:disabled,
+            textarea:read-only,
+            textarea[readonly] {
+                background      : rgba(0, 0, 0, 0.05) !important;
+                background-color: rgba(0, 0, 0, 0.05) !important;
+                color           : rgba(0, 0, 0, 0.5) !important;
+                cursor          : no-drop !important;
             }
 
             select {
@@ -1977,7 +1994,10 @@ $formBlockLabelWidth : 200px;
 
 .inputReadOnly {
     pointer-events: none !important;
-    background    : #9e9e9e42 !important;
+    background    : rgba(0, 0, 0, 0.05) !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    color         : rgba(0, 0, 0, 0.5) !important;
+    cursor        : no-drop !important;
 }
 
 .wLen1 {

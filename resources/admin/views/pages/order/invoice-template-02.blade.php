@@ -56,7 +56,7 @@
         <div class="slip-info-col col-cust">
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_name', [], $printLocale) }}</span>
-                <span class="info-val"><span class="cust-code">{{ $customerCode }}</span> {{ $cName }}</span>
+                <span class="info-val">{{ $cName }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_address', [], $printLocale) }}</span>
@@ -90,9 +90,9 @@
                 <span class="info-lbl">{{ __('order.invoice.slip_district', [], $printLocale) }}</span>
                 <span class="info-val">{{ $shopCity }}</span>
             </div>
-            <div class="info-row spacer-row">
-                <span class="info-lbl">&nbsp;</span>
-                <span class="info-val">&nbsp;</span>
+            <div class="info-row">
+                <span class="info-lbl">{{ __('order.detail.created_by', [], $printLocale) }}:</span>
+                <span class="info-val">{{ $order->createdBy?->name ?: '---' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_delivery_branch', [], $printLocale) }}</span>

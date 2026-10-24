@@ -209,6 +209,7 @@ return [
         'grand_total' => 'Grand Total',
         'status' => 'Status',
         'created_at' => 'Created At',
+        'created_by' => 'Created By',
         'appointment_time' => 'Appointment Time',
         'delivery_date' => 'Delivery Date',
         'phone' => 'Phone',
