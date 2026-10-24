@@ -21,7 +21,7 @@ class OrderTransactionReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:report-transaction-view|report-sales-view|order-view', [
+        $this->middleware('permission:report-transaction-view', [
             'only' => ['index', 'daily', 'monthly', 'report', 'details']
         ]);
     }

@@ -19,7 +19,7 @@ class StaffExpenseReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:report-staff-expense-view|staff-expense-view|report-sales-view', [
+        $this->middleware('permission:report-staff-expense-view', [
             'only' => ['index', 'daily', 'monthly', 'report', 'details']
         ]);
     }

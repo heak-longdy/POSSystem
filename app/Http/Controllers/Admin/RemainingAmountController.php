@@ -26,9 +26,9 @@ class RemainingAmountController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:order-view', ['only' => ['index', 'getPaymentDetails', 'report', 'show']]);
-        $this->middleware('permission:order-update', ['only' => ['addPayment', 'updatePayment', 'sendPaymentReminder']]);
-        $this->middleware('permission:order-delete', ['only' => ['deletePayment']]);
+        $this->middleware('permission:remaining-amount-view', ['only' => ['index', 'getPaymentDetails', 'report', 'show']]);
+        $this->middleware('permission:remaining-amount-update', ['only' => ['addPayment', 'updatePayment', 'sendPaymentReminder']]);
+        $this->middleware('permission:remaining-amount-delete', ['only' => ['deletePayment']]);
     }
 
     public function index(Request $req)

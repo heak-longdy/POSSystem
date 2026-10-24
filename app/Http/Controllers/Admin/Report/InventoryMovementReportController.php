@@ -22,7 +22,7 @@ class InventoryMovementReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:report-inventory-view|stock-movement-view|report-sales-view|order-view', [
+        $this->middleware('permission:report-inventory-view', [
             'only' => ['index', 'daily', 'monthly', 'report', 'details']
         ]);
     }

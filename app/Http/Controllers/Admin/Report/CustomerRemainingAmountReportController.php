@@ -16,7 +16,7 @@ class CustomerRemainingAmountReportController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:report-sales-view|order-view');
+        $this->middleware('permission:report-sales-view');
     }
 
     public function index(Request $request, CustomerRemainingAmountReportService $report)
