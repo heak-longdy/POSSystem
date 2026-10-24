@@ -1,10 +1,17 @@
 @extends('admin::shared.layout')
 
 @php
+    $isConsolidated = ($documentType ?? '') === 'consolidated';
     $isInvoice = ($documentType ?? 'invoice') === 'invoice';
-    $docTitle = $isInvoice 
-        ? __('order_bulk_print.preview.title_invoice') 
-        : __('order_bulk_print.preview.title_delivery_slip');
+    $isDeliverySlip = ($documentType ?? '') === 'delivery_slip';
+
+    if ($isConsolidated) {
+        $docTitle = __('order_bulk_print.preview.title_consolidated');
+    } elseif ($isInvoice) {
+        $docTitle = __('order_bulk_print.preview.title_invoice');
+    } else {
+        $docTitle = __('order_bulk_print.preview.title_delivery_slip');
+    }
     $headerTitle = $docTitle . ' (' . ($totalCount ?? 0) . ')';
 @endphp
 
@@ -18,13 +25,40 @@
     <style>
         @include('admin::pages.order.partials.print-document-styles')
 
-        /* Preview Screen Layout: Natural outer page scroll, NO internal scrollbar */
+        /* 
+         * Preview Screen Layout & Full-Height Background
+         * Ensure uniform light gray background (#f1f5f9) extends to the very bottom of the page,
+         * with seamless flex stretching and natural outer page scrolling.
+         */
+        #content:has(.workspace-tab-pane.active .bulk-preview-wrapper),
         #content:has(.bulk-preview-wrapper),
-        #workspace-viewport:has(.bulk-preview-wrapper),
-        .workspace-tab-pane:has(.bulk-preview-wrapper),
-        .workspace-tab-pane.active:has(.bulk-preview-wrapper) {
-            height: auto !important;
+        .container-wrapper:has(.workspace-tab-pane.active .bulk-preview-wrapper),
+        .container-wrapper:has(.bulk-preview-wrapper) {
+            background-color: #f1f5f9 !important;
+        }
+
+        #workspace-viewport:has(.workspace-tab-pane.active .bulk-preview-wrapper),
+        #workspace-viewport:has(.bulk-preview-wrapper) {
+            background-color: #f1f5f9 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            flex: 1 1 auto !important;
             min-height: 0 !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            overflow-y: visible !important;
+        }
+
+        .workspace-tab-pane.active:has(.bulk-preview-wrapper),
+        .workspace-tab-pane:has(> #bulkPrintPreviewApp),
+        .workspace-tab-pane:has(.bulk-preview-wrapper) {
+            background-color: #f1f5f9 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            flex: 1 1 auto !important;
+            min-height: 100% !important;
+            height: auto !important;
             max-height: none !important;
             overflow: visible !important;
             overflow-y: visible !important;
@@ -32,15 +66,63 @@
 
         .bulk-preview-wrapper {
             background-color: #f1f5f9;
-            min-height: calc(100vh - 120px);
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-height: 100%;
             padding: 16px 20px 60px 20px;
             box-sizing: border-box;
-            display: block;
-            width: 100%;
             height: auto !important;
             max-height: none !important;
             overflow: visible !important;
             overflow-y: visible !important;
+        }
+
+        @media screen and (max-width: 768px) {
+            .bulk-preview-wrapper {
+                padding: 12px 14px 40px 14px;
+            }
+
+            .preview-toolbar {
+                top: 0;
+                padding: 10px 14px;
+                gap: 12px;
+            }
+
+            .toolbar-info {
+                gap: 8px;
+            }
+
+            .toolbar-title {
+                font-size: 13.5px;
+            }
+
+            .toolbar-controls {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        @media screen and (max-width: 576px) {
+            .bulk-preview-wrapper {
+                padding: 10px 8px 30px 8px;
+            }
+
+            .preview-toolbar {
+                border-radius: 8px;
+                padding: 10px 12px;
+            }
+
+            .toolbar-controls {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .btn-toolbar {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
         }
 
         /* Top Breadcrumb Navigation */
@@ -483,7 +565,7 @@
     </style>
 
     <div class="bulk-preview-wrapper" id="bulkPrintPreviewApp" x-data="orderBulkPrintPreview()" x-cloak>
-        @if (!empty($error) || empty($items))
+        @if (!empty($error) || (!$isConsolidated && empty($items)) || ($isConsolidated && !isset($consolidatedProducts)))
             <div class="preview-error-card">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px auto; display: block;">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -519,6 +601,14 @@
                         <span class="toolbar-badge">
                             {{ __('order_bulk_print.preview.meta_docs', ['count' => $totalCount]) }}
                         </span>
+                        @if ($isConsolidated)
+                            <span class="toolbar-badge" style="background: #0284c7;">
+                                {{ $totalProducts ?? 0 }} {{ __('order_bulk_print.preview.products') }}
+                            </span>
+                            <span class="toolbar-badge" style="background: #10b981;">
+                                {{ number_format($overallQuantity ?? 0) }} {{ __('order_bulk_print.preview.total_quantity') }}
+                            </span>
+                        @endif
                         <span class="toolbar-badge" style="background: #334155;">
                             {{ $locale === 'km' ? __('order_bulk_print.selection.khmer') : __('order_bulk_print.selection.english') }}
                         </span>
@@ -527,7 +617,7 @@
                     <div class="toolbar-meta">
                         <span>{{ __('order_bulk_print.preview.prepared', ['date' => now()->format('Y-m-d H:i')]) }}</span>
                         <span>·</span>
-                        <span>{{ __('order_bulk_print.preview.paper_size') }}</span>
+                        <span>{{ $isConsolidated ? 'Paper: A4 Portrait' : __('order_bulk_print.preview.paper_size') }}</span>
                     </div>
 
                     <div class="status-indicator" :class="{ 'ready': isReady }">
@@ -571,49 +661,70 @@
 
             <!-- Document Stack: Natural outer page scroll, using div (not main) to prevent #content main scroll rules -->
             <div class="preview-stack-container" :style="scale !== 1 ? 'transform: scale(' + scale + '); transform-origin: top center;' : ''">
-                @foreach ($items as $index => $item)
-                    @php
-                        $order = $item['order'];
-                        $invoiceNo = $order->invoice_number ?: sprintf('%05d', $order->id);
-                    @endphp
-                    <section class="bulk-preview-item">
-                        <!-- Screen-only separator between documents -->
-                        <div class="document-separator no-print">
-                            <span>
-                                {{ __('order_bulk_print.preview.doc_separator', [
-                                    'current' => $index + 1,
-                                    'total' => $totalCount,
-                                    'invoice' => $invoiceNo,
-                                ]) }}
-                            </span>
-                            <div class="document-separator-line"></div>
-                        </div>
-
-                        <!-- Printed Paper Sheet -->
-                        <div class="paper-sheet-box">
-                            @if ($isInvoice)
-                                @include('admin::pages.order.invoice-template', [
-                                    'order' => $order,
-                                    'printLocale' => $item['printLocale'],
-                                    'invoicePreviousBalance' => $item['invoicePreviousBalance'],
-                                    'customerName' => $item['customerName'],
-                                    'customerPhone' => $item['customerPhone'],
-                                    'customerAddress' => $item['customerAddress'],
-                                    'printAreaId' => $item['printAreaId'],
-                                ])
-                            @else
-                                @include('admin::pages.order.invoice-template-02', [
-                                    'order' => $order,
-                                    'printLocale' => $item['printLocale'],
-                                    'customerName' => $item['customerName'],
-                                    'customerPhone' => $item['customerPhone'],
-                                    'customerAddress' => $item['customerAddress'],
-                                    'printAreaId' => $item['printAreaId'],
-                                ])
-                            @endif
+                @if ($isConsolidated)
+                    <section class="bulk-preview-item" style="margin-bottom: 0;">
+                        <div class="paper-sheet-box" style="padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important;">
+                            @include('admin::pages.order-bulk-print.partials.consolidated-template', [
+                                'orders' => $orders,
+                                'consolidatedProducts' => $consolidatedProducts ?? [],
+                                'overallQuantity' => $overallQuantity ?? 0,
+                                'totalProducts' => $totalProducts ?? 0,
+                                'delLocation' => $delLocation ?? '',
+                                'delDate' => $delDate ?? '',
+                                'driverName' => $driverName ?? '',
+                                'stopsCount' => $stopsCount ?? ($orders->count() ?? 0),
+                                'documentNo' => $documentNo ?? '',
+                                'reportDate' => $reportDate ?? now()->format('m/d/y'),
+                                'reportTime' => $reportTime ?? now()->format('g:iA'),
+                                'printLocale' => $locale ?? 'en',
+                            ])
                         </div>
                     </section>
-                @endforeach
+                @else
+                    @foreach ($items as $index => $item)
+                        @php
+                            $order = $item['order'];
+                            $invoiceNo = $order->invoice_number ?: sprintf('%05d', $order->id);
+                        @endphp
+                        <section class="bulk-preview-item">
+                            <!-- Screen-only separator between documents -->
+                            <div class="document-separator no-print">
+                                <span>
+                                    {{ __('order_bulk_print.preview.doc_separator', [
+                                        'current' => $index + 1,
+                                        'total' => $totalCount,
+                                        'invoice' => $invoiceNo,
+                                    ]) }}
+                                </span>
+                                <div class="document-separator-line"></div>
+                            </div>
+
+                            <!-- Printed Paper Sheet -->
+                            <div class="paper-sheet-box">
+                                @if ($isInvoice)
+                                    @include('admin::pages.order.invoice-template', [
+                                        'order' => $order,
+                                        'printLocale' => $item['printLocale'],
+                                        'invoicePreviousBalance' => $item['invoicePreviousBalance'],
+                                        'customerName' => $item['customerName'],
+                                        'customerPhone' => $item['customerPhone'],
+                                        'customerAddress' => $item['customerAddress'],
+                                        'printAreaId' => $item['printAreaId'],
+                                    ])
+                                @else
+                                    @include('admin::pages.order.invoice-template-02', [
+                                        'order' => $order,
+                                        'printLocale' => $item['printLocale'],
+                                        'customerName' => $item['customerName'],
+                                        'customerPhone' => $item['customerPhone'],
+                                        'customerAddress' => $item['customerAddress'],
+                                        'printAreaId' => $item['printAreaId'],
+                                    ])
+                                @endif
+                            </div>
+                        </section>
+                    @endforeach
+                @endif
             </div>
         @endif
     </div>
@@ -640,25 +751,26 @@
                 },
 
                 removeInternalScroll() {
-                    // Remove any height or overflow restrictions on ancestors to ensure 100% outer window scroll
+                    // Ensure active tab pane and ancestors flex cleanly to 100% full height with uniform light gray background
                     const activePane = this.$el.closest('.workspace-tab-pane');
                     if (activePane) {
-                        activePane.style.setProperty('height', 'auto', 'important');
-                        activePane.style.setProperty('max-height', 'none', 'important');
+                        activePane.style.setProperty('background-color', '#f1f5f9', 'important');
+                        activePane.style.setProperty('display', 'flex', 'important');
+                        activePane.style.setProperty('flex-direction', 'column', 'important');
+                        activePane.style.setProperty('flex', '1 1 auto', 'important');
+                        activePane.style.setProperty('min-height', '100%', 'important');
                         activePane.style.setProperty('overflow', 'visible', 'important');
                         activePane.style.setProperty('overflow-y', 'visible', 'important');
                     }
                     const viewport = document.getElementById('workspace-viewport');
                     if (viewport) {
-                        viewport.style.setProperty('height', 'auto', 'important');
-                        viewport.style.setProperty('max-height', 'none', 'important');
+                        viewport.style.setProperty('background-color', '#f1f5f9', 'important');
                         viewport.style.setProperty('overflow', 'visible', 'important');
                         viewport.style.setProperty('overflow-y', 'visible', 'important');
                     }
                     const content = document.getElementById('content');
                     if (content) {
-                        content.style.setProperty('height', 'auto', 'important');
-                        content.style.setProperty('max-height', 'none', 'important');
+                        content.style.setProperty('background-color', '#f1f5f9', 'important');
                         content.style.setProperty('overflow', 'visible', 'important');
                         content.style.setProperty('overflow-y', 'visible', 'important');
                     }
@@ -729,15 +841,20 @@
                         this.scale = savedScale;
                         if (activePane) {
                             activePane.style.setProperty('display', 'flex', 'important');
-                            activePane.style.setProperty('height', 'auto', 'important');
-                            activePane.style.setProperty('max-height', 'none', 'important');
+                            activePane.style.setProperty('flex-direction', 'column', 'important');
+                            activePane.style.setProperty('flex', '1 1 auto', 'important');
+                            activePane.style.setProperty('min-height', '100%', 'important');
+                            activePane.style.setProperty('background-color', '#f1f5f9', 'important');
                             activePane.style.setProperty('overflow', 'visible', 'important');
+                            activePane.style.setProperty('overflow-y', 'visible', 'important');
                         }
                         if (viewport) {
                             viewport.style.setProperty('display', 'flex', 'important');
-                            viewport.style.setProperty('height', 'auto', 'important');
-                            viewport.style.setProperty('max-height', 'none', 'important');
+                            viewport.style.setProperty('flex-direction', 'column', 'important');
+                            viewport.style.setProperty('flex', '1 1 auto', 'important');
+                            viewport.style.setProperty('background-color', '#f1f5f9', 'important');
                             viewport.style.setProperty('overflow', 'visible', 'important');
+                            viewport.style.setProperty('overflow-y', 'visible', 'important');
                         }
                         siblingsToRestore.forEach(item => {
                             if (item.prevDisplay) {
