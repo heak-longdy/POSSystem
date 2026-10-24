@@ -22545,6 +22545,8 @@ window.workspaceMdi = function () {
   return {
     tabs: [],
     activeTabKey: '',
+    permissionScope: '',
+    canViewDashboard: false,
     showOverflowDropdown: false,
     showProfileDropdown: false,
     showNotificationDropdown: false,
@@ -22896,7 +22898,10 @@ window.workspaceMdi = function () {
       this.dragOverTabKey = null;
     },
     init: function init() {
-      var _document$querySelect,
+      var _window$workspaceAcce,
+          _window$workspaceAcce2,
+          _window$workspaceAcce3,
+          _document$querySelect,
           _document$querySelect2,
           _document$querySelect3,
           _document$querySelect4,
@@ -22904,7 +22909,10 @@ window.workspaceMdi = function () {
           _document$querySelect6,
           _this5 = this;
 
-      // 1. Detect current page information
+      this.permissionScope = ((_window$workspaceAcce = window.workspaceAccess) === null || _window$workspaceAcce === void 0 ? void 0 : _window$workspaceAcce.scope) || '';
+      this.canViewDashboard = ((_window$workspaceAcce2 = window.workspaceAccess) === null || _window$workspaceAcce2 === void 0 ? void 0 : _window$workspaceAcce2.dashboard) === true;
+      var currentPageAllowed = ((_window$workspaceAcce3 = window.workspaceAccess) === null || _window$workspaceAcce3 === void 0 ? void 0 : _window$workspaceAcce3.currentPageAllowed) !== false; // 1. Detect current page information
+
       var currentPath = window.location.pathname;
       var currentFullUrl = this.normalizeUrl(window.location.href); // Extract page title from header metadata, header, form header, or document title
 
@@ -22943,7 +22951,7 @@ window.workspaceMdi = function () {
 
       var initialPane = document.getElementById('tab-pane-initial');
 
-      if (initialPane) {
+      if (initialPane && currentPageAllowed) {
         initialPane.id = 'tab-pane-' + currentKey;
         initialPane.setAttribute('data-tab-key', currentKey);
         initialPane.classList.add('active');
@@ -22954,7 +22962,7 @@ window.workspaceMdi = function () {
       var savedTabs = [];
 
       try {
-        var stored = sessionStorage.getItem('pos_workspace_tabs');
+        var stored = this.permissionScope && sessionStorage.getItem('pos_workspace_scope') === this.permissionScope && sessionStorage.getItem('pos_workspace_tabs');
 
         if (stored) {
           savedTabs = JSON.parse(stored);
@@ -22966,7 +22974,7 @@ window.workspaceMdi = function () {
 
       if (Array.isArray(savedTabs)) {
         savedTabs = savedTabs.filter(function (t) {
-          return t.key !== '-admin-dashboard';
+          return t.key !== '-admin-dashboard' && (_this5.canViewDashboard || t.key !== 'admin-dashboard') && (currentPageAllowed || t.key !== currentKey);
         });
         savedTabs.forEach(function (t) {
           t.isLoading = false;
@@ -22986,7 +22994,7 @@ window.workspaceMdi = function () {
         savedTabs = savedTabs.filter(function (t) {
           return t.key !== modulePrefix + '-create';
         });
-      } // Ensure Dashboard tab is always pinned
+      } // Only pin Dashboard when the current user may access it.
 
 
       var dashboardUrl = '/admin/dashboard';
@@ -22995,7 +23003,7 @@ window.workspaceMdi = function () {
         return t.key === dashboardKey;
       });
 
-      if (!hasDashboard) {
+      if (this.canViewDashboard && !hasDashboard) {
         savedTabs.unshift({
           id: 'tab-' + Math.random().toString(36).substr(2, 9),
           key: dashboardKey,
@@ -23023,12 +23031,12 @@ window.workspaceMdi = function () {
         return t.key === currentKey;
       });
 
-      if (existingCurrentIndex >= 0) {
+      if (currentPageAllowed && existingCurrentIndex >= 0) {
         savedTabs[existingCurrentIndex].title = currentKey === dashboardKey ? 'Dashboard' : currentTitle;
         savedTabs[existingCurrentIndex].icon = currentIcon;
         savedTabs[existingCurrentIndex].url = currentFullUrl;
         savedTabs[existingCurrentIndex].isLoading = false;
-      } else {
+      } else if (currentPageAllowed) {
         savedTabs.push({
           id: 'tab-' + Math.random().toString(36).substr(2, 9),
           key: currentKey,
@@ -23043,7 +23051,7 @@ window.workspaceMdi = function () {
       }
 
       this.tabs = savedTabs;
-      this.activeTabKey = currentKey;
+      this.activeTabKey = currentPageAllowed ? currentKey : '';
       this.saveSession(); // 4. Initialize s-event and s-mask on the initial page
 
       if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
@@ -23152,6 +23160,7 @@ window.workspaceMdi = function () {
         });
         sessionStorage.setItem('pos_workspace_tabs', JSON.stringify(sanitized));
         sessionStorage.setItem('pos_workspace_active_tab', this.activeTabKey);
+        sessionStorage.setItem('pos_workspace_scope', this.permissionScope);
       } catch (e) {}
     },
 
@@ -23516,6 +23525,14 @@ window.workspaceMdi = function () {
           'X-MDI-Partial': '1'
         }
       }).then(function (res) {
+        if (res.status === 403) {
+          tab.isPinned = false;
+
+          _this13.closeTab(tab);
+
+          return null;
+        }
+
         if (!res.ok) throw new Error('HTTP error ' + res.status); // Check if redirected to login/auth
 
         if (res.url && (res.url.includes('/login') || res.url.includes('/auth'))) {
@@ -24035,7 +24052,7 @@ window.workspaceMdi = function () {
 
                 if (_this15.tabs.length > 0) {
                   _this15.switchTab(_this15.tabs[0]);
-                } else {
+                } else if (_this15.canViewDashboard) {
                   dashboardUrl = '/admin/dashboard';
                   dashboardKey = _this15.generateKey(dashboardUrl);
                   dashTitle = window.workspaceTranslations && window.workspaceTranslations.dashboard || 'Dashboard';
@@ -24053,6 +24070,8 @@ window.workspaceMdi = function () {
                   _this15.tabs = [dashTab];
 
                   _this15.switchTab(dashTab);
+                } else {
+                  _this15.activeTabKey = '';
                 }
 
                 _this15.saveSession();

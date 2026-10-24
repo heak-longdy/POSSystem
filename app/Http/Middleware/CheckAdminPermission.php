@@ -13,7 +13,10 @@ class CheckAdminPermission
     public function handle(Request $request, Closure $next)
     {
         $permissions = AdminPermissions::forRequest($request);
-        if ($permissions && !$request->user()->canAny($permissions)) {
+        // Only the landing redirect is permission-free. Unmapped module routes
+        // must not silently bypass authorization.
+        if (!$request->routeIs('admin-home')
+            && (!$permissions || !$request->user()->canAny($permissions))) {
             throw UnauthorizedException::forPermissions($permissions);
         }
 

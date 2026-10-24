@@ -67,6 +67,8 @@ window.workspaceMdi = function () {
     return {
         tabs: [],
         activeTabKey: '',
+        permissionScope: '',
+        canViewDashboard: false,
         showOverflowDropdown: false,
         showProfileDropdown: false,
         showNotificationDropdown: false,
@@ -283,6 +285,9 @@ window.workspaceMdi = function () {
         },
 
         init() {
+            this.permissionScope = window.workspaceAccess?.scope || '';
+            this.canViewDashboard = window.workspaceAccess?.dashboard === true;
+            const currentPageAllowed = window.workspaceAccess?.currentPageAllowed !== false;
             // 1. Detect current page information
             const currentPath = window.location.pathname;
             const currentFullUrl = this.normalizeUrl(window.location.href);
@@ -324,7 +329,7 @@ window.workspaceMdi = function () {
 
             // 2. Associate the server-rendered initial pane with current tab key
             const initialPane = document.getElementById('tab-pane-initial');
-            if (initialPane) {
+            if (initialPane && currentPageAllowed) {
                 initialPane.id = 'tab-pane-' + currentKey;
                 initialPane.setAttribute('data-tab-key', currentKey);
                 initialPane.classList.add('active');
@@ -334,7 +339,9 @@ window.workspaceMdi = function () {
             // 3. Load stored tabs from sessionStorage
             let savedTabs = [];
             try {
-                const stored = sessionStorage.getItem('pos_workspace_tabs');
+                const stored = this.permissionScope
+                    && sessionStorage.getItem('pos_workspace_scope') === this.permissionScope
+                    && sessionStorage.getItem('pos_workspace_tabs');
                 if (stored) {
                     savedTabs = JSON.parse(stored);
                 }
@@ -344,7 +351,9 @@ window.workspaceMdi = function () {
 
             // Always ensure all restored tabs are NOT loading, have normalized URLs, and remove legacy malformed keys
             if (Array.isArray(savedTabs)) {
-                savedTabs = savedTabs.filter(t => t.key !== '-admin-dashboard');
+                savedTabs = savedTabs.filter(t => t.key !== '-admin-dashboard'
+                    && (this.canViewDashboard || t.key !== 'admin-dashboard')
+                    && (currentPageAllowed || t.key !== currentKey));
                 savedTabs.forEach(t => {
                     t.isLoading = false;
                     t.url = this.normalizeUrl(t.url);
@@ -363,12 +372,12 @@ window.workspaceMdi = function () {
                 savedTabs = savedTabs.filter(t => t.key !== modulePrefix + '-create');
             }
 
-            // Ensure Dashboard tab is always pinned
+            // Only pin Dashboard when the current user may access it.
             const dashboardUrl = '/admin/dashboard';
             const dashboardKey = this.generateKey(dashboardUrl);
             const hasDashboard = savedTabs.some(t => t.key === dashboardKey);
 
-            if (!hasDashboard) {
+            if (this.canViewDashboard && !hasDashboard) {
                 savedTabs.unshift({
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
                     key: dashboardKey,
@@ -390,12 +399,12 @@ window.workspaceMdi = function () {
 
             // Register or update current page tab
             const existingCurrentIndex = savedTabs.findIndex(t => t.key === currentKey);
-            if (existingCurrentIndex >= 0) {
+            if (currentPageAllowed && existingCurrentIndex >= 0) {
                 savedTabs[existingCurrentIndex].title = currentKey === dashboardKey ? 'Dashboard' : currentTitle;
                 savedTabs[existingCurrentIndex].icon = currentIcon;
                 savedTabs[existingCurrentIndex].url = currentFullUrl;
                 savedTabs[existingCurrentIndex].isLoading = false;
-            } else {
+            } else if (currentPageAllowed) {
                 savedTabs.push({
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
                     key: currentKey,
@@ -410,7 +419,7 @@ window.workspaceMdi = function () {
             }
 
             this.tabs = savedTabs;
-            this.activeTabKey = currentKey;
+            this.activeTabKey = currentPageAllowed ? currentKey : '';
             this.saveSession();
 
             // 4. Initialize s-event and s-mask on the initial page
@@ -511,6 +520,7 @@ window.workspaceMdi = function () {
                 }));
                 sessionStorage.setItem('pos_workspace_tabs', JSON.stringify(sanitized));
                 sessionStorage.setItem('pos_workspace_active_tab', this.activeTabKey);
+                sessionStorage.setItem('pos_workspace_scope', this.permissionScope);
             } catch (e) {}
         },
 
@@ -820,6 +830,11 @@ window.workspaceMdi = function () {
                 }
             })
             .then(res => {
+                if (res.status === 403) {
+                    tab.isPinned = false;
+                    this.closeTab(tab);
+                    return null;
+                }
                 if (!res.ok) throw new Error('HTTP error ' + res.status);
                 // Check if redirected to login/auth
                 if (res.url && (res.url.includes('/login') || res.url.includes('/auth'))) {
@@ -1148,7 +1163,7 @@ window.workspaceMdi = function () {
             // Switch to dashboard or first pinned tab
             if (this.tabs.length > 0) {
                 this.switchTab(this.tabs[0]);
-            } else {
+            } else if (this.canViewDashboard) {
                 const dashboardUrl = '/admin/dashboard';
                 const dashboardKey = this.generateKey(dashboardUrl);
                 const dashTitle = (window.workspaceTranslations && window.workspaceTranslations.dashboard) || 'Dashboard';
@@ -1165,6 +1180,8 @@ window.workspaceMdi = function () {
                 };
                 this.tabs = [dashTab];
                 this.switchTab(dashTab);
+            } else {
+                this.activeTabKey = '';
             }
 
             this.saveSession();

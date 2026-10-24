@@ -9,7 +9,8 @@ class AdminPermissions
 {
     public static function forAction(string $module, string $action, bool $editing = false): array
     {
-        if (!array_key_exists($module, config('admin_permissions.modules', []))) {
+        if (!array_key_exists($module, config('admin_permissions.modules', []))
+            && !in_array($module, ['remaining-amount', 'stock-on-hand', 'stock-movement'], true)) {
             return [];
         }
 
@@ -22,12 +23,19 @@ class AdminPermissions
             'change-password' => 'update', 'save-password' => 'update',
             'add-payment' => 'update', 'update-payment' => 'update', 'cancel' => 'update',
             'update-payment-status' => 'update', 'send-payment-reminder' => 'update',
+            'send-reminder' => 'update',
             'paid' => 'update',
             'delete' => 'delete', 'delete-payment' => 'delete',
             'restore' => in_array($module, ['staff', 'staff-expense']) ? 'restore' : 'update',
             'destroy' => in_array($module, ['staff', 'staff-expense']) ? 'force-delete' : 'delete',
-            'export' => in_array('excel', config('admin_permissions.extra_actions.' . $module, [])) ? 'excel' : 'view',
+            'export' => in_array($module, ['stock-on-hand', 'stock-movement'], true)
+                || in_array('excel', config('admin_permissions.extra_actions.' . $module, [])) ? 'excel' : 'view',
         ];
+
+        // This legacy URL opens the remaining-amount listing, not a creation form.
+        if ($module === 'remaining-amount' && $action === 'create') {
+            return ['remaining-amount-view'];
+        }
 
         return isset($actions[$action]) ? [$module . '-' . $actions[$action]] : [];
     }
@@ -54,6 +62,12 @@ class AdminPermissions
         if (in_array($name, ['admin-setting-setting', 'admin-setting-save', 'admin-our-service-index', 'admin-our-service-store'])) {
             return [$request->isMethod('GET') ? 'service-view' : 'service-update'];
         }
+        if (in_array($name, ['admin-setting-invoice-index', 'setting-invoice-index'])) {
+            return ['setting-invoice-view'];
+        }
+        if (in_array($name, ['admin-setting-invoice-save', 'admin-setting-invoice-preview', 'setting-invoice-save'])) {
+            return ['setting-invoice-update'];
+        }
         if (str_starts_with($name ?? '', 'admin-select-')) {
             $modules = config('admin_permissions.lookups.' . substr($name, strlen('admin-select-')), []);
             return collect($modules)->flatMap(fn ($module) => [
@@ -73,7 +87,7 @@ class AdminPermissions
             return ['stock-on-hand-view', 'stock-out-create', 'stock-out-update', 'stock-transfer-create', 'stock-transfer-update'];
         }
 
-        // Reports retain their existing alternative view permissions. Exports also
+        // Each report requires its own module permission. Export actions also
         // require the Excel permission already offered by the permission screen.
         $exports = [
             'admin-report-sales-report' => 'report-sales-excel',
@@ -93,6 +107,18 @@ class AdminPermissions
         if (isset($exports[$name])) {
             return [$exports[$name]];
         }
+        foreach ([
+            'report-sales' => 'report-sales',
+            'report-order-transaction' => 'report-transaction',
+            'report-inventory-movement' => 'report-inventory',
+            'report-staff-expense' => 'report-staff-expense',
+            'report-customer-remaining-amount' => 'report-sales',
+        ] as $prefix => $module) {
+            if (in_array($name, array_map(fn ($action) => 'admin-' . $prefix . '-' . $action,
+                ['index', 'daily', 'monthly', 'details']), true)) {
+                return [$module . '-view'];
+            }
+        }
         if (in_array($name, ['admin-about-us-index', 'admin-about-us-store'])) {
             return [$name === 'admin-about-us-index' ? 'about-view' : 'about-update'];
         }
@@ -105,7 +131,8 @@ class AdminPermissions
         }
 
         // Longest prefix first: customer-paid must not be treated as customer.
-        $modules = array_keys(config('admin_permissions.modules', []));
+        $modules = array_merge(array_keys(config('admin_permissions.modules', [])),
+            ['remaining-amount', 'stock-on-hand', 'stock-movement']);
         usort($modules, fn ($a, $b) => strlen($b) <=> strlen($a));
         foreach ($modules as $module) {
             $prefix = 'admin-' . $module . '-';
@@ -120,7 +147,7 @@ class AdminPermissions
     public static function allowsAction(string $module, string $action): bool
     {
         $permissions = static::forAction($module, $action);
-        return !$permissions || Gate::any($permissions);
+        return $permissions && Gate::any($permissions);
     }
 
     public static function visibleMenu(array $items): array
@@ -134,7 +161,20 @@ class AdminPermissions
                 }
             }
             $permissions = (array) ($item['permission'] ?? []);
-            return !$permissions || Gate::any($permissions) ? $item : null;
+            return $permissions && Gate::any($permissions) ? $item : null;
         }, $items)));
+    }
+
+    public static function workspaceScope(): string
+    {
+        $user = auth()->user();
+
+        // Invalidate saved tabs after a user switch or permission change. Include
+        // a version so tabs saved under the former permissive rules are discarded.
+        return hash('sha256', json_encode([
+            1, $user->getAuthIdentifier(), $user->role,
+            $user->role === 'super_admin' ? ['*']
+                : $user->getAllPermissions()->pluck('name')->sort()->values()->all(),
+        ]));
     }
 }

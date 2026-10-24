@@ -51,7 +51,7 @@ Route::group(
     }
 );
 
-Route::middleware(['web', 'admin', 'AdminGuard'])->group(function () {
+Route::middleware(['web', 'admin', 'AdminGuard', \App\Http\Middleware\CheckAdminPermission::class])->group(function () {
     Route::get('/admin/setting/invoice', [\App\Http\Controllers\Admin\InvoiceSettingController::class, 'index'])->name('setting-invoice-index');
     Route::post('/admin/setting/invoice/save', [\App\Http\Controllers\Admin\InvoiceSettingController::class, 'save'])->name('setting-invoice-save');
 });

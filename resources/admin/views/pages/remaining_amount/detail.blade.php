@@ -297,7 +297,7 @@
                                                 </td>
                                                 <td class="text-center">
                                                     @if ($order->payment_status !== 'Cancel')
-                                                        @can('order-delete')
+                                                        @can('remaining-amount-delete')
                                                             <button type="button"
                                                                 class="btn-action-delete"
                                                                 title="{{ __('remaining_amount.action.delete_payment') }}"

@@ -47,7 +47,7 @@ class Handler extends ExceptionHandler
             if ($request->expectsJson()) {
                 return response()->json(['message' => __('permission.no_permission.description')], 403);
             }
-            return response()->view('admin::pages.no-permission', [], 403);
+            return response()->view('admin::pages.no-permission', ['workspaceAccessDenied' => true], 403);
         });
     }
 }

@@ -38,7 +38,7 @@ return [
         'type'  => 'single',
         'active' => 'admin/remaining-amount/*',
         'path' => 'admin/remaining-amount/list/partial',
-        'permission' => 'order-view',
+        'permission' => 'remaining-amount-view',
         'name' => [
             'en' => 'Remaining Amount',
             'km' => 'គ្រប់គ្រងទឹកប្រាក់នៅសល់',
@@ -150,7 +150,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/report/sales*',
                 'path' => 'admin/report/sales/daily',
-                'permission' => ['report-sales-view', 'order-view'],
+                'permission' => ['report-sales-view'],
                 'name' => [
                     'en' => 'Sales Report',
                     'km' => 'របាយការណ៍ការលក់',
@@ -162,7 +162,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/report/customer-remaining-amount*',
                 'path' => 'admin/report/customer-remaining-amount',
-                'permission' => ['report-sales-view', 'order-view'],
+                'permission' => ['report-sales-view'],
                 'name' => [
                     'en' => 'Customer Remaining Amount Report',
                     'km' => 'របាយការណ៍ទឹកប្រាក់នៅសល់របស់អតិថិជន',
@@ -174,7 +174,7 @@ return [
                 'type' => 'single',
                 'active' => 'admin/report/inventory-movement*',
                 'path' => 'admin/report/inventory-movement/daily',
-                'permission' => ['report-inventory-view', 'stock-movement-view', 'report-sales-view', 'order-view'],
+                'permission' => ['report-inventory-view'],
                 'name' => [
                     'en' => 'Inventory Movement Report',
                     'km' => 'របាយការណ៍បម្រែបម្រួលស្តុក',
@@ -186,7 +186,7 @@ return [
                 'type'  => 'single',
                 'active' => 'admin/report/staff-expense*',
                 'path' => 'admin/report/staff-expense/daily',
-                'permission' => ['report-staff-expense-view', 'staff-expense-view', 'report-sales-view'],
+                'permission' => ['report-staff-expense-view'],
                 'name' => [
                     'en' => 'Staff Expense Report',
                     'km' => 'របាយការណ៍ចំណាយបុគ្គលិក',

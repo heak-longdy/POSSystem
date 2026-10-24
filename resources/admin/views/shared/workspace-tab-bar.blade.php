@@ -1,4 +1,9 @@
 <script>
+    window.workspaceAccess = {
+        scope: @json(\App\Support\AdminPermissions::workspaceScope()),
+        dashboard: @json(auth()->user()->can('dashboard-view')),
+        currentPageAllowed: @json(!($workspaceAccessDenied ?? false))
+    };
     window.workspaceTranslations = {
         confirmCloseTab: @json(__('global.workspace.confirm_close_tab')),
         confirmCloseAll: @json(__('global.workspace.confirm_close_all')),

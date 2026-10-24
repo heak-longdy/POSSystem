@@ -1153,7 +1153,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 14px;">
-                            <a href="{{ Route::has('admin-remaining-amount-list') ? route('admin-remaining-amount-list', 'partial') : 'javascript:void(0);' }}" class="badge-subtle badge-coral-subtle" style="text-decoration: none;">
+                            <a @can('remaining-amount-view') href="{{ Route::has('admin-remaining-amount-list') ? route('admin-remaining-amount-list', 'partial') : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-coral-subtle" style="text-decoration: none;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -1180,7 +1180,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 14px;">
-                            <a href="{{ Route::has('admin-product-list') ? route('admin-product-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-purple-subtle" style="text-decoration: none;">
+                            <a @can('product-view') href="{{ Route::has('admin-product-list') ? route('admin-product-list', 1) : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-purple-subtle" style="text-decoration: none;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
@@ -1210,7 +1210,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 14px;">
-                            <a href="{{ Route::has('admin-customer-list') ? route('admin-customer-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-cyan-subtle" style="text-decoration: none;">
+                            <a @can('customer-view') href="{{ Route::has('admin-customer-list') ? route('admin-customer-list', 1) : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-cyan-subtle" style="text-decoration: none;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
@@ -1235,7 +1235,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 14px;">
-                            <a href="{{ Route::has('admin-staff-list') ? route('admin-staff-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-emerald-subtle" style="text-decoration: none;">
+                            <a @can('staff-view') href="{{ Route::has('admin-staff-list') ? route('admin-staff-list', 1) : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-emerald-subtle" style="text-decoration: none;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
@@ -1259,7 +1259,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 14px;">
-                            <a href="{{ Route::has('admin-user-list') ? route('admin-user-list', 1) : 'javascript:void(0);' }}" class="badge-subtle badge-indigo-subtle" style="text-decoration: none;">
+                            <a @can('user-view') href="{{ Route::has('admin-user-list') ? route('admin-user-list', 1) : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-indigo-subtle" style="text-decoration: none;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
@@ -1279,7 +1279,7 @@
                         <div class="table-header-flex" style="margin-bottom: 8px;">
                             <h3 class="dash-card-title">@lang('dashboard.recent_transactions')</h3>
                             @if (Route::has('admin-order-list'))
-                                <a href="{{ route('admin-order-list') }}" class="timeline-view-all-link" title="@lang('dashboard.view_all_transactions')">
+                                <a @can('order-view') href="{{ route('admin-order-list') }}" @endcan class="timeline-view-all-link" title="@lang('dashboard.view_all_transactions')">
                                     <span>@lang('dashboard.view_all_transactions')</span>
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="9 18 15 12 9 6"></polyline>
@@ -1378,7 +1378,7 @@
                                             @endif
                                         </div>
                                         <div class="timeline-meta-bar">
-                                            <a href="{{ $orderUrl }}" class="timeline-order-pill">
+                                            <a @can('order-view') href="{{ $orderUrl }}" @endcan class="timeline-order-pill">
                                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                                     <polyline points="14 2 14 8 20 8"></polyline>

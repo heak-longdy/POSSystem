@@ -120,7 +120,7 @@
                                         <div class="invoice-group-title">
                                             <span>
                                                 <i class="bx bx-receipt"></i> {{ __('customer_remaining_report.invoice') }}:
-                                                @can('order-view')
+                                                @can('remaining-amount-view')
                                                     <a class="report-link" href="{{ route('admin-remaining-amount-detail', $invoice['order_id']) }}">{{ $invoice['invoice'] }}</a>
                                                 @else
                                                     {{ $invoice['invoice'] }}
