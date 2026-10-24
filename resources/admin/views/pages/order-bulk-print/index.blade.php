@@ -343,6 +343,16 @@
             transform: translateY(-1px);
         }
 
+        .btn-print-consolidated {
+            background: #0284c7;
+            color: #ffffff;
+        }
+
+        .btn-print-consolidated:hover {
+            background: #0369a1;
+            transform: translateY(-1px);
+        }
+
         .btn-clear-selection {
             background: rgba(239, 68, 68, 0.15);
             color: #f87171;
@@ -637,6 +647,10 @@
 
                 <button type="button" class="btn-bulk-action btn-print-delivery" @click="submitPrint('delivery_slip')">
                     <i class="bx bx-file"></i> {{ __('order_bulk_print.selection.print_delivery_slips') }}
+                </button>
+
+                <button type="button" class="btn-bulk-action btn-print-consolidated" @click="submitPrint('consolidated')">
+                    <i class="bx bx-layer"></i> {{ __('order_bulk_print.selection.consolidated_product_quantity') }}
                 </button>
 
                 <button type="button" class="btn-bulk-action btn-clear-selection" @click="clearSelection()">
@@ -975,13 +989,20 @@
                     const baseRoute = '{{ route('admin-order-bulk-print-preview') }}';
                     const targetUrl = baseRoute.replace(/\/+$/, '') + '/' + docType + '?' + params.toString();
 
-                    const titlePrefix = docType === 'invoice'
-                        ? '{{ __('order_bulk_print.preview.title_invoice') }}'
-                        : '{{ __('order_bulk_print.preview.title_delivery_slip') }}';
+                    let titlePrefix;
+                    let iconClass = 'bx bx-printer';
+                    if (docType === 'invoice') {
+                        titlePrefix = '{{ __('order_bulk_print.preview.title_invoice') }}';
+                    } else if (docType === 'delivery_slip') {
+                        titlePrefix = '{{ __('order_bulk_print.preview.title_delivery_slip') }}';
+                    } else {
+                        titlePrefix = '{{ __('order_bulk_print.preview.title_consolidated') }}';
+                        iconClass = 'bx bx-layer';
+                    }
                     const tabTitle = titlePrefix + ' (' + this.selectedIds.length + ')';
 
                     if (window.MDI && typeof window.MDI.openUrlInTab === 'function') {
-                        window.MDI.openUrlInTab(targetUrl, tabTitle, 'bx bx-printer');
+                        window.MDI.openUrlInTab(targetUrl, tabTitle, iconClass);
                     } else {
                         window.location.href = targetUrl;
                     }
