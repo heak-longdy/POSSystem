@@ -61,16 +61,20 @@ return [
         'english' => 'English',
         'print_invoices' => 'Print Selected Invoices',
         'print_delivery_slips' => 'Print Selected Delivery Slips',
+        'consolidated_product_quantity' => 'Consolidated Product Quantity',
         'loading_matching' => 'Fetching matching order IDs...',
     ],
 
     'preview' => [
         'title_invoice' => 'Bulk Invoice Preview',
         'title_delivery_slip' => 'Bulk Delivery Slip Preview',
+        'title_consolidated' => 'Consolidated Product Quantity',
+        'load_report_draft' => 'Load Report (Draft)',
         'meta_docs' => ':count documents',
         'prepared' => 'Prepared: :date',
         'paper_size' => 'Paper: A5 landscape',
         'print_all' => 'Print All',
+        'print' => 'Print',
         'close' => 'Close Preview',
         'preparing' => 'Preparing documents and loading fonts...',
         'ready' => 'Ready to print',
@@ -78,6 +82,9 @@ return [
         'zoom_in' => 'Zoom In',
         'zoom_out' => 'Zoom Out',
         'fit_width' => 'Fit Width',
+        'products' => 'Products',
+        'total_quantity' => 'Total Quantity',
+        'no_products_found' => 'No product items found in the selected orders.',
     ],
 
     'validation' => [
