@@ -1026,6 +1026,20 @@ class OrderController extends Controller
             ]);
         }
 
+        foreach ($dataCarts as $cart) {
+            if (($cart->product_type ?? null) !== 'product') {
+                continue;
+            }
+            $quantity = $cart->product_qty ?? null;
+            // Match the form's positive safe-integer check before any order or stock changes.
+            if (!is_numeric($quantity) || (float) $quantity < 1 || (float) $quantity > 9007199254740991
+                || floor((float) $quantity) !== (float) $quantity) {
+                throw ValidationException::withMessages([
+                    'dataCarts' => __('order.validation.quantity_invalid'),
+                ]);
+            }
+        }
+
         return $dataCarts;
     }
 

@@ -437,6 +437,7 @@ return [
         'cart_required' => 'Shopping cart is required',
         'cart_invalid' => 'Shopping cart format invalid',
         'cart_item_invalid' => 'Shopping cart item is invalid.',
+        'quantity_invalid' => 'Enter a whole-number quantity of at least 1 for each product.',
         'discount_invalid' => 'Item discount must be a non-negative number.',
         'unit_price_invalid' => 'Enter a valid non-negative USD unit price with at most two decimal places, within the supported line amount.',
         'original_price_changed' => 'The original product price has changed or cannot be represented in cents. Reload the product and check its price.',

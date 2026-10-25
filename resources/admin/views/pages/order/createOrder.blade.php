@@ -12,7 +12,7 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => $headerName])
     <div class="form-admin booking booking-dashboard booking-order-ui" x-data="XDatacreateorder"
-        x-id="['order-date', 'delivery-date']">
+        x-id="['order-date', 'delivery-date', 'order-quantity-error']">
         <div class="booking-pos-workspace">
             <div class="booking-pos-header">
                 <div class="form-header">
@@ -164,6 +164,13 @@
                     </div>
 
                     <div class="booking-pos-items-body">
+                        <template x-if="quantityValidationMessage()">
+                            <div class="booking-error-summary booking-quantity-error" role="alert"
+                                :id="$id('order-quantity-error')">
+                                <span x-html="getValidationIcon(quantityValidationMessage())" aria-hidden="true"></span>
+                                <span x-text="quantityValidationMessage()"></span>
+                            </div>
+                        </template>
                         <!-- Empty State -->
                         <template x-if="!dataCart?.length">
                             <div class="booking-pos-items-empty">
@@ -298,6 +305,7 @@
                                                 <td class="col-qty">
                                                     <div class="cell-label-mobile">{{ __('order.qty') }}</div>
                                                     <div class="booking-pos-qty-pill" x-show="item.product_type === 'product'"
+                                                        :class="{ 'has-quantity-error': hasQuantityValidationError(item) }"
                                                         aria-label="Quantity selector">
                                                         <button type="button" class="qty-pill-btn qty-btn-minus"
                                                             :disabled="!canEditOrderItems() || Number(item.product_qty) <= 1"
@@ -305,6 +313,8 @@
                                                             aria-label="Decrease">&minus;</button>
                                                         <input type="number" min="1" step="1" data-cart-qty
                                                             x-model="item.product_qty" :disabled="!canEditOrderItems()"
+                                                            :aria-invalid="hasQuantityValidationError(item)"
+                                                            :aria-describedby="hasQuantityValidationError(item) ? $id('order-quantity-error') : null"
                                                             x-on:input="qtyRealTimeAction(item)"
                                                             class="qty-pill-input">
                                                         <button type="button" class="qty-pill-btn qty-btn-plus"
@@ -372,10 +382,10 @@
                         </span>
                     </div>
 
-                    <template x-if="validationMessages().length">
+                    <template x-if="validationMessages('details').length">
                         <div class="booking-error-summary">
                             <div class="booking-error-summary-list" style="display: flex;flex-direction: column;grid-gap: 5px;">
-                                <template x-for="message in validationMessages()" :key="message">
+                                <template x-for="message in validationMessages('details')" :key="message">
                                     <div style="display: flex; align-items: flex-start; gap: 6px;">
                                         <span x-html="getValidationIcon(message)" style="display: inline-flex; align-items: center; line-height: 1; margin-top: 3px;"></span>
                                         <span x-text="message"></span>
@@ -636,6 +646,12 @@
                     .form-admin.booking.booking-dashboard.booking-order-ui .booking-pos-items-section :is(button, button span) {
                         line-height: 1.5 !important;
                     }
+                    .booking-order-ui .booking-pos-items-section .booking-quantity-error {
+                        display: flex; align-items: flex-start; gap: 6px; margin: 16px 20px;
+                    }
+                    .booking-order-ui .booking-quantity-error > span:first-child {
+                        display: inline-flex; flex-shrink: 0; margin-top: 2px;
+                    }
                     .booking-order-ui .booking-pos-items-empty {
                         display: flex !important; flex-direction: column !important; align-items: center !important;
                         justify-content: center !important; text-align: center !important; gap: 0;
@@ -731,6 +747,9 @@
                     .booking-order-ui .order-items-table .booking-discount-group { width: 100%; }
                     .booking-order-ui .order-items-table :is(.booking-discount-group, .booking-pos-qty-pill):focus-within {
                         border-color: var(--order-accent) !important; box-shadow: 0 0 0 3px rgba(37, 99, 235, .1) !important;
+                    }
+                    .booking-order-ui .order-items-table .booking-pos-qty-pill.has-quantity-error {
+                        border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, .12) !important;
                     }
                     .booking-order-ui .order-items-table .discount-prefix-select {
                         width: 38px !important; min-width: 38px; height: 100% !important; margin: 0 !important;
@@ -2904,7 +2923,7 @@
                         return;
                     }
 
-                    item.product_qty = Number(item.product_qty || 1) + 1;
+                    item.product_qty = Number(item.product_qty || 0) + 1;
                     this.calculatorProductPrice();
                 },
                 decreaseCartQty(item) {
@@ -3048,9 +3067,6 @@
                     this.calculatorProductPrice();
                 },
                 qtyRealTimeAction(item) {
-                    if (!item.product_qty) {
-                        item.product_qty = 1;
-                    }
                     if (item?.product_type === 'service') {
                         item.product_qty = 1;
                     }
@@ -3339,6 +3355,7 @@
                                 btnClose: @json(__('order.button.close')),
                                 btnSave: this.btnSubmit,
                                 typeAction: 'manual',
+                                digPosition: "posTop",
                             },
                             afterClosed: (result) => {
                                 if (!result) {
@@ -3358,6 +3375,8 @@
                 confirmPaymentAction(message, btnSave, onConfirm) {
                     const confirmDialog = this.$store?.confirmDialog;
 
+                    console.log('hiiiiiiii');
+
                     if (confirmDialog && typeof confirmDialog.open === 'function') {
                         confirmDialog.open({
                             data: {
@@ -3366,6 +3385,7 @@
                                 btnClose: @json(__('order.button.close')),
                                 btnSave: btnSave,
                                 typeAction: 'manual',
+                                digPosition: "posTop",
                             },
                             afterClosed: (result) => {
                                 if (result) {
@@ -3575,6 +3595,9 @@
                         errors.dataCarts = [@json(__('order.validation.cart_required'))];
                     } else if (this.dataCart.some((item) => !item?.product_id || !item?.product_type)) {
                         errors.dataCarts = [@json(__('order.validation.cart_item_invalid'))];
+                    } else if (this.dataCart.some((item) => item.product_type === 'product'
+                        && (!Number.isSafeInteger(Number(item.product_qty)) || Number(item.product_qty) < 1))) {
+                        errors.dataCarts = [@json(__('order.validation.quantity_invalid'))];
                     } else if (this.dataCart.some((item) => item.product_type === 'product' && !this.validProductPrice(item))) {
                         errors.dataCarts = [@json(__('order.validation.unit_price_invalid'))];
                     } else if (this.dataCart.some((item) => {
@@ -3616,10 +3639,19 @@
                             });
                     });
                 },
-                validationMessages() {
+                quantityValidationMessage() {
+                    const messages = this.dataError?.dataCarts;
+                    return (Array.isArray(messages) ? messages : [messages])
+                        .find((message) => message === @json(__('order.validation.quantity_invalid'))) || '';
+                },
+                hasQuantityValidationError(item) {
+                    return Boolean(this.quantityValidationMessage()) && item?.product_type === 'product'
+                        && (!Number.isSafeInteger(Number(item.product_qty)) || Number(item.product_qty) < 1);
+                },
+                validationMessages(section = null) {
                     return Object.values(this.dataError || {})
                         .flatMap((messages) => Array.isArray(messages) ? messages : [messages])
-                        .filter(Boolean);
+                        .filter((message) => message && (section !== 'details' || message !== this.quantityValidationMessage()));
                 },
                 getValidationIcon(message = '') {
                     const text = String(message || '').toLowerCase();

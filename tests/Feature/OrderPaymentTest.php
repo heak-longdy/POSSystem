@@ -519,6 +519,46 @@ class OrderPaymentTest extends TestCase
         return $payload;
     }
 
+    public function test_create_and_edit_reject_invalid_quantities_without_changing_the_order_or_stock(): void
+    {
+        $payload = $this->automaticCartPayload();
+        $cart = json_decode($payload['dataCarts'], true);
+        $invalidQuantities = ['', null, 0, '0', -1, '1.5', 'invalid', '1e999', true, [], '9007199254740992'];
+
+        foreach ($invalidQuantities as $quantity) {
+            $cart[0]['product_qty'] = $quantity;
+            $this->postJson('/admin/order/save', array_merge($payload, ['dataCarts' => json_encode($cart)]))
+                ->assertUnprocessable()->assertJsonValidationErrors('dataCarts')
+                ->assertJsonPath('errors.dataCarts.0', __('order.validation.quantity_invalid'));
+        }
+        $this->assertSame(0, Order::count());
+        $this->assertSame(0, DB::table('order_details')->count());
+        $this->assertSame(0, DB::table('stock_outs')->count());
+        $this->assertEquals(100, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order = Order::findOrFail($response->json('id'));
+        $detail = $order->orderDetails->first();
+        $payload['id'] = $order->id;
+        $cart[0]['id'] = $detail->id;
+        foreach ($invalidQuantities as $quantity) {
+            $cart[0]['product_qty'] = $quantity;
+            $this->postJson('/admin/order/save', array_merge($payload, ['dataCarts' => json_encode($cart)]))
+                ->assertUnprocessable()->assertJsonValidationErrors('dataCarts')
+                ->assertJsonPath('errors.dataCarts.0', __('order.validation.quantity_invalid'));
+            $this->assertEquals(3, $detail->fresh()->qty);
+            $this->assertSame(27.0, $order->fresh()->total_price);
+            $this->assertEquals(97, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+        }
+
+        $cart[0]['product_qty'] = '5';
+        $this->postJson('/admin/order/save', array_merge($payload, ['dataCarts' => json_encode($cart)]))->assertOk();
+        $order->refresh();
+        $this->assertEquals(5, $order->orderDetails->first()->qty);
+        $this->assertSame(45.0, $order->total_price);
+        $this->assertEquals(95, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+    }
+
     /** @dataProvider automaticPriceCases */
     public function test_automatic_usd_prices_are_calculated_saved_and_restored(string $original, string $unit, int $qty, float $discount, float $total): void
     {
