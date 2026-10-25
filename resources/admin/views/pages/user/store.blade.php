@@ -20,8 +20,6 @@
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
-                </div>
-                <div class="row-3">
                     <div class="form-row">
                         <label>{{ __('user.form.email.label') }} <span>*</span> </label>
                         <input type="text" name="email" value="{!! request('id') ? $data?->email : old('email') !!}" placeholder="{{ __('user.form.email.placeholder') }}">
@@ -29,11 +27,13 @@
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
+                </div>
+                <div class="row-3">
                     <div class="form-row">
                         <label>@lang('global.form.status.label')<span>*</span></label>
                         <select name="status">
                             @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data->status == $key) || old('status') == $key ? 'selected' : '' !!}>
+                                <option value="{{ $key }}" {!! (request('id') && $data?->status == $key) || old('status') == $key ? 'selected' : '' !!}>
                                     {{ $key == 1 ? __('user.form.status.active') : __('user.form.status.disable') }}
                                 </option>
                             @endforeach
@@ -52,6 +52,20 @@
                             @endforeach
                         </select>
                         @error('language_preference')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
+                    <div class="form-row">
+                        <label>@lang('user.form.data_access.label')<span>*</span></label>
+                        <select name="data_access">
+                            <option value="own" {!! old('data_access', request('id') ? ($data?->data_access ?? 'own') : 'own') === 'own' ? 'selected' : '' !!}>
+                                @lang('user.form.data_access.own')
+                            </option>
+                            <option value="all" {!! old('data_access', request('id') ? ($data?->data_access ?? 'own') : 'own') === 'all' ? 'selected' : '' !!}>
+                                @lang('user.form.data_access.all')
+                            </option>
+                        </select>
+                        @error('data_access')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>

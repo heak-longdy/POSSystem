@@ -40,7 +40,7 @@ class OrderBulkPrintService
         }
 
         // Query orders with all required relations in descending ID order
-        $orders = Order::whereIn('id', $distinctIds)
+        $orders = Order::forUser()->whereIn('id', $distinctIds)
             ->with([
                 'customer',
                 'shop',

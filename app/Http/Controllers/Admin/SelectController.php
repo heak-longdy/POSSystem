@@ -38,7 +38,7 @@ class SelectController extends Controller
     }
     public function customer()
     {
-        $data = Customer::where('status', 1)->orderBy('id', 'asc')->limit(50)->get();
+        $data = Customer::forUser()->where('status', 1)->orderBy('id', 'asc')->limit(50)->get();
         return response()->json($data);
     }
     public function shop()
@@ -121,7 +121,7 @@ class SelectController extends Controller
     }
     public function selectCustomer(Request $req)
     {
-        $data = Customer::where('status', 1)->where(function (Builder $q) use ($req) {
+        $data = Customer::forUser()->where('status', 1)->where(function (Builder $q) use ($req) {
             if ($req->search) {
                 $q->where('name', 'LIKE', '%' . $req->search . '%');
             }

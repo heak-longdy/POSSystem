@@ -13,6 +13,7 @@ use App\Models\Staff;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -30,14 +31,16 @@ class DashboardController extends Controller
 
         $data['totalCustomerPaidUsd'] = CustomerPaid::sum('amount_usd');
         $data['totalCustomerPaidKhr'] = CustomerPaid::sum('amount_kh');
-        $data['totalOrderRemainingAmount'] = (float) Order::whereIn('payment_status', ['Pending', 'Partial'])
+        $data['totalOrderRemainingAmount'] = (float) Order::forUser()
+            ->whereIn('payment_status', ['Pending', 'Partial'])
             ->sum(DB::raw('GREATEST(0, total_price - COALESCE(paid_amount, 0))'));
-        $data['remainingOrderCount'] = (int) Order::whereIn('payment_status', ['Pending', 'Partial'])
+        $data['remainingOrderCount'] = (int) Order::forUser()
+            ->whereIn('payment_status', ['Pending', 'Partial'])
             ->whereRaw('(total_price - COALESCE(paid_amount, 0)) > 0')
             ->count();
         
-        $data['totalOrderPrice'] = (float) Order::sum('total_price');
-        $data['pendingOrderCount'] = (int) Order::where('payment_status', 'Pending')->count();
+        $data['totalOrderPrice'] = (float) Order::forUser()->sum('total_price');
+        $data['pendingOrderCount'] = (int) Order::forUser()->where('payment_status', 'Pending')->count();
 
         // Products Count Dynamic Data
         $data['totalProductsCount'] = (int) Product::count();
@@ -46,9 +49,9 @@ class DashboardController extends Controller
         $data['activeProductCount'] = $data['activeProductsCount'];
 
         // Customer Count Dynamic Data
-        $data['totalCustomerCount'] = (int) Customer::count();
+        $data['totalCustomerCount'] = (int) Customer::forUser()->count();
         $data['totalCustomersCount'] = $data['totalCustomerCount'];
-        $data['activeCustomerCount'] = (int) Customer::where('status', 1)->count();
+        $data['activeCustomerCount'] = (int) Customer::forUser()->where('status', 1)->count();
         $data['activeCustomersCount'] = $data['activeCustomerCount'];
 
         // Staff Count Dynamic Data
@@ -61,7 +64,8 @@ class DashboardController extends Controller
         $data['activeUserCount'] = (int) User::where('role', '!=', 'super_admin')->where('status', 1)->count();
         $data['activeUsersCount'] = $data['activeUserCount'];
 
-        $data['recentTransactions'] = Order::with(['customer', 'shop'])
+        $data['recentTransactions'] = Order::forUser()
+            ->with(['customer', 'shop'])
             ->latest('id')
             ->take(6)
             ->get();
@@ -144,6 +148,10 @@ class DashboardController extends Controller
             ->whereNull('orders.deleted_at')
             ->whereNull('products.deleted_at')
             ->where('orders.payment_status', '!=', 'Cancel');
+
+        if (Auth::check() && !Auth::user()->hasFullDataAccess()) {
+            $query->where('orders.created_by', Auth::id());
+        }
 
         if ($selectedMonth && $selectedMonth !== 'all') {
             try {

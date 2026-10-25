@@ -33,6 +33,7 @@ class User extends Authenticatable
         'remember_token',
         'status',
         'language_preference',
+        'data_access',
         'image',
       	'identity_expired_date',
     ];
@@ -66,7 +67,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(ModelHasPermission::class, 'model_id');
     }
-   protected $appends = ['image_url', 'language_preference_label', 'created_date'];
+   protected $appends = ['image_url', 'language_preference_label', 'created_date', 'data_access_badge', 'data_access_label'];
     public function getImageUrlAttribute()
     {
         if ($this->image != null) {
@@ -83,5 +84,35 @@ class User extends Authenticatable
     public function getCreatedDateAttribute()
     {
         return $this->created_at ? \Carbon\Carbon::parse($this->created_at)->format('d/M/Y h:i A') : null;
+    }
+
+    public function hasFullDataAccess(): bool
+    {
+        if ($this->role === 'super_admin') {
+            return true;
+        }
+
+        return ($this->data_access ?? 'own') === 'all';
+    }
+
+    public function getDataAccessLabelAttribute(): string
+    {
+        return $this->hasFullDataAccess()
+            ? __('user.data_access.all')
+            : __('user.data_access.own');
+    }
+
+    public function getDataAccessBadgeAttribute(): string
+    {
+        if ($this->hasFullDataAccess()) {
+            return '<span class="badge" style="display: inline-block; font-size: 11px;padding: 5px 10px; border-radius: 14px; background: #2196F3; color: #0369a1; font-weight: 600;">' . __('user.data_access.all') . '</span>';
+        }
+
+        return '<span class="badge" style="display: inline-block; font-size: 11px;padding: 5px 10px; border-radius: 14px; background: #FFC107; color: #92400e; font-weight: 600;">' . __('user.data_access.own') . '</span>';
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['super_admin', 'admin'], true);
     }
 }

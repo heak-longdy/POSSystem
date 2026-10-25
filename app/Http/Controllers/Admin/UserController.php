@@ -111,6 +111,9 @@ class UserController extends Controller
                 $user->fill($req->only(array_diff($user->getFillable(), ['role'])));
                 if ($creating) {
                     $user->role = 'admin';
+                    if (!$req->filled('data_access')) {
+                        $user->data_access = 'own';
+                    }
                 }
                 $user->save();
 

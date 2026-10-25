@@ -34,6 +34,7 @@ class UserRequest extends FormRequest
             // "identity" => "required|numeric|unique:users,identity," . $acceptedId,
             "status"    => "required|numeric",
             "language_preference" => ["required", Rule::in(Language::activeCodes())],
+            "data_access" => ["required", "string", Rule::in(["all", "own"])],
             'password' => $acceptedId ? 'nullable':'required'.'|same:confirm_password|min:6',
             'confirm_password' => $acceptedId ? 'nullable':'required|min:6',
         ];
@@ -46,6 +47,8 @@ class UserRequest extends FormRequest
             "status.numeric" => __('user.validation.status_numeric'),
             "language_preference.required" => __('user.validation.language_preference_required'),
             "language_preference.in" => __('user.validation.language_preference_in'),
+            "data_access.required" => __('user.validation.data_access_required'),
+            "data_access.in" => __('user.validation.data_access_in'),
             "email.required" => __('user.validation.email_required'),
             "email.unique" => __('user.validation.email_unique'),
             'email.email'    => __('user.validation.email_format'),

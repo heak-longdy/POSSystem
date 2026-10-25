@@ -20,8 +20,9 @@
                     'colVal' => 10,
                     'rowClass' => 'thumbnailIcon',
                 ],
-                ['field' => 'name', 'title' => __('user.table.name'), 'class' => 'text left', 'colVal' => 30],
-                ['field' => 'email', 'title' => __('user.table.email'), 'class' => 'text left', 'colVal' => 30],
+                ['field' => 'name', 'title' => __('user.table.name'), 'class' => 'text left', 'colVal' => 25],
+                ['field' => 'email', 'title' => __('user.table.email'), 'class' => 'text left', 'colVal' => 20],
+                ['field' => 'data_access_badge', 'title' => __('user.table.data_access'), 'class' => 'text center', 'colVal' => 15],
                 ['field' => 'language_preference_label', 'title' => __('user.table.language'), 'class' => 'text left', 'colVal' => 10],
                 ['field' => 'created_date', 'title' => __('user.table.post_date'), 'class' => '', 'colVal' => 10],
                 [

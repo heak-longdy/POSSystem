@@ -22,9 +22,9 @@ class CustomerController extends Controller
     {
         $status = $req->status ?? 1;
         if ($status !== 'trash') {
-            $query = Customer::where('status', $status);
+            $query = Customer::forUser()->where('status', $status);
         } else {
-            $query = Customer::onlyTrashed();
+            $query = Customer::forUser()->onlyTrashed();
         }
 
         if ($req->filled('search')) {
@@ -69,33 +69,81 @@ class CustomerController extends Controller
     }
     public function onEdit(Request $req)
     {
+        $customer = Customer::findOrFail($req->id);
+        if (!$customer->isOwnedBy(auth()->user())) {
+            abort(403, 'Unauthorized access to customer.');
+        }
+
         $data['id'] = $req->id;
-        $data['data'] = Customer::find($req->id);
+        $data['data'] = $customer;
         $data['routeName'] = $this->routeName;
         return view($this->layout . 'store', $data);
     }
     public function Save(CustomerRequest $req, $id = "")
     {
-        if ($req->input('save_opt') == 'save_new') {
-            return $this->tools->onSave($this->table, $req, $id, $this->routeName, 'back');
+        $originalUser = null;
+        if ($id) {
+            $customer = Customer::findOrFail($id);
+            if (!$customer->isOwnedBy(auth()->user())) {
+                abort(403, 'Unauthorized access to customer.');
+            }
+            $originalUser = $customer->user;
         }
-        return $this->tools->onSave($this->table, $req, $id, $this->routeName);
+
+        if ($req->input('save_opt') == 'save_new') {
+            $response = $this->tools->onSave($this->table, $req, $id, $this->routeName, 'back');
+        } else {
+            $response = $this->tools->onSave($this->table, $req, $id, $this->routeName);
+        }
+
+        if ($id && $originalUser !== null) {
+            Customer::where('id', $id)->update(['user' => $originalUser]);
+        }
+
+        return $response;
     }
     public function updateStatus($id, $status)
     {
-        return $this->tools->onUpdateStatus($this->table, $id, $status);
+        $customer = Customer::findOrFail($id);
+        if (!$customer->isOwnedBy(auth()->user())) {
+            abort(403, 'Unauthorized access to customer.');
+        }
+        $originalUser = $customer->user;
+        $response = $this->tools->onUpdateStatus($this->table, $id, $status);
+        if ($originalUser !== null) {
+            Customer::where('id', $id)->update(['user' => $originalUser]);
+        }
+        return $response;
     }
     public function restore($id = "")
     {
+        if ($id) {
+            $customer = Customer::withTrashed()->findOrFail($id);
+            if (!$customer->isOwnedBy(auth()->user())) {
+                abort(403, 'Unauthorized access to customer.');
+            }
+        }
         return $this->tools->onRestore($this->table, $id);
     }
     public function destroy($id = "")
     {
+        if ($id) {
+            $customer = Customer::withTrashed()->findOrFail($id);
+            if (!$customer->isOwnedBy(auth()->user())) {
+                abort(403, 'Unauthorized access to customer.');
+            }
+        }
         return $this->tools->onDestroy($this->table, $id);
     }
 
     public function delete($id = "")
     {
+        if ($id) {
+            $customer = Customer::findOrFail($id);
+            if (!$customer->isOwnedBy(auth()->user())) {
+                abort(403, 'Unauthorized access to customer.');
+            }
+        }
         return $this->tools->onDelete($this->table, $id);
     }
 

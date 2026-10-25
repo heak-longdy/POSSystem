@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,6 +28,7 @@ class Order extends Model
         'pay_way',
         'total_point',
         'remark',
+        'created_by',
     ];
 
     protected $casts = [
@@ -76,5 +78,29 @@ class Order extends Model
     public function getRemainingAmountAttribute()
     {
         return max(0, (float) ($this->total_price ?? 0) - (float) ($this->paid_amount ?? 0));
+    }
+
+    public function scopeForUser(Builder $query, ?User $user = null): Builder
+    {
+        $user = $user ?? auth()->user();
+
+        if (!$user || $user->hasFullDataAccess()) {
+            return $query;
+        }
+
+        return $query->where('orders.created_by', $user->id);
+    }
+
+    public function isOwnedBy(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->hasFullDataAccess()) {
+            return true;
+        }
+
+        return (int) $this->created_by === (int) $user->id;
     }
 }

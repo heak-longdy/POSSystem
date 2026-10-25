@@ -28,6 +28,10 @@ return [
         'title' => 'User is empty',
         'description' => 'You can create a new User by clicking the button below.',
     ],
+    'data_access' => [
+        'all' => 'All Records',
+        'own' => 'Own Records Only',
+    ],
     'form' => [
         'title' => [
             'change_password' => 'Change Password',
@@ -74,6 +78,11 @@ return [
         'language_preference' => [
             'label' => 'Language Preference',
         ],
+        'data_access' => [
+            'label' => 'Data Access Permission',
+            'all' => 'All Records (Store-wide)',
+            'own' => 'Own Records Only (Restricted to creator)',
+        ],
         'profile' => [
             'label' => 'Profile',
             'placeholder' => 'Enter profile',
@@ -102,6 +111,7 @@ return [
         'profile' => 'Profile',
         'name' => 'Name',
         'email' => 'Email',
+        'data_access' => 'Data Access',
         'language' => 'Language',
         'post_date' => 'Post Date',
         'action' => 'Action',
@@ -121,6 +131,8 @@ return [
         'status_numeric' => 'Status is invalid format',
         'language_preference_required' => 'Language Preference is required',
         'language_preference_in' => 'Language Preference is invalid',
+        'data_access_required' => 'Data access permission is required',
+        'data_access_in' => 'Invalid data access option selected',
         'email_required' => 'Email is required',
         'email_unique' => 'Email already exists',
         'email_format' => 'Please provide a valid email address.',

@@ -66,8 +66,8 @@ trait BuildsOrderListingQuery
             ?: $this->normalizePaymentStatus($req->payment_status);
 
         $query = $normalizedStatus === 'trash'
-            ? Order::onlyTrashed()
-            : Order::query();
+            ? Order::forUser()->onlyTrashed()
+            : Order::forUser();
 
         $from = $req->from_date ?: null;
         $to = $req->to_date ?: null;

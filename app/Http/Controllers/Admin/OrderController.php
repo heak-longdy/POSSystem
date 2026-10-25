@@ -54,8 +54,8 @@ class OrderController extends Controller
         $data['lastMonthDay'] = $dates['to'];
 
         $query = $status === 'trash'
-            ? Order::onlyTrashed()
-            : Order::query();
+            ? Order::forUser()->onlyTrashed()
+            : Order::forUser();
 
         $data['data'] = $query->with([
                 'shop',
@@ -115,7 +115,7 @@ class OrderController extends Controller
         $data['firstMonthDay'] = $from;
         $data['lastMonthDay'] = $to;
         $data['startDate'] = Carbon::now()->firstOfMonth()->format('Y-m-d');
-        $data['data'] = Order::with(['shop'])
+        $data['data'] = Order::forUser()->with(['shop'])
             ->when($from && $to, function ($q) use ($from, $to) {
                 $q->whereBetween(DB::raw('DATE(order_date)'), [$from, $to]);
             })
@@ -156,6 +156,10 @@ class OrderController extends Controller
             return redirect()->route('admin-' . $this->routeName . '-list', 1);
         }
 
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         return view($this->layout . 'createOrder', $this->formData($order));
     }
 
@@ -181,6 +185,10 @@ class OrderController extends Controller
             return redirect()->route('admin-' . $this->routeName . '-list', 'Pending');
         }
 
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         $data['order'] = $order;
         $data['routeName'] = $this->routeName;
         $data['paymentRemainingAmount'] = $this->remainingPaymentCents($order) / 100;
@@ -203,6 +211,10 @@ class OrderController extends Controller
             $order = $orderId
                 ? Order::with('orderDetails')->findOrFail($orderId)
                 : new Order();
+
+            if ($order->exists && !$order->isOwnedBy(Auth::user())) {
+                abort(403, 'Unauthorized access to order.');
+            }
 
             if ($order->exists && $order->payment_status !== 'Pending') {
                 throw ValidationException::withMessages([
@@ -241,7 +253,9 @@ class OrderController extends Controller
             if (!$order->exists) {
                 $order->invoice_number = $this->nextInvoiceNumber();
             }
-            $order->created_by = Auth::id();
+            if (!$order->exists || empty($order->created_by)) {
+                $order->created_by = Auth::id();
+            }
             $order->save();
 
             $totalPoint = 0;
@@ -298,6 +312,13 @@ class OrderController extends Controller
 
     public function updateStatus($id = '', $status = '')
     {
+        if ($id) {
+            $order = Order::find($id);
+            if ($order && !$order->isOwnedBy(Auth::user())) {
+                abort(403, 'Unauthorized access to order.');
+            }
+        }
+
         return response()->json([
             'message' => 'unsuccess',
             'status' => 422,
@@ -307,6 +328,11 @@ class OrderController extends Controller
 
     public function updatePaymentStatus(Request $req, $id)
     {
+        $order = Order::where('id', $id)->firstOrFail();
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         $newStatus = $req->payment_status;
         if (!in_array($newStatus, ['Paid', 'Cancel'])) {
             return response()->json(['message' => 'error', 'error' => 'Invalid payment status.'], 422);
@@ -363,6 +389,10 @@ class OrderController extends Controller
             return response()->json(['message' => 'error', 'error' => 'Order not found.'], 404);
         }
 
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         $res = $this->paymentResponse($order);
         $res['customer_name'] = $order->customer?->name ?: ($order->customer?->phone ?: 'Walk-in customer');
         $res['shop_name'] = $order->shop?->name ?: '---';
@@ -374,6 +404,11 @@ class OrderController extends Controller
 
     public function addPayment(Request $req, $id)
     {
+        $order = Order::where('id', $id)->firstOrFail();
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         $req->validate([
             'amount' => 'required|numeric|min:0.01|multiple_of:0.01',
             'payment_method' => 'nullable|string|max:50',
@@ -432,6 +467,12 @@ class OrderController extends Controller
 
     public function updatePayment(Request $req, $paymentId)
     {
+        $payment = OrderPayment::where('id', $paymentId)->firstOrFail();
+        $order = Order::where('id', $payment->order_id)->firstOrFail();
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         $req->validate([
             'amount' => 'required|numeric|min:0.01|multiple_of:0.01',
             'payment_method' => 'nullable|string|max:50',
@@ -488,6 +529,12 @@ class OrderController extends Controller
 
     public function deletePayment($paymentId)
     {
+        $payment = OrderPayment::where('id', $paymentId)->firstOrFail();
+        $order = Order::where('id', $payment->order_id)->firstOrFail();
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         DB::beginTransaction();
         try {
             $payment = OrderPayment::where('id', $paymentId)->lockForUpdate()->firstOrFail();
@@ -519,6 +566,10 @@ class OrderController extends Controller
         $order = Order::with(['customer', 'shop'])->find($id);
         if (!$order) {
             return response()->json(['message' => 'error', 'error' => 'Order not found.'], 404);
+        }
+
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
         }
 
         if ($order->payment_status === 'Cancel') {
@@ -567,6 +618,11 @@ class OrderController extends Controller
 
     public function cancelOrder($id)
     {
+        $order = Order::with('orderDetails')->where('id', $id)->firstOrFail();
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         DB::beginTransaction();
         try {
             $order = Order::with('orderDetails')->where('id', $id)->lockForUpdate()->firstOrFail();
@@ -600,6 +656,11 @@ class OrderController extends Controller
 
     public function delete($id = '')
     {
+        $order = Order::with('orderDetails')->findOrFail($id);
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         DB::beginTransaction();
         try {
             $order = Order::with('orderDetails')->findOrFail($id);
@@ -628,6 +689,11 @@ class OrderController extends Controller
 
     public function restore($id = '')
     {
+        $order = Order::withTrashed()->findOrFail($id);
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         DB::beginTransaction();
         try {
             $order = Order::withTrashed()->findOrFail($id);
@@ -659,6 +725,11 @@ class OrderController extends Controller
 
     public function destroy($id = '')
     {
+        $order = Order::withTrashed()->findOrFail($id);
+        if (!$order->isOwnedBy(Auth::user())) {
+            abort(403, 'Unauthorized access to order.');
+        }
+
         DB::beginTransaction();
         try {
             $order = Order::withTrashed()->findOrFail($id);
@@ -715,7 +786,8 @@ class OrderController extends Controller
             },
         ])
             ->whereHas('order', function ($query) use ($req, $dates, $paymentStatus, $status) {
-                $query->when($dates['from'], function ($q) use ($dates) {
+                $query->forUser()
+                    ->when($dates['from'], function ($q) use ($dates) {
                         $q->whereDate('order_date', '>=', $dates['from']);
                     })
                     ->when($dates['to'], function ($q) use ($dates) {
