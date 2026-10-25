@@ -2006,7 +2006,7 @@
         .slip-table-bottom-bar {
             display: flex;
             justify-content: space-between;
-            align-items: stretch;
+            align-items: flex-start;
             margin-top: 2px;
         }
         .slip-free-goods-note {
@@ -2031,6 +2031,43 @@
             font-size: 11.5px;
             min-width: 70px;
             text-align: right;
+        }
+
+        /* Slip Financial Summary Table (matching Invoice summary section) */
+        .slip-calc-table {
+            border-collapse: collapse !important;
+            border: 1px solid #000000 !important;
+            background: #ffffff !important;
+            width: 250px !important;
+            margin-left: auto !important;
+            box-sizing: border-box !important;
+        }
+        .slip-calc-table td {
+            border: 1px solid #000000 !important;
+            box-sizing: border-box !important;
+            color: #000000 !important;
+            height: 20px !important;
+        }
+        .slip-calc-table td.slip-calc-label {
+            width: 48% !important;
+            font-size: 11.5px !important;
+            font-weight: 600 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            background: #ffffff !important;
+            padding: 2px 4px !important;
+        }
+        .slip-calc-table td.slip-calc-value {
+            width: 52% !important;
+            font-size: 11.5px !important;
+            text-align: right !important;
+            padding-right: 6px !important;
+            vertical-align: middle !important;
+            font-weight: 600 !important;
+            background: #ffffff !important;
+        }
+        .slip-calc-table td.font-bold {
+            font-weight: 700 !important;
         }
 
         /* Dual Signatures Section */

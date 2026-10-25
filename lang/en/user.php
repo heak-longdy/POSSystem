@@ -80,8 +80,8 @@ return [
         ],
         'data_access' => [
             'label' => 'Data Access Permission',
-            'all' => 'All Records (Store-wide)',
-            'own' => 'Own Records Only (Restricted to creator)',
+            'all' => 'All Records',
+            'own' => 'Own Records Only',
         ],
         'profile' => [
             'label' => 'Profile',
@@ -111,6 +111,7 @@ return [
         'profile' => 'Profile',
         'name' => 'Name',
         'email' => 'Email',
+        'phone' => 'Phone',
         'data_access' => 'Data Access',
         'language' => 'Language',
         'post_date' => 'Post Date',

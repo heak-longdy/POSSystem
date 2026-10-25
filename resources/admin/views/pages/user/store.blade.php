@@ -12,7 +12,7 @@
             </div>
             {{ csrf_field() }}
             <div class="form-body">
-                <div class="row-2">
+                <div class="row-3">
                     <div class="form-row">
                         <label>{{ __('user.form.name.label') }} <span>*</span> </label>
                         <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('user.form.name.placeholder') }}">
@@ -24,6 +24,13 @@
                         <label>{{ __('user.form.email.label') }} <span>*</span> </label>
                         <input type="text" name="email" value="{!! request('id') ? $data?->email : old('email') !!}" placeholder="{{ __('user.form.email.placeholder') }}">
                         @error('email')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
+                    <div class="form-row">
+                        <label>{{ __('user.form.phone.label') }}</label>
+                        <input type="text" name="phone" value="{!! request('id') ? $data?->phone : old('phone') !!}" placeholder="{{ __('user.form.phone.placeholder') }}">
+                        @error('phone')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>

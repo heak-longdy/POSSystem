@@ -715,6 +715,7 @@
                                     @include('admin::pages.order.invoice-template-02', [
                                         'order' => $order,
                                         'printLocale' => $item['printLocale'],
+                                        'invoicePreviousBalance' => $item['invoicePreviousBalance'],
                                         'customerName' => $item['customerName'],
                                         'customerPhone' => $item['customerPhone'],
                                         'customerAddress' => $item['customerAddress'],

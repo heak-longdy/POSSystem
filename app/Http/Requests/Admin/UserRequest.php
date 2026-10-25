@@ -30,7 +30,7 @@ class UserRequest extends FormRequest
         return [
             "name"  => "required",
             "email" => "required|email|unique:users,email," . $acceptedId,
-            // "phone" => "required|numeric|unique:users,phone," . $acceptedId,
+            "phone" => "nullable|string|max:50",
             // "identity" => "required|numeric|unique:users,identity," . $acceptedId,
             "status"    => "required|numeric",
             "language_preference" => ["required", Rule::in(Language::activeCodes())],

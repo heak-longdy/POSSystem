@@ -6,7 +6,7 @@
     $shopName = $order->shop?->name ?: 'ER-MLP1-TBK(PHE SUYHORTH)';
     $shopPhone = $order->shop?->phone ?: '092 989 928/088 666 6367';
     $shopAddress = $order->shop?->address ?: 'TBONG KHMUM';
-    $shopCity = $order->shop?->city ?: ($isKm ? 'ត្បូងឃ្មុំ' : 'Tbong Khmum');
+    $shopCity = $order->shop?->city ?: ($isKm ? 'N/A' : 'N/A');
 
     $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
     $cPhone = $customerPhone ?? ($order->customer?->phone ?: '012399252');
@@ -18,11 +18,12 @@
     $deliveryDate = $order->delivery_date
         ? \Carbon\Carbon::parse($order->delivery_date)
         : ($order->order_date ? \Carbon\Carbon::parse($order->order_date)->addDays(2) : now()->addDays(2));
-    $driverName = $order->barber?->name ?: ($order->payments->first()?->createdBy?->name ?: ($isKm ? 'សាខាអ្នកដឹក' : 'Delivery Branch'));
+    $creatorPhone = $creatorPhone ?? ($order->createdBy?->phone ?: '---');
 
     $details = $order->orderDetails ?: collect();
     $minRows = 3;
     $emptyRowsCount = max(0, min(3, $minRows - $details->count()));
+    $invoicePreviousBalance = $invoicePreviousBalance ?? 0;
     $printAreaId = $printAreaId ?? "posSlipPrintArea_{$printLocale}";
 @endphp
 
@@ -95,8 +96,8 @@
                 <span class="info-val">{{ $order->createdBy?->name ?: '---' }}</span>
             </div>
             <div class="info-row">
-                <span class="info-lbl">{{ __('order.invoice.slip_delivery_branch', [], $printLocale) }}</span>
-                <span class="info-val">{{ $driverName }}</span>
+                <span class="info-lbl">{{ __('order.detail.phone', [], $printLocale) }}:</span>
+                <span class="info-val">{{ $creatorPhone }}</span>
             </div>
         </div>
     </div>
@@ -206,10 +207,32 @@
             <span class="slip-free-goods-note">{{ __('order.invoice.slip_free_goods', [], $printLocale) }}</span>
         </div>
         <div class="slip-bottom-right">
-            <div class="slip-total-pay-box">
-                <span class="pay-lbl">{{ __('order.invoice.slip_total_pay', [], $printLocale) }}</span>
-                <strong class="pay-val">${{ number_format((float) ($order->total_price ?? 0), 2) }}</strong>
-            </div>
+            <table class="slip-calc-table">
+                <tbody>
+                    <tr>
+                        <td class="slip-calc-label inv-foot-calc-label">{{ __('order.invoice.prev_balance', [], $printLocale) }}</td>
+                        <td class="slip-calc-value inv-foot-calc-value">${{ number_format((float) ($invoicePreviousBalance ?? 0), 2) }}</td>
+                    </tr>
+                    <tr>
+                        <td class="slip-calc-label inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>
+                        <td class="slip-calc-value inv-foot-calc-value font-bold">
+                            ${{ number_format((float) ($order->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="slip-calc-label inv-foot-calc-label">{{ __('order.invoice.paid', [], $printLocale) }}</td>
+                        <td class="slip-calc-value inv-foot-calc-value">
+                            {{ (float) ($order->paid_amount ?? 0) > 0 ? '$' . number_format((float) $order->paid_amount, 2) : '' }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="slip-calc-label inv-foot-calc-label">{{ __('order.invoice.balance_due', [], $printLocale) }}</td>
+                        <td class="slip-calc-value inv-foot-calc-value">
+                            ${{ number_format(max(0, (float) ($order->remaining_amount ?? 0)) + (float) ($invoicePreviousBalance ?? 0), 2) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 

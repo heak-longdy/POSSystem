@@ -8,7 +8,7 @@
     $documentNo = $documentNo ?? '';
     $reportDate = $reportDate ?? now()->format('n/j/y');
     $reportTime = $reportTime ?? now()->format('g:iA');
-    $totalWeight = $totalWeight ?? '1,264';
+    $totalWeight = $totalWeight ?? 'N/A';
 @endphp
 
 <style>
@@ -286,11 +286,11 @@
                 </div>
                 <div class="load-hdr-line">
                     <span class="load-hdr-lbl">Vehicle :</span>
-                    <span class="load-hdr-val">na</span>
+                    <span class="load-hdr-val">N/A</span>
                 </div>
                 <div class="load-hdr-line">
                     <span class="load-hdr-lbl">Load No. :</span>
-                    <span class="load-hdr-val">na</span>
+                    <span class="load-hdr-val">N/A</span>
                 </div>
             </div>
 
@@ -312,7 +312,7 @@
                 </div>
                 <div class="load-hdr-line">
                     <span class="load-hdr-lbl">No. of Helpers :</span>
-                    <span class="load-hdr-val">na</span>
+                    <span class="load-hdr-val">N/A</span>
                 </div>
             </div>
         </div>

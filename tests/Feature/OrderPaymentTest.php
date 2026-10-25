@@ -26,6 +26,7 @@ class OrderPaymentTest extends TestCase
             Schema::create($name, function (Blueprint $table) {
                 $table->id();
                 $table->string('name')->nullable();
+                $table->string('phone')->nullable();
                 $table->boolean('status')->default(true);
                 $table->softDeletes();
             });
@@ -151,6 +152,10 @@ class OrderPaymentTest extends TestCase
             $cells = $xpath->query('//div[@id="posInvoicePrintArea_' . $locale . '"]//tfoot//td[contains(@class, "inv-foot-calc-value")]');
             $values = array_map(fn ($cell) => trim($cell->textContent), iterator_to_array($cells));
             $this->assertSame($expected, $values, 'Printed invoice summary for ' . $locale);
+
+            $slipCells = $xpath->query('//div[@id="posSlipPrintArea_' . $locale . '"]//table[contains(@class, "slip-calc-table")]//td[contains(@class, "slip-calc-value")]');
+            $slipValues = array_map(fn ($cell) => trim($cell->textContent), iterator_to_array($slipCells));
+            $this->assertSame($expected, $slipValues, 'Printed delivery slip summary for ' . $locale);
         }
     }
 
@@ -803,4 +808,74 @@ class OrderPaymentTest extends TestCase
             ->assertUnprocessable()->assertJsonValidationErrors('amount');
         $this->assertSame(0, $order->payments()->count());
     }
+
+    public function test_print_delivery_slip_summary_structure_labels_and_values(): void
+    {
+        // Prior unpaid order creating previous balance of $20.00
+        $this->order(50, [30])->update(['customer_id' => 1]);
+
+        // Current order: total 770.02, paid 100.00, remaining 670.02
+        $current = $this->order(770.02, [100.00]);
+        $current->update(['customer_id' => 1]);
+
+        $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
+        $html = $response->getContent();
+        $document = new \DOMDocument();
+        @$document->loadHTML('<?xml encoding="UTF-8">' . $html);
+        $xpath = new \DOMXPath($document);
+
+        // English Delivery Slip
+        $enLabels = iterator_to_array($xpath->query('//div[@id="posSlipPrintArea_en"]//table[contains(@class, "slip-calc-table")]//td[contains(@class, "slip-calc-label")]'));
+        $enValues = iterator_to_array($xpath->query('//div[@id="posSlipPrintArea_en"]//table[contains(@class, "slip-calc-table")]//td[contains(@class, "slip-calc-value")]'));
+        $this->assertCount(4, $enLabels);
+        $this->assertCount(4, $enValues);
+
+        $this->assertSame('Previous Balance', trim($enLabels[0]->textContent));
+        $this->assertSame('Total', trim($enLabels[1]->textContent));
+        $this->assertSame('Paid', trim($enLabels[2]->textContent));
+        $this->assertSame('Balance Due', trim($enLabels[3]->textContent));
+
+        $this->assertSame('$20.00', trim($enValues[0]->textContent));
+        $this->assertSame('$790.02', trim($enValues[1]->textContent));
+        $this->assertSame('$100.00', trim($enValues[2]->textContent));
+        $this->assertSame('$690.02', trim($enValues[3]->textContent));
+
+        // Khmer Delivery Slip
+        $kmLabels = iterator_to_array($xpath->query('//div[@id="posSlipPrintArea_km"]//table[contains(@class, "slip-calc-table")]//td[contains(@class, "slip-calc-label")]'));
+        $kmValues = iterator_to_array($xpath->query('//div[@id="posSlipPrintArea_km"]//table[contains(@class, "slip-calc-table")]//td[contains(@class, "slip-calc-value")]'));
+        $this->assertCount(4, $kmLabels);
+        $this->assertCount(4, $kmValues);
+
+        $this->assertSame('នៅខ្វះមុន', trim($kmLabels[0]->textContent));
+        $this->assertSame('សរុប', trim($kmLabels[1]->textContent));
+        $this->assertSame('អោយ', trim($kmLabels[2]->textContent));
+        $this->assertSame('នៅខ្វះ', trim($kmLabels[3]->textContent));
+
+        $this->assertSame('$20.00', trim($kmValues[0]->textContent));
+        $this->assertSame('$790.02', trim($kmValues[1]->textContent));
+        $this->assertSame('$100.00', trim($kmValues[2]->textContent));
+        $this->assertSame('$690.02', trim($kmValues[3]->textContent));
+
+        // Creator phone number replaces delivery branch
+        DB::table('users')->insert(['id' => 2, 'name' => 'Creator John', 'phone' => '012 345 678']);
+        $current->update(['created_by' => 2]);
+        $response = $this->get('/admin/order/detail/' . $current->id)->assertOk();
+        $html = $response->getContent();
+        $document = new \DOMDocument();
+        @$document->loadHTML('<?xml encoding="UTF-8">' . $html);
+        $xpath = new \DOMXPath($document);
+
+        // Verify "Delivery Branch" / "សាខាអ្នកដឹក" is not in slip info col
+        $enBranch = $xpath->query('//div[@id="posSlipPrintArea_en"]//div[contains(@class, "col-dist")]//span[contains(text(), "Delivery Branch")]');
+        $this->assertSame(0, $enBranch->length);
+        $kmBranch = $xpath->query('//div[@id="posSlipPrintArea_km"]//div[contains(@class, "col-dist")]//span[contains(text(), "សាខាអ្នកដឹក")]');
+        $this->assertSame(0, $kmBranch->length);
+
+        // Verify creator phone is rendered
+        $enPhone = $xpath->query('//div[@id="posSlipPrintArea_en"]//div[contains(@class, "col-dist")]//span[contains(@class, "info-val") and contains(text(), "012 345 678")]');
+        $this->assertSame(1, $enPhone->length);
+        $kmPhone = $xpath->query('//div[@id="posSlipPrintArea_km"]//div[contains(@class, "col-dist")]//span[contains(@class, "info-val") and contains(text(), "012 345 678")]');
+        $this->assertSame(1, $kmPhone->length);
+    }
 }
+
