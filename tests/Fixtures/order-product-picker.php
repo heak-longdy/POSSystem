@@ -15,8 +15,14 @@ $order = ['id' => 123, 'shop_id' => 1, 'shop' => $shop, 'payment_status' => 'Pen
     'order_details' => [['id' => 99, 'type' => 'product', 'product_id' => 1, 'qty' => 3,
         'price' => 15, 'product_discount' => 0.5, 'product_discount_type' => 'usd',
         'product' => ['id' => 1, 'name' => 'Existing product']]]];
-foreach (['create', 'edit', 'locked', 'no-shop'] as $mode) {
-    $data = in_array($mode, ['edit', 'locked']) ? (object) $order : null;
+foreach (['create', 'edit', 'automatic', 'locked', 'no-shop'] as $mode) {
+    $data = in_array($mode, ['edit', 'automatic', 'locked']) ? (object) $order : null;
+    if ($mode === 'automatic') {
+        $data->order_details[0] = array_merge($data->order_details[0], [
+            'qty' => 2, 'price' => 10, 'original_price' => '9.30', 'unit_price' => '10.00',
+            'product_discount' => 0, 'pricing_method' => 'auto_unit_price_v1',
+        ]);
+    }
     if ($mode === 'locked') $data->payment_status = 'Paid';
     $html = Illuminate\Support\Facades\Blade::render($source, [
         'data' => $data, 'id' => $data->id ?? null, 'selectedShop' => $mode === 'no-shop' ? null : $shop,
@@ -25,4 +31,4 @@ foreach (['create', 'edit', 'locked', 'no-shop'] as $mode) {
     file_put_contents($argv[1] . '/' . $mode . '.html', $html);
 }
 file_put_contents($argv[1] . '/dialog.html', view('admin::components.verify')->render());
-echo "Rendered Create, Edit, locked order and no-shop fixtures.\n";
+echo "Rendered Create, legacy/automatic Edit, locked order and no-shop fixtures.\n";

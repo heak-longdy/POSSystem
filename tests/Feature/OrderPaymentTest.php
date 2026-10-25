@@ -36,6 +36,7 @@ class OrderPaymentTest extends TestCase
             $table->id();
             $table->integer('customer_id')->nullable();
             $table->integer('shop_id')->nullable();
+            $table->integer('created_by')->nullable();
             $table->double('total_price')->default(0);
             $table->double('paid_amount')->default(0);
             $table->double('total_discount')->default(0);
@@ -85,6 +86,9 @@ class OrderPaymentTest extends TestCase
             $table->integer('service_id');
             $table->double('price');
         });
+        // Exercise only this feature's migration against the isolated in-memory database.
+        $migration = require database_path('migrations/2026_10_25_000000_add_automatic_product_pricing_to_order_details_table.php');
+        $migration->up();
         DB::table('shop_services')->insert(['shop_id' => 1, 'service_id' => 1, 'price' => 19.65]);
         Schema::create('customer_points', function (Blueprint $table) {
             $table->id();
@@ -414,7 +418,7 @@ class OrderPaymentTest extends TestCase
             $table->id();
             $table->integer('shop_id');
             $table->integer('product_id');
-            $table->double('price');
+            $table->double('price')->nullable();
             $table->softDeletes();
         });
         foreach (['stock_on_hands', 'stock_outs', 'stock_histories'] as $name) {
@@ -440,6 +444,13 @@ class OrderPaymentTest extends TestCase
                 'shop_id' => 1, 'product_id' => $item['product_id'], 'current_stock' => 100,
             ]);
         }
+
+        foreach ($fixture['items'] as &$item) {
+            $item['itemData']['originalPrice'] = (string) $item['itemData']['price'];
+            $item['itemData']['unitPrice'] = number_format($item['itemData']['price'] - ($item['itemData']['discount'] ?? 0), 2, '.', '');
+            $item['itemData']['pricingMethod'] = 'auto_unit_price_v1';
+        }
+        unset($item);
 
         return array_merge($this->creationPayload($payment), [
             'subTotal' => 61.28,
@@ -490,6 +501,173 @@ class OrderPaymentTest extends TestCase
             ->assertJsonPath('remaining_amount', 0)->assertJsonPath('payment_status', 'Paid');
     }
 
+    private function automaticCartPayload(string $original = '9.30', string $unit = '9.00', int $qty = 3): array
+    {
+        $payload = $this->discountedCartPayload();
+        DB::table('shop_products')->where('product_id', 4)->update(['price' => $original]);
+        $payload['dataCarts'] = json_encode([[
+            'product_id' => 4, 'product_type' => 'product', 'product_qty' => $qty,
+            'itemData' => ['originalPrice' => $original, 'unitPrice' => $unit,
+                'pricingMethod' => 'auto_unit_price_v1', 'price' => 999, 'discount' => 99, 'discountType' => 'percent'],
+        ]]);
+
+        return $payload;
+    }
+
+    /** @dataProvider automaticPriceCases */
+    public function test_automatic_usd_prices_are_calculated_saved_and_restored(string $original, string $unit, int $qty, float $discount, float $total): void
+    {
+        $payload = $this->automaticCartPayload($original, $unit, $qty);
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order = Order::findOrFail($response->json('id'));
+        $detail = $order->orderDetails->first();
+        $this->assertSame($original, $detail->original_price);
+        $this->assertSame($unit, $detail->unit_price);
+        $this->assertSame('auto_unit_price_v1', $detail->pricing_method);
+        $this->assertSame('usd', $detail->product_discount_type);
+        $this->assertSame($discount, $detail->product_discount);
+        $this->assertSame(max((float) $original, (float) $unit), $detail->price);
+        $this->assertSame($total, $order->total_price);
+        $this->assertSame(round($discount * $qty, 2), $order->total_discount);
+        $this->assertEquals(100 - $qty, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+        $saved = app(OrderController::class)->edit($order->id)->getData()['order']->orderDetails->first();
+        $this->assertSame($original, $saved->original_price);
+        $this->assertSame($unit, $saved->unit_price);
+    }
+
+    public static function automaticPriceCases(): array
+    {
+        return [
+            ['9.30', '9.00', 1, 0.30, 9.00], ['9.30', '9.00', 3, 0.30, 27.00],
+            ['9.30', '8.80', 3, 0.50, 26.40], ['9.30', '9.30', 3, 0.00, 27.90],
+            ['9.30', '10.00', 2, 0.00, 20.00], ['9.30', '0.00', 2, 9.30, 0.00],
+            ['0.00', '1.25', 2, 0.00, 2.50], ['0.30', '0.29', 3, 0.01, 0.87],
+        ];
+    }
+
+    public function test_edit_preserves_original_price_after_markup_and_catalog_changes(): void
+    {
+        $payload = $this->automaticCartPayload('9.30', '10.00', 2);
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order = Order::findOrFail($response->json('id'));
+        $payload['id'] = $order->id;
+        $items = json_decode($payload['dataCarts'], true);
+        $items[0]['id'] = $order->orderDetails->first()->id;
+        $items[0]['itemData']['unitPrice'] = '9.00';
+        DB::table('shop_products')->where('product_id', 4)->update(['price' => 99]);
+        $payload['dataCarts'] = json_encode($items);
+        $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order->refresh();
+        $this->assertSame('9.30', $order->orderDetails->first()->original_price);
+        $this->assertSame('9.00', $order->orderDetails->first()->unit_price);
+        $this->assertSame(0.30, $order->orderDetails->first()->product_discount);
+        $this->assertSame(18.0, $order->total_price);
+        $this->assertEquals(98, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+
+        $items[0]['id'] = $order->orderDetails->first()->id;
+        $items[0]['itemData']['originalPrice'] = '99.00';
+        $payload['dataCarts'] = json_encode($items);
+        $this->postJson('/admin/order/save', $payload)->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        $this->assertSame(18.0, $order->fresh()->total_price);
+        $this->assertSame('9.30', $order->fresh()->orderDetails->first()->original_price);
+        $this->assertEquals(98, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+    }
+
+    public function test_invalid_unit_prices_and_stale_references_do_not_save_orders(): void
+    {
+        $payload = $this->automaticCartPayload();
+        $items = json_decode($payload['dataCarts'], true);
+        foreach (['', '-1', '9.001', 'invalid', '1e2', '1e999', '10000000000000', null, true, []] as $unit) {
+            $items[0]['itemData']['unitPrice'] = $unit;
+            $payload['dataCarts'] = json_encode($items);
+            $this->postJson('/admin/order/save', $payload)->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        }
+        $items[0]['itemData']['unitPrice'] = '9.00';
+        $items[0]['itemData']['originalPrice'] = '9.31';
+        $payload['dataCarts'] = json_encode($items);
+        $this->postJson('/admin/order/save', $payload)->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        $this->assertSame(0, Order::count());
+        $this->assertSame(0, DB::table('order_details')->count());
+        $this->assertSame(0, DB::table('stock_outs')->count());
+        $this->assertEquals(100, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+    }
+
+    public function test_product_detail_references_cannot_be_reused_for_other_lines_or_orders(): void
+    {
+        $payload = $this->automaticCartPayload();
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order = Order::findOrFail($response->json('id'));
+        $item = json_decode($payload['dataCarts'], true)[0];
+        $item['id'] = $order->orderDetails->first()->id;
+        $payload['dataCarts'] = json_encode([$item]);
+        // A detail from an existing order cannot be attached to a new order.
+        $this->postJson('/admin/order/save', $payload)->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        $payload['id'] = $order->id;
+        $payload['dataCarts'] = json_encode([$item, $item]);
+        $this->postJson('/admin/order/save', $payload)->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        $item['product_id'] = 3;
+        $payload['dataCarts'] = json_encode([$item]);
+        $this->postJson('/admin/order/save', $payload)->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+        $this->assertSame(1, Order::count());
+        $this->assertSame(27.0, $order->fresh()->total_price);
+        $this->assertEquals(97, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+    }
+
+    public function test_legacy_fractional_discount_is_preserved_until_unit_price_changes(): void
+    {
+        $payload = $this->automaticCartPayload();
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order = Order::findOrFail($response->json('id'));
+        $detail = $order->orderDetails->first();
+        $detail->update(['price' => 19.95, 'product_discount' => 12.5, 'product_discount_type' => 'percent',
+            'original_price' => null, 'unit_price' => null, 'pricing_method' => null]);
+        $order->update(['total_price' => 52.37, 'total_discount' => 7.48]);
+        $payload['id'] = $order->id;
+        $item = json_decode($payload['dataCarts'], true)[0];
+        $item['id'] = $detail->id;
+        $item['itemData'] = ['originalPrice' => '19.95', 'unitPrice' => '17.45625', 'pricingMethod' => null,
+            'price' => 999, 'discount' => 999, 'discountType' => 'usd'];
+        foreach ([3 => 52.37, 5 => 87.28] as $qty => $total) {
+            $item['product_qty'] = $qty;
+            $payload['dataCarts'] = json_encode([$item]);
+            $this->postJson('/admin/order/save', $payload)->assertOk();
+            $order->refresh();
+            $detail = $order->orderDetails->first();
+            $this->assertNull($detail->pricing_method);
+            $this->assertNull($detail->original_price);
+            $this->assertSame(12.5, $detail->product_discount);
+            $this->assertSame('percent', $detail->product_discount_type);
+            $this->assertSame(19.95, $detail->price);
+            $this->assertSame($total, $order->total_price);
+            $item['id'] = $detail->id;
+        }
+        $item['product_qty'] = 3;
+        $item['itemData']['unitPrice'] = '17.46';
+        $item['itemData']['pricingMethod'] = 'auto_unit_price_v1';
+        $payload['dataCarts'] = json_encode([$item]);
+        $this->postJson('/admin/order/save', $payload)->assertOk();
+        $order->refresh();
+        $detail = $order->orderDetails->first();
+        $this->assertSame('19.95', $detail->original_price);
+        $this->assertSame('17.46', $detail->unit_price);
+        $this->assertSame('usd', $detail->product_discount_type);
+        $this->assertSame(2.49, $detail->product_discount);
+        $this->assertSame(52.38, $order->total_price);
+        $this->assertEquals(97, DB::table('stock_on_hands')->where('product_id', 4)->value('current_stock'));
+    }
+
+    public function test_new_original_price_falls_back_only_when_shop_price_is_null(): void
+    {
+        $payload = $this->automaticCartPayload();
+        Schema::table('products', fn (Blueprint $table) => $table->double('price')->nullable());
+        DB::table('products')->where('id', 4)->update(['price' => 9.30]);
+        DB::table('shop_products')->where('product_id', 4)->update(['price' => null]);
+        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $this->assertSame('9.30', Order::findOrFail($response->json('id'))->orderDetails->first()->original_price);
+        DB::table('shop_products')->where('product_id', 4)->update(['price' => 0]);
+        $this->postJson('/admin/order/save', $payload)->assertUnprocessable()->assertJsonValidationErrors('dataCarts');
+    }
+
     public function test_discounted_creation_rejects_the_gross_payment_and_rolls_back_stock(): void
     {
         $payload = $this->discountedCartPayload(61.28);
@@ -512,7 +690,8 @@ class OrderPaymentTest extends TestCase
         $payload = $this->discountedCartPayload();
         $items = [
             ['product_id' => 4, 'product_type' => 'product', 'product_qty' => 3,
-                'itemData' => ['price' => 2.79, 'discount' => '0.50', 'discountType' => 'usd']],
+                'itemData' => ['price' => 2.79, 'originalPrice' => '2.79', 'unitPrice' => '2.29',
+                    'pricingMethod' => 'auto_unit_price_v1', 'discount' => '0.50', 'discountType' => 'usd']],
             ['product_id' => 1, 'product_type' => 'service', 'product_qty' => 1,
                 'itemData' => ['price' => 20, 'discount' => '0.50', 'discountType' => 'usd']],
         ];
@@ -533,7 +712,7 @@ class OrderPaymentTest extends TestCase
         $this->assertSame(0.5, $view->getData()['order']->orderDetails->last()->service_discount);
 
         $payload['id'] = $order->id;
-        $items[0]['itemData']['discount'] = '0.75';
+        $items[0]['itemData']['unitPrice'] = '2.04';
         $items[1]['itemData']['discount'] = '12.5';
         $items[1]['itemData']['discountType'] = 'percent';
         $payload['dataCarts'] = json_encode($items);
@@ -549,6 +728,7 @@ class OrderPaymentTest extends TestCase
             $item['itemData']['discount'] = '';
         }
         unset($item);
+        $items[0]['itemData']['unitPrice'] = '2.79';
         $payload['dataCarts'] = json_encode($items);
         $this->postJson('/admin/order/save', $payload)->assertOk();
         $this->assertSame(28.37, $order->fresh()->total_price);

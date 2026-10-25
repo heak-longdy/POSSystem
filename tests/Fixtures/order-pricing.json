@@ -71,5 +71,78 @@
     ],
     "lines": [6.87, 19.5],
     "subtotal": 28.37, "discount": 2, "commission": 0, "total": 26.37
+  },
+  {
+    "name": "Automatic USD: requested example",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 1, "itemData": {"originalPrice": "9.30", "unitPrice": "9.00", "pricingMethod": "auto_unit_price_v1", "price": 9.3, "discount": 0.3, "discountType": "usd"}}
+    ],
+    "lines": [9.0],
+    "subtotal": 9.3, "discount": 0.3, "commission": 0, "total": 9.0
+  },
+  {
+    "name": "Automatic USD: quantity change",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 3, "itemData": {"originalPrice": "9.30", "unitPrice": "9.00", "pricingMethod": "auto_unit_price_v1", "price": 9.3, "discount": 0.3, "discountType": "usd"}}
+    ],
+    "lines": [27.0],
+    "subtotal": 27.9, "discount": 0.9, "commission": 0, "total": 27.0
+  },
+  {
+    "name": "Automatic USD: further reduction",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 3, "itemData": {"originalPrice": "9.30", "unitPrice": "8.80", "pricingMethod": "auto_unit_price_v1", "price": 9.3, "discount": 0.5, "discountType": "usd"}}
+    ],
+    "lines": [26.4],
+    "subtotal": 27.9, "discount": 1.5, "commission": 0, "total": 26.4
+  },
+  {
+    "name": "Automatic USD: equal price",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 3, "itemData": {"originalPrice": "9.30", "unitPrice": "9.30", "pricingMethod": "auto_unit_price_v1", "price": 9.3, "discount": 0.0, "discountType": "usd"}}
+    ],
+    "lines": [27.9],
+    "subtotal": 27.9, "discount": 0.0, "commission": 0, "total": 27.9
+  },
+  {
+    "name": "Automatic USD: price increase",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 2, "itemData": {"originalPrice": "9.30", "unitPrice": "10.00", "pricingMethod": "auto_unit_price_v1", "price": 10.0, "discount": 0.0, "discountType": "usd"}}
+    ],
+    "lines": [20.0],
+    "subtotal": 20.0, "discount": 0.0, "commission": 0, "total": 20.0
+  },
+  {
+    "name": "Automatic USD: zero selling price",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 2, "itemData": {"originalPrice": "9.30", "unitPrice": "0.00", "pricingMethod": "auto_unit_price_v1", "price": 9.3, "discount": 9.3, "discountType": "usd"}}
+    ],
+    "lines": [0.0],
+    "subtotal": 18.6, "discount": 18.6, "commission": 0, "total": 0.0
+  },
+  {
+    "name": "Automatic USD: zero reference",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 2, "itemData": {"originalPrice": "0.00", "unitPrice": "1.25", "pricingMethod": "auto_unit_price_v1", "price": 1.25, "discount": 0.0, "discountType": "usd"}}
+    ],
+    "lines": [2.5],
+    "subtotal": 2.5, "discount": 0.0, "commission": 0, "total": 2.5
+  },
+  {
+    "name": "Automatic USD: cent precision",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 3, "itemData": {"originalPrice": "0.30", "unitPrice": "0.29", "pricingMethod": "auto_unit_price_v1", "price": 0.3, "discount": 0.01, "discountType": "usd"}}
+    ],
+    "lines": [0.87],
+    "subtotal": 0.9, "discount": 0.03, "commission": 0, "total": 0.87
+  },
+  {
+    "name": "Automatic USD: two product lines",
+    "items": [
+      {"product_id": 1, "product_type": "product", "product_qty": 3, "itemData": {"originalPrice": "9.30", "unitPrice": "9.00", "pricingMethod": "auto_unit_price_v1", "price": 9.3, "discount": 0.3, "discountType": "usd"}},
+      {"product_id": 2, "product_type": "product", "product_qty": 2, "itemData": {"originalPrice": "2.79", "unitPrice": "1.79", "pricingMethod": "auto_unit_price_v1", "price": 2.79, "discount": 1, "discountType": "usd"}}
+    ],
+    "lines": [27, 3.58],
+    "subtotal": 33.48, "discount": 2.9, "commission": 0, "total": 30.58
   }
 ]

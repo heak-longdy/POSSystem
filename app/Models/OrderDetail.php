@@ -17,6 +17,9 @@ class OrderDetail extends Model
         'service_id',
         'product_id',
         'price',
+        'original_price',
+        'unit_price',
+        'pricing_method',
         'qty',
         'point',
         'type',
@@ -32,6 +35,8 @@ class OrderDetail extends Model
 
     protected $casts = [
         'price' => 'double',
+        'original_price' => 'decimal:2',
+        'unit_price' => 'decimal:2',
         'product_discount' => 'double',
         'service_discount' => 'double',
     ];

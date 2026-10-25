@@ -158,7 +158,7 @@ try {
         ['43px', '7px', 'rgb(203, 213, 225)'], 'shop filter reuses the order Select2 styling');
     assert.equal(await evaluate(`${picker}.products.length`), 12);
     assert.equal(await evaluate(`getComputedStyle(document.querySelector('${modal} .order-product-picker__product')).color`), 'rgb(15, 23, 42)', 'product names remain readable under global button styles');
-    assert.equal(await evaluate(`document.querySelector('${modal} tbody tr:first-child .order-product-picker__no').textContent.trim()`), '1', 'first row shows Nº 1');
+    assert.equal(await evaluate(`document.querySelector('${modal} tbody tr:first-of-type .order-product-picker__no').textContent.trim()`), '1', 'first row shows Nº 1');
     assert.equal(await evaluate(`document.activeElement === document.querySelector('${search}')`), true);
     await selectShop('Central Shop');
     await click(row(1)); await click(row(2));
@@ -177,8 +177,12 @@ try {
     assert.equal(await evaluate(`${order}.amountPaid`), 36.5, 'existing discounts and commissions are preserved');
     assert.equal(await evaluate(`document.activeElement.classList.contains('order-add-product')`), true);
     await input('[data-cart-qty]', '3');
-    await input('.booking-pos-cart-item .booking-discount-group input', '0.75');
-    assert.equal(await evaluate(`${order}.dataCart[0].itemData.discount`), '0.75');
+    await input('[data-cart-price]', '9.25');
+    assert.equal(await evaluate(`${order}.dataCart[0].itemData.discount`), 0.75);
+    assert.equal(await evaluate(`${order}.dataCart[0].itemData.originalPrice`), 10);
+    assert.equal(await evaluate(`${order}.cartLineTotal(${order}.dataCart[0])`), 27.75);
+    assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$0.75');
+    assert.equal(await evaluate(`document.querySelectorAll('.col-discount input, .col-discount select').length`), 0);
     await open();
     assert.equal(await evaluate(`document.querySelector('${row(1)}').disabled`), true);
     await click(`${modal} thead input`);
@@ -203,7 +207,7 @@ try {
     await click(`${modal} .order-product-picker__state button`);
     await waitFor(`!${picker}.loading && !${picker}.failed && ${picker}.products.length === 12`);
     await close();
-    console.log('Create: multi-page selection, search, duplicates, cancel, retry, quantity, price and decimal discount edits passed.');
+    console.log('Create: picker behavior, quantities, editable prices and read-only automatic USD discounts passed.');
 
     await navigate('edit');
     const existing = await evaluate(`JSON.stringify(${order}.dataCart[0])`);
@@ -211,6 +215,13 @@ try {
     await click(`${modal} .order-product-picker__primary`);
     await waitFor(`!document.querySelector('${modal}') && ${order}.dataCart.length === 2`);
     assert.equal(await evaluate(`JSON.stringify(${order}.dataCart[0])`), existing, 'adding leaves saved detail ID and fields unchanged');
+    assert.equal(await evaluate(`document.querySelector('[data-cart-price]').value`), '14.5');
+    assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$0.50');
+    await input('[data-cart-price]', '14.00');
+    assert.equal(await evaluate(`${order}.dataCart[0].itemData.pricingMethod`), 'auto_unit_price_v1');
+    assert.equal(await evaluate(`${order}.dataCart[0].itemData.originalPrice`), 15);
+    assert.equal(await evaluate(`${order}.cartLineTotal(${order}.dataCart[0])`), 42);
+    assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$1.00');
     await open();
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
     await new Promise(resolve => setTimeout(resolve, 250));
@@ -309,7 +320,34 @@ try {
     assert.equal(await evaluate(`document.querySelectorAll('.select2-dropdown').length`), 0, 'dialog teardown removes its dropdown');
     console.log('Shop filter: first-open Select2, shop search, cart reset, prices, stock, pagination, stale requests, clearing and reopening passed.');
 
+    await navigate('automatic');
+    assert.equal(await evaluate(`document.querySelector('[data-cart-price]').value`), '10.00');
+    assert.equal(await evaluate(`document.querySelector('[data-original-price]').textContent.includes('$9.30')`), true);
+    assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$0.00');
+    await click('[data-cart-price]');
+    await input('[data-cart-price]', '');
+    assert.equal(await evaluate(`Boolean(${order}.validateOrderBeforeSubmit().dataCarts)`), true);
+    for (const [text, expected] of [['9', '9'], ['.', '9.'], ['0', '9.0'], ['0', '9.00']]) {
+        await send('Input.insertText', { text });
+        assert.equal(await evaluate(`document.querySelector('[data-cart-price]').value`), expected);
+        assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$0.30');
+        assert.equal(await evaluate(`${order}.amountPaid`), 18);
+    }
+    await input('[data-cart-qty]', '3');
+    assert.equal(await evaluate(`${order}.amountPaid`), 27);
+    assert.equal(await evaluate(`${order}.roundMoney(${order}.subTotal - ${order}.total)`), 0.9);
+    await input('[data-cart-price]', '9.001');
+    assert.equal(await evaluate(`document.querySelector('[data-cart-price]').getAttribute('aria-invalid')`), 'true');
+    assert.equal(await evaluate(`Boolean(${order}.validateOrderBeforeSubmit().dataCarts)`), true);
+    await input('[data-cart-price]', '9.30');
+    assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$0.00');
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+    await click('[data-cart-price]');
+    fs.writeFileSync(path.join(os.tmpdir(), 'pos-order-automatic-discount-mobile.png'), Buffer.from((await send('Page.captureScreenshot')).data, 'base64'));
+    console.log('Automatic Edit: saved markup, immutable reference, real decimal typing, quantities and invalid prices passed.');
+
     await navigate('locked');
+    assert.equal(await evaluate(`document.querySelector('[data-cart-price]').disabled`), true);
     assert.equal(await evaluate(`document.querySelector('.order-add-product').disabled`), true);
     await evaluate(`${order}.openProductPicker()`);
     assert.equal(await evaluate(`Alpine.store('confirmDialog').show`), false);

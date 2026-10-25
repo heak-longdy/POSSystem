@@ -250,24 +250,49 @@
                                                 </td>
                                                 <td class="col-price">
                                                     <div class="cell-label-mobile">{{ __('order.unit_price') }}</div>
-                                                    <span class="item-unit-price" x-text="formatCurrency(item?.itemData?.price || 0)"></span>
+                                                    <template x-if="item.product_type === 'product'">
+                                                        <div class="item-price-editor">
+                                                            <div class="booking-discount-group">
+                                                                <input type="text" inputmode="decimal" data-cart-price
+                                                                    x-model.unintrusive="item.itemData.unitPrice"
+                                                                    :disabled="!canEditOrderItems()"
+                                                                    :aria-invalid="!validProductPrice(item)"
+                                                                    aria-label="{{ __('order.unit_price') }} (USD)"
+                                                                    @input="priceRealTimeAction(item)"
+                                                                    @blur="normalizeUnitPrice(item)">
+                                                            </div>
+                                                            <small class="item-original-price" data-original-price>
+                                                                <span>{{ __('order.original_price') }}:</span>
+                                                                <span class="item-original-price-amount" x-text="formatCurrency(item.itemData.originalPrice)"></span>
+                                                            </small>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="item.product_type !== 'product'">
+                                                        <span class="item-unit-price" x-text="formatCurrency(item?.itemData?.price || 0)"></span>
+                                                    </template>
                                                 </td>
                                                 <td class="col-discount">
                                                     <div class="cell-label-mobile">{{ __('order.discount') }}</div>
-                                                    <div class="booking-discount-group">
-                                                        <select class="discount-prefix-select"
-                                                            x-model="item.itemData.discountType"
-                                                            :value="item?.itemData?.discountType"
-                                                            :disabled="!canEditOrderItems()"
-                                                            @change="discountSelectOpton($event, item)">
-                                                            <option value="usd">$</option>
-                                                            <option value="percent">%</option>
-                                                        </select>
-                                                        <input type="number" min="0" step="any" inputmode="decimal"
-                                                            x-model.unintrusive="item.itemData.discount"
-                                                            :disabled="!canEditOrderItems()"
-                                                            x-on:input="discountRealTiemAction(item)">
-                                                    </div>
+                                                    <template x-if="item.product_type === 'product'">
+                                                        <span class="item-unit-price" data-automatic-discount
+                                                            x-text="validProductPrice(item) ? formatCurrency(cartUnitDiscount(item)) : '—'"></span>
+                                                    </template>
+                                                    <template x-if="item.product_type !== 'product'">
+                                                        <div class="booking-discount-group">
+                                                            <select class="discount-prefix-select"
+                                                                x-model="item.itemData.discountType"
+                                                                :value="item?.itemData?.discountType"
+                                                                :disabled="!canEditOrderItems()"
+                                                                @change="discountSelectOpton($event, item)">
+                                                                <option value="usd">$</option>
+                                                                <option value="percent">%</option>
+                                                            </select>
+                                                            <input type="number" min="0" step="any" inputmode="decimal"
+                                                                x-model.unintrusive="item.itemData.discount"
+                                                                :disabled="!canEditOrderItems()"
+                                                                x-on:input="discountRealTiemAction(item)">
+                                                        </div>
+                                                    </template>
                                                 </td>
                                                 
                                                 <td class="col-qty">
@@ -649,9 +674,9 @@
                         border-bottom: 1px solid #edf2f7 !important; vertical-align: middle !important; background: transparent !important;
                     }
                     .booking-order-ui .order-items-table :is(th, td).col-product { width: auto !important; }
-                    .booking-order-ui .order-items-table :is(th, td).col-stock { width: 84px !important; text-align: center !important; }
-                    .booking-order-ui .order-items-table :is(th, td).col-price { width: 96px !important; text-align: right !important; }
-                    .booking-order-ui .order-items-table :is(th, td).col-discount { width: 116px !important; }
+                    .booking-order-ui .order-items-table :is(th, td).col-stock { width: 100px !important; text-align: center !important; }
+                    .booking-order-ui .order-items-table :is(th, td).col-price { width: 130px !important; text-align: right !important; }
+                    .booking-order-ui .order-items-table :is(th, td).col-discount { width: 100px !important;text-align: center !important; }
                     .booking-order-ui .order-items-table :is(th, td).col-qty { width: 132px !important; text-align: center !important; }
                     .booking-order-ui .order-items-table :is(th, td).col-total { width: 110px !important; text-align: right !important; }
                     .booking-order-ui .order-items-table :is(th, td).col-action { width: 64px !important; text-align: center !important; }
@@ -720,6 +745,19 @@
                         font-weight: 600; font-variant-numeric: tabular-nums; -moz-appearance: textfield;
                     }
                     .booking-order-ui .order-items-table .booking-discount-group input { width: 100%; flex: 1; }
+                    .booking-order-ui .order-items-table .item-price-editor {
+                        display: flex; flex-direction: column; gap: 6px; width: 100%; min-width: 0;position: relative;
+                    }
+                    .booking-order-ui .order-items-table .item-price-editor input[data-cart-price] {
+                        padding-inline: 8px !important; text-align: right !important;
+                    }
+                    .booking-order-ui .order-items-table .item-original-price {
+                        display: flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 2px 4px;
+                        margin: 0; font-size: 10.5px; font-weight: 500; line-height: 1.5; color: var(--order-muted);
+                        position:absolute;bottom: -20px;right: 0;
+                    }
+                    .booking-order-ui .order-items-table .item-original-price > span { white-space: nowrap; }
+                    .booking-order-ui .order-items-table .item-original-price-amount { font-weight: 600; font-variant-numeric: tabular-nums; }
                     .booking-order-ui .order-items-table input::-webkit-inner-spin-button,
                     .booking-order-ui .order-items-table input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
                     .booking-order-ui .order-items-table .booking-pos-qty-pill .qty-pill-btn {
@@ -757,6 +795,7 @@
                         .booking-order-ui .order-items-table td.col-action { grid-column: 6; grid-row: 1; justify-self: end; }
                         .booking-order-ui .order-items-table td.col-stock { grid-column: 1 / 3; grid-row: 2; }
                         .booking-order-ui .order-items-table td.col-price { grid-column: 3 / 5; grid-row: 2; }
+                        .booking-order-ui .order-items-table .item-original-price { justify-content: flex-start; }
                         .booking-order-ui .order-items-table td.col-total { grid-column: 5 / 7; grid-row: 2; }
                         .booking-order-ui .order-items-table td.col-discount { grid-column: 1 / 4; grid-row: 3; }
                         .booking-order-ui .order-items-table td.col-qty { grid-column: 4 / 7; grid-row: 3; }
@@ -772,6 +811,7 @@
                         .booking-order-ui .booking-pos-items-header .header-actions button { width: 100% !important; white-space: normal !important; }
                         .booking-order-ui .order-items-table tbody { padding: 12px; }
                         .booking-order-ui .order-items-table tbody tr.booking-pos-cart-item { padding: 12px !important; }
+                        .booking-order-ui .order-items-table .item-original-price { flex-direction: column; align-items: flex-start; }
                         .booking-order-ui .booking-pos-items-empty { margin: 12px; padding: 32px 16px !important; }
                         .booking-order-ui .order-items-footer-bar { padding: 14px 16px; gap: 12px; }
                         .booking-order-ui .order-items-footer-bar .footer-summary-badge { gap: 8px; }
@@ -1988,6 +2028,12 @@
                         current_stock: currentStock,
                         itemData: {
                             price: price,
+                            ...(type === 'product' ? {
+                                originalPrice: detail?.original_price ?? price,
+                                unitPrice: detail?.unit_price ?? String(this.totalDiscount(discountType, price, discount)),
+                                pricingMethod: detail?.pricing_method ?? null,
+                                legacyUnitPrice: this.totalDiscount(discountType, price, discount),
+                            } : {}),
                             point: detail?.point || 0,
                             discount: discount || 0,
                             discountType: discountType,
@@ -2662,10 +2708,65 @@
                     return name;
                 },
                 cartLineTotal(item) {
+                    if (this.isAutomaticProduct(item)) {
+                        return this.automaticProductAmounts(item)?.total ?? 0;
+                    }
                     const qty = this.cartQuantity(item);
                     const unitTotal = this.totalDiscount(item?.itemData?.discountType,
                         item?.itemData?.price, item?.itemData?.discount);
                     return this.roundMoney(qty * unitTotal);
+                },
+                usdCents(value) {
+                    if (!['string', 'number'].includes(typeof value)) return null;
+                    const match = String(value).trim().match(/^([0-9]+)(?:\.([0-9]{0,2}))?$/);
+                    if (!match) return null;
+                    const cents = Number(match[1]) * 100 + Number((match[2] || '').padEnd(2, '0'));
+                    return Number.isSafeInteger(cents) && cents <= 999999999999999 ? cents : null;
+                },
+                usdString(cents) {
+                    return `${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, '0')}`;
+                },
+                isAutomaticProduct(item) {
+                    return item?.product_type === 'product' && item?.itemData?.pricingMethod === 'auto_unit_price_v1';
+                },
+                automaticProductAmounts(item) {
+                    const original = this.usdCents(item?.itemData?.originalPrice);
+                    const unit = this.usdCents(item?.itemData?.unitPrice);
+                    const qty = this.cartQuantity(item);
+                    if (original === null || unit === null || !Number.isSafeInteger(qty)) return null;
+                    const price = Math.max(original, unit);
+                    if (price > 0 && qty > Math.floor(999999999999999 / price)) return null;
+                    const discount = Math.max(original - unit, 0);
+                    return { price: price / 100, unit: unit / 100, discount: discount / 100,
+                        subtotal: price * qty / 100, total: unit * qty / 100 };
+                },
+                validProductPrice(item) {
+                    if (this.isAutomaticProduct(item)) return this.automaticProductAmounts(item) !== null;
+                    const data = item?.itemData;
+                    return data?.pricingMethod == null && data?.unitPrice !== ''
+                        && Number.isFinite(Number(data?.unitPrice))
+                        && Number(data.unitPrice) === data.legacyUnitPrice;
+                },
+                cartUnitDiscount(item) {
+                    if (this.isAutomaticProduct(item)) return this.automaticProductAmounts(item)?.discount ?? 0;
+                    return Math.max(0, Number(item.itemData.price) - this.totalDiscount(
+                        item.itemData.discountType, item.itemData.price, item.itemData.discount));
+                },
+                initializeProductPrice(item) {
+                    if (item?.product_type !== 'product' || item.itemData.unitPrice !== undefined) return;
+                    const data = item.itemData;
+                    const unit = this.totalDiscount(data.discountType, data.price, data.discount);
+                    const rounded = this.roundMoney(unit);
+                    // Remove binary arithmetic noise only; do not round fractional-cent adjustments.
+                    const exactCents = Math.abs(unit - rounded) <= Number.EPSILON * Math.max(1, Math.abs(unit)) * 4;
+                    data.originalPrice = data.price;
+                    data.unitPrice = exactCents ? this.usdString(Math.round(rounded * 100)) : String(unit);
+                    data.pricingMethod = 'auto_unit_price_v1';
+                },
+                normalizeUnitPrice(item) {
+                    if (!this.canEditOrderItems() || !this.isAutomaticProduct(item)) return;
+                    const cents = this.usdCents(item.itemData.unitPrice);
+                    if (cents !== null) item.itemData.unitPrice = this.usdString(cents);
                 },
                 cartQuantity(item) {
                     return item?.product_type === 'service' ? 1 : Math.max(1, Math.trunc(Number(item?.product_qty || 1)));
@@ -2780,6 +2881,7 @@
                             this.dataCart[findIndex].product_qty = 1;
                         }
                     } else {
+                        this.initializeProductPrice(payload);
                         this.dataCart.push(payload);
                         if (type === 'product' && currentStock === null) {
                             this.fetchCartItemStock(payload);
@@ -2909,6 +3011,16 @@
                     (cartItem?.querySelector('[data-cart-price]') || cartItem?.querySelector('[data-cart-qty]'))?.focus();
                 },
                 priceRealTimeAction(item) {
+                    if (!this.canEditOrderItems()) return;
+                    if (item.product_type === 'product') {
+                        const data = item.itemData;
+                        if (data.pricingMethod !== 'auto_unit_price_v1'
+                            && (data.unitPrice === '' || Number(data.unitPrice) !== data.legacyUnitPrice)) {
+                            data.pricingMethod = 'auto_unit_price_v1';
+                        }
+                        this.calculatorProductPrice();
+                        return;
+                    }
                     const price = Math.max(0, Number(item?.itemData?.price || 0));
                     item.itemData.price = price;
                     item.itemData.total = this.totalDiscount(
@@ -3049,6 +3161,7 @@
                         if (Array.isArray(draft.dataCart) && draft.dataCart.length > 0) {
                             this.dataCart = draft.dataCart;
                             this.dataCart.forEach((item) => {
+                                this.initializeProductPrice(item);
                                 if (item.product_type === 'product' && (item.current_stock === null || item.current_stock === undefined)) {
                                     this.fetchCartItemStock(item);
                                 }
@@ -3120,11 +3233,20 @@
                     if (this.dataCart?.length > 0) {
                         this.dataCart.forEach((item) => {
                             const qty = this.cartQuantity(item);
+                            let automatic = null;
+                            if (this.isAutomaticProduct(item)) {
+                                automatic = this.automaticProductAmounts(item);
+                                if (!automatic) return;
+                                item.itemData.price = automatic.price;
+                                item.itemData.discount = automatic.discount;
+                                item.itemData.discountType = 'usd';
+                                item.itemData.total = automatic.unit;
+                            }
                             const unitPrice = Number(item?.itemData?.price || 0);
                             const totalCommission = this.getCommssion(item?.itemData?.commissionType,
                                 unitPrice, item?.itemData?.commission);
 
-                            this.subTotal += this.roundMoney(qty * unitPrice);
+                            this.subTotal += automatic?.subtotal ?? this.roundMoney(qty * unitPrice);
                             this.commissionTotal += this.roundMoney(totalCommission * qty);
                             this.total += this.cartLineTotal(item);
                         });
@@ -3453,10 +3575,13 @@
                         errors.dataCarts = [@json(__('order.validation.cart_required'))];
                     } else if (this.dataCart.some((item) => !item?.product_id || !item?.product_type)) {
                         errors.dataCarts = [@json(__('order.validation.cart_item_invalid'))];
+                    } else if (this.dataCart.some((item) => item.product_type === 'product' && !this.validProductPrice(item))) {
+                        errors.dataCarts = [@json(__('order.validation.unit_price_invalid'))];
                     } else if (this.dataCart.some((item) => {
+                        if (this.isAutomaticProduct(item)) return false;
                         const discount = Number(item?.itemData?.discount ?? 0);
                         return !Number.isFinite(discount) || discount < 0;
-                    }) || Array.from(this.$el?.querySelectorAll('.booking-discount-group input') || [])
+                    }) || Array.from(this.$el?.querySelectorAll('.booking-discount-group input:not([data-cart-price])') || [])
                         .some((input) => !input.validity.valid)) {
                         errors.dataCarts = [@json(__('order.validation.discount_invalid'))];
                     }

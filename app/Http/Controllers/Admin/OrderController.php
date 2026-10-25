@@ -210,6 +210,26 @@ class OrderController extends Controller
                 ]);
             }
 
+            // Capture references before the existing edit flow replaces the details.
+            $pricingSources = [];
+            $usedDetailIds = [];
+            foreach ($dataCarts as $index => $cart) {
+                if (($cart->product_type ?? null) !== 'product' || empty($cart->id)) {
+                    continue;
+                }
+                $source = $order->exists ? $order->orderDetails->firstWhere('id', $cart->id) : null;
+                if (!$source || $source->type !== 'product'
+                    || (int) $source->product_id !== (int) ($cart->product_id ?? 0)
+                    || (int) $order->shop_id !== (int) $req->shop_id
+                    || isset($usedDetailIds[$source->id])) {
+                    throw ValidationException::withMessages([
+                        'dataCarts' => __('order.validation.pricing_reference_invalid'),
+                    ]);
+                }
+                $usedDetailIds[$source->id] = true;
+                $pricingSources[$index] = $source;
+            }
+
             if ($order->exists) {
                 $this->reverseOrderEffects($order);
                 OrderDetail::withTrashed()
@@ -225,8 +245,8 @@ class OrderController extends Controller
             $order->save();
 
             $totalPoint = 0;
-            foreach ($dataCarts as $cart) {
-                $detail = $this->createDetail($order, $cart);
+            foreach ($dataCarts as $index => $cart) {
+                $detail = $this->createDetail($order, $cart, $pricingSources[$index] ?? null);
                 $this->applyDetailStock($order, $detail);
                 $totalPoint += (int) ($detail->point ?? 0);
             }
@@ -937,7 +957,7 @@ class OrderController extends Controller
         return $dataCarts;
     }
 
-    protected function createDetail(Order $order, $cart)
+    protected function createDetail(Order $order, $cart, ?OrderDetail $source = null)
     {
         $type = $cart->product_type ?? null;
         $productId = (int) ($cart->product_id ?? 0);
@@ -948,7 +968,7 @@ class OrderController extends Controller
             $discount = 0;
         }
 
-        if (!is_numeric($discount) || !is_finite((float) $discount) || (float) $discount < 0) {
+        if ($type === 'service' && (!is_numeric($discount) || !is_finite((float) $discount) || (float) $discount < 0)) {
             throw ValidationException::withMessages([
                 'dataCarts' => __('order.validation.discount_invalid'),
             ]);
@@ -970,7 +990,11 @@ class OrderController extends Controller
             ]);
         }
 
-        return OrderDetail::create([
+        $productPricing = $type === 'product'
+            ? $this->productPricing($itemData, $shopItem, $source, $qty)
+            : [];
+
+        return OrderDetail::create(array_merge([
             'order_id' => $order->id,
             'service_id' => $type === 'service' ? $productId : null,
             'product_id' => $type === 'product' ? $productId : null,
@@ -986,7 +1010,59 @@ class OrderController extends Controller
             'product_commission_type' => $type === 'product' ? ($itemData->commissionType ?? 'usd') : null,
             'service_commission' => $type === 'service' ? ($itemData->commission ?? 0) : 0,
             'service_commission_type' => $type === 'service' ? ($itemData->commissionType ?? 'usd') : null,
-        ]);
+        ], $productPricing));
+    }
+
+    protected function productPricing($itemData, ShopProduct $shopItem, ?OrderDetail $source, int $qty): array
+    {
+        $pricing = app(OrderPricing::class);
+        $unit = $itemData->unitPrice ?? null;
+        if ($source && $source->pricing_method === null
+            && ($itemData->pricingMethod ?? null) !== OrderPricing::AUTOMATIC
+            && is_numeric($unit) && is_finite((float) $unit)) {
+            $legacyUnit = $pricing->legacyUnitPrice($source);
+            // Preserve the historical rule and fractional-cent rounding until a price edit.
+            if (abs((float) $unit - $legacyUnit) <= max(1, abs($legacyUnit)) * PHP_FLOAT_EPSILON * 4) {
+                return [
+                    'price' => $source->price,
+                    'product_discount' => $source->product_discount,
+                    'product_discount_type' => $source->product_discount_type,
+                    'original_price' => null,
+                    'unit_price' => null,
+                    'pricing_method' => null,
+                ];
+            }
+        }
+
+        if ($source && $source->pricing_method !== null && $source->pricing_method !== OrderPricing::AUTOMATIC) {
+            throw ValidationException::withMessages([
+                'dataCarts' => __('order.validation.pricing_reference_invalid'),
+            ]);
+        }
+        $original = $source
+            ? ($source->pricing_method === OrderPricing::AUTOMATIC ? $source->original_price : $source->price)
+            : ($shopItem->price ?? $shopItem->product->price ?? null);
+        $originalCents = $pricing->usdCents($original);
+        if ($originalCents === null || $pricing->usdCents($itemData->originalPrice ?? null) !== $originalCents) {
+            throw ValidationException::withMessages([
+                'dataCarts' => __('order.validation.original_price_changed'),
+            ]);
+        }
+        $amounts = $pricing->automaticAmounts($original, $unit, $qty);
+        if ($amounts === null) {
+            throw ValidationException::withMessages([
+                'dataCarts' => __('order.validation.unit_price_invalid'),
+            ]);
+        }
+
+        return [
+            'price' => $amounts['price'],
+            'product_discount' => $amounts['product_discount'],
+            'product_discount_type' => 'usd',
+            'original_price' => $amounts['original_price'],
+            'unit_price' => $amounts['unit_price'],
+            'pricing_method' => OrderPricing::AUTOMATIC,
+        ];
     }
 
     protected function applyOrderEffects(Order $order)

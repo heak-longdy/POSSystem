@@ -20,6 +20,9 @@ class OrderPricingTest extends TestCase
                 $data = $item['itemData'];
                 $detail = new OrderDetail([
                     'type' => $type, 'price' => $data['price'], 'qty' => $item['product_qty'],
+                    'original_price' => $data['originalPrice'] ?? null,
+                    'unit_price' => $data['unitPrice'] ?? null,
+                    'pricing_method' => $data['pricingMethod'] ?? null,
                     $type . '_discount' => $data['discount'] ?? 0,
                     $type . '_discount_type' => $data['discountType'] ?? null,
                     $type . '_commission' => $data['commission'] ?? 0,
@@ -34,5 +37,30 @@ class OrderPricingTest extends TestCase
                 'total_commission' => $fixture['commission'], 'total_price' => $fixture['total'],
             ], $pricing->totals($details), $fixture['name']);
         }
+    }
+
+    public function test_automatic_prices_are_parsed_as_cents_without_silent_rounding(): void
+    {
+        $pricing = new OrderPricing();
+        foreach (['9' => 900, '9.' => 900, '9.00' => 900, '0.29' => 29, '0' => 0] as $value => $expected) {
+            $this->assertSame($expected, $pricing->usdCents($value));
+        }
+        foreach (['', '-1', '9.001', 'NaN', '1e2', '0.5oops', '10000000000000', INF, true, [], null] as $value) {
+            $this->assertNull($pricing->usdCents($value));
+        }
+        $this->assertNull($pricing->automaticAmounts('9999999999999.99', '1', 2));
+        $this->assertSame(999999999999999, $pricing->usdCents('9999999999999.99'));
+        $this->assertSame('9999999999999.99', $pricing->usdString(OrderPricing::MAX_CENTS));
+    }
+
+    public function test_automatic_totals_ignore_stale_compatibility_discount_and_price(): void
+    {
+        $detail = new OrderDetail([
+            'type' => 'product', 'qty' => 3, 'original_price' => '9.30', 'unit_price' => '9.00',
+            'pricing_method' => OrderPricing::AUTOMATIC, 'price' => 999, 'product_discount' => 99,
+            'product_discount_type' => 'percent', 'product_commission' => 10, 'product_commission_type' => 'percent',
+        ]);
+        $this->assertEquals(['subtotal' => 27.90, 'discount' => 0.90, 'commission' => 2.79, 'total' => 27],
+            (new OrderPricing())->line($detail));
     }
 }
