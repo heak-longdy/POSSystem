@@ -10,7 +10,7 @@ return [
     'shop' => 'ហាង',
     'all_shops' => 'ហាងទាំងអស់',
     'all_customers' => 'អតិថិជនទាំងអស់',
-    'filter' => 'អនុវត្តការត្រង',
+    'filter' => 'ស្វែងរក',
     'reset' => 'កំណត់ឡើងវិញ',
     'customer_count' => 'អតិថិជន',
     'total_amount' => 'ទឹកប្រាក់បញ្ជាទិញសរុប',

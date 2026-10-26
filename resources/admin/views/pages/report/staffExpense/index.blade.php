@@ -133,11 +133,16 @@
             border-color: #2563eb;
         }
 
-        .filter-form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        .staff-expense-report-wrapper .filter-form-grid {
+            display: flex;
+            flex-wrap: wrap;
             gap: 12px;
             align-items: flex-end;
+        }
+
+        .staff-expense-report-wrapper .filter-form-grid > .filter-field-wrap {
+            flex: 1 1 160px;
+            min-width: 0;
         }
 
         .filter-field-wrap label {
@@ -194,12 +199,21 @@
             z-index: 9999 !important;
         }
 
-        .filter-actions-wrap {
+        .staff-expense-report-wrapper .filter-actions-wrap {
             display: flex;
+            flex: 0 1 auto;
+            flex-wrap: wrap;
             align-items: center;
             gap: 8px;
-            height: 43px;
-            width: fit-content;
+            height: auto;
+            min-height: 43px;
+            max-width: 100%;
+        }
+
+        .staff-expense-report-wrapper .filter-actions-wrap > .btn-filter-search,
+        .staff-expense-report-wrapper .filter-actions-wrap > .btn-filter-reset {
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .btn-filter-search {

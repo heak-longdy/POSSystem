@@ -495,17 +495,6 @@
             color: #991b1b;
         }
 
-        .pagination-bar {
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-top: 1px solid #e2e8f0;
-            background: #ffffff;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
         .empty-orders-state {
             text-align: center;
             padding: 48px 20px;
@@ -736,18 +725,9 @@
             </div>
 
             <!-- Pagination Bar -->
-            @if ($orders->hasPages())
-                <div class="pagination-bar">
-                    <div style="font-size: 13px; color: #64748b;">
-                        {{ __('order_bulk_print.table.showing', [
-                            'from' => $orders->firstItem() ?: 0,
-                            'to' => $orders->lastItem() ?: 0,
-                            'total' => $orders->total(),
-                        ]) }}
-                    </div>
-                    <div>
-                        {{ $orders->links() }}
-                    </div>
+            @if ($orders->count() > 0)
+                <div class="paginationLayout2">
+                    @include('admin::components.pagination', ['paginate' => $orders])
                 </div>
             @endif
         </div>

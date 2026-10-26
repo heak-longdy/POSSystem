@@ -137,11 +137,16 @@
             border-color: #2563eb;
         }
 
-        .filter-form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        .sales-report-wrapper .filter-form-grid {
+            display: flex;
+            flex-wrap: wrap;
             gap: 12px;
             align-items: flex-end;
+        }
+
+        .sales-report-wrapper .filter-form-grid > .filter-field-wrap {
+            flex: 1 1 170px;
+            min-width: 0;
         }
 
         .filter-field-wrap label {
@@ -198,12 +203,20 @@
             z-index: 9999 !important;
         }
 
-        .filter-actions-wrap {
+        .sales-report-wrapper .filter-actions-wrap {
             display: flex;
+            flex: 0 1 auto;
+            flex-wrap: wrap;
             align-items: center;
             gap: 8px;
-            height: 43px;
-            width: fit-content;
+            min-height: 43px;
+            max-width: 100%;
+        }
+
+        .sales-report-wrapper .filter-actions-wrap > .btn-filter-search,
+        .sales-report-wrapper .filter-actions-wrap > .btn-filter-reset {
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .btn-filter-search {
