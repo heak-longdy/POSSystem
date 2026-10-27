@@ -801,18 +801,22 @@ class InventoryMovementReportController extends Controller
             ];
         }
 
-        // Custom range or default to Current Month
-        $from = $req->get('from_date');
-        $to = $req->get('to_date');
-
-        if (!$from || !$to) {
-            $from = Carbon::today()->startOfMonth()->format('Y-m-d');
-            $to = Carbon::today()->format('Y-m-d');
+        // Start with today when no date range has been selected.
+        if (!$req->filled('from_date') && !$req->filled('to_date')) {
+            $today = Carbon::today()->format('Y-m-d');
+            return [
+                'from' => $today,
+                'to'   => $today,
+            ];
         }
+
+        // Preserve the existing bounds for partially specified custom ranges.
+        $from = $req->filled('from_date') ? $req->from_date : Carbon::today()->startOfMonth()->format('Y-m-d');
+        $to   = $req->filled('to_date')   ? $req->to_date   : Carbon::today()->endOfMonth()->format('Y-m-d');
 
         return [
             'from' => $from,
-            'to' => $to,
+            'to'   => $to,
         ];
     }
 
@@ -821,28 +825,28 @@ class InventoryMovementReportController extends Controller
      */
     private function resolveMonthlyDateRange(Request $req)
     {
-        $currentYear = Carbon::now()->year;
-        $selectedYear = (int) $req->get('year', $currentYear);
-        $fromMonth = (int) $req->get('from_month', 1);
-        $toMonth = (int) $req->get('to_month', Carbon::now()->month);
+        $now = Carbon::now();
+        $selectedYear = (int) ($req->filled('year') ? $req->year : $now->year);
 
-        if ($fromMonth < 1 || $fromMonth > 12) $fromMonth = 1;
-        if ($toMonth < 1 || $toMonth > 12) $toMonth = 12;
-        if ($fromMonth > $toMonth) {
-            $temp = $fromMonth;
-            $fromMonth = $toMonth;
-            $toMonth = $temp;
+        $fromMonth = (int) ($req->filled('from_month') ? $req->from_month : 1);
+        $toMonth   = (int) ($req->filled('to_month')   ? $req->to_month   : 12);
+
+        if (!$req->filled('from_month') && !$req->filled('to_month')) {
+            $fromMonth = $toMonth = $now->month;
         }
 
+        $fromMonth = max(1, min(12, $fromMonth));
+        $toMonth   = max($fromMonth, min(12, $toMonth));
+
         $startDate = Carbon::create($selectedYear, $fromMonth, 1)->startOfMonth()->format('Y-m-d');
-        $endDate = Carbon::create($selectedYear, $toMonth, 1)->endOfMonth()->format('Y-m-d');
+        $endDate   = Carbon::create($selectedYear, $toMonth, 1)->endOfMonth()->format('Y-m-d');
 
         return [
-            'year' => $selectedYear,
+            'year'       => $selectedYear,
             'from_month' => $fromMonth,
-            'to_month' => $toMonth,
-            'from' => $startDate,
-            'to' => $endDate,
+            'to_month'   => $toMonth,
+            'from'       => $startDate,
+            'to'         => $endDate,
         ];
     }
 

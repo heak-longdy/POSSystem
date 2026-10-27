@@ -723,6 +723,11 @@ class SalesReportController extends Controller
                 'from' => $now->copy()->subDays(29)->format('Y-m-d'),
                 'to' => $now->format('Y-m-d'),
             ];
+        } elseif ($preset === 'this_month') {
+            return [
+                'from' => $now->copy()->startOfMonth()->format('Y-m-d'),
+                'to' => $now->copy()->endOfMonth()->format('Y-m-d'),
+            ];
         } elseif ($preset === 'last_month') {
             $lastMonth = $now->copy()->subMonth();
             return [
@@ -731,13 +736,21 @@ class SalesReportController extends Controller
             ];
         }
 
-        // Custom date range or default to current month
+        // Start with today when no date range has been selected.
+        if (!$req->filled('from_date') && !$req->filled('to_date')) {
+            return [
+                'from' => $now->format('Y-m-d'),
+                'to'   => $now->format('Y-m-d'),
+            ];
+        }
+
+        // Preserve the existing bounds for partially specified custom ranges.
         $from = $req->filled('from_date') ? $req->from_date : $now->copy()->startOfMonth()->format('Y-m-d');
-        $to = $req->filled('to_date') ? $req->to_date : $now->copy()->endOfMonth()->format('Y-m-d');
+        $to   = $req->filled('to_date')   ? $req->to_date   : $now->copy()->endOfMonth()->format('Y-m-d');
 
         return [
             'from' => $from,
-            'to' => $to,
+            'to'   => $to,
         ];
     }
 
@@ -750,20 +763,24 @@ class SalesReportController extends Controller
         $selectedYear = (int) ($req->filled('year') ? $req->year : $now->year);
 
         $fromMonth = (int) ($req->filled('from_month') ? $req->from_month : 1);
-        $toMonth = (int) ($req->filled('to_month') ? $req->to_month : 12);
+        $toMonth   = (int) ($req->filled('to_month')   ? $req->to_month   : 12);
+
+        if (!$req->filled('from_month') && !$req->filled('to_month')) {
+            $fromMonth = $toMonth = $now->month;
+        }
 
         $fromMonth = max(1, min(12, $fromMonth));
-        $toMonth = max($fromMonth, min(12, $toMonth));
+        $toMonth   = max($fromMonth, min(12, $toMonth));
 
         $fromDate = Carbon::create($selectedYear, $fromMonth, 1)->startOfMonth()->format('Y-m-d');
-        $toDate = Carbon::create($selectedYear, $toMonth, 1)->endOfMonth()->format('Y-m-d');
+        $toDate   = Carbon::create($selectedYear, $toMonth, 1)->endOfMonth()->format('Y-m-d');
 
         return [
-            'year' => $selectedYear,
+            'year'       => $selectedYear,
             'from_month' => $fromMonth,
-            'to_month' => $toMonth,
-            'from' => $fromDate,
-            'to' => $toDate,
+            'to_month'   => $toMonth,
+            'from'       => $fromDate,
+            'to'         => $toDate,
         ];
     }
 

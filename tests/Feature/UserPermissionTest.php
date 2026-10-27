@@ -566,7 +566,7 @@ class UserPermissionTest extends TestCase
         $menu = $response['permissionMenu'];
         $names = PermissionModuleSelection::flatten($menu)->pluck('name')->all();
         $expected = ['Dashboard', 'Product', 'Order', 'Order Bulk Print', 'Shop', 'Customer', 'Stock In', 'Stock Out',
-            'Stock Transfer', 'Stock On Hand', 'Stock Movement', 'Report Sales', 'Report Inventory Movement',
+            'Stock Transfer', 'Stock On Hand', 'Stock Movement', 'Report Sales', 'Consolidated Product Quantity', 'Report Inventory Movement',
             'Staff Expense Report', 'Position', 'Staff', 'Staff Expense', 'User', 'File Manager', 'Category', 'Supplier', 'UOM', 'Invoice Setting'];
         $this->assertSame($expected, $names);
         $groups = $menu->filter(fn ($item) => isset($item['children']))->values();
@@ -574,7 +574,7 @@ class UserPermissionTest extends TestCase
             $groups->map(fn ($item) => $item['label']['en'])->all());
         $this->assertSame(['Stock In', 'Stock Out', 'Stock Transfer', 'Stock On Hand', 'Stock Movement'],
             PermissionModuleSelection::flatten($groups[0]['children'])->pluck('name')->all());
-        $this->assertSame(['Report Sales', 'Report Inventory Movement', 'Staff Expense Report'],
+        $this->assertSame(['Report Sales', 'Consolidated Product Quantity', 'Report Inventory Movement', 'Staff Expense Report'],
             PermissionModuleSelection::flatten($groups[1]['children'])->pluck('name')->all());
         $settings = $groups[2]['children'];
         $this->assertSame(['Position', 'Staff', 'Staff Expense', 'User'],

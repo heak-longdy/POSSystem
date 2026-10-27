@@ -34,8 +34,8 @@ class AdminPermissions
             'send-reminder' => 'update',
             'paid' => 'update',
             'delete' => 'delete', 'delete-payment' => 'delete',
-            'restore' => in_array($module, ['staff', 'staff-expense']) ? 'restore' : 'update',
-            'destroy' => in_array($module, ['staff', 'staff-expense']) ? 'force-delete' : 'delete',
+            'restore' => in_array($module, ['staff', 'staff-expense', 'other-income']) ? 'restore' : 'update',
+            'destroy' => in_array($module, ['staff', 'staff-expense', 'other-income']) ? 'force-delete' : 'delete',
             'export' => in_array($module, ['stock-on-hand', 'stock-movement'], true)
                 || in_array('excel', config('admin_permissions.extra_actions.' . $module, [])) ? 'excel' : 'view',
         ];
@@ -85,7 +85,7 @@ class AdminPermissions
         if ($name === 'admin-stock-in-products') {
             return ['stock-in-view', 'stock-in-create', 'stock-in-update'];
         }
-        if (in_array($name, ['admin-stock-on-hand-report', 'admin-stock-movement-report', 'admin-product-report', 'admin-staff-expense-report'])) {
+        if (in_array($name, ['admin-stock-on-hand-report', 'admin-stock-movement-report', 'admin-product-report', 'admin-staff-expense-report', 'admin-other-income-report'])) {
             return [str_replace(['admin-', '-report'], ['', '-excel'], $name)];
         }
         if ($name === 'admin-stock-on-hand-onFind') {
@@ -95,10 +95,12 @@ class AdminPermissions
         // Each report requires its own module permission. Export actions also
         // require the Excel permission already offered by the permission screen.
         $exports = [
+            'admin-report-consolidated-product-quantity-report' => 'report-consolidated-product-quantity-excel',
             'admin-report-sales-report' => 'report-sales-excel',
             'admin-report-order-transaction-report' => 'report-transaction-excel',
             'admin-report-inventory-movement-report' => 'report-inventory-excel',
             'admin-report-staff-expense-report' => 'report-staff-expense-excel',
+            'admin-report-other-income-report' => 'report-other-income-excel',
             'admin-report-customer-remaining-amount-report' => 'report-sales-excel',
             'admin-report-product-report' => 'product-excel',
             'admin-report-shop-report' => 'shop-view',
@@ -114,9 +116,11 @@ class AdminPermissions
         }
         foreach ([
             'report-sales' => 'report-sales',
+            'report-consolidated-product-quantity' => 'report-consolidated-product-quantity',
             'report-order-transaction' => 'report-transaction',
             'report-inventory-movement' => 'report-inventory',
             'report-staff-expense' => 'report-staff-expense',
+            'report-other-income' => 'report-other-income',
             'report-customer-remaining-amount' => 'report-sales',
         ] as $prefix => $module) {
             if (in_array($name, array_map(fn ($action) => 'admin-' . $prefix . '-' . $action,

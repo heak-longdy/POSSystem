@@ -344,24 +344,25 @@
         .currency-net { color: #2563eb; font-weight: 700; }
 
         .btn-view-details {
-            display: inline-flex;
-            align-items: center;
+            display: inline-flex !important;
+            align-items: center !important;
             gap: 4px;
-            padding: 5px 10px;
+            padding: 5px 10px !important;
             background: #eff6ff;
-            color: #2563eb;
-            border-radius: 6px;
+            color: #2563eb !important;
+            border-radius: 6px !important;
             font-size: 12px;
             font-weight: 600;
-            border: 1px solid #bfdbfe;
-            cursor: pointer;
+            border: 1px solid #bfdbfe !important;
+            cursor: pointer !important;
             transition: all 0.15s ease;
+            min-width: 0 !important;
         }
 
         .btn-view-details:hover {
-            background: #2563eb;
-            color: #ffffff;
-            border-color: #2563eb;
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #2563eb !important;
         }
 
         .btn-excel-export {
@@ -618,7 +619,7 @@
                             <div class="preset-badge-group">
                                 <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">{{ __('staff_expense_report.presets.title') }}</span>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'today', 'grouping' => $grouping])) }}"
-                                    class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">{{ __('staff_expense_report.presets.today') }}</a>
+                                    class="preset-btn {{ request('preset') === 'today' || (!request()->filled('preset') && !request()->filled('from_date') && !request()->filled('to_date')) ? 'active' : '' }}">{{ __('staff_expense_report.presets.today') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'yesterday', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">{{ __('staff_expense_report.presets.yesterday') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '7days', 'grouping' => $grouping])) }}"
@@ -626,7 +627,7 @@
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '30days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_30_days') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'this_month', 'grouping' => $grouping])) }}"
-                                    class="preset-btn {{ request('preset') === 'this_month' || (!request('preset') && !request('from_date')) ? 'active' : '' }}">{{ __('staff_expense_report.presets.this_month') }}</a>
+                                    class="preset-btn {{ request('preset') === 'this_month' ? 'active' : '' }}">{{ __('staff_expense_report.presets.this_month') }}</a>
                                 <a href="{{ route('admin-report-staff-expense-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'last_month', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">{{ __('staff_expense_report.presets.last_month') }}</a>
                             </div>
@@ -942,14 +943,6 @@
                                                     title="{{ __('staff_expense_report.button.details') }}">
                                                     <i class='bx bx-show'></i>
                                                 </button>
-                                                @can('staff-expense-update')
-                                                    <a href="{{ route('admin-staff-expense-edit', $row->id) }}"
-                                                        class="btn-view-details" target="_blank"
-                                                        title="{{ __('staff_expense_report.button.edit') }}">
-                                                        <i class='bx bx-edit'></i>
-                                                    </a>
-                                                @endcan
-                                            </div>
                                         </td>
                                     </tr>
                                 @empty

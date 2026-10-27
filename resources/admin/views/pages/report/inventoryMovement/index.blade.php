@@ -564,14 +564,15 @@
                     <div class="menu-row">
                         <div class="tabs">
                             @php
-                                $currentParams = request()->query();
+                                $dailyParams = array_merge(request()->except(['from_month', 'to_month', 'year', 'page']), ['grouping' => $grouping]);
+                                $monthlyParams = array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['grouping' => $grouping]);
                             @endphp
-                            <a href="{{ route('admin-report-inventory-movement-daily', $currentParams) }}"
+                            <a href="{{ route('admin-report-inventory-movement-daily', $dailyParams) }}"
                                 class="{{ $viewMode === 'daily' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-event'></i>
                                 {{ __('inventory_movement.tab.daily') }}
                             </a>
-                            <a href="{{ route('admin-report-inventory-movement-monthly', $currentParams) }}"
+                            <a href="{{ route('admin-report-inventory-movement-monthly', $monthlyParams) }}"
                                 class="{{ $viewMode === 'monthly' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-alt'></i>
                                 {{ __('inventory_movement.tab.monthly') }}
@@ -606,7 +607,7 @@
                             <div class="preset-badge-group">
                                 <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">{{ __('inventory_movement.presets.title') }}</span>
                                 <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'today', 'grouping' => $grouping])) }}"
-                                    class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">{{ __('inventory_movement.presets.today') }}</a>
+                                    class="preset-btn {{ request('preset') === 'today' || (!request()->filled('preset') && !request()->filled('from_date') && !request()->filled('to_date')) ? 'active' : '' }}">{{ __('inventory_movement.presets.today') }}</a>
                                 <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'yesterday', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">{{ __('inventory_movement.presets.yesterday') }}</a>
                                 <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '7days', 'grouping' => $grouping])) }}"
@@ -614,7 +615,7 @@
                                 <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '30days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">{{ __('inventory_movement.presets.last_30_days') }}</a>
                                 <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'this_month', 'grouping' => $grouping])) }}"
-                                    class="preset-btn {{ request('preset') === 'this_month' || (!request('preset') && !request('from_date')) ? 'active' : '' }}">{{ __('inventory_movement.presets.this_month') }}</a>
+                                    class="preset-btn {{ request('preset') === 'this_month' ? 'active' : '' }}">{{ __('inventory_movement.presets.this_month') }}</a>
                                 <a href="{{ route('admin-report-inventory-movement-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'last_month', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">{{ __('inventory_movement.presets.last_month') }}</a>
                             </div>

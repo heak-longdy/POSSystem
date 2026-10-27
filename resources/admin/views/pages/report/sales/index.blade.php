@@ -703,14 +703,15 @@
                     <div class="menu-row">
                         <div class="tabs">
                             @php
-                                $currentParams = request()->query();
+                                $dailyParams = array_merge(request()->except(['from_month', 'to_month', 'year', 'page']), ['grouping' => $grouping]);
+                                $monthlyParams = array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['grouping' => $grouping]);
                             @endphp
-                            <a href="{{ route('admin-report-sales-daily', $currentParams) }}"
+                            <a href="{{ route('admin-report-sales-daily', $dailyParams) }}"
                                 class="{{ $viewMode === 'daily' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-event'></i>
                                 {{ __('sales_report.tab.daily') }}
                             </a>
-                            <a href="{{ route('admin-report-sales-monthly', $currentParams) }}"
+                            <a href="{{ route('admin-report-sales-monthly', $monthlyParams) }}"
                                 class="{{ $viewMode === 'monthly' ? 'tabActive' : '' }}">
                                 <i class='bx bx-calendar-alt'></i>
                                 {{ __('sales_report.tab.monthly') }}
@@ -745,13 +746,15 @@
                             <div class="preset-badge-group">
                                 <span style="font-size: 12px; font-weight: 600; color: #64748b; margin-right: 4px;">{{ __('sales_report.presets.title') }}</span>
                                 <a href="{{ route('admin-report-sales-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'today', 'grouping' => $grouping])) }}"
-                                    class="preset-btn {{ request('preset') === 'today' ? 'active' : '' }}">{{ __('sales_report.presets.today') }}</a>
+                                    class="preset-btn {{ request('preset') === 'today' || (!request()->filled('preset') && !request()->filled('from_date') && !request()->filled('to_date')) ? 'active' : '' }}">{{ __('sales_report.presets.today') }}</a>
                                 <a href="{{ route('admin-report-sales-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'yesterday', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'yesterday' ? 'active' : '' }}">{{ __('sales_report.presets.yesterday') }}</a>
                                 <a href="{{ route('admin-report-sales-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '7days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '7days' ? 'active' : '' }}">{{ __('sales_report.presets.last_7_days') }}</a>
                                 <a href="{{ route('admin-report-sales-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => '30days', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === '30days' ? 'active' : '' }}">{{ __('sales_report.presets.last_30_days') }}</a>
+                                <a href="{{ route('admin-report-sales-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'this_month', 'grouping' => $grouping])) }}"
+                                    class="preset-btn {{ request('preset') === 'this_month' ? 'active' : '' }}">{{ __('sales_report.presets.this_month') }}</a>
                                 <a href="{{ route('admin-report-sales-daily', array_merge(request()->except(['from_date', 'to_date', 'preset', 'page']), ['preset' => 'last_month', 'grouping' => $grouping])) }}"
                                     class="preset-btn {{ request('preset') === 'last_month' ? 'active' : '' }}">{{ __('sales_report.presets.last_month') }}</a>
                             </div>
@@ -1110,11 +1113,11 @@
                                                     title="{{ __('sales_report.modal.invoices_for') }} {{ $row->invoice_number }}">
                                                     <i class='bx bx-detail'></i>
                                                 </button>
-                                                <a href="{{ route('admin-order-detail', $row->id) }}"
+                                                {{-- <a href="{{ route('admin-order-detail', $row->id) }}"
                                                     class="btn-drilldown" target="_blank"
                                                     title="{{ __('sales_report.button.view_order_detail') }}">
                                                     <i class='bx bx-link-external'></i>
-                                                </a>
+                                                </a> --}}
                                             </div>
                                         </td>
                                     </tr>

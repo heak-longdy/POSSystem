@@ -42,7 +42,11 @@ use App\Http\Controllers\Admin\Report\SalesReportController;
 use App\Http\Controllers\Admin\Report\OrderTransactionReportController;
 use App\Http\Controllers\Admin\Report\InventoryMovementReportController;
 use App\Http\Controllers\Admin\Report\StaffExpenseReportController;
+use App\Http\Controllers\Admin\Report\OtherIncomeReportController;
 use App\Http\Controllers\Admin\Report\CustomerRemainingAmountReportController;
+use App\Http\Controllers\Admin\Report\ConsolidatedProductQuantityReportController;
+use App\Http\Controllers\Admin\OtherIncomeController;
+use App\Http\Controllers\Admin\OtherIncomeCategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -392,6 +396,32 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::get('/staff/{staffId}',  [Admin\StaffExpenseController::class, 'staffHistory'])->name('staff-history');
         });
 
+        // Other Income Category Management
+        CRUD(OtherIncomeCategoryController::class, 'other-income-category');
+
+        // Other Income Management
+        CRUD(OtherIncomeController::class, 'other-income');
+        Route::get('other-income/report', [OtherIncomeController::class, 'report'])->name('other-income-report');
+        Route::group([
+            'prefix' => 'other-income',
+            'as'     => 'other-income-',
+        ], function () {
+            Route::post('{id}/payment', [OtherIncomeController::class, 'storePayment'])->name('store-payment');
+            Route::delete('payment/{paymentId}', [OtherIncomeController::class, 'deletePayment'])->name('delete-payment');
+            Route::get('calculate-purchases', [OtherIncomeController::class, 'calculatePurchases'])->name('calculate-purchases');
+            Route::get('details/{id}', [OtherIncomeController::class, 'details'])->name('details');
+            Route::get('supplier-history/{supplierId}', [OtherIncomeController::class, 'supplierHistory'])->name('supplier-history');
+        });
+
+        // Report Management - Consolidated Product Quantity
+        Route::group([
+            'prefix' => 'report/consolidated-product-quantity',
+            'as' => 'report-consolidated-product-quantity-',
+        ], function () {
+            Route::get('/', [ConsolidatedProductQuantityReportController::class, 'index'])->name('index');
+            Route::get('report', [ConsolidatedProductQuantityReportController::class, 'report'])->name('report');
+        });
+
         // Report Management - Sales Report
         Route::group([
             'prefix' => 'report/sales',
@@ -449,6 +479,18 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::get('monthly', [StaffExpenseReportController::class, 'monthly'])->name('monthly');
             Route::get('report', [StaffExpenseReportController::class, 'report'])->name('report');
             Route::get('details/{period}', [StaffExpenseReportController::class, 'details'])->name('details');
+        });
+
+        // Report Management - Other Income Report
+        Route::group([
+            'prefix' => 'report/other-income',
+            'as'     => 'report-other-income-',
+        ], function () {
+            Route::get('/', [OtherIncomeReportController::class, 'index'])->name('index');
+            Route::get('daily', [OtherIncomeReportController::class, 'daily'])->name('daily');
+            Route::get('monthly', [OtherIncomeReportController::class, 'monthly'])->name('monthly');
+            Route::get('report', [OtherIncomeReportController::class, 'report'])->name('report');
+            Route::get('details/{period}', [OtherIncomeReportController::class, 'details'])->name('details');
         });
     });
 

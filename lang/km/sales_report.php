@@ -15,6 +15,7 @@ return [
         'yesterday' => 'ម្សិលមិញ',
         'last_7_days' => '៧ ថ្ងៃចុងក្រោយ',
         'last_30_days' => '៣០ ថ្ងៃចុងក្រោយ',
+        'this_month' => 'ខែនេះ',
         'last_month' => 'ខែមុន',
     ],
 

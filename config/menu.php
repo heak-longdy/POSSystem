@@ -159,6 +159,18 @@ return [
                 'dropDown' => 'disable',
             ],
             [
+                'type' => 'single',
+                'active' => 'admin/report/consolidated-product-quantity*',
+                'path' => 'admin/report/consolidated-product-quantity',
+                'permission' => ['report-consolidated-product-quantity-view'],
+                'name' => [
+                    'en' => 'Consolidated Product Quantity',
+                    'km' => 'របាយការណ៍បរិមាណផលិតផលសរុប',
+                ],
+                'icon' => 'bx-package',
+                'dropDown' => 'disable',
+            ],
+            [
                 'type'  => 'single',
                 'active' => 'admin/report/customer-remaining-amount*',
                 'path' => 'admin/report/customer-remaining-amount',
@@ -192,6 +204,18 @@ return [
                     'km' => 'របាយការណ៍ចំណាយបុគ្គលិក',
                 ],
                 'icon' => 'bx-wallet-alt',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/other-income*',
+                'path' => 'admin/report/other-income/daily',
+                'permission' => ['report-other-income-view'],
+                'name' => [
+                    'en' => 'Other Income Report',
+                    'km' => 'របាយការណ៍ចំណូលផ្សេងៗ',
+                ],
+                'icon' => 'bx-trending-up',
                 'dropDown' => 'disable',
             ],
         ]
@@ -250,6 +274,30 @@ return [
                     'km' => 'ចំណាយបុគ្គលិក',
                 ],
                 'icon' => 'bx-dollar-circle',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/other-income*',
+                'path' => 'admin/other-income/list/1',
+                'permission' => ['other-income-view'],
+                'name' => [
+                    'en' => 'Other Income',
+                    'km' => 'ចំណូលផ្សេងៗ',
+                ],
+                'icon' => 'bx-money',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/other-income-category*',
+                'path' => 'admin/other-income-category/list/1',
+                'permission' => ['other-income-category-view'],
+                'name' => [
+                    'en' => 'Income Categories',
+                    'km' => 'ប្រភេទចំណូល',
+                ],
+                'icon' => 'bx-category-alt',
                 'dropDown' => 'disable',
             ],
             [

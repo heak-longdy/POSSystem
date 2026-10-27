@@ -735,7 +735,15 @@ class StaffExpenseReportController extends Controller
             ];
         }
 
-        // Custom date range or default to current month
+        // Start with today when no date range has been selected.
+        if (!$req->filled('from_date') && !$req->filled('to_date')) {
+            return [
+                'from' => $now->format('Y-m-d'),
+                'to'   => $now->format('Y-m-d'),
+            ];
+        }
+
+        // Preserve the existing bounds for partially specified custom ranges.
         $from = $req->filled('from_date') ? $req->from_date : $now->copy()->startOfMonth()->format('Y-m-d');
         $to   = $req->filled('to_date')   ? $req->to_date   : $now->copy()->endOfMonth()->format('Y-m-d');
 
@@ -755,6 +763,10 @@ class StaffExpenseReportController extends Controller
 
         $fromMonth = (int) ($req->filled('from_month') ? $req->from_month : 1);
         $toMonth   = (int) ($req->filled('to_month')   ? $req->to_month   : 12);
+
+        if (!$req->filled('from_month') && !$req->filled('to_month')) {
+            $fromMonth = $toMonth = $now->month;
+        }
 
         $fromMonth = max(1, min(12, $fromMonth));
         $toMonth   = max($fromMonth, min(12, $toMonth));
