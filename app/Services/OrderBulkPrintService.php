@@ -82,8 +82,8 @@ class OrderBulkPrintService
             ]);
         }
 
-        // Calculate previous balances if document is invoice
-        $previousBalances = $documentType === 'invoice'
+        // Calculate previous balances for invoice and delivery slip
+        $previousBalances = in_array($documentType, ['invoice', 'delivery_slip'])
             ? $this->invoiceService->previousBalanceForMany($orders)
             : [];
 

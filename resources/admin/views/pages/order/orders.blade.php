@@ -1179,7 +1179,7 @@
                             price: item?.price || 0,
                             discount: this.discountAmount(item),
                             commission: this.commissionAmount(item),
-                            payment_status: this.orderStatusLabel(order.payment_status),
+                            payment_status: this.orderStatusLabel(order.payment_status, Boolean(order.is_transferred)),
                             paid_amount: order.paid_amount || 0,
                             remaining_amount: order.remaining_amount || 0,
                             payment_date: this.dateFormat(order.payment_date),
@@ -1197,7 +1197,8 @@
                 dateFormat(date) {
                     return date ? moment(date).format('YYYY-MM-DD HH:mm') : '';
                 },
-                orderStatusLabel(status) {
+                orderStatusLabel(status, isTransferred = false) {
+                    if (isTransferred) return @json(__('order.status.paid_through_transfer'));
                     if (status === 'Paid') return @json(__('order.status.paid'));
                     if (status === 'Partial') return @json(__('order.status.partial'));
                     if (status === 'Cancel') return @json(__('order.status.rejected'));

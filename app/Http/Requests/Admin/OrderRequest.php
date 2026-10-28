@@ -40,6 +40,8 @@ class OrderRequest extends FormRequest
             'dataCarts' => 'required|json',
             'partial_payment_amount' => 'nullable|numeric|min:0|multiple_of:0.01',
             'partial_payment_note' => 'nullable|string|max:500',
+            'creation_request_key' => 'nullable|string|max:36',
+            'previous_balance_fingerprint' => 'nullable|string|max:64',
         ];
     }
 

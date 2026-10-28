@@ -50,10 +50,17 @@
                                     $customerAddress = $order->customer?->address ?: null;
                                     $customerInitials = strtoupper(substr($customerName, 0, 2));
                                 @endphp
-                                <span class="detail-status-pill {{ $statusClass }}">
-                                    <span class="status-dot"></span>
-                                    {{ $statusLabel }}
-                                </span>
+                                @if ($order->isTransferred())
+                                    <span class="detail-status-pill status-paid" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;">
+                                        <span class="status-dot" style="background: #2563eb;"></span>
+                                        {{ __('order.status.paid_through_transfer') }}
+                                    </span>
+                                @else
+                                    <span class="detail-status-pill {{ $statusClass }}">
+                                        <span class="status-dot"></span>
+                                        {{ $statusLabel }}
+                                    </span>
+                                @endif
 
                                 @if ($order->trashed())
                                     <span class="detail-status-pill status-trash">
@@ -138,6 +145,30 @@
                     </div>
                 </header>
 
+                @if ($order->isTransferred())
+                    @php
+                        $destTransfer = $order->completedOutgoingBalanceTransfer;
+                        $destOrder = $destTransfer?->newOrder;
+                    @endphp
+                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #3b82f6; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i data-feather="info" style="color: #2563eb; width: 22px; height: 22px; flex-shrink: 0;"></i>
+                            <div>
+                                <strong style="color: #1e40af; font-size: 14px;">{{ __('order.balance_transferred_notice_title') }}</strong>
+                                <p style="color: #3b82f6; font-size: 13px; margin: 2px 0 0;">
+                                    {{ __('order.balance_transferred_notice_desc') }}
+                                    @if ($destOrder)
+                                        <span>({{ __('order.transferred_to') }}: <a href="{{ route('admin-remaining-amount-detail', $destOrder->id) }}" style="font-weight: 600; text-decoration: underline; color: #1d4ed8;">#{{ $destOrder->invoice_number ?: $destOrder->id }}</a>)</span>
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+                        <span style="background: #dbeafe; color: #1d4ed8; font-weight: 600; font-size: 12px; padding: 4px 12px; border-radius: 9999px; white-space: nowrap;">
+                            {{ __('order.status.paid_through_transfer') }}
+                        </span>
+                    </div>
+                @endif
+
                 <!-- Financial overview -->
                 <section class="detail-kpi-grid">
                     <article class="kpi-card">
@@ -145,10 +176,32 @@
                             <i data-feather="dollar-sign"></i>
                         </div>
                         <div class="kpi-info">
-                            <span class="kpi-label">{{ __('order.detail.total_bill') }}</span>
+                            <span class="kpi-label">{{ (float) ($order->previous_balance ?? 0) > 0 ? __('order.current_order_total') : __('order.detail.total_bill') }}</span>
                             <strong class="kpi-value">${{ number_format((float) ($order->total_price ?? 0), 2) }}</strong>
                         </div>
                     </article>
+
+                    @if ((float) ($order->previous_balance ?? 0) > 0)
+                        <article class="kpi-card">
+                            <div class="kpi-icon-wrap kpi-orange">
+                                <i data-feather="clock"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">{{ __('order.previous_balance') }}</span>
+                                <strong class="kpi-value text-warning">${{ number_format((float) $order->previous_balance, 2) }}</strong>
+                            </div>
+                        </article>
+
+                        <article class="kpi-card">
+                            <div class="kpi-icon-wrap kpi-blue">
+                                <i data-feather="shopping-bag"></i>
+                            </div>
+                            <div class="kpi-info">
+                                <span class="kpi-label">{{ __('order.total_amount_due') }}</span>
+                                <strong class="kpi-value">${{ number_format((float) $order->total_amount_due, 2) }}</strong>
+                            </div>
+                        </article>
+                    @endif
 
                     <article class="kpi-card">
                         <div class="kpi-icon-wrap kpi-green">
@@ -240,6 +293,70 @@
                                 </table>
                             </div>
                         </section>
+
+                        @if ($order->incomingBalanceTransfers->count() > 0)
+                            <!-- Consolidated Previous Orders Table -->
+                            <section class="detail-card">
+                                <div class="detail-card-header">
+                                    <div class="card-title-group">
+                                        <i data-feather="clock"></i>
+                                        <h2>{{ __('order.consolidated_orders') }}</h2>
+                                        <span class="count-badge">{{ $order->incomingBalanceTransfers->count() }}</span>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="detail-data-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">#</th>
+                                                <th>{{ __('order.invoice.invoice_number') }}</th>
+                                                <th>{{ __('order.form.order_date') }}</th>
+                                                <th class="text-right">{{ __('order.current_order_total') }}</th>
+                                                <th class="text-right">{{ __('order.transferred_amount') }}</th>
+                                                <th class="text-center">{{ __('order.status_label') }}</th>
+                                                <th class="text-center" style="width: 70px;">{{ __('global.table.action') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($order->incomingBalanceTransfers as $tIdx => $transfer)
+                                                @php
+                                                    $prevOrder = $transfer->previousOrder;
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ $tIdx + 1 }}</td>
+                                                    <td>
+                                                        <strong style="color: #1e293b;">#{{ $prevOrder?->invoice_number ?: $transfer->previous_order_id }}</strong>
+                                                    </td>
+                                                    <td>
+                                                        <span>{{ $prevOrder?->order_date ? \Carbon\Carbon::parse($prevOrder->order_date)->format('d M Y, h:i A') : '---' }}</span>
+                                                    </td>
+                                                    <td class="text-right font-weight-bold">
+                                                        ${{ number_format((float) ($prevOrder?->total_price ?? 0), 2) }}
+                                                    </td>
+                                                    <td class="text-right font-weight-bold text-danger">
+                                                        ${{ number_format((float) ($transfer->transferred_amount ?? 0), 2) }}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="detail-status-pill status-paid" style="font-size: 11px; padding: 2px 8px;">
+                                                            {{ __('order.status.paid_through_transfer') }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @if ($prevOrder)
+                                                            <a href="{{ route('admin-remaining-amount-detail', $prevOrder->id) }}" class="btn-action-edit" title="{{ __('remaining_amount.detail.title') }}">
+                                                                <i data-feather="eye"></i>
+                                                            </a>
+                                                        @else
+                                                            <span class="text-muted">---</span>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        @endif
 
                         <!-- Payment History Audit Log -->
                         <section class="detail-card">
@@ -445,14 +562,35 @@
                                     <span class="text-danger">- ${{ number_format($discount, 2) }}</span>
                                 </div>
                                 <div class="billing-divider"></div>
-                                <div class="billing-row billing-grand-total">
-                                    <span>{{ __('order.detail.grand_total') }}</span>
+                                <div class="billing-row">
+                                    <span>{{ __('order.current_order_total') }}</span>
                                     <span>${{ number_format($grandTotal, 2) }}</span>
                                 </div>
+                                @if ((float) ($order->previous_balance ?? 0) > 0)
+                                    <div class="billing-row" style="color: #b45309; font-weight: 500;">
+                                        <span>{{ __('order.previous_balance') }}</span>
+                                        <span>+${{ number_format((float) $order->previous_balance, 2) }}</span>
+                                    </div>
+                                    <div class="billing-row billing-grand-total">
+                                        <span>{{ __('order.total_amount_due') }}</span>
+                                        <span>${{ number_format((float) $order->total_amount_due, 2) }}</span>
+                                    </div>
+                                @else
+                                    <div class="billing-row billing-grand-total">
+                                        <span>{{ __('order.detail.grand_total') }}</span>
+                                        <span>${{ number_format($grandTotal, 2) }}</span>
+                                    </div>
+                                @endif
                                 <div class="billing-row billing-paid">
                                     <span>{{ __('order.detail.paid_amount') }}</span>
                                     <span class="text-success">${{ number_format($paid, 2) }}</span>
                                 </div>
+                                @if ($order->isTransferred())
+                                    <div class="billing-row" style="color: #2563eb; font-weight: 500;">
+                                        <span>{{ __('order.transferred_amount') }}</span>
+                                        <span>${{ number_format((float) $order->transferred_out_amount, 2) }}</span>
+                                    </div>
+                                @endif
                                 <div class="billing-divider"></div>
                                 <div class="billing-row billing-due">
                                     <span>{{ __('order.detail.balance_due') }}</span>

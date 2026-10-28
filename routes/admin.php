@@ -288,6 +288,7 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         ], function () {
             Route::get('list/{status?}', [OrderController::class, 'index'])->name('list');
             Route::get('create', [OrderController::class, 'onCreate'])->name('create');
+            Route::get('preview-previous-balance', [OrderController::class, 'previewPreviousBalance'])->name('preview-previous-balance');
             Route::match(['get', 'post'], 'status/{id}/{status}', [OrderController::class, 'updateStatus'])->name('status');
             Route::get('list-product/{status?}', [OrderController::class, 'product'])->name('list-product');
             Route::get('edit/{id?}', [OrderController::class, 'onEdit'])->name('edit');

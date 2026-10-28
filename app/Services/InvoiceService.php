@@ -13,27 +13,11 @@ class InvoiceService
 {
     public function previousBalance(Order $order): float
     {
-        if (!$order->customer_id) {
-            return 0;
-        }
-
-        // Use current debts on every other invoice, including when reprinting an older one.
-        return Order::where('customer_id', $order->customer_id)
-            ->whereIn('payment_status', ['Pending', 'Partial'])
-            ->where('id', '!=', $order->id)
-            ->select(['total_price', 'paid_amount'])
-            ->cursor()
-            ->sum(function (Order $otherOrder) {
-                // Match payment calculations in cents; overpayments cannot offset other debts.
-                $totalCents = (int) round((float) ($otherOrder->total_price ?? 0) * 100);
-                $paidCents = (int) round((float) ($otherOrder->paid_amount ?? 0) * 100);
-
-                return max(0, $totalCents - $paidCents);
-            }) / 100;
+        return (float) ($order->previous_balance ?? 0);
     }
 
     /**
-     * Compute previous unpaid balance for multiple orders efficiently.
+     * Compute previous unpaid balance for multiple orders efficiently from saved snapshots.
      *
      * @param iterable<Order> $orders
      * @return array<int, float>
@@ -41,55 +25,9 @@ class InvoiceService
     public function previousBalanceForMany(iterable $orders): array
     {
         $ordersList = is_array($orders) ? $orders : iterator_to_array($orders);
-        if (empty($ordersList)) {
-            return [];
-        }
-
-        $customerIds = [];
-        foreach ($ordersList as $order) {
-            if (!empty($order->customer_id)) {
-                $customerIds[] = $order->customer_id;
-            }
-        }
-        $customerIds = array_unique($customerIds);
-
-        if (empty($customerIds)) {
-            $result = [];
-            foreach ($ordersList as $order) {
-                $result[$order->id] = 0.0;
-            }
-            return $result;
-        }
-
-        $debtsByCustomer = [];
-        $orderDebts = [];
-
-        $cursor = Order::whereIn('customer_id', $customerIds)
-            ->whereIn('payment_status', ['Pending', 'Partial'])
-            ->select(['id', 'customer_id', 'total_price', 'paid_amount'])
-            ->cursor();
-
-        foreach ($cursor as $o) {
-            $totalCents = (int) round((float) ($o->total_price ?? 0) * 100);
-            $paidCents = (int) round((float) ($o->paid_amount ?? 0) * 100);
-            $debtCents = max(0, $totalCents - $paidCents);
-
-            $debtsByCustomer[$o->customer_id] = ($debtsByCustomer[$o->customer_id] ?? 0) + $debtCents;
-            $orderDebts[$o->id] = $debtCents;
-        }
-
         $result = [];
         foreach ($ordersList as $order) {
-            if (!$order->customer_id) {
-                $result[$order->id] = 0.0;
-                continue;
-            }
-
-            $totalCustomerDebtCents = $debtsByCustomer[$order->customer_id] ?? 0;
-            $thisOrderDebtCents = $orderDebts[$order->id] ?? 0;
-            $prevBalanceCents = max(0, $totalCustomerDebtCents - $thisOrderDebtCents);
-
-            $result[$order->id] = $prevBalanceCents / 100;
+            $result[$order->id] = (float) ($order->previous_balance ?? 0);
         }
 
         return $result;

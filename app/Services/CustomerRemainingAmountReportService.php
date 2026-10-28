@@ -14,22 +14,25 @@ class CustomerRemainingAmountReportService
     {
         return Order::query()
             ->where('payment_status', '!=', 'Cancel')
-            // Use the current balance before date filtering or building history.
-            // A settled invoice must not reappear when viewing an earlier period.
-            ->whereRaw('ROUND(COALESCE(total_price, 0), 2) > ROUND(COALESCE(paid_amount, 0), 2)')
+            // Exclude orders whose remaining balance was transferred to another order
+            ->whereDoesntHave('outgoingBalanceTransfers', function ($q) {
+                $q->where('transfer_status', 'completed');
+            })
+            // Use the current balance including previous_balance
+            ->whereRaw('ROUND(COALESCE(total_price, 0) + COALESCE(previous_balance, 0), 2) > ROUND(COALESCE(paid_amount, 0), 2)')
             ->when($shopId, fn ($query) => $query->where('shop_id', $shopId));
     }
 
     public function customers(array $filters)
     {
-        $remaining = 'CASE WHEN ROUND(COALESCE(total_price, 0), 2) > ROUND(COALESCE(paid_amount, 0), 2) '
-            . 'THEN ROUND(COALESCE(total_price, 0), 2) - ROUND(COALESCE(paid_amount, 0), 2) ELSE 0 END';
+        $remaining = 'CASE WHEN ROUND(COALESCE(total_price, 0) + COALESCE(previous_balance, 0), 2) > ROUND(COALESCE(paid_amount, 0), 2) '
+            . 'THEN ROUND(COALESCE(total_price, 0) + COALESCE(previous_balance, 0), 2) - ROUND(COALESCE(paid_amount, 0), 2) ELSE 0 END';
 
         $totals = $this->outstandingOrders($filters['shop_id'] ?? null)
             ->select('customer_id')
             ->selectRaw('COUNT(*) AS order_count')
             ->selectRaw('COUNT(*) AS outstanding_orders')
-            ->selectRaw('SUM(ROUND(COALESCE(total_price, 0), 2)) AS total_amount')
+            ->selectRaw('SUM(ROUND(COALESCE(total_price, 0) + COALESCE(previous_balance, 0), 2)) AS total_amount')
             ->selectRaw('SUM(ROUND(COALESCE(paid_amount, 0), 2)) AS paid_amount')
             ->selectRaw("ROUND(SUM($remaining), 2) AS remaining_amount")
             ->selectRaw('MAX(COALESCE(order_date, created_at)) AS last_order_date')
@@ -86,9 +89,9 @@ class CustomerRemainingAmountReportService
                 'invoice' => $base['invoice'],
                 'shop' => $base['shop'],
                 'payment_status' => $paymentStatus,
-                'total_amount' => $this->cents($order->total_price),
+                'total_amount' => $this->cents((float) ($order->total_price ?? 0) + (float) ($order->previous_balance ?? 0)),
                 'paid_amount' => $this->cents($order->paid_amount),
-                'current' => max(0, $this->cents($order->total_price) - $this->cents($order->paid_amount)),
+                'current' => max(0, $this->cents((float) ($order->total_price ?? 0) + (float) ($order->previous_balance ?? 0)) - $this->cents($order->paid_amount) - $this->cents($order->transferred_out_amount)),
                 'opening' => 0,
                 'closing' => 0,
                 'rows' => collect(),
@@ -103,6 +106,19 @@ class CustomerRemainingAmountReportService
                 'status' => $paymentStatus,
                 'payment_status' => $paymentStatus,
             ]));
+
+            if ((float) ($order->previous_balance ?? 0) > 0) {
+                $events->push(array_merge($base, [
+                    'date' => $orderDate,
+                    'sequence' => 0,
+                    'record_id' => $order->id,
+                    'type' => 'balance_transfer',
+                    'amount' => $this->cents($order->previous_balance),
+                    'note' => __('order.previous_balance') ?: 'Previous Balance Forward',
+                    'status' => $paymentStatus,
+                    'payment_status' => $paymentStatus,
+                ]));
+            }
 
             $recordedPaid = 0;
             foreach ($order->payments as $payment) {

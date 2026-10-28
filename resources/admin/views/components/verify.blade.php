@@ -90,6 +90,13 @@
                 }
                 cb(urlRute);
             },
+            notifyError(message) {
+                if (typeof this.data?.onError === 'function') {
+                    this.data.onError(message);
+                } else {
+                    alert(message);
+                }
+            },
             onConfirm() {
                 this.data = this.$store?.confirmDialog?.data ?? this.data;
                 this.typeAction = this.data?.typeAction || this.typeAction;
@@ -121,7 +128,7 @@
                                 this.$store?.confirmDialog?.close(true);
                             } else {
                                 const message = res.data?.error || res.data?.message || this.data?.requestFailed || this.labels.requestFailed;
-                                alert(message);
+                                this.notifyError(message);
                                 this.disabled = false;
                                 this.loading = false;
                             }
@@ -130,7 +137,7 @@
                             const message = e.response?.data?.error ||
                                 Object.values(e.response?.data?.errors || {})?.[0]?.[0] ||
                                 this.data?.requestFailed || this.labels.requestFailed;
-                            alert(message);
+                            this.notifyError(message);
                             this.disabled = false;
                             this.loading = false;
                         }).finally(() => {

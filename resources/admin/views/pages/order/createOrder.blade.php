@@ -23,6 +23,27 @@
                         <span>{{ $headerName }}</span>
                     </h3>
                 </div>
+
+                <!-- Transferred Notice Banner (if order balance was consolidated into a newer order) -->
+                <template x-if="isTransferred">
+                    <div class="booking-transferred-banner" style="margin-top: 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #3b82f6; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; box-sizing: border-box;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            <div>
+                                <div style="color: #1e40af; font-size: 13.5px; font-weight: 600;">{{ __('order.balance_transferred_notice_title') }}</div>
+                                <div style="color: #3b82f6; font-size: 12.5px; margin-top: 2px;">
+                                    {{ __('order.balance_transferred_notice_desc') }}
+                                    <template x-if="transferredToOrder">
+                                        <span>({{ __('order.transferred_to') }}: <strong x-text="transferredToOrder.invoice_number"></strong>)</span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <span style="background: #dbeafe; color: #1d4ed8; font-weight: 600; font-size: 12px; padding: 4px 10px; border-radius: 9999px; white-space: nowrap;">
+                            {{ __('order.status.paid_through_transfer') }}
+                        </span>
+                    </div>
+                </template>
             </div>
 
             <!-- Left Main Column (Catalog & Recent Bookings) -->
@@ -427,6 +448,53 @@
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
+                            <div class="form-group form-group--full" x-show="formData.customer_id || previousBalance > 0" x-cloak>
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                                    <label style="margin-bottom: 0; display: inline-flex; align-items: center; gap: 5px;">
+                                        <i data-feather="clock" style="width: 14px; height: 14px;"></i> {{ __('order.previous_balance') }}
+                                    </label>
+                                    <template x-if="previousOrdersCount > 0">
+                                        <button type="button" @click="showPreviousBalanceBreakdown = !showPreviousBalanceBreakdown"
+                                            class="badge-transfer-toggle"
+                                            style="border: none; background: #e0f2fe; color: #0369a1; border-radius: 9999px; font-size: 11px; font-weight: 600; padding: 2px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                            <span x-text="previousOrdersCount + ' ' + (previousOrdersCount === 1 ? '{{ __('order.order_singular') }}' : '{{ __('order.orders_plural') }}')"></span>
+                                            <span x-text="showPreviousBalanceBreakdown ? '▲' : '▼'" style="font-size: 8px;"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                <div class="booking-input-prefix-group" style="position: relative;">
+                                    <span class="input-addon-prefix" style="color: #64748b; font-weight: 600;">$</span>
+                                    <input type="text" readonly :value="Number(previousBalance || 0).toFixed(2)"
+                                        class="sidebar-date-input"
+                                        style="background: #f8fafc; cursor: default; font-weight: 600; color: #0f172a;"
+                                        :placeholder="loadingPreviousBalance ? '{{ __('order.calculating') }}...' : '0.00'">
+                                    <div x-show="loadingPreviousBalance" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: flex; align-items: center;">
+                                        <span class="booking-spinner" style="width: 16px; height: 16px; border-width: 2px;"></span>
+                                    </div>
+                                </div>
+                                <!-- Collapsible breakdown of previous orders -->
+                                <div x-show="showPreviousBalanceBreakdown && previousOrders.length > 0" x-transition
+                                    style="margin-top: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 12px;">
+                                    <div style="font-weight: 600; color: #475569; margin-bottom: 6px; display: flex; justify-content: space-between;">
+                                        <span>{{ __('order.consolidated_orders') }}</span>
+                                        <span style="font-size: 11px; color: #64748b;">{{ __('order.unpaid_balance') }}</span>
+                                    </div>
+                                    <div style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+                                        <template x-for="pOrder in previousOrders" :key="pOrder.id">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px;">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #1e293b;" x-text="pOrder.invoice_number"></div>
+                                                    <div style="font-size: 10.5px; color: #64748b;" x-text="pOrder.order_date"></div>
+                                                </div>
+                                                <div style="text-align: right;">
+                                                    <span style="font-weight: 700; color: #dc2626;" x-text="pOrder.remaining_amount_formatted || pOrder.transferred_amount_formatted || ('$' + Number(pOrder.remaining_amount || pOrder.transferred_amount || 0).toFixed(2))"></span>
+                                                    <div style="font-size: 10px; text-transform: uppercase; font-weight: 600; color: #f59e0b;" x-text="pOrder.payment_status"></div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group form-group--full">
                                 <label><i data-feather="home"></i> {{ __('order.form.shop') }}</label>
                                 <div class="select2Group">
@@ -450,16 +518,22 @@
                             </div>
                             <div class="form-group form-group--full">
                                 <label :for="$id('order-date')"><i data-feather="calendar" aria-hidden="true"></i> {{ __('order.form.order_date') }}</label>
-                                <input type="text" :id="$id('order-date')" x-ref="orderDate" name="order_date" x-model="formData.order_date"
-                                    :disabled="!canEditOrderItems()" autocomplete="off" class="sidebar-date-input">
+                                <div class="filter-date-input" @click="$refs.orderDate && $refs.orderDate.focus()">
+                                    <input type="text" :id="$id('order-date')" x-ref="orderDate" name="order_date" x-model="formData.order_date"
+                                        :disabled="!canEditOrderItems()" autocomplete="off" class="sidebar-date-input">
+                                    <i class="bx bx-calendar" aria-hidden="true"></i>
+                                </div>
                                 <template x-for="item in dataError?.order_date">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
                             </div>
                             <div class="form-group form-group--full">
                                 <label :for="$id('delivery-date')"><i data-feather="truck" aria-hidden="true"></i> {{ __('order.form.delivery_date') }}</label>
-                                <input type="text" :id="$id('delivery-date')" x-ref="deliveryDate" x-model="formData.delivery_date"
-                                    :disabled="!canEditOrderItems()" autocomplete="off" class="sidebar-date-input">
+                                <div class="filter-date-input" @click="$refs.deliveryDate && $refs.deliveryDate.focus()">
+                                    <input type="text" :id="$id('delivery-date')" x-ref="deliveryDate" x-model="formData.delivery_date"
+                                        :disabled="!canEditOrderItems()" autocomplete="off" class="sidebar-date-input">
+                                    <i class="bx bx-calendar" aria-hidden="true"></i>
+                                </div>
                                 <template x-for="item in dataError?.delivery_date">
                                     <span class="error" x-text="item">Error</span>
                                 </template>
@@ -853,7 +927,7 @@
                         display: flex !important;
                         align-items: stretch !important;
                         width: 100% !important;
-                        height: 34px !important;
+                        /* height: 34px !important; */
                         border: 1px solid #cbd5e1 !important;
                         border-radius: 7px !important;
                         background: #ffffff !important;
@@ -880,7 +954,8 @@
                         flex-shrink: 0 !important;
                         user-select: none !important;
                         min-width: 24px !important;
-                        height: 100% !important;
+                        line-height: 15px !important;
+                        /* height: 100% !important; */
                     }
 
                     .booking-input-prefix-group input {
@@ -1034,6 +1109,36 @@
                     .sidebar-date-input:focus {
                         border-color: #2563eb !important;
                         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+                    }
+
+                    /* Sidebar Datepicker Input Wrappers with Calendar Icon */
+                    .sidebar-form-grid .filter-date-input {
+                        position: relative !important;
+                        cursor: pointer;
+                        width: 100%;
+                    }
+                    .sidebar-form-grid .filter-date-input input.sidebar-date-input {
+                        padding-right: 36px !important;
+                        cursor: pointer;
+                    }
+                    .sidebar-form-grid .filter-date-input i.bx-calendar {
+                        position: absolute !important;
+                        right: 12px !important;
+                        top: 50% !important;
+                        transform: translateY(-50%) !important;
+                        font-size: 18px !important;
+                        color: #64748b !important;
+                        pointer-events: none !important;
+                        line-height: 1 !important;
+                    }
+                    .sidebar-form-grid .filter-date-input:hover i.bx-calendar {
+                        color: #334155 !important;
+                    }
+                    .sidebar-form-grid .filter-date-input input:disabled {
+                        cursor: not-allowed !important;
+                    }
+                    .sidebar-form-grid .filter-date-input input:disabled ~ i.bx-calendar {
+                        color: #94a3b8 !important;
                     }
 
                     /* Payment Ledger Card */
@@ -1445,6 +1550,17 @@
                         padding-bottom: 32px !important;
                     }
 
+                    .booking-order-ui .booking-pos-header {
+                        grid-column: 1 / -1 !important;
+                        width: 100% !important;
+                    }
+
+                    .booking-order-ui .booking-transferred-banner {
+                        grid-column: 1 / -1 !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+
                     /* Left Column: Catalog & Recent Bookings */
                     .booking-pos-main-col {
                         height: fit-content !important;
@@ -1527,17 +1643,31 @@
                             <span>{{ __('order.subtotal') }}</span>
                             <span x-text="formatCurrency(subTotal)"></span>
                         </div>
-                        <div class="summary-line">
+                        <div class="summary-line" x-show="subTotal - total > 0">
                             <span>{{ __('order.discount') }}</span>
                             <span class="deduct" x-text="formatDeductionCurrency(subTotal - total)"></span>
                         </div>
-                        <div class="summary-line">
+                        <div class="summary-line" x-show="commissionTotal > 0">
                             <span>{{ __('order.commission') }}</span>
                             <span class="deduct" x-text="formatDeductionCurrency(commissionTotal)"></span>
                         </div>
+                        <div class="summary-line" x-show="previousBalance > 0">
+                            <span>{{ __('order.current_order_total') }}</span>
+                            <span x-text="formatCurrency(amountPaid)"></span>
+                        </div>
+                        <div class="summary-line" x-show="previousBalance > 0" style="color: #b45309; font-weight: 600;">
+                            <span style="display: inline-flex; align-items: center; gap: 6px;">
+                                <span>{{ __('order.previous_balance') }}</span>
+                                <template x-if="previousOrdersCount > 0">
+                                    <span style="background: #fef3c7; color: #92400e; font-size: 10px; padding: 1px 6px; border-radius: 9999px;"
+                                        x-text="previousOrdersCount + ' ' + (previousOrdersCount === 1 ? '{{ __('order.order_singular') }}' : '{{ __('order.orders_plural') }}')"></span>
+                                </template>
+                            </span>
+                            <span x-text="'+' + formatCurrency(previousBalance)"></span>
+                        </div>
                         <div class="summary-total-line">
-                            <span>{{ __('order.total_payable') }}</span>
-                            <strong x-text="formatCurrency(amountPaid)"></strong>
+                            <span>{{ __('order.total_amount_due') }}</span>
+                            <strong x-text="formatCurrency(totalAmountDue())"></strong>
                         </div>
                     </div>
 
@@ -1552,10 +1682,10 @@
                                     <span>{{ __('order.initial_partial_payment') }}</span>
                                 </div>
                                 <button type="button" class="booking-pay-full-btn"
-                                    @click="formData.partial_payment_amount = Math.round(Number(amountPaid || 0) * 100) / 100"
-                                    :title="'Fill ' + formatCurrency(amountPaid)">
+                                    @click="formData.partial_payment_amount = Math.round(Number(totalAmountDue() || 0) * 100) / 100"
+                                    :title="'Fill ' + formatCurrency(totalAmountDue())">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                                    <span>{{ __('order.pay_full') }} (<span x-text="formatCurrency(amountPaid)"></span>)</span>
+                                    <span>{{ __('order.pay_full') }} (<span x-text="formatCurrency(totalAmountDue())"></span>)</span>
                                 </button>
                             </div>
                             <div class="booking-payment-form-grid">
@@ -1564,7 +1694,7 @@
                                     <div class="booking-input-prefix-group">
                                         <span class="input-addon-prefix">$</span>
                                         <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
-                                            :max="amountPaid" placeholder="0.00" autocomplete="off">
+                                            :max="totalAmountDue()" placeholder="0.00" autocomplete="off">
                                     </div>
                                     <template x-for="item in dataError?.partial_payment_amount">
                                         <div class="msgError"><p x-text="item"></p></div>
@@ -1605,9 +1735,9 @@
                                 </div>
                                 <div class="booking-payment-ledger-card">
                                     <span class="label">{{ __('order.status_label') }}</span>
-                                    <span class="booking-payment-status-pill" :class="statusClass(orderStatus)">
+                                    <span class="booking-payment-status-pill" :class="isTransferred ? 'ready' : statusClass(orderStatus)">
                                         <span class="status-dot"></span>
-                                        <span x-text="statusLabel(orderStatus)"></span>
+                                        <span x-text="isTransferred ? '{{ __('order.status.paid_through_transfer') }}' : statusLabel(orderStatus)"></span>
                                     </span>
                                 </div>
                             </div>
@@ -1716,6 +1846,15 @@
                 paidAmount: 0,
                 remainingAmount: 0,
                 orderStatus: 'Pending',
+                previousBalance: 0,
+                previousOrders: [],
+                previousOrdersCount: 0,
+                previousBalanceFingerprint: '',
+                loadingPreviousBalance: false,
+                creationRequestKey: '',
+                showPreviousBalanceBreakdown: false,
+                isTransferred: false,
+                transferredToOrder: null,
                 paymentHistory: [],
                 paymentAmount: null,
                 paymentNote: '',
@@ -1735,6 +1874,22 @@
                     const details = this.orderDetails(order);
                     this.initialOrder = order;
                     this.initialSelectedShop = selectedShop;
+
+                    this.creationRequestKey = 'ord_req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    this.isTransferred = Boolean(order?.is_transferred || (order?.transferred_out_amount && order.transferred_out_amount > 0));
+                    this.transferredToOrder = order?.completed_outgoing_balance_transfer?.new_order || null;
+                    this.previousBalance = Number(order?.previous_balance || 0);
+                    if (order?.incoming_balance_transfers && order.incoming_balance_transfers.length > 0) {
+                        this.previousOrders = order.incoming_balance_transfers.map(t => ({
+                            id: t.previous_order_id,
+                            invoice_number: t.previous_order?.invoice_number || ('#' + t.previous_order_id),
+                            order_date: t.previous_order?.order_date ? moment(t.previous_order.order_date).format('YYYY-MM-DD HH:mm') : '---',
+                            payment_status: t.previous_order?.payment_status,
+                            transferred_amount: Number(t.transferred_amount || 0),
+                            transferred_amount_formatted: '$' + Number(t.transferred_amount || 0).toFixed(2),
+                        }));
+                        this.previousOrdersCount = this.previousOrders.length;
+                    }
 
                     this.shopData = order?.shop || selectedShop || null;
                     this.customerData = order?.customer || null;
@@ -1785,6 +1940,10 @@
                         });
                     }
 
+                    if (!this.orderId && this.formData.customer_id) {
+                        this.fetchPreviousBalance(this.formData.customer_id);
+                    }
+
                     this.calculatorProductPrice();
                     this.fiterProduct(this.searchFilter);
                     this.$nextTick(() => {
@@ -1800,7 +1959,8 @@
                     window.addEventListener('workspace:tab-change', () => this.saveDraft());
                     window.addEventListener('beforeunload', () => this.saveDraft());
                     window.addEventListener('workspace:tab-activated', (e) => {
-                        if (e.detail?.key === 'admin-order-create') {
+                        const currentTabKey = this.$root?.closest('.workspace-tab-pane')?.getAttribute('data-tab-key');
+                        if (!e.detail?.key || e.detail.key === currentTabKey || e.detail.key === 'admin-order-create') {
                             this.fetchSelectShop();
                             this.fetchSelectCustomer();
                             this.refreshIcons();
@@ -1931,17 +2091,21 @@
                 orderDetails(order) {
                     return order?.orderDetails || order?.order_details || [];
                 },
+                totalAmountDue() {
+                    return this.roundMoney(Number(this.amountPaid || 0) + Number(this.previousBalance || 0));
+                },
                 canEditOrderItems() {
-                    return !this.orderId || this.orderStatus === 'Pending';
+                    return (!this.orderId || this.orderStatus === 'Pending') && !this.isTransferred;
                 },
                 canRecordPayment() {
                     return this.orderId &&
                         this.orderStatus !== 'Paid' &&
                         this.orderStatus !== 'Cancel' &&
+                        !this.isTransferred &&
                         Number(this.remainingAmount || 0) > 0;
                 },
                 paymentProgressPercentage() {
-                    const total = Number(this.total || 0);
+                    const total = Number(this.totalAmountDue() || this.total || 0);
                     const paid = Number(this.paidAmount || 0);
                     if (total <= 0) return 0;
                     return Math.min(100, Math.max(0, Math.round((paid / total) * 100)));
@@ -2176,16 +2340,19 @@
                             };
                             this.formData.customer_id = event.params.data.id;
                             delete this.dataError?.customer_id;
+                            this.fetchPreviousBalance(event.params.data.id);
                             this.saveDraft();
                         }).on('change', (e) => {
                             if (!$(e.target).val()) {
                                 this.customerData = null;
                                 this.formData.customer_id = null;
+                                this.fetchPreviousBalance(null);
                                 this.saveDraft();
                             }
                         }).on('select2:clear select2:unselect', () => {
                             this.customerData = null;
                             this.formData.customer_id = null;
+                            this.fetchPreviousBalance(null);
                             this.saveDraft();
                         }).on('select2:open', () => {
                             $select2FocusInputSearch();
@@ -2212,7 +2379,43 @@
                     this.setSelect2Value('#customer_id', null);
                     this.customerData = null;
                     this.formData.customer_id = null;
+                    this.fetchPreviousBalance(null);
                     this.saveDraft();
+                },
+                fetchPreviousBalance(customerId) {
+                    if (this.orderId || !customerId) {
+                        this.previousBalance = 0;
+                        this.previousOrders = [];
+                        this.previousOrdersCount = 0;
+                        this.previousBalanceFingerprint = '';
+                        return;
+                    }
+                    this.loadingPreviousBalance = true;
+                    Axios.get('{{ route("admin-order-preview-previous-balance") }}', {
+                        params: { customer_id: customerId }
+                    }).then((res) => {
+                        if (res.data?.status === 200 && res.data?.data) {
+                            const d = res.data.data;
+                            this.previousBalance = Number(d.previous_balance || 0);
+                            this.previousOrders = d.previous_orders || [];
+                            this.previousOrdersCount = Number(d.previous_orders_count || 0);
+                            this.previousBalanceFingerprint = d.fingerprint || '';
+                        } else {
+                            this.previousBalance = 0;
+                            this.previousOrders = [];
+                            this.previousOrdersCount = 0;
+                            this.previousBalanceFingerprint = '';
+                        }
+                    }).catch((err) => {
+                        console.error('Failed to preview previous balance:', err);
+                        this.previousBalance = 0;
+                        this.previousOrders = [];
+                        this.previousOrdersCount = 0;
+                        this.previousBalanceFingerprint = '';
+                    }).finally(() => {
+                        this.loadingPreviousBalance = false;
+                        this.refreshIcons();
+                    });
                 },
                 openProductPicker(trigger) {
                     if (!this.canEditOrderItems() || this.$store.confirmDialog.show) return;
@@ -3167,6 +3370,9 @@
                                 this.formData[field] = String(this.formData[field] || '').replace(/[០-៩]/g,
                                     digit => String(digit.charCodeAt(0) - 0x17E0));
                             });
+                            if (this.formData.order_date) {
+                                this.formData.order_date = moment(this.formData.order_date).format('YYYY-MM-DD');
+                            }
                         }
                         if (draft.shopData) {
                             this.shopData = draft.shopData;
@@ -3193,6 +3399,7 @@
                                 if (custText && this.getScopeEl('#customer_id').val() != draft.formData.customer_id) {
                                     this.setSelect2Value('#customer_id', draft.formData.customer_id, custText);
                                 }
+                                this.fetchPreviousBalance(draft.formData.customer_id);
                             }
 
                             const shopPlaceholder = @json(__('order.form.select_shop'));
@@ -3507,7 +3714,17 @@
                 },
                 saveOrder() {
                     this.submitLoading = true;
-                    const orderDateVal = this.formData.order_date;
+                    const orderDateBase = this.formData.order_date
+                        ? String(this.formData.order_date).split('T')[0].split(' ')[0]
+                        : '';
+                    let orderTime = moment().format('HH:mm:ss');
+                    if (this.orderId && this.initialOrder?.order_date) {
+                        const existingTime = moment(this.initialOrder.order_date).format('HH:mm:ss');
+                        if (existingTime && existingTime !== '00:00:00') {
+                            orderTime = existingTime;
+                        }
+                    }
+                    const orderDateVal = orderDateBase ? `${orderDateBase} ${orderTime}` : '';
                     const data = {
                         ...this.formData,
                         order_date: orderDateVal,
@@ -3519,6 +3736,8 @@
                         total: this.total,
                         total_discount: parseFloat(this.subTotal) - parseFloat(this.total),
                         orderDelete: this.orderDeleteId,
+                        creation_request_key: this.creationRequestKey,
+                        previous_balance_fingerprint: this.previousBalanceFingerprint,
                     };
 
                     setTimeout(() => {
@@ -3611,7 +3830,7 @@
 
                     const partialPayment = Number(this.formData.partial_payment_amount || 0);
                     const maxAllowedPayment = this.orderId && !this.canEditOrderItems()
-                        ? Number(this.remainingAmount || 0) : Number(this.amountPaid || 0);
+                        ? Number(this.remainingAmount || 0) : Number(this.totalAmountDue() || 0);
                     if (partialPayment < 0) {
                         errors.partial_payment_amount = [@json(__('order.validation.partial_min'))];
                     } else if (Math.round(partialPayment * 100) > Math.round(maxAllowedPayment * 100)) {

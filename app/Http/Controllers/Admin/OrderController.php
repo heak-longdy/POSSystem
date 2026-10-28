@@ -60,6 +60,7 @@ class OrderController extends Controller
         $data['data'] = $query->with([
                 'shop',
                 'customer',
+                'completedOutgoingBalanceTransfer.newOrder',
                 'orderDetails' => function ($detail) {
                     $detail->withTrashed()->with(['service', 'product']);
                 },
@@ -139,6 +140,20 @@ class OrderController extends Controller
         return view($this->layout . 'createOrder', $this->formData());
     }
 
+    public function previewPreviousBalance(Request $req)
+    {
+        $customerId = (int) $req->customer_id;
+        $excludeOrderId = $req->order_id ? (int) $req->order_id : null;
+
+        $preview = app(\App\Services\OrderBalanceTransferService::class)->previewPreviousBalance($customerId, $excludeOrderId);
+
+        return response()->json([
+            'message' => 'success',
+            'status' => 200,
+            'data' => $preview,
+        ]);
+    }
+
     public function onEdit(Request $req)
     {
         return $this->edit($req->id);
@@ -150,7 +165,16 @@ class OrderController extends Controller
             return redirect()->route('admin-' . $this->routeName . '-list', 1);
         }
 
-        $order = Order::with(['customer', 'shop', 'barber', 'payments.createdBy', 'orderDetails.service', 'orderDetails.product'])->find($id);
+        $order = Order::with([
+            'customer',
+            'shop',
+            'barber',
+            'payments.createdBy',
+            'orderDetails.service',
+            'orderDetails.product',
+            'incomingBalanceTransfers.previousOrder',
+            'completedOutgoingBalanceTransfer.newOrder',
+        ])->find($id);
         if (!$order) {
             Session::flash('warning', __('order.message.not_found'));
             return redirect()->route('admin-' . $this->routeName . '-list', 1);
@@ -178,6 +202,8 @@ class OrderController extends Controller
                 $detail->withTrashed()->with(['service', 'product']);
             },
             'payments.createdBy',
+            'incomingBalanceTransfers.previousOrder',
+            'completedOutgoingBalanceTransfer.newOrder',
         ])->find($id);
 
         if (!$order) {
@@ -192,10 +218,10 @@ class OrderController extends Controller
         $data['order'] = $order;
         $data['routeName'] = $this->routeName;
         $data['paymentRemainingAmount'] = $this->remainingPaymentCents($order) / 100;
-        $data['invoicePreviousBalance'] = app(InvoiceService::class)->previousBalance($order);
-        $data['canEdit'] = $order->payment_status === 'Pending' && !$order->trashed();
-        $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && $data['paymentRemainingAmount'] > 0;
-        $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0;
+        $data['invoicePreviousBalance'] = (float) ($order->previous_balance ?? 0);
+        $data['canEdit'] = $order->payment_status === 'Pending' && !$order->trashed() && !$order->isTransferred();
+        $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && $data['paymentRemainingAmount'] > 0 && !$order->isTransferred();
+        $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0 && !$order->isTransferred();
         $data['canReject'] = $data['canCancel'];
 
         return view($this->layout . 'detail', $data);
@@ -219,6 +245,12 @@ class OrderController extends Controller
             if ($order->exists && $order->payment_status !== 'Pending') {
                 throw ValidationException::withMessages([
                     'payment_status' => 'Only Pending orders can be updated.',
+                ]);
+            }
+
+            if ($order->exists && $order->isTransferred()) {
+                throw ValidationException::withMessages([
+                    'payment_status' => 'Cannot edit an order whose balance has already been transferred to a newer order.',
                 ]);
             }
 
@@ -252,6 +284,12 @@ class OrderController extends Controller
             $order->fill($this->payload($req, $order));
             if (!$order->exists) {
                 $order->invoice_number = $this->nextInvoiceNumber();
+                $order->creation_request_key = $req->creation_request_key ?: null;
+                $order->creation_payload_hash = $req->previous_balance_fingerprint ?: null;
+
+                // Capture authoritative previous balance for new order
+                $preview = app(\App\Services\OrderBalanceTransferService::class)->previewPreviousBalance((int) $req->customer_id);
+                $order->previous_balance = (float) $preview['previous_balance'];
             }
             if (!$order->exists || empty($order->created_by)) {
                 $order->created_by = Auth::id();
@@ -274,6 +312,12 @@ class OrderController extends Controller
                 'total_commission' => $totals['total_commission'],
             ]);
             $this->adjustCustomerPoint($order, 1);
+
+            // Consolidate eligible previous balances if creating a new order with previous balance
+            if (!$orderId && (float) $order->previous_balance > 0) {
+                app(\App\Services\OrderBalanceTransferService::class)->consolidateBalances($order, Auth::id());
+            }
+
             $this->recordInitialPayment(
                 $order,
                 (float) ($req->partial_payment_amount ?? 0),
@@ -345,6 +389,11 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $order = Order::where('id', $id)->lockForUpdate()->firstOrFail();
+            if ($order->isTransferred()) {
+                throw ValidationException::withMessages([
+                    'payment_status' => 'Cannot modify payment status of an order whose balance was transferred to a newer order.',
+                ]);
+            }
             if ($order->payment_status === 'Cancel') {
                 throw ValidationException::withMessages([
                     'payment_status' => 'Cannot add payment to a rejected order.',
@@ -384,7 +433,14 @@ class OrderController extends Controller
 
     public function getPaymentDetails($id)
     {
-        $order = Order::with(['payments.createdBy', 'customer', 'shop', 'barber'])->find($id);
+        $order = Order::with([
+            'payments.createdBy',
+            'customer',
+            'shop',
+            'barber',
+            'incomingBalanceTransfers.previousOrder',
+            'completedOutgoingBalanceTransfer.newOrder',
+        ])->find($id);
         if (!$order) {
             return response()->json(['message' => 'error', 'error' => 'Order not found.'], 404);
         }
@@ -419,6 +475,11 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $order = Order::where('id', $id)->lockForUpdate()->firstOrFail();
+            if ($order->isTransferred()) {
+                throw ValidationException::withMessages([
+                    'payment_status' => 'Cannot add payment to an order whose balance was transferred to a newer order.',
+                ]);
+            }
             if ($order->payment_status === 'Cancel') {
                 throw ValidationException::withMessages([
                     'payment_status' => 'Cannot add payment to a rejected order.',
@@ -484,6 +545,11 @@ class OrderController extends Controller
         try {
             $payment = OrderPayment::where('id', $paymentId)->lockForUpdate()->firstOrFail();
             $order = Order::where('id', $payment->order_id)->lockForUpdate()->firstOrFail();
+            if ($order->isTransferred()) {
+                throw ValidationException::withMessages([
+                    'payment_status' => 'Cannot edit payment on an order whose balance was transferred to a newer order.',
+                ]);
+            }
             if ($order->payment_status === 'Cancel') {
                 throw ValidationException::withMessages([
                     'payment_status' => 'Cannot edit payment on a rejected order.',
@@ -539,6 +605,11 @@ class OrderController extends Controller
         try {
             $payment = OrderPayment::where('id', $paymentId)->lockForUpdate()->firstOrFail();
             $order = Order::where('id', $payment->order_id)->lockForUpdate()->firstOrFail();
+            if ($order->isTransferred()) {
+                throw ValidationException::withMessages([
+                    'payment_status' => 'Cannot delete payment on an order whose balance was transferred to a newer order.',
+                ]);
+            }
             if ($order->payment_status === 'Cancel') {
                 throw ValidationException::withMessages([
                     'payment_status' => 'Cannot delete payment on a rejected order.',
@@ -625,12 +696,27 @@ class OrderController extends Controller
 
         DB::beginTransaction();
         try {
-            $order = Order::with('orderDetails')->where('id', $id)->lockForUpdate()->firstOrFail();
+            $order = Order::with(['orderDetails', 'completedOutgoingBalanceTransfer', 'incomingBalanceTransfers'])
+                ->where('id', $id)->lockForUpdate()->firstOrFail();
+
+            if ($order->isTransferred()) {
+                throw ValidationException::withMessages([
+                    'payment_status' => 'Cannot cancel an order whose balance has been transferred to a newer order.',
+                ]);
+            }
+
             if ($order->payment_status !== 'Pending' || (float) ($order->paid_amount ?? 0) > 0) {
                 throw ValidationException::withMessages([
                     'payment_status' => 'Only unpaid pending orders can be rejected.',
                 ]);
             }
+
+            // Reverse incoming balance transfers back to their source orders
+            app(\App\Services\OrderBalanceTransferService::class)->reverseTransfersForOrder(
+                $order,
+                'Order cancelled by user',
+                Auth::id()
+            );
 
             $this->reverseOrderEffects($order);
             $order->update([
@@ -656,14 +742,19 @@ class OrderController extends Controller
 
     public function delete($id = '')
     {
-        $order = Order::with('orderDetails')->findOrFail($id);
+        $order = Order::with(['orderDetails', 'completedOutgoingBalanceTransfer', 'incomingBalanceTransfers'])->findOrFail($id);
         if (!$order->isOwnedBy(Auth::user())) {
             abort(403, 'Unauthorized access to order.');
         }
 
         DB::beginTransaction();
         try {
-            $order = Order::with('orderDetails')->findOrFail($id);
+            $order = Order::with(['orderDetails', 'completedOutgoingBalanceTransfer', 'incomingBalanceTransfers'])->findOrFail($id);
+            if ($order->isTransferred()) {
+                throw ValidationException::withMessages([
+                    'order' => 'Cannot delete an order whose balance has been transferred to another order.',
+                ]);
+            }
             if ($order->payment_status !== 'Cancel') {
                 $this->reverseOrderEffects($order);
             }
@@ -832,18 +923,26 @@ class OrderController extends Controller
 
     protected function remainingPaymentCents(Order $order): int
     {
-        return max(0, $this->paymentCents($order->total_price) - $this->paymentCents($order->paid_amount));
+        $dueCents = $this->paymentCents((float) ($order->total_price ?? 0) + (float) ($order->previous_balance ?? 0));
+        $paidCents = $this->paymentCents($order->paid_amount);
+        $transferredOutCents = $this->paymentCents($order->transferred_out_amount);
+
+        return max(0, $dueCents - $paidCents - $transferredOutCents);
     }
 
     protected function syncOrderPaymentState(Order $order)
     {
         $totalPaidCents = $this->paymentCents(OrderPayment::where('order_id', $order->id)->sum('amount'));
-        $totalPriceCents = $this->paymentCents($order->total_price);
+        $totalDueCents = $this->paymentCents((float) ($order->total_price ?? 0) + (float) ($order->previous_balance ?? 0));
+        $transferredOutCents = $this->paymentCents($order->transferred_out_amount);
 
-        if ($totalPaidCents <= 0 && $totalPriceCents > 0) {
+        if ($transferredOutCents > 0) {
+            $paymentStatus = 'Paid';
+            $paymentDate = $order->payment_date ?: Carbon::now()->format('Y-m-d H:i:s');
+        } elseif ($totalPaidCents <= 0 && $totalDueCents > 0) {
             $paymentStatus = 'Pending';
             $paymentDate = null;
-        } elseif ($totalPaidCents >= $totalPriceCents) {
+        } elseif ($totalPaidCents >= $totalDueCents) {
             $paymentStatus = 'Paid';
             $paymentDate = $order->payment_date ?: Carbon::now()->format('Y-m-d H:i:s');
         } else {
@@ -858,14 +957,14 @@ class OrderController extends Controller
         ]);
 
         $order = $order->fresh();
-        $order->load(['payments.createdBy']);
+        $order->load(['payments.createdBy', 'incomingBalanceTransfers.previousOrder', 'completedOutgoingBalanceTransfer.newOrder']);
 
         return $order;
     }
 
     protected function paymentResponse(Order $order)
     {
-        $order->loadMissing(['payments.createdBy']);
+        $order->loadMissing(['payments.createdBy', 'incomingBalanceTransfers.previousOrder', 'completedOutgoingBalanceTransfer.newOrder']);
 
         $payments = $order->payments->map(function ($payment) {
             return [
@@ -886,6 +985,9 @@ class OrderController extends Controller
             ];
         });
 
+        $totalDue = (float) $order->total_amount_due;
+        $remAmount = $this->remainingPaymentCents($order) / 100;
+
         return [
             'message' => 'success',
             'status' => 200,
@@ -893,12 +995,20 @@ class OrderController extends Controller
             'invoice_number' => $order->invoice_number ?: '#' . $order->id,
             'total_price' => (float) ($order->total_price ?? 0),
             'total_price_formatted' => '$' . number_format((float) ($order->total_price ?? 0), 2),
+            'previous_balance' => (float) ($order->previous_balance ?? 0),
+            'previous_balance_formatted' => '$' . number_format((float) ($order->previous_balance ?? 0), 2),
+            'total_amount_due' => $totalDue,
+            'total_amount_due_formatted' => '$' . number_format($totalDue, 2),
             'paid_amount' => (float) ($order->paid_amount ?? 0),
             'paid_amount_formatted' => '$' . number_format((float) ($order->paid_amount ?? 0), 2),
-            'remaining_amount' => $this->remainingPaymentCents($order) / 100,
-            'remaining_amount_formatted' => '$' . number_format($this->remainingPaymentCents($order) / 100, 2),
+            'remaining_amount' => $remAmount,
+            'remaining_amount_formatted' => '$' . number_format($remAmount, 2),
             'payment_status' => $order->payment_status ?: 'Pending',
             'payment_date' => $order->payment_date,
+            'is_transferred' => $order->isTransferred(),
+            'transferred_out_amount' => (float) $order->transferred_out_amount,
+            'transferred_to_invoice' => $order->completedOutgoingBalanceTransfer?->newOrder?->invoice_number,
+            'transferred_to_order_id' => $order->completedOutgoingBalanceTransfer?->new_order_id,
             'payments' => $payments,
         ];
     }
@@ -917,7 +1027,8 @@ class OrderController extends Controller
             return;
         }
 
-        if ($amountCents > $this->paymentCents($order->total_price)) {
+        $totalDueCents = $this->paymentCents((float) ($order->total_price ?? 0) + (float) ($order->previous_balance ?? 0));
+        if ($amountCents > $totalDueCents) {
             throw ValidationException::withMessages([
                 'partial_payment_amount' => __('order.validation.partial_max'),
             ]);
@@ -964,6 +1075,7 @@ class OrderController extends Controller
                 'shop_id' => $shop?->id,
                 'customer' => null,
                 'customer_id' => null,
+                'previous_balance' => 0,
                 'orderDetails' => collect([]),
                 'payments' => collect([]),
                 'paid_amount' => 0,
@@ -1003,10 +1115,20 @@ class OrderController extends Controller
 
     protected function payload(OrderRequest $req, Order $order)
     {
+        $orderDate = $req->order_date;
+        if ($orderDate) {
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($orderDate))) {
+                $orderDate = trim($orderDate) . ' ' . Carbon::now()->format('H:i:s');
+            }
+            $orderDateFormatted = Carbon::parse($orderDate)->format('Y-m-d H:i:s');
+        } else {
+            $orderDateFormatted = Carbon::now()->format('Y-m-d H:i:s');
+        }
+
         return [
             'customer_id' => $req->customer_id,
             'shop_id' => $req->shop_id,
-            'order_date' => $req->order_date,
+            'order_date' => $orderDateFormatted,
             'delivery_date' => $req->delivery_date ?: null,
             // Recalculate from saved line items before recording any payment.
             'total_price' => 0,
@@ -1347,6 +1469,7 @@ class OrderController extends Controller
             'Paid' => __('order.status.paid'),
             'Partial' => __('order.status.partial'),
             'Cancel' => __('order.status.rejected'),
+            'paid_through_transfer' => __('order.status.paid_through_transfer'),
             default => __('order.status.pending'),
         };
     }
@@ -1377,12 +1500,14 @@ class OrderController extends Controller
             $item->order_items_title = $this->orderItemsTitle($item);
             $item->payment_status_title = $this->paymentStatusBadge($item);
             $item->total_price_title = '$' . number_format((float) ($item->total_price ?? 0), 2);
+            $item->previous_balance_title = '$' . number_format((float) ($item->previous_balance ?? 0), 2);
+            $item->total_amount_due_title = '$' . number_format((float) ($item->total_amount_due ?? 0), 2);
             $item->paid_amount_title = '$' . number_format((float) ($item->paid_amount ?? 0), 2);
             $item->remaining_amount_title = '$' . number_format((float) ($item->remaining_amount ?? 0), 2);
             $item->total_commission_title = '$' . number_format((float) ($item->total_commission ?? 0), 2);
             $item->total_discount_title = '$' . number_format((float) ($item->total_discount ?? 0), 2);
-            $item->can_reject = $item->payment_status === 'Pending' && (float) ($item->paid_amount ?? 0) <= 0;
-            $item->can_add_payment = ($item->payment_status !== 'Cancel' && (float) ($item->remaining_amount ?? 0) > 0);
+            $item->can_reject = $item->payment_status === 'Pending' && (float) ($item->paid_amount ?? 0) <= 0 && !$item->isTransferred();
+            $item->can_add_payment = ($item->payment_status !== 'Cancel' && (float) ($item->remaining_amount ?? 0) > 0 && !$item->isTransferred());
             $itemDate = $item->order_date;
             $item->order_date_title = $itemDate
                 ? Carbon::parse($itemDate)->format('Y-m-d H:i')
@@ -1495,6 +1620,15 @@ class OrderController extends Controller
 
     protected function paymentStatusBadge(Order $order)
     {
+        if ($order->isTransferred()) {
+            $label = __('order.status.paid_through_transfer');
+            $date = $order->payment_date
+                ? '<small class="text-muted">' . e(Carbon::parse($order->payment_date)->format('Y-m-d H:i')) . '</small>'
+                : '';
+
+            return '<span class="badge bg-success" style="margin-bottom:7px;" title="' . e(__('order.balance_transferred_notice_desc')) . '">' . e($label) . '</span>' . $date;
+        }
+
         $status = $order->payment_status ?: 'Pending';
         $label = $this->orderStatusLabel($status);
         $class = match ($status) {

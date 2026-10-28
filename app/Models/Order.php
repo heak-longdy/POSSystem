@@ -15,6 +15,7 @@ class Order extends Model
 
     protected $fillable = [
         'customer_id',
+        'previous_balance',
         'total_price',
         'total_commission',
         'total_discount',
@@ -28,10 +29,13 @@ class Order extends Model
         'pay_way',
         'total_point',
         'remark',
+        'creation_request_key',
+        'creation_payload_hash',
         'created_by',
     ];
 
     protected $casts = [
+        'previous_balance' => 'double',
         'total_price' => 'double',
         'total_discount' => 'double',
         'total_commission' => 'double',
@@ -41,7 +45,7 @@ class Order extends Model
         'payment_date' => 'datetime',
     ];
 
-    protected $appends = ['remaining_amount'];
+    protected $appends = ['remaining_amount', 'total_amount_due', 'transferred_out_amount', 'is_transferred'];
 
     public function customer()
     {
@@ -75,9 +79,61 @@ class Order extends Model
             ->orderBy('id', 'asc');
     }
 
-    public function getRemainingAmountAttribute()
+    public function incomingBalanceTransfers()
     {
-        return max(0, (float) ($this->total_price ?? 0) - (float) ($this->paid_amount ?? 0));
+        return $this->hasMany(OrderBalanceTransfer::class, 'new_order_id');
+    }
+
+    public function outgoingBalanceTransfers()
+    {
+        return $this->hasMany(OrderBalanceTransfer::class, 'previous_order_id');
+    }
+
+    public function completedOutgoingBalanceTransfer()
+    {
+        return $this->hasOne(OrderBalanceTransfer::class, 'previous_order_id')
+            ->where('transfer_status', 'completed');
+    }
+
+    public function getTotalAmountDueAttribute(): float
+    {
+        return (float) ($this->total_price ?? 0) + (float) ($this->previous_balance ?? 0);
+    }
+
+    public function getTransferredOutAmountAttribute(): float
+    {
+        if ($this->relationLoaded('completedOutgoingBalanceTransfer')) {
+            return (float) ($this->completedOutgoingBalanceTransfer?->transferred_amount ?? 0);
+        }
+
+        if ($this->relationLoaded('outgoingBalanceTransfers')) {
+            return (float) ($this->outgoingBalanceTransfers->firstWhere('transfer_status', 'completed')?->transferred_amount ?? 0);
+        }
+
+        try {
+            return (float) ($this->completedOutgoingBalanceTransfer()->value('transferred_amount') ?? 0);
+        } catch (\Throwable $e) {
+            return 0.0;
+        }
+    }
+
+    public function getRemainingAmountAttribute(): float
+    {
+        $totalDue = (float) ($this->total_price ?? 0) + (float) ($this->previous_balance ?? 0);
+        $paid = (float) ($this->paid_amount ?? 0);
+        $transferredOut = $this->transferred_out_amount;
+
+        return max(0, $totalDue - $paid - $transferredOut);
+    }
+
+    public function getIsTransferredAttribute(): bool
+    {
+        return $this->isTransferred();
+    }
+
+    public function isTransferred(): bool
+    {
+        return $this->transferred_out_amount > 0;
     }
 
     public function scopeForUser(Builder $query, ?User $user = null): Builder

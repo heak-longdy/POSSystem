@@ -30,6 +30,25 @@
         confirm: @json(__('global.confirm') ?? __('dialog.button.confirm') ?? 'Confirm'),
         discardAndClose: @json(__('global.workspace.close_tab') ?? __('dialog.button.close') ?? 'Close Tab'),
     };
+
+    // Format workspace labels without changing the page or browser title.
+    window.workspaceTabLabel = (tab) => {
+        const title = tab?.title || '';
+        if (!title || !tab?.url) return title;
+
+        let record;
+        try {
+            const pathname = new URL(tab.url, window.location.origin).pathname;
+            record = pathname.match(/\/(?:detail|details|view|edit)\/(\d+)\/?$/);
+        } catch (error) {
+            return title;
+        }
+
+        if (!record) return title;
+        const suffix = '(' + record[1] + ')';
+        const baseTitle = title.endsWith(suffix) ? title.slice(0, -suffix.length) : title;
+        return baseTitle.trimEnd() + ' ' + suffix;
+    };
 </script>
 
 <div id="workspace-tab-bar" class="mdi-workspace-tabs-container" x-data="workspaceMdi()" x-cloak>
@@ -59,7 +78,7 @@
                  :class="{ 'active': activeTabKey === tab.key, 'pinned': tab.isPinned, 'drag-over': dragOverTabKey === tab.key }"
                  @click="switchTab(tab); hideTooltip(); closeContextMenu()"
                  @contextmenu.prevent="openContextMenu($event, tab); hideTooltip()"
-                 @mouseenter="showTooltip($el, tab.title + (tab.isDirty ? ' (' + (window.workspaceTranslations?.unsaved || 'unsaved') + ')' : ''))"
+                 @mouseenter="showTooltip($el, window.workspaceTabLabel(tab) + (tab.isDirty ? ' (' + (window.workspaceTranslations?.unsaved || 'unsaved') + ')' : ''))"
                  @mouseleave="hideTooltip()"
                  draggable="true"
                  @dragstart="onTabDragStart($event, tab); hideTooltip(); closeContextMenu()"
@@ -75,13 +94,13 @@
                 <i class="mdi-tab-icon" x-show="!tab.isLoading" :class="tab.icon || 'bx bx-file'"></i>
                 
                 <!-- Tab Title -->
-                <span class="mdi-tab-title" x-text="tab.title"></span>
+                <span class="mdi-tab-title" x-text="window.workspaceTabLabel(tab)"></span>
                 
                 <!-- Unsaved Changes Dot -->
                 <span class="mdi-tab-dirty-dot" 
                       x-show="tab.isDirty" 
                       @mouseenter.stop="showTooltip($el, window.workspaceTranslations?.unsavedChanges || '{{ __('global.workspace.unsaved_changes') ?? __('global.unsaved_changes') ?? 'Unsaved changes' }}')"
-                      @mouseleave.stop="showTooltip($el.closest('.mdi-tab-item'), tab.title + (tab.isDirty ? ' (' + (window.workspaceTranslations?.unsaved || 'unsaved') + ')' : ''))">
+                      @mouseleave.stop="showTooltip($el.closest('.mdi-tab-item'), window.workspaceTabLabel(tab) + (tab.isDirty ? ' (' + (window.workspaceTranslations?.unsaved || 'unsaved') + ')' : ''))">
                 </span>
                 
                 <!-- Close Button -->
@@ -90,7 +109,7 @@
                         x-show="!tab.isPinned" 
                         @click.stop="closeTab(tab, $event); hideTooltip()"
                         @mouseenter.stop="showTooltip($el, window.workspaceTranslations?.closeTabShortcut || '{{ __('global.workspace.close_tab_shortcut') ?? 'Close tab (Ctrl+W)' }}')"
-                        @mouseleave.stop="showTooltip($el.closest('.mdi-tab-item'), tab.title + (tab.isDirty ? ' (' + (window.workspaceTranslations?.unsaved || 'unsaved') + ')' : ''))">
+                        @mouseleave.stop="showTooltip($el.closest('.mdi-tab-item'), window.workspaceTabLabel(tab) + (tab.isDirty ? ' (' + (window.workspaceTranslations?.unsaved || 'unsaved') + ')' : ''))">
                     &times;
                 </button>
             </div>
@@ -151,7 +170,7 @@
                         
                         <div class="item-left">
                             <i :class="tab.icon || 'bx bx-file'" style="font-size: 15px;"></i>
-                            <span x-text="tab.title"></span>
+                            <span x-text="window.workspaceTabLabel(tab)"></span>
                         </div>
 
                         <div class="item-actions">

@@ -25,7 +25,7 @@ class AdminPermissions
         $actions = [
             'list' => 'view', 'view' => 'view', 'detail' => 'view', 'list-product' => 'view',
             'staff-history' => 'view', 'payment-details' => 'view', 'report' => 'view',
-            'create' => 'create', 'edit' => 'update', 'update' => 'update', 'status' => 'update',
+            'create' => 'create', 'preview-previous-balance' => 'create', 'edit' => 'update', 'update' => 'update', 'status' => 'update',
             'save' => $editing ? 'update' : 'create',
             'permission' => 'update', 'save-permission' => 'update',
             'change-password' => 'update', 'save-password' => 'update',

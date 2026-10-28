@@ -39,6 +39,7 @@ class OrderPaymentTest extends TestCase
             $table->integer('shop_id')->nullable();
             $table->integer('created_by')->nullable();
             $table->double('total_price')->default(0);
+            $table->double('previous_balance')->default(0);
             $table->double('paid_amount')->default(0);
             $table->double('total_discount')->default(0);
             $table->double('total_commission')->default(0);
@@ -49,6 +50,21 @@ class OrderPaymentTest extends TestCase
             $table->dateTime('order_date')->nullable();
             $table->dateTime('delivery_date')->nullable();
             $table->dateTime('payment_date')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+        Schema::create('order_balance_transfers', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('new_order_id');
+            $table->unsignedBigInteger('previous_order_id');
+            $table->decimal('transferred_amount', 15, 2)->default(0);
+            $table->string('original_payment_status', 20)->default('Pending');
+            $table->dateTime('transferred_at')->nullable();
+            $table->unsignedBigInteger('transferred_by')->nullable();
+            $table->string('transfer_status', 20)->default('completed');
+            $table->dateTime('reversed_at')->nullable();
+            $table->unsignedBigInteger('reversed_by')->nullable();
+            $table->string('reversal_reason', 500)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

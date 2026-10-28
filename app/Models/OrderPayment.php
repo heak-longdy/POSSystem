@@ -18,6 +18,8 @@ class OrderPayment extends Model
         'payment_method',
         'payment_date',
         'note',
+        'payment_request_key',
+        'payment_payload_hash',
         'created_by',
     ];
 

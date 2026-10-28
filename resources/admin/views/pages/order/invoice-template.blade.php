@@ -205,7 +205,7 @@
             <tr>
                 <td class="inv-foot-calc-label">{{ __('order.invoice.balance_due', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">
-                    ${{ number_format(max(0, (float) ($order->remaining_amount ?? 0)) + (float) ($invoicePreviousBalance ?? 0), 2) }}
+                    ${{ number_format(max(0, (float) ($order->remaining_amount ?? 0)), 2) }}
                 </td>
             </tr>
         </tfoot>
