@@ -535,6 +535,7 @@
                         $isActive = ($status === $key);
                     @endphp
                     <a href="{{ route('admin-order-bulk-print-index', $tabParams) }}" 
+                       @click="clearSelection()"
                        class="status-pill {{ $isActive ? 'active' : '' }}">
                         {{ $label }}
                     </a>
@@ -542,7 +543,7 @@
             </div>
 
             <!-- Filter Fields Form -->
-            <form id="bulkFilterForm" method="GET" action="{{ route('admin-order-bulk-print-index') }}">
+            <form id="bulkFilterForm" method="GET" action="{{ route('admin-order-bulk-print-index') }}" @submit="clearSelection()">
                 <input type="hidden" name="status" value="{{ $status }}">
 
                 <div class="filter-grid">
@@ -598,7 +599,7 @@
                         <button type="submit" class="btn-filter-apply">
                             <i class="bx bx-filter-alt"></i> {{ __('order_bulk_print.filters.apply') }}
                         </button>
-                        <a href="{{ route('admin-order-bulk-print-index', ['status' => $status]) }}" class="btn-filter-reset">
+                        <a href="{{ route('admin-order-bulk-print-index', ['status' => $status]) }}" class="btn-filter-reset" @click="clearSelection()">
                             <i class="bx bx-reset"></i> {{ __('order_bulk_print.filters.reset') }}
                         </a>
                     </div>
@@ -739,6 +740,9 @@
             return {
                 selectedIds: [],
                 allMatchingSelected: false,
+                selectionStorageKey: 'pos_order_bulk_print_selection_{{ auth()->id() }}',
+                // Use the rendered filters: the MDI tab can differ from window.location.
+                selectionContext: {{ \Illuminate\Support\Js::from([$status, $paymentStatus, (string) request('shop_id', ''), $fromDate, $toDate, $search]) }},
                 totalMatchingCount: {{ (int) $orders->total() }},
                 currentPageIds: {{ json_encode($orders->pluck('id')->all()) }},
                 maxOrders: {{ (int) $maxOrders }},
@@ -750,11 +754,41 @@
                 },
 
                 init() {
+                    this.restoreSelection();
                     this.$nextTick(() => {
                         this.initSelect2();
                         this.initDatepickers();
                         this.initCheckboxWatcher();
+                        this.syncCheckboxes();
                     });
+                },
+
+                restoreSelection() {
+                    try {
+                        const stored = JSON.parse(sessionStorage.getItem(this.selectionStorageKey));
+                        if (!stored || stored.context !== JSON.stringify(this.selectionContext) || !Array.isArray(stored.ids)) return;
+
+                        this.selectedIds = [...new Set(stored.ids.map(Number).filter(id => Number.isSafeInteger(id) && id > 0))];
+                        this.allMatchingSelected = stored.allMatchingSelected === true;
+                    } catch (e) {
+                        // Unavailable storage must not prevent selecting or printing orders.
+                    }
+                },
+
+                persistSelection() {
+                    try {
+                        if (!this.selectedIds.length) {
+                            sessionStorage.removeItem(this.selectionStorageKey);
+                            return;
+                        }
+                        sessionStorage.setItem(this.selectionStorageKey, JSON.stringify({
+                            context: JSON.stringify(this.selectionContext),
+                            ids: this.selectedIds,
+                            allMatchingSelected: this.allMatchingSelected
+                        }));
+                    } catch (e) {
+                        // Keep the current selection usable when storage is unavailable.
+                    }
                 },
 
                 initCheckboxWatcher() {
@@ -764,6 +798,7 @@
                 },
 
                 syncCheckboxes() {
+                    this.persistSelection();
                     this.$nextTick(() => {
                         const rowCheckboxes = this.$el.querySelectorAll('tbody input.bulk-checkbox[data-order-id]');
                         rowCheckboxes.forEach(cb => {
