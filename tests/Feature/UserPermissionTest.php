@@ -145,20 +145,109 @@ class UserPermissionTest extends TestCase
     {
         $this->partialMock(\App\Http\Controllers\Admin\RemainingAmountController::class,
             fn ($mock) => $mock->shouldReceive('index')->andReturn(response('Allowed')));
-        // No live catalog changes: the dedicated grant is deliberately absent.
+        // Order permissions must not grant access to Remaining Amount.
         $this->staff->syncPermissions(['order-view', 'order-update', 'order-delete']);
         $this->actingAs($this->staff)->getJson(route('admin-remaining-amount-list', 'partial'))->assertForbidden();
         $this->postJson(route('admin-remaining-amount-add-payment', 1))->assertForbidden();
         $this->deleteJson(route('admin-remaining-amount-delete-payment', 1))->assertForbidden();
 
-        // Model a future explicit grant using disposable test fixtures only.
-        Permission::create(['name' => 'remaining-amount-view', 'guard_name' => 'web']);
         $this->staff->syncPermissions(['remaining-amount-view']);
         $this->get(route('admin-remaining-amount-list', 'partial'))->assertOk();
         $this->postJson(route('admin-remaining-amount-add-payment', 1))->assertForbidden();
         $this->getJson(route('admin-order-list', 1))->assertForbidden();
         $this->actingAs(new User(['role' => 'super_admin']))
             ->get(route('admin-remaining-amount-list', 'partial'))->assertOk();
+    }
+
+    public function test_remaining_amount_can_be_configured_on_the_user_permission_page(): void
+    {
+        $this->partialMock(\App\Http\Controllers\Admin\RemainingAmountController::class, function ($mock) {
+            foreach (['index', 'addPayment', 'updatePayment', 'deletePayment'] as $method) {
+                $mock->shouldReceive($method)->andReturn(response('Allowed'));
+            }
+        });
+        $permissions = ['remaining-amount-view', 'remaining-amount-update', 'remaining-amount-delete'];
+        $this->staff->givePermissionTo('dashboard-view');
+
+        $response = $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))
+            ->assertOk()->assertSee('Remaining Amount')
+            ->assertDontSee('value="remaining-amount-create"', false);
+        $modules = PermissionModuleSelection::flatten($response['permissionMenu']);
+        $module = $modules->firstWhere('name', 'Remaining Amount');
+        $this->assertNotNull($module);
+        $this->assertSame($permissions, $module->permission->pluck('name')->all());
+        foreach ($permissions as $permission) {
+            $response->assertSee('value="' . $permission . '"', false);
+        }
+        $this->assertSame(['dashboard-view'], $this->staff->fresh()->permissions->pluck('name')->all());
+
+        $this->postJson($this->saveUrl(), ['permission' => ['dashboard-view', 'remaining-amount-view']])->assertOk();
+        $this->actingAs($this->staff->fresh())->get(route('admin-remaining-amount-list', 'partial'))->assertOk();
+        $this->assertStringContainsString('data-url="' . url('admin/remaining-amount/list/partial') . '"',
+            view('admin::shared.sidebar')->render());
+        $this->postJson(route('admin-remaining-amount-add-payment', 1))->assertForbidden();
+        $this->deleteJson(route('admin-remaining-amount-delete-payment', 1))->assertForbidden();
+
+        $this->actingAs($this->manager)->postJson($this->saveUrl(), ['permission' => array_merge(['dashboard-view'], $permissions)])
+            ->assertOk()->assertJson(['error' => false]);
+        $this->get(route('admin-user-permission', $this->staff->id))
+            ->assertViewHas('userPermissions', fn ($names) => !array_diff($permissions, $names));
+        $this->actingAs($this->staff->fresh())->postJson(route('admin-remaining-amount-add-payment', 1))->assertOk();
+        $this->putJson(route('admin-remaining-amount-update-payment', 1))->assertOk();
+        $this->deleteJson(route('admin-remaining-amount-delete-payment', 1))->assertOk();
+        $this->getJson(route('admin-order-list', 1))->assertForbidden();
+
+        $this->actingAs($this->manager)->postJson($this->saveUrl(), ['permission' => ['dashboard-view']])->assertOk();
+        $this->actingAs($this->staff->fresh())->getJson(route('admin-remaining-amount-list', 'partial'))->assertForbidden();
+        $this->postJson(route('admin-remaining-amount-add-payment', 1))->assertForbidden();
+        $this->deleteJson(route('admin-remaining-amount-delete-payment', 1))->assertForbidden();
+        $this->assertStringNotContainsString('data-url="' . url('admin/remaining-amount/list/partial') . '"',
+            view('admin::shared.sidebar')->render());
+    }
+
+    public function test_remaining_amount_permissions_are_translated_on_the_khmer_permission_page(): void
+    {
+        $this->manager->update(['language_preference' => 'km']);
+        $response = $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))->assertOk();
+        $document = new \DOMDocument();
+        @$document->loadHTML('<?xml encoding="utf-8" ?>' . $response->getContent());
+        $xpath = new \DOMXPath($document);
+        $moduleId = ModulePermission::where('name', 'Remaining Amount')->value('id');
+        $card = $xpath->query('//div[contains(@class,"permissionItem") and @data-module-id="' . $moduleId . '"]')->item(0);
+        $this->assertNotNull($card);
+        $this->assertStringContainsString('គ្រប់គ្រងទឹកប្រាក់នៅសល់', $card->textContent);
+        foreach (['មើល', 'កែប្រែ', 'លុប'] as $label) {
+            $this->assertStringContainsString($label, $card->textContent);
+        }
+    }
+
+    public function test_remaining_amount_catalog_migration_preserves_existing_grants_and_ids(): void
+    {
+        $this->staff->givePermissionTo(['dashboard-view', 'remaining-amount-view']);
+        $role = Role::create(['name' => 'collector', 'guard_name' => 'web']);
+        $role->givePermissionTo('remaining-amount-update');
+        $permissionIds = DB::table('permissions')->pluck('id', 'name')->all();
+        $directGrants = DB::table('model_has_permissions')->get()->toJson();
+        $roleGrants = DB::table('role_has_permissions')->get()->toJson();
+
+        // Repair existing permissions that were never linked to a module card.
+        DB::table('permissions')->where('name', 'like', 'remaining-amount-%')->update(['module_id' => null]);
+        ModulePermission::where('name', 'Remaining Amount')->delete();
+        $migration = require database_path('migrations/2026_10_29_000000_add_remaining_amount_permissions.php');
+        $migration->up();
+        $moduleId = ModulePermission::where('name', 'Remaining Amount')->value('id');
+        $migration->up();
+        (new PermissionSeeder())->run();
+        $migration->down();
+
+        $this->assertSame(1, ModulePermission::where('name', 'Remaining Amount')->count());
+        $this->assertSame(3, Permission::where('module_id', $moduleId)->count());
+        $this->assertSame($permissionIds, DB::table('permissions')->pluck('id', 'name')->all());
+        $this->assertSame($directGrants, DB::table('model_has_permissions')->get()->toJson());
+        $this->assertSame($roleGrants, DB::table('role_has_permissions')->get()->toJson());
+        $this->assertTrue($this->staff->fresh()->can('remaining-amount-view'));
+        $this->assertTrue($role->fresh()->hasPermissionTo('remaining-amount-update'));
+        $this->assertFalse($this->staff->fresh()->can('remaining-amount-delete'));
     }
 
     public function test_workspace_scope_changes_when_user_or_effective_permissions_change(): void
@@ -565,7 +654,7 @@ class UserPermissionTest extends TestCase
         $response = $this->actingAs($this->manager)->get(route('admin-user-permission', $this->staff->id))->assertOk();
         $menu = $response['permissionMenu'];
         $names = PermissionModuleSelection::flatten($menu)->pluck('name')->all();
-        $expected = ['Dashboard', 'Product', 'Order', 'Order Bulk Print', 'Shop', 'Customer', 'Stock In', 'Stock Out',
+        $expected = ['Dashboard', 'Product', 'Order', 'Order Bulk Print', 'Remaining Amount', 'Shop', 'Customer', 'Stock In', 'Stock Out',
             'Stock Transfer', 'Stock On Hand', 'Stock Movement', 'Report Sales', 'Consolidated Product Quantity', 'Report Inventory Movement',
             'Staff Expense Report', 'Position', 'Staff', 'Staff Expense', 'User', 'File Manager', 'Category', 'Supplier', 'UOM', 'Invoice Setting'];
         $this->assertSame($expected, $names);

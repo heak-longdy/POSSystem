@@ -2,6 +2,47 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('order.title')])
     <style>
+        /* Keep payment labels readable within the listing's horizontal scroll area. */
+        .order-listing-wrapper .table-wrapper {
+            min-width: 1280px;
+        }
+        .order-listing-wrapper .table-header > .row,
+        .order-listing-wrapper .table-body > .column > .row {
+            flex-shrink: 1;
+        }
+        .order-listing-wrapper .table .row.order-payment-status {
+            flex: 0 0 180px;
+        }
+        .order-listing-wrapper .table-body .column .row.order-payment-status > span {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+            padding-right: 20px;
+            overflow: visible;
+        }
+        .order-listing-wrapper .table-body .column .row.order-payment-status .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 3px 10px;
+            margin: 0 !important;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 18px;
+            white-space: nowrap;
+            word-break: normal;
+        }
+        .order-listing-wrapper .table-body .column .row.order-payment-status .text-muted {
+            display: block;
+            font-size: 11px;
+            line-height: 16px;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
         .order-listing-wrapper .header .header-action-button .filter {
             display: flex;
             align-items: center;
@@ -603,7 +644,7 @@
                 ['field' => 'shop_title', 'title' => __('order.table.shop'), 'class' => 'text left', 'colVal' => 8],
                 ['field' => 'customer_title', 'title' => __('order.table.customer'), 'class' => 'text left', 'colVal' => 11],
                 ['field' => 'order_items_title', 'title' => __('order.table.products'), 'class' => 'text left', 'colVal' => 20],
-                ['field' => 'payment_status_title', 'title' => __('order.table.pay_status'), 'class' => 'text left', 'colVal' => 8],
+                ['field' => 'payment_status_title', 'title' => __('order.table.pay_status'), 'class' => 'text left order-payment-status', 'colVal' => 8],
                 ['field' => 'total_price_title', 'title' => __('order.table.total'), 'class' => 'text left', 'colVal' => 7],
                 ['field' => 'paid_amount_title', 'title' => __('order.table.paid'), 'class' => 'text left', 'colVal' => 6],
                 ['field' => 'remaining_amount_title', 'title' => __('order.table.remaining'), 'class' => 'text left', 'colVal' => 6],

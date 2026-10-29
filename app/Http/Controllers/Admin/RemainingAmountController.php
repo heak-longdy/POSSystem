@@ -427,6 +427,7 @@ class RemainingAmountController extends Controller
             'shop:id,name,phone',
             'barber:id,name,phone',
             'customer:id,name,phone',
+            'completedOutgoingBalanceTransfer.newOrder',
             'orderDetails.service:id,name',
             'orderDetails.product:id,name',
             'payments.createdBy:id,name,phone',

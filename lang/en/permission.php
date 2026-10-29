@@ -59,6 +59,7 @@ return [
         'order' => 'Order',
         'order-bulk-print' => 'Order Bulk Print',
         'order_bulk_print' => 'Order Bulk Print',
+        'remaining_amount' => 'Remaining Amount',
         'exchange-reward' => 'Exchange Reward',
         'package' => 'Package',
         'advertise' => 'Advertise',
@@ -108,6 +109,9 @@ return [
         'setting-invoice-view' => 'View',
         'setting-invoice-update' => 'Update',
         'order-bulk-print-view' => 'View',
+        'remaining-amount-view' => 'View',
+        'remaining-amount-update' => 'Update',
+        'remaining-amount-delete' => 'Delete',
         'dashboard-view' => 'View',
 
         //user

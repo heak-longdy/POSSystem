@@ -230,7 +230,7 @@
         /* Floating Selection Toolbar */
         .selection-toolbar-card {
             position: sticky;
-            top: 70px;
+            top: 47px;
             z-index: 100;
             background: #1e293b;
             color: #ffffff;

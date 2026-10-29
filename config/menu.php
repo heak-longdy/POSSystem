@@ -1,5 +1,7 @@
 <?php
 
+// Match module paths exactly or below a slash boundary; `module*` also matches sibling modules.
+// These patterns are shared by routeActive() and the workspace sidebar highlighting.
 return [
     [
         'type'  => 'single',
@@ -148,7 +150,7 @@ return [
         'listMenu' => [
             [
                 'type'  => 'single',
-                'active' => 'admin/report/sales*',
+                'active' => 'admin/report/sales,admin/report/sales/*',
                 'path' => 'admin/report/sales/daily',
                 'permission' => ['report-sales-view'],
                 'name' => [
@@ -160,7 +162,7 @@ return [
             ],
             [
                 'type' => 'single',
-                'active' => 'admin/report/consolidated-product-quantity*',
+                'active' => 'admin/report/consolidated-product-quantity,admin/report/consolidated-product-quantity/*',
                 'path' => 'admin/report/consolidated-product-quantity',
                 'permission' => ['report-consolidated-product-quantity-view'],
                 'name' => [
@@ -172,7 +174,7 @@ return [
             ],
             [
                 'type'  => 'single',
-                'active' => 'admin/report/customer-remaining-amount*',
+                'active' => 'admin/report/customer-remaining-amount,admin/report/customer-remaining-amount/*',
                 'path' => 'admin/report/customer-remaining-amount',
                 'permission' => ['report-sales-view'],
                 'name' => [
@@ -184,7 +186,7 @@ return [
             ],
             [
                 'type' => 'single',
-                'active' => 'admin/report/inventory-movement*',
+                'active' => 'admin/report/inventory-movement,admin/report/inventory-movement/*',
                 'path' => 'admin/report/inventory-movement/daily',
                 'permission' => ['report-inventory-view'],
                 'name' => [
@@ -196,7 +198,7 @@ return [
             ],
             [
                 'type'  => 'single',
-                'active' => 'admin/report/staff-expense*',
+                'active' => 'admin/report/staff-expense,admin/report/staff-expense/*',
                 'path' => 'admin/report/staff-expense/daily',
                 'permission' => ['report-staff-expense-view'],
                 'name' => [
@@ -208,7 +210,7 @@ return [
             ],
             [
                 'type'  => 'single',
-                'active' => 'admin/report/other-income*',
+                'active' => 'admin/report/other-income,admin/report/other-income/*',
                 'path' => 'admin/report/other-income/daily',
                 'permission' => ['report-other-income-view'],
                 'name' => [
@@ -242,18 +244,6 @@ return [
             // ],
             [
                 'type'  => 'single',
-                'active' => 'admin/position/*',
-                'path' => 'admin/position/list/1',
-                'permission' => ['position-view'],
-                'name' => [
-                    'en' => 'Position',
-                    'km' => 'មុខតំណែង',
-                ],
-                'icon' => 'bx-universal-access',
-                'dropDown' => 'disable',
-            ],
-            [
-                'type'  => 'single',
                 'active' => 'admin/staff/*',
                 'path' => 'admin/staff/list/1',
                 'permission' => ['staff-view'],
@@ -266,7 +256,7 @@ return [
             ],
             [
                 'type'  => 'single',
-                'active' => 'admin/staff-expense*',
+                'active' => 'admin/staff-expense,admin/staff-expense/*',
                 'path' => 'admin/staff-expense/list/1',
                 'permission' => ['staff-expense-view'],
                 'name' => [
@@ -278,7 +268,7 @@ return [
             ],
             [
                 'type'  => 'single',
-                'active' => 'admin/other-income*',
+                'active' => 'admin/other-income,admin/other-income/*',
                 'path' => 'admin/other-income/list/1',
                 'permission' => ['other-income-view'],
                 'name' => [
@@ -286,18 +276,6 @@ return [
                     'km' => 'ចំណូលផ្សេងៗ',
                 ],
                 'icon' => 'bx-money',
-                'dropDown' => 'disable',
-            ],
-            [
-                'type'  => 'single',
-                'active' => 'admin/other-income-category*',
-                'path' => 'admin/other-income-category/list/1',
-                'permission' => ['other-income-category-view'],
-                'name' => [
-                    'en' => 'Income Categories',
-                    'km' => 'ប្រភេទចំណូល',
-                ],
-                'icon' => 'bx-category-alt',
                 'dropDown' => 'disable',
             ],
             [
@@ -325,7 +303,7 @@ return [
                 'dropDown' => 'disable',
             ],
             [
-                'active' => 'admin/about/privacy*,admin/aboutUs*,admin/uom/*,admin/category/*,admin/supplier/*,admin/setting/invoice*',
+                'active' => 'admin/about/privacy,admin/about/privacy/*,admin/aboutUs,admin/aboutUs/*,admin/uom/*,admin/category/*,admin/supplier/*,admin/setting/invoice,admin/setting/invoice/*,admin/position/*,admin/other-income-category,admin/other-income-category/*',
                 'permission' => ['about-view', 'uom-view'],
                 'name' => [
                     'en' => 'Setting',
@@ -333,6 +311,16 @@ return [
                 ],
                 'icon' => 'bx-wrench',
                 'children' => [
+                    [
+                        'active' => 'admin/position/*',
+                        'path' => 'admin/position/list/1',
+                        'permission' => ['position-view'],
+                        'name' => [
+                            'en' => 'Position',
+                            'km' => 'មុខតំណែង',
+                        ],
+                        'icon' => 'bx-universal-access',
+                    ],
                     [
                         'active' => 'admin/category/*',
                         'path' => 'admin/category/list/1',
@@ -342,6 +330,16 @@ return [
                             'km' => 'ប្រភេទ',
                         ],
                         'icon' => 'bx-category',
+                    ],
+                    [
+                        'active' => 'admin/other-income-category,admin/other-income-category/*',
+                        'path' => 'admin/other-income-category/list/1',
+                        'permission' => ['other-income-category-view'],
+                        'name' => [
+                            'en' => 'Income Categories',
+                            'km' => 'ប្រភេទចំណូល',
+                        ],
+                        'icon' => 'bx-category-alt',
                     ],
                     [
                         'active' => 'admin/supplier/*',
@@ -364,7 +362,7 @@ return [
                         'icon' => 'bx-ruler',
                     ],
                     [
-                        'active' => 'admin/setting/invoice*',
+                        'active' => 'admin/setting/invoice,admin/setting/invoice/*',
                         'path' => 'admin/setting/invoice',
                         'permission' => 'setting-invoice-view',
                         'name' => [

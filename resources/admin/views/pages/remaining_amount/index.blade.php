@@ -1,6 +1,55 @@
 @extends('admin::shared.layout')
 @section('layout')
     @include('admin::shared.header', ['header_name' => __('remaining_amount.title')])
+    <style>
+        /* Keep payment labels readable within the listing's horizontal scroll area. */
+        .remaining-amount-wrapper .table-wrapper,
+        .order-listing-wrapper .table-wrapper {
+            min-width: 1280px;
+        }
+        .remaining-amount-wrapper .table-header > .row,
+        .remaining-amount-wrapper .table-body > .column > .row,
+        .order-listing-wrapper .table-header > .row,
+        .order-listing-wrapper .table-body > .column > .row {
+            flex-shrink: 1;
+        }
+        .remaining-amount-wrapper .table .row.order-payment-status,
+        .order-listing-wrapper .table .row.order-payment-status {
+            flex: 0 0 180px;
+        }
+        .remaining-amount-wrapper .table-body .column .row.order-payment-status > span,
+        .order-listing-wrapper .table-body .column .row.order-payment-status > span {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+            padding-right: 20px;
+            overflow: visible;
+        }
+        .remaining-amount-wrapper .table-body .column .row.order-payment-status .badge,
+        .order-listing-wrapper .table-body .column .row.order-payment-status .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 3px 10px;
+            margin: 0 !important;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 18px;
+            white-space: nowrap;
+            word-break: normal;
+        }
+        .remaining-amount-wrapper .table-body .column .row.order-payment-status .text-muted,
+        .order-listing-wrapper .table-body .column .row.order-payment-status .text-muted {
+            display: block;
+            font-size: 11px;
+            line-height: 16px;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+    </style>
     <div class="content-wrapper order-listing-wrapper remaining-amount-wrapper" id="app" x-data="xRemainingAmount">
         @php
             $tabQuery = request()->except(['page', 'payment_status']);
@@ -48,7 +97,7 @@
                 ['field' => 'shop_title', 'title' => __('order.table.shop'), 'class' => 'text left', 'colVal' => 8],
                 ['field' => 'customer_title', 'title' => __('order.table.customer'), 'class' => 'text left', 'colVal' => 12],
                 ['field' => 'order_items_title', 'title' => __('order.table.products'), 'class' => 'text left', 'colVal' => 20],
-                ['field' => 'payment_status_title', 'title' => __('order.table.pay_status'), 'class' => 'text left', 'colVal' => 8],
+                ['field' => 'payment_status_title', 'title' => __('order.table.pay_status'), 'class' => 'text left order-payment-status', 'colVal' => 8],
                 ['field' => 'total_price_title', 'title' => __('order.table.total'), 'class' => 'text left', 'colVal' => 8],
                 ['field' => 'paid_amount_title', 'title' => __('order.table.paid'), 'class' => 'text left', 'colVal' => 8],
                 ['field' => 'remaining_amount_title', 'title' => __('order.table.remaining'), 'class' => 'text left', 'colVal' => 8],
@@ -533,7 +582,8 @@
                         window.$select2FocusInputSearch();
                     });
                 },
-                paymentStatusLabel(status) {
+                paymentStatusLabel(status, isTransferred = false) {
+                    if (isTransferred) return @json(__('order.status.paid_through_transfer'));
                     const map = {
                         'Paid': @json(__('order.status.paid')),
                         'Partial': @json(__('order.status.partial')),
@@ -716,7 +766,7 @@
                             shop: item?.shop?.name || '',
                             barber: item?.barber?.name || '',
                             customer_phone: item?.customer?.phone || '',
-                            payment_status: this.paymentStatusLabel(item?.payment_status),
+                            payment_status: this.paymentStatusLabel(item?.payment_status, Boolean(item?.is_transferred)),
                             total_price: Number(item?.total_price || 0),
                             paid_amount: Number(item?.paid_amount || 0),
                             remaining_amount: Number(item?.remaining_amount || 0),
