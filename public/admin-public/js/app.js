@@ -22450,6 +22450,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _s_events__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./s-events */ "./resources/admin/ts/workspace/s-events.js");
 /* harmony import */ var _sidebar_active__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sidebar-active */ "./resources/admin/ts/workspace/sidebar-active.js");
 /* harmony import */ var _sidebar_active__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_sidebar_active__WEBPACK_IMPORTED_MODULE_2__);
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -24308,7 +24310,7 @@ window.workspaceMdi = function () {
           }
         }).then( /*#__PURE__*/function () {
           var _ref2 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee7(response) {
-            var finalUrl, responseText, json, title, msg, parser, doc, hasSuccessToast, isRedirectedToList, renderedFormErrors, hasServerValidationErrors, isValidationError, currentPane, newContent, _title2, _msg, _title3, _msg2, _targetUrl, modName, targetPath, listKey, existingListTab, listPane;
+            var finalUrl, responseText, json, title, msg, errorMsg, errKeys, first, _title2, parser, doc, hasSuccessToast, isRedirectedToList, hasErrorToast, renderedFormErrors, hasServerValidationErrors, isStillOnForm, isValidationError, currentPane, newContent, _title3, firstErrorMsg, _msg, _title4, _msg2, _targetUrl, modName, targetPath, listKey, existingListTab, listPane;
 
             return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee7$(_context7) {
               while (1) {
@@ -24344,7 +24346,7 @@ window.workspaceMdi = function () {
                     json = JSON.parse(responseText);
 
                     if (!(json.status === 'success' || json.message === 'success' || json.status === 200)) {
-                      _context7.next = 16;
+                      _context7.next = 18;
                       break;
                     }
 
@@ -24369,41 +24371,74 @@ window.workspaceMdi = function () {
 
                     return _context7.abrupt("return");
 
-                  case 16:
-                    _context7.next = 20;
+                  case 18:
+                    if (!(json.errors || json.status === 'error' || json.status === 422 || !response.ok)) {
+                      _context7.next = 23;
+                      break;
+                    }
+
+                    errorMsg = json.message || window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields || 'Please check the required fields.';
+
+                    if (json.errors && _typeof(json.errors) === 'object') {
+                      errKeys = Object.keys(json.errors);
+
+                      if (errKeys.length > 0) {
+                        first = json.errors[errKeys[0]];
+                        errorMsg = Array.isArray(first) ? first[0] : String(first);
+                      }
+                    }
+
+                    if (window.iziToast) {
+                      _title2 = window.workspaceTranslations && window.workspaceTranslations.warning || 'Warning';
+                      window.iziToast.warning({
+                        title: _title2,
+                        message: errorMsg
+                      });
+                    }
+
+                    return _context7.abrupt("return");
+
+                  case 23:
+                    _context7.next = 27;
                     break;
 
-                  case 18:
-                    _context7.prev = 18;
+                  case 25:
+                    _context7.prev = 25;
                     _context7.t0 = _context7["catch"](9);
 
-                  case 20:
+                  case 27:
                     // Parse HTML response
                     parser = new DOMParser();
                     doc = parser.parseFromString(responseText, 'text/html'); // Check if redirected to login page in document
 
                     if (!doc.querySelector('form[action*="login"]')) {
-                      _context7.next = 25;
+                      _context7.next = 32;
                       break;
                     }
 
                     window.location.href = finalUrl;
                     return _context7.abrupt("return");
 
-                  case 25:
+                  case 32:
                     // Success indicators:
-                    // 1. Flashed session success message in iziToast config
-                    hasSuccessToast = responseText.includes("type: 'success'") && !responseText.includes("type: 'success', title: 'Success', method: 'success', message: null"); // 2. Redirected to a listing URL
+                    // 1. Flashed session success message in iziToast config or toastr
+                    hasSuccessToast = /type:\s*['"]success['"][^}]+message:\s*["'][^"']+["']/i.test(responseText) || /toastr\.success\s*\(/i.test(responseText); // 2. Redirected to a listing URL
 
                     isRedirectedToList = finalUrl.includes('/list'); // Error indicators:
-                    // Rendered error elements outside of template tags
+                    // 1. Flashed session error/warning message in iziToast config or toastr
 
-                    renderedFormErrors = doc.querySelectorAll('form .form-row > label.error, form .form-group > label.error, form .invalid-feedback:not(:empty), .alert-danger:not(:empty)');
-                    hasServerValidationErrors = renderedFormErrors.length > 0;
-                    isValidationError = !response.ok || hasServerValidationErrors && !hasSuccessToast;
+                    hasErrorToast = /type:\s*['"](?:error|warning)['"][^}]+message:\s*["'][^"']+["']/i.test(responseText) || /toastr\.(?:error|warning)\s*\(/i.test(responseText); // 2. Rendered error elements outside of template tags
+
+                    renderedFormErrors = Array.from(doc.querySelectorAll('form label.error, form .error, form .invalid-feedback, form .alert-danger, .alert-danger')).filter(function (el) {
+                      return !el.closest('template') && el.textContent && el.textContent.trim().length > 0;
+                    });
+                    hasServerValidationErrors = renderedFormErrors.length > 0; // 3. Response remained on create/edit form without success toast
+
+                    isStillOnForm = finalUrl.includes('/create') || finalUrl.includes('/edit') || finalUrl.includes('/store');
+                    isValidationError = !response.ok || hasServerValidationErrors || hasErrorToast || isStillOnForm && !hasSuccessToast;
 
                     if (!isValidationError) {
-                      _context7.next = 45;
+                      _context7.next = 55;
                       break;
                     }
 
@@ -24411,14 +24446,14 @@ window.workspaceMdi = function () {
                     currentPane = document.getElementById('tab-pane-' + currentTabKey);
 
                     if (!currentPane) {
-                      _context7.next = 42;
+                      _context7.next = 52;
                       break;
                     }
 
                     newContent = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
 
                     if (!newContent) {
-                      _context7.next = 42;
+                      _context7.next = 52;
                       break;
                     }
 
@@ -24433,7 +24468,7 @@ window.workspaceMdi = function () {
                       currentPane.replaceChildren();
                     }
 
-                    _context7.next = 38;
+                    _context7.next = 47;
                     return _this17.executeScriptsFromDoc(doc, currentPane, function () {
                       currentPane.innerHTML = newContent.innerHTML;
                       currentPane.querySelectorAll('script').forEach(function (script) {
@@ -24441,7 +24476,7 @@ window.workspaceMdi = function () {
                       });
                     });
 
-                  case 38:
+                  case 47:
                     if (window.feather && typeof window.feather.replace === 'function') {
                       try {
                         window.feather.replace();
@@ -24466,22 +24501,39 @@ window.workspaceMdi = function () {
                       } catch (e) {
                         console.warn('Alpine.initTree warning on error re-render:', e);
                       }
-                    }
+                    } // Auto-focus the first field with an error
 
-                  case 42:
+
+                    setTimeout(function () {
+                      try {
+                        var firstError = currentPane.querySelector('label.error, .invalid-feedback, .alert-danger');
+
+                        if (firstError) {
+                          var container = firstError.closest('.form-row, .form-group') || firstError.parentElement;
+                          var input = container ? container.querySelector('input:not([type="hidden"]), select, textarea') : null;
+
+                          if (input && typeof input.focus === 'function') {
+                            input.focus();
+                          }
+                        }
+                      } catch (e) {}
+                    }, 50);
+
+                  case 52:
                     if (window.iziToast) {
-                      _title2 = window.workspaceTranslations && window.workspaceTranslations.warning || 'Warning';
-                      _msg = window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields || 'Please check the required fields.';
+                      _title3 = window.workspaceTranslations && window.workspaceTranslations.warning || 'Warning';
+                      firstErrorMsg = renderedFormErrors.length > 0 ? renderedFormErrors[0].textContent.trim() : null;
+                      _msg = firstErrorMsg || window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields || 'Please check the required fields.';
                       window.iziToast.warning({
-                        title: _title2,
+                        title: _title3,
                         message: _msg
                       });
                     }
 
-                    _context7.next = 60;
+                    _context7.next = 70;
                     break;
 
-                  case 45:
+                  case 55:
                     // Success!
                     doc.querySelectorAll('script').forEach(function (sc) {
                       var text = sc.textContent || '';
@@ -24494,17 +24546,17 @@ window.workspaceMdi = function () {
                     });
 
                     if (window.iziToast && !document.querySelector('.iziToast-wrapper .iziToast')) {
-                      _title3 = window.workspaceTranslations && window.workspaceTranslations.success || 'Success';
+                      _title4 = window.workspaceTranslations && window.workspaceTranslations.success || 'Success';
                       _msg2 = window.workspaceTranslations && window.workspaceTranslations.savedSuccessfully || 'Saved successfully!';
                       window.iziToast.success({
-                        title: _title3,
+                        title: _title4,
                         message: _msg2
                       });
                     } // If user chose "Save & New"
 
 
                     if (!(submitter && submitter.value === 'save_new')) {
-                      _context7.next = 50;
+                      _context7.next = 60;
                       break;
                     }
 
@@ -24512,7 +24564,7 @@ window.workspaceMdi = function () {
 
                     return _context7.abrupt("return");
 
-                  case 50:
+                  case 60:
                     // Determine target list URL
                     _targetUrl = finalUrl;
                     modName = currentTabKey ? currentTabKey.replace(/^admin-/, '').replace(/-create$/, '').replace(/-edit.*$/, '') : '';
@@ -24553,12 +24605,12 @@ window.workspaceMdi = function () {
 
                     _this17.openUrlInTab(targetPath);
 
-                  case 60:
+                  case 70:
                   case "end":
                     return _context7.stop();
                 }
               }
-            }, _callee7, null, [[9, 18]]);
+            }, _callee7, null, [[9, 25]]);
           }));
 
           return function (_x2) {

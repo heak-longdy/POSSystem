@@ -11,7 +11,7 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'customers';
-    protected $fillable = ['name', 'ordering', 'phone', 'address', 'profile', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
+    protected $fillable = ['code', 'name', 'ordering', 'phone', 'address', 'profile', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
 
     protected $appends = ['image_url'];
     public function getImageUrlAttribute()

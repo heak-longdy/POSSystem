@@ -2346,11 +2346,16 @@
                                     search: param.term
                                 }),
                                 processResults: (data) => ({
-                                    results: $.map(data.data, (item) => ({
-                                        text: item?.name ? item.name : item?.phone,
-                                        id: item.id,
-                                        item: item
-                                    }))
+                                    results: $.map(data.data, (item) => {
+                                        const code = item?.code || (item?.id ? String(item.id).padStart(10, '0') : '');
+                                        const displayName = item?.name ? item.name : (item?.phone || '');
+                                        const phoneSuffix = item?.name && item?.phone ? ` (${item.phone})` : '';
+                                        return {
+                                            text: code ? `[${code}] ${displayName}${phoneSuffix}` : displayName,
+                                            id: item.id,
+                                            item: item
+                                        };
+                                    })
                                 }),
                                 error: (xhr, status, error) => {
                                     console.error('Error fetching customers:', error);

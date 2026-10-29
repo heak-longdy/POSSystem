@@ -1446,6 +1446,20 @@ window.workspaceMdi = function () {
                                 this.openUrlInTab(json.redirect || json.url);
                             }
                             return;
+                        } else if (json.errors || json.status === 'error' || json.status === 422 || !response.ok) {
+                            let errorMsg = json.message || (window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields) || 'Please check the required fields.';
+                            if (json.errors && typeof json.errors === 'object') {
+                                const errKeys = Object.keys(json.errors);
+                                if (errKeys.length > 0) {
+                                    const first = json.errors[errKeys[0]];
+                                    errorMsg = Array.isArray(first) ? first[0] : String(first);
+                                }
+                            }
+                            if (window.iziToast) {
+                                const title = (window.workspaceTranslations && window.workspaceTranslations.warning) || 'Warning';
+                                window.iziToast.warning({ title: title, message: errorMsg });
+                            }
+                            return;
                         }
                     } catch(jsonErr) {}
 
@@ -1460,16 +1474,24 @@ window.workspaceMdi = function () {
                     }
 
                     // Success indicators:
-                    // 1. Flashed session success message in iziToast config
-                    const hasSuccessToast = responseText.includes("type: 'success'") && !responseText.includes("type: 'success', title: 'Success', method: 'success', message: null");
+                    // 1. Flashed session success message in iziToast config or toastr
+                    const hasSuccessToast = /type:\s*['"]success['"][^}]+message:\s*["'][^"']+["']/i.test(responseText) ||
+                                            /toastr\.success\s*\(/i.test(responseText);
                     // 2. Redirected to a listing URL
                     const isRedirectedToList = finalUrl.includes('/list');
 
                     // Error indicators:
-                    // Rendered error elements outside of template tags
-                    const renderedFormErrors = doc.querySelectorAll('form .form-row > label.error, form .form-group > label.error, form .invalid-feedback:not(:empty), .alert-danger:not(:empty)');
+                    // 1. Flashed session error/warning message in iziToast config or toastr
+                    const hasErrorToast = /type:\s*['"](?:error|warning)['"][^}]+message:\s*["'][^"']+["']/i.test(responseText) ||
+                                          /toastr\.(?:error|warning)\s*\(/i.test(responseText);
+                    // 2. Rendered error elements outside of template tags
+                    const renderedFormErrors = Array.from(doc.querySelectorAll('form label.error, form .error, form .invalid-feedback, form .alert-danger, .alert-danger'))
+                        .filter(el => !el.closest('template') && el.textContent && el.textContent.trim().length > 0);
                     const hasServerValidationErrors = renderedFormErrors.length > 0;
-                    const isValidationError = !response.ok || (hasServerValidationErrors && !hasSuccessToast);
+                    // 3. Response remained on create/edit form without success toast
+                    const isStillOnForm = finalUrl.includes('/create') || finalUrl.includes('/edit') || finalUrl.includes('/store');
+
+                    const isValidationError = !response.ok || hasServerValidationErrors || hasErrorToast || (isStillOnForm && !hasSuccessToast);
 
                     if (isValidationError) {
                         // Re-render form with error highlights in active pane
@@ -1507,11 +1529,26 @@ window.workspaceMdi = function () {
                                         console.warn('Alpine.initTree warning on error re-render:', e);
                                     }
                                 }
+
+                                // Auto-focus the first field with an error
+                                setTimeout(() => {
+                                    try {
+                                        const firstError = currentPane.querySelector('label.error, .invalid-feedback, .alert-danger');
+                                        if (firstError) {
+                                            const container = firstError.closest('.form-row, .form-group') || firstError.parentElement;
+                                            const input = container ? container.querySelector('input:not([type="hidden"]), select, textarea') : null;
+                                            if (input && typeof input.focus === 'function') {
+                                                input.focus();
+                                            }
+                                        }
+                                    } catch (e) {}
+                                }, 50);
                             }
                         }
                         if (window.iziToast) {
                             const title = (window.workspaceTranslations && window.workspaceTranslations.warning) || 'Warning';
-                            const msg = (window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields) || 'Please check the required fields.';
+                            const firstErrorMsg = renderedFormErrors.length > 0 ? renderedFormErrors[0].textContent.trim() : null;
+                            const msg = firstErrorMsg || (window.workspaceTranslations && window.workspaceTranslations.checkRequiredFields) || 'Please check the required fields.';
                             window.iziToast.warning({ title: title, message: msg });
                         }
                     } else {

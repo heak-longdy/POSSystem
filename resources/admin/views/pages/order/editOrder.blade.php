@@ -452,9 +452,11 @@
                             processResults: function(data) {
                                 return {
                                     results: $.map(data.data, function(item) {
+                                        const code = item?.code || (item?.id ? String(item.id).padStart(10, '0') : '');
+                                        const displayName = item?.name ? item.name : (item?.phone || '');
+                                        const phoneSuffix = item?.name && item?.phone ? ` (${item.phone})` : '';
                                         return {
-                                            text: item?.name ? item?.name : item
-                                                ?.phone,
+                                            text: code ? `[${code}] ${displayName}${phoneSuffix}` : displayName,
                                             id: item.id
                                         }
                                     })

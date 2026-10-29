@@ -29,10 +29,15 @@ class CustomerController extends Controller
 
         if ($req->filled('search')) {
             $search = trim($req->search);
-            $query->where(function ($q) use ($search) {
+            $numericId = (ctype_digit($search) || is_numeric($search)) ? (int) ltrim($search, '0') : null;
+            $query->where(function ($q) use ($search, $numericId) {
                 $q->where('name', 'LIKE', '%' . $search . '%')
                   ->orWhere('phone', 'LIKE', '%' . $search . '%')
-                  ->orWhere('address', 'LIKE', '%' . $search . '%');
+                  ->orWhere('address', 'LIKE', '%' . $search . '%')
+                  ->orWhere('code', 'LIKE', '%' . $search . '%');
+                if ($numericId && $numericId > 0) {
+                    $q->orWhere('id', $numericId);
+                }
             });
         }
 
@@ -162,6 +167,7 @@ class CustomerController extends Controller
 
         $columns = array(
             __('global.table.no'),
+            __('customer.table.code'),
             __('global.table.name'),
             __('customer.form.phone.label'),
             __('customer.form.address.label'),
@@ -176,6 +182,7 @@ class CustomerController extends Controller
             foreach ($customers as $index => $customer) {
                 fputcsv($file, array(
                     $index + 1,
+                    $customer->code ?? '',
                     $customer->name ?? '',
                     $customer->phone ?? '',
                     $customer->address ?? '',

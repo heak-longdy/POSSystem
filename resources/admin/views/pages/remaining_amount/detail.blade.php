@@ -99,6 +99,14 @@
                                     <span>{{ __('order.action.reject_order') }}</span>
                                 </button>
                             @endif
+                            <button type="button" class="btn btn-system btn-system-outline" @click="refreshPage($event)" :disabled="refreshing" title="{{ __('global.button.refresh') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-cw" :class="{ 'spin-icon': refreshing }">
+                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                    <polyline points="1 20 1 14 7 14"></polyline>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                </svg>
+                                <span>{{ __('global.button.refresh') }}</span>
+                            </button>
                         </div>
                     </div>
 
@@ -2460,6 +2468,7 @@
 
         function xOrderDetail() {
             return {
+                refreshing: false,
                 openPaymentModal: false,
                 activePrintTemplate: 'template1',
                 printLanguage: '{{ app()->getLocale() === 'km' ? 'km' : 'en' }}',
@@ -2469,6 +2478,20 @@
                     payment_method: 'Cash',
                     payment_date: '{{ \Carbon\Carbon::now()->format('Y-m-d\TH:i') }}',
                     note: ''
+                },
+                refreshPage(e) {
+                    if (this.refreshing) return;
+                    this.refreshing = true;
+                    const detailUrl = '{{ route('admin-remaining-amount-detail', $order->id) }}';
+                    const workspace = window.MDI;
+                    const tabKey = this.$root?.closest('.workspace-tab-pane')?.getAttribute('data-tab-key') || workspace?.activeTabKey;
+                    if (workspace && typeof workspace.refreshTab === 'function') {
+                        workspace.refreshTab(tabKey);
+                    } else if (typeof window.reloadData === 'function') {
+                        window.reloadData(detailUrl);
+                    } else {
+                        window.location.reload();
+                    }
                 },
                 init() {
                     this.$nextTick(() => {

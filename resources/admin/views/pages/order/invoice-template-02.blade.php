@@ -57,7 +57,7 @@
         <div class="slip-info-col col-cust">
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_name', [], $printLocale) }}</span>
-                <span class="info-val">{{ $cName }}</span>
+                <span class="info-val">@if($customerCode)<span class="cust-code">{{ $customerCode }}</span>@endif {{ $cName }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_address', [], $printLocale) }}</span>

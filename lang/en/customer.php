@@ -10,6 +10,10 @@ return [
         'import' => 'Import Customers',
     ],
 
+    'table' => [
+        'code' => 'Customer Code',
+    ],
+
     'empty' => [
         'title' => 'Customer is empty',
         'description' => 'You can create a new Customer by clicking the button below.',
@@ -20,6 +24,10 @@ return [
             'create' => 'Create Customer',
             'update' => 'Update Customer',
             'change_password' => 'Change Password',
+        ],
+        'code' => [
+            'label' => 'Customer Code',
+            'placeholder' => 'Enter customer code ...',
         ],
         'name' => [
             'label' => 'Name',
@@ -65,6 +73,8 @@ return [
     ],
 
     'validation' => [
+        'code_max' => 'The customer code may not be greater than 50 characters.',
+        'code_unique' => 'The customer code has already been taken.',
         'name_required' => 'Please enter the customer name.',
         'name_max' => 'The name may not be greater than 255 characters.',
         'phone_required' => 'Please enter the phone number.',

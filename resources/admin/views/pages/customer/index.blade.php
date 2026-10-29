@@ -14,9 +14,10 @@
             'tbHeader' => [
                 ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
                 ['field' => 'image_url', 'title' => __('global.table.image'), 'class' => 'text left', 'colVal' => 10],
-                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 25],
-                ['field' => 'phone', 'title' => __('customer.form.phone.label'), 'class' => 'text left', 'colVal' => 20],
-                ['field' => 'address', 'title' => __('customer.form.address.label'), 'class' => 'text left', 'colVal' => 35],
+                ['field' => 'code', 'title' => __('customer.table.code'), 'class' => 'text left', 'colVal' => 12],
+                ['field' => 'name', 'title' => __('global.table.name'), 'class' => 'text left', 'colVal' => 23],
+                ['field' => 'phone', 'title' => __('customer.form.phone.label'), 'class' => 'text left', 'colVal' => 18],
+                ['field' => 'address', 'title' => __('customer.form.address.label'), 'class' => 'text left', 'colVal' => 27],
                 [
                     'field' => 'action',
                     'title' => "",
@@ -169,6 +170,7 @@
 
                         worksheet.columns = [
                             { header: @json(__('global.table.no')), key: 'index', width: 8 },
+                            { header: @json(__('customer.table.code')), key: 'code', width: 16 },
                             { header: @json(__('global.table.name')), key: 'name', width: 28 },
                             { header: @json(__('customer.form.phone.label')), key: 'phone', width: 20 },
                             { header: @json(__('customer.form.address.label')), key: 'address', width: 40 },
@@ -176,8 +178,10 @@
                         ];
 
                         rows.forEach((item, index) => {
+                            const code = item?.code || (item?.id ? String(item.id).padStart(10, '0') : '');
                             worksheet.addRow({
                                 index: index + 1,
+                                code: code,
                                 name: item?.name || '',
                                 phone: item?.phone || '',
                                 address: item?.address || '',

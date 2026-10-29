@@ -19,6 +19,7 @@ class CustomerExportTest extends TestCase
         // Isolated SQLite test table; never touches production or dev data.
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->nullable();
             $table->string('name')->nullable();
             $table->integer('ordering')->nullable();
             $table->string('phone')->nullable();
@@ -35,6 +36,7 @@ class CustomerExportTest extends TestCase
         DB::table('customers')->insert([
             [
                 'id' => 1,
+                'code' => 'CUST-001',
                 'name' => 'Sokha Chan & សុខា',
                 'phone' => '012345678',
                 'address' => 'St 271, Boeng Tumpun, Phnom Penh',
@@ -45,6 +47,7 @@ class CustomerExportTest extends TestCase
             ],
             [
                 'id' => 2,
+                'code' => null,
                 'name' => 'Bopha Vong',
                 'phone' => '098765432',
                 'address' => 'St 1986, Sen Sok',
@@ -55,6 +58,7 @@ class CustomerExportTest extends TestCase
             ],
             [
                 'id' => 3,
+                'code' => null,
                 'name' => 'Disabled Dara',
                 'phone' => '011223344',
                 'address' => 'St 63, BKK1',
@@ -65,6 +69,7 @@ class CustomerExportTest extends TestCase
             ],
             [
                 'id' => 4,
+                'code' => null,
                 'name' => 'Trashed Rith',
                 'phone' => '077889900',
                 'address' => 'Chroy Changvar',
@@ -147,10 +152,12 @@ class CustomerExportTest extends TestCase
         $header = str_getcsv($lines[0]);
         $row = str_getcsv($lines[1]);
 
+        $this->assertContains('Customer Code', $header);
         $this->assertContains('Name', $header);
         $this->assertContains('Phone', $header);
-        $this->assertEquals('Sokha Chan & សុខា', $row[1]);
-        $this->assertEquals('012345678', $row[2]);
+        $this->assertEquals('CUST-001', $row[1]);
+        $this->assertEquals('Sokha Chan & សុខា', $row[2]);
+        $this->assertEquals('012345678', $row[3]);
     }
 
     public function test_permissions_gate_customer_export_routes(): void

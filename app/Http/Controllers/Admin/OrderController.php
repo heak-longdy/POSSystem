@@ -82,20 +82,26 @@ class OrderController extends Controller
                 $query->where('payment_status', '!=', 'Cancel');
             })
             ->when($req->search, function ($query) use ($req) {
-                $query->where(function ($q) use ($req) {
-                    $q->where('invoice_number', 'like', '%' . $req->search . '%')
-                        ->orWhereHas('shop', function ($shop) use ($req) {
-                            $shop->where('name', 'like', '%' . $req->search . '%');
+                $search = trim((string) $req->search);
+                $numericId = (ctype_digit($search) || is_numeric($search)) ? (int) ltrim($search, '0') : null;
+                $query->where(function ($q) use ($search, $numericId) {
+                    $q->where('invoice_number', 'like', '%' . $search . '%')
+                        ->orWhereHas('shop', function ($shop) use ($search) {
+                            $shop->where('name', 'like', '%' . $search . '%');
                         })
-                        ->orWhereHas('customer', function ($customer) use ($req) {
-                            $customer->where('name', 'like', '%' . $req->search . '%')
-                                ->orWhere('phone', 'like', '%' . $req->search . '%');
+                        ->orWhereHas('customer', function ($customer) use ($search, $numericId) {
+                            $customer->where('name', 'like', '%' . $search . '%')
+                                ->orWhere('phone', 'like', '%' . $search . '%')
+                                ->orWhere('code', 'like', '%' . $search . '%');
+                            if ($numericId && $numericId > 0) {
+                                $customer->orWhere('id', $numericId);
+                            }
                         })
-                        ->orWhereHas('orderDetails.product', function ($product) use ($req) {
-                            $product->where('name', 'like', '%' . $req->search . '%');
+                        ->orWhereHas('orderDetails.product', function ($product) use ($search) {
+                            $product->where('name', 'like', '%' . $search . '%');
                         })
-                        ->orWhereHas('orderDetails.service', function ($service) use ($req) {
-                            $service->where('name', 'like', '%' . $req->search . '%');
+                        ->orWhereHas('orderDetails.service', function ($service) use ($search) {
+                            $service->where('name', 'like', '%' . $search . '%');
                         });
                 });
             })
@@ -910,11 +916,17 @@ class OrderController extends Controller
                         $q->where('payment_status', '!=', 'Cancel');
                     })
                     ->when($req->search, function ($q) use ($req) {
-                        $q->where(function ($sub) use ($req) {
-                            $sub->where('invoice_number', 'like', '%' . $req->search . '%')
-                                ->orWhereHas('customer', function ($c) use ($req) {
-                                    $c->where('name', 'like', '%' . $req->search . '%')
-                                        ->orWhere('phone', 'like', '%' . $req->search . '%');
+                        $search = trim((string) $req->search);
+                        $numericId = (ctype_digit($search) || is_numeric($search)) ? (int) ltrim($search, '0') : null;
+                        $q->where(function ($sub) use ($search, $numericId) {
+                            $sub->where('invoice_number', 'like', '%' . $search . '%')
+                                ->orWhereHas('customer', function ($c) use ($search, $numericId) {
+                                    $c->where('name', 'like', '%' . $search . '%')
+                                        ->orWhere('phone', 'like', '%' . $search . '%')
+                                        ->orWhere('code', 'like', '%' . $search . '%');
+                                    if ($numericId && $numericId > 0) {
+                                        $c->orWhere('id', $numericId);
+                                    }
                                 });
                         });
                     });

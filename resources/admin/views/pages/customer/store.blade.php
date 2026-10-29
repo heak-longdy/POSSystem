@@ -3,42 +3,50 @@
     @include('admin::shared.header', ['header_name' => '', 'customClass' => 'headerInForm'])
     <div class="form-admin" x-data="xComponent">
         <div class="form-bg"></div>
-        <form id="form" class="form-wrapper" action="{!! route('admin-'.$routeName.'-save', request('id')) !!}" method="POST" enctype="multipart/form-data">
+        <form id="form" class="form-wrapper" action="{!! route('admin-'.$routeName.'-save', $id ?: (request('id') ?: ($data?->id ?? ''))) !!}" method="POST" enctype="multipart/form-data">
             <div class="form-header">
                 <h3>
                     <i data-feather="arrow-left" s-click-link="{!! route('admin-' . $routeName . '-list', 1) !!}"></i>
-                    {{ request('id') ? __('customer.form.title.update') : __('customer.form.title.create') }}
+                    {{ ($id || request('id') || isset($data)) ? __('customer.form.title.update') : __('customer.form.title.create') }}
                 </h3>
             </div>
             {{ csrf_field() }}
             <div class="form-body">
-                {{-- Name & Phone --}}
+                {{-- Code & Name --}}
                 <div class="row-2">
                     <div class="form-row iconInput">
+                        <label>{{ __('customer.form.code.label') }}</label>
+                        <input type="text" name="code" value="{{ old('code', $data?->code ?? '') }}" placeholder="{{ __('customer.form.code.placeholder') }}">
+                        <i class='bx bx-barcode'></i>
+                        @error('code')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
+                    <div class="form-row iconInput">
                         <label>{{ __('customer.form.name.label') }} <span>*</span> </label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('customer.form.name.placeholder') }}">
+                        <input type="text" name="name" value="{{ old('name', $data?->name ?? '') }}" placeholder="{{ __('customer.form.name.placeholder') }}">
                         <i class='bx bx-font-family'></i>
                         @error('name')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
+                </div>
+
+                {{-- Phone & Status --}}
+                <div class="row-2">
                     <div class="form-row iconInput">
                         <label>{{ __('customer.form.phone.label') }} <span>*</span> </label>
-                        <input type="text" name="phone" value="{!! request('id') ? $data?->phone : old('phone') !!}" placeholder="{{ __('customer.form.phone.placeholder') }}">
+                        <input type="text" name="phone" value="{{ old('phone', $data?->phone ?? '') }}" placeholder="{{ __('customer.form.phone.placeholder') }}">
                         <i class='bx bx-phone'></i>
                         @error('phone')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
-                </div>
-
-                {{-- Status & Payment Restriction --}}
-                <div class="row-2">
                     <div class="form-row">
                         <label>@lang('global.form.status.label') <span>*</span></label>
                         <select name="status" id="status">
                             @foreach (config('dummy.status') as $key => $item)
-                                <option value="{{ $key }}" {!! (request('id') && $data?->status == $key) || old('status', 1) == $key ? 'selected' : '' !!}>
+                                <option value="{{ $key }}" {!! (string) old('status', $data?->status ?? 1) === (string) $key ? 'selected' : '' !!}>
                                     {{ $key == 1 ? __('global.form.status.active') : __('global.form.status.disable') }}
                                 </option>
                             @endforeach
@@ -47,13 +55,17 @@
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
+                </div>
+
+                {{-- Payment Restriction --}}
+                <div class="row-2">
                     <div class="form-row">
                         <label>{{ __('customer.form.payment_restriction.label') }} <span>*</span></label>
                         <select name="payment_restriction" id="payment_restriction">
-                            <option value="N" {!! (request('id') && ($data?->payment_restriction === 'N' || empty($data?->payment_restriction))) || old('payment_restriction', 'N') === 'N' ? 'selected' : '' !!}>
+                            <option value="N" {!! old('payment_restriction', $data?->payment_restriction ?? 'N') === 'N' ? 'selected' : '' !!}>
                                 {{ __('customer.form.payment_restriction.no') }}
                             </option>
-                            <option value="Y" {!! (request('id') && $data?->payment_restriction === 'Y') || old('payment_restriction') === 'Y' ? 'selected' : '' !!}>
+                            <option value="Y" {!! old('payment_restriction', $data?->payment_restriction ?? 'N') === 'Y' ? 'selected' : '' !!}>
                                 {{ __('customer.form.payment_restriction.yes') }}
                             </option>
                         </select>
@@ -61,12 +73,13 @@
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
+                    <div class="form-row"></div>
                 </div>
 
                 {{-- Address --}}
                 <div class="form-row">
                     <label>{{ __('customer.form.address.label') }}</label>
-                    <textarea name="address" rows="3" placeholder="{{ __('customer.form.address.placeholder') }}">{!! request('id') ? $data?->address : old('address') !!}</textarea>
+                    <textarea name="address" rows="3" placeholder="{{ __('customer.form.address.placeholder') }}">{{ old('address', $data?->address ?? '') }}</textarea>
                     @error('address')
                         <label class="error">{{ $message }}</label>
                     @enderror
@@ -104,7 +117,7 @@
                 <div class="form-button">
                     <button type="submit" color="primary">
                         <i data-feather="save"></i>
-                        <span>{{ request('id') ? __('global.button.update') : __('global.button.submit') }}</span>
+                        <span>{{ ($id || request('id') || isset($data)) ? __('global.button.update') : __('global.button.submit') }}</span>
                     </button>
                     <button type="submit" name="save_opt" value="save_new" color="success">
                         <i data-feather="save"></i>

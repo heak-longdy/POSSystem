@@ -121,9 +121,19 @@ class SelectController extends Controller
     }
     public function selectCustomer(Request $req)
     {
-        $data = Customer::forUser()->where('status', 1)->where(function (Builder $q) use ($req) {
-            if ($req->search) {
-                $q->where('name', 'LIKE', '%' . $req->search . '%');
+        $search = trim((string) $req->search);
+        $numericId = (ctype_digit($search) || is_numeric($search)) ? (int) ltrim($search, '0') : null;
+
+        $data = Customer::forUser()->where('status', 1)->where(function (Builder $q) use ($search, $numericId) {
+            if ($search !== '') {
+                $q->where(function (Builder $sub) use ($search, $numericId) {
+                    $sub->where('name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('phone', 'LIKE', '%' . $search . '%')
+                        ->orWhere('code', 'LIKE', '%' . $search . '%');
+                    if ($numericId && $numericId > 0) {
+                        $sub->orWhere('id', $numericId);
+                    }
+                });
             }
         })->orderBy('created_at', 'desc')->take(12)->get();
 

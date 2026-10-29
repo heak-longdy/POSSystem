@@ -201,6 +201,14 @@
         color: var(--detail-ink) !important;
     }
 
+    @keyframes orderDetailSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .order-details-refresh .spin-icon {
+        animation: orderDetailSpin 0.75s linear infinite;
+    }
+
     .order-details-refresh .detail-header-tools > .btn-system-neutral {
         background: transparent !important;
         border-color: transparent !important;

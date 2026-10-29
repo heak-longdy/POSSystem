@@ -17,7 +17,11 @@ class Tools
         try {
             $item = $req->all();
             $item["user"] = Auth::user()->id;
-            $table::updateOrCreate(['id' => $id], $item);
+            if ($id) {
+                $table::updateOrCreate(['id' => $id], $item);
+            } else {
+                $table::create($item);
+            }
             DB::commit();
             Session::flash('success', $messages['success'] ?? $status);
             if ($redirect == 'back') {

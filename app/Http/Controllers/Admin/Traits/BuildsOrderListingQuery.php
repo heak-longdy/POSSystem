@@ -89,15 +89,20 @@ trait BuildsOrderListingQuery
                 $q->where('payment_status', '!=', 'Cancel');
             })
             ->when($req->search, function ($q) use ($req) {
-                $search = $req->search;
-                $q->where(function ($sub) use ($search) {
+                $search = trim((string) $req->search);
+                $numericId = (ctype_digit($search) || is_numeric($search)) ? (int) ltrim($search, '0') : null;
+                $q->where(function ($sub) use ($search, $numericId) {
                     $sub->where('invoice_number', 'like', '%' . $search . '%')
                         ->orWhereHas('shop', function ($shop) use ($search) {
                             $shop->where('name', 'like', '%' . $search . '%');
                         })
-                        ->orWhereHas('customer', function ($customer) use ($search) {
+                        ->orWhereHas('customer', function ($customer) use ($search, $numericId) {
                             $customer->where('name', 'like', '%' . $search . '%')
-                                ->orWhere('phone', 'like', '%' . $search . '%');
+                                ->orWhere('phone', 'like', '%' . $search . '%')
+                                ->orWhere('code', 'like', '%' . $search . '%');
+                            if ($numericId && $numericId > 0) {
+                                $customer->orWhere('id', $numericId);
+                            }
                         })
                         ->orWhereHas('orderDetails.product', function ($product) use ($search) {
                             $product->where('name', 'like', '%' . $search . '%');
