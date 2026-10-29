@@ -475,6 +475,11 @@ return [
         'payment_amount_required' => 'Payment amount is required.',
         'payment_amount_exceeds' => 'Payment amount exceeds remaining balance.',
         'out_of_stock_item' => ':name is limited in stock or out of stock.',
+        'full_payment_required' => 'Customer Full-Payment Restriction: Pending and Partial payments are not allowed for this customer.',
+    ],
+
+    'notice' => [
+        'full_payment_restricted' => 'Customer Full-Payment Restriction: Pending and Partial payments are not allowed for this customer.',
     ],
 
     'remaining_amount' => [

@@ -57,6 +57,11 @@ return [
             'label' => 'ID Card',
             'placeholder' => 'Enter id card',
         ],
+        'payment_restriction' => [
+            'label' => 'Payment Restriction',
+            'yes'   => 'Yes',
+            'no'    => 'No',
+        ],
     ],
 
     'validation' => [
@@ -70,5 +75,7 @@ return [
         'status_required' => 'Status is required.',
         'status_boolean' => 'Status must be true or false.',
         'status_invalid' => 'The selected status is invalid.',
+        'payment_restriction_required' => 'Payment restriction selection is required.',
+        'payment_restriction_invalid' => 'The selected payment restriction is invalid.',
     ],
 ];

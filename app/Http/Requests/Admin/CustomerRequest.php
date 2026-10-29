@@ -30,6 +30,7 @@ class CustomerRequest extends FormRequest
             'address'    => 'nullable|string|max:500',
             'profile'    => 'nullable|string|max:255',
             'status'     => 'required|in:1,2',
+            'payment_restriction' => 'nullable|in:N,Y',
         ];
     }
     public function messages()
@@ -41,6 +42,7 @@ class CustomerRequest extends FormRequest
             'phone.max'            => __('customer.validation.phone_max'),
             'status.required'      => __('customer.validation.status_required'),
             'status.in'            => __('customer.validation.status_invalid'),
+            'payment_restriction.in' => __('customer.validation.payment_restriction_invalid'),
         ];
     }
 }

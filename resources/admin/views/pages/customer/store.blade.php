@@ -32,7 +32,7 @@
                     </div>
                 </div>
 
-                {{-- Status --}}
+                {{-- Status & Payment Restriction --}}
                 <div class="row-2">
                     <div class="form-row">
                         <label>@lang('global.form.status.label') <span>*</span></label>
@@ -44,6 +44,20 @@
                             @endforeach
                         </select>
                         @error('status')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
+                    <div class="form-row">
+                        <label>{{ __('customer.form.payment_restriction.label') }} <span>*</span></label>
+                        <select name="payment_restriction" id="payment_restriction">
+                            <option value="N" {!! (request('id') && ($data?->payment_restriction === 'N' || empty($data?->payment_restriction))) || old('payment_restriction', 'N') === 'N' ? 'selected' : '' !!}>
+                                {{ __('customer.form.payment_restriction.no') }}
+                            </option>
+                            <option value="Y" {!! (request('id') && $data?->payment_restriction === 'Y') || old('payment_restriction') === 'Y' ? 'selected' : '' !!}>
+                                {{ __('customer.form.payment_restriction.yes') }}
+                            </option>
+                        </select>
+                        @error('payment_restriction')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>

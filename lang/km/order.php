@@ -406,6 +406,11 @@ return [
         'payment_amount_required' => 'សូមបញ្ចូលចំនួនទឹកប្រាក់ទូទាត់',
         'payment_amount_exceeds' => 'ចំនួនទឹកប្រាក់ទូទាត់លើសពីសមតុល្យនៅសល់',
         'out_of_stock_item' => ':name មានចំនួនកំណត់ ឬអស់ពីស្តុក។',
+        'full_payment_required' => 'ការកម្រិតបង់ប្រាក់ពេញ៖ មិនអនុញ្ញាតឱ្យជំពាក់ (Pending) ឬបង់ខ្លះ (Partial) សម្រាប់អតិថិជននេះឡើយ។',
+    ],
+
+    'notice' => [
+        'full_payment_restricted' => 'ការកម្រិតបង់ប្រាក់ពេញ៖ មិនអនុញ្ញាតឱ្យជំពាក់ (Pending) ឬបង់ខ្លះ (Partial) សម្រាប់អតិថិជននេះឡើយ។',
     ],
 
     'remaining_amount' => [

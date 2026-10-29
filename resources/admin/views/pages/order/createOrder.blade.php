@@ -1674,6 +1674,12 @@
                     <!-- New Booking Partial Payment -->
                     <template x-if="!orderId">
                         <div class="booking-payment-form booking-payment-form--record">
+                            <template x-if="showRestrictionError && isCustomerRestricted">
+                                <div class="booking-restricted-customer-banner" style="display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; margin-bottom: 12px; color: #991b1b; font-size: 12px; font-weight: 500; line-height: 1.4;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                    <span>{{ __('order.notice.full_payment_restricted') }}</span>
+                                </div>
+                            </template>
                             <div class="booking-payment-form-header">
                                 <div class="booking-payment-form-title">
                                     <span class="booking-payment-title-icon">
@@ -1682,7 +1688,7 @@
                                     <span>{{ __('order.initial_partial_payment') }}</span>
                                 </div>
                                 <button type="button" class="booking-pay-full-btn"
-                                    @click="formData.partial_payment_amount = Math.round(Number(totalAmountDue() || 0) * 100) / 100"
+                                    @click="formData.partial_payment_amount = Math.round(Number(totalAmountDue() || 0) * 100) / 100; showRestrictionError = false; clearError('partial_payment_amount');"
                                     :title="'Fill ' + formatCurrency(totalAmountDue())">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                                     <span>{{ __('order.pay_full') }} (<span x-text="formatCurrency(totalAmountDue())"></span>)</span>
@@ -1694,10 +1700,11 @@
                                     <div class="booking-input-prefix-group">
                                         <span class="input-addon-prefix">$</span>
                                         <input type="number" min="0" step="0.01" x-model="formData.partial_payment_amount"
+                                            @input="if (isCustomerRestricted && Math.round(Number(formData.partial_payment_amount || 0) * 100) >= Math.round(Number(totalAmountDue() || 0) * 100)) { showRestrictionError = false; clearError('partial_payment_amount'); }"
                                             :max="totalAmountDue()" placeholder="0.00" autocomplete="off">
                                     </div>
-                                    <template x-for="item in dataError?.partial_payment_amount">
-                                        <div class="msgError"><p x-text="item"></p></div>
+                                    <template x-for="item in (dataError?.partial_payment_amount || []).filter(msg => !showRestrictionError || msg !== @json(__('order.validation.full_payment_required')))">
+                                        <span class="error" x-text="item"></span>
                                     </template>
                                 </div>
                                 <div class="form-group">
@@ -1705,7 +1712,7 @@
                                     <input type="text" x-model="formData.partial_payment_note" class="booking-note-input"
                                         placeholder="{{ __('order.placeholder.note') }}" maxlength="500" autocomplete="off">
                                     <template x-for="item in dataError?.partial_payment_note">
-                                        <div class="msgError"><p x-text="item"></p></div>
+                                        <span class="error" x-text="item"></span>
                                     </template>
                                 </div>
                             </div>
@@ -1770,7 +1777,7 @@
                                             :max="remainingAmount" placeholder="0.00" autocomplete="off">
                                     </div>
                                     <template x-for="item in dataError?.partial_payment_amount">
-                                        <div class="msgError"><p x-text="item"></p></div>
+                                        <span class="error" x-text="item"></span>
                                     </template>
                                 </div>
                                 <div class="form-group">
@@ -1778,7 +1785,7 @@
                                     <input type="text" x-model="formData.partial_payment_note" class="booking-note-input"
                                         placeholder="{{ __('order.placeholder.note') }}" maxlength="500" autocomplete="off">
                                     <template x-for="item in dataError?.partial_payment_note">
-                                        <div class="msgError"><p x-text="item"></p></div>
+                                        <span class="error" x-text="item"></span>
                                     </template>
                                 </div>
                             </div>
@@ -1864,6 +1871,8 @@
                 selectType: 'product',
                 shopData: null,
                 customerData: null,
+                isCustomerRestricted: false,
+                showRestrictionError: false,
                 orderDeleteId: [],
                 initialOrder: null,
                 initialSelectedShop: null,
@@ -1893,6 +1902,7 @@
 
                     this.shopData = order?.shop || selectedShop || null;
                     this.customerData = order?.customer || null;
+                    this.isCustomerRestricted = String(order?.customer?.payment_restriction || '').toUpperCase() === 'Y';
                     this.formData.shop_id = order?.shop_id || selectedShop?.id || null;
                     this.formData.customer_id = order?.customer_id || order?.customer?.id || null;
                     const orderDateVal = order?.order_date;
@@ -2339,19 +2349,30 @@
                                 name: event.params.data.text
                             };
                             this.formData.customer_id = event.params.data.id;
-                            delete this.dataError?.customer_id;
+                            this.isCustomerRestricted = String(this.customerData?.payment_restriction || '').toUpperCase() === 'Y';
+                            this.showRestrictionError = false;
+                            this.clearError('customer_id');
+                            this.clearError('partial_payment_amount');
                             this.fetchPreviousBalance(event.params.data.id);
                             this.saveDraft();
                         }).on('change', (e) => {
                             if (!$(e.target).val()) {
                                 this.customerData = null;
                                 this.formData.customer_id = null;
+                                this.isCustomerRestricted = false;
+                                this.showRestrictionError = false;
+                                this.clearError('customer_id');
+                                this.clearError('partial_payment_amount');
                                 this.fetchPreviousBalance(null);
                                 this.saveDraft();
                             }
                         }).on('select2:clear select2:unselect', () => {
                             this.customerData = null;
                             this.formData.customer_id = null;
+                            this.isCustomerRestricted = false;
+                            this.showRestrictionError = false;
+                            this.clearError('customer_id');
+                            this.clearError('partial_payment_amount');
                             this.fetchPreviousBalance(null);
                             this.saveDraft();
                         }).on('select2:open', () => {
@@ -2379,6 +2400,10 @@
                     this.setSelect2Value('#customer_id', null);
                     this.customerData = null;
                     this.formData.customer_id = null;
+                    this.isCustomerRestricted = false;
+                    this.showRestrictionError = false;
+                    this.clearError('customer_id');
+                    this.clearError('partial_payment_amount');
                     this.fetchPreviousBalance(null);
                     this.saveDraft();
                 },
@@ -2388,6 +2413,8 @@
                         this.previousOrders = [];
                         this.previousOrdersCount = 0;
                         this.previousBalanceFingerprint = '';
+                        this.isCustomerRestricted = false;
+                        this.showRestrictionError = false;
                         return;
                     }
                     this.loadingPreviousBalance = true;
@@ -2400,6 +2427,10 @@
                             this.previousOrders = d.previous_orders || [];
                             this.previousOrdersCount = Number(d.previous_orders_count || 0);
                             this.previousBalanceFingerprint = d.fingerprint || '';
+                            if (d.payment_restriction !== undefined || d.is_restricted !== undefined) {
+                                this.isCustomerRestricted = Boolean(d.is_restricted ?? (String(d.payment_restriction || '').toUpperCase() === 'Y'));
+                            }
+                            this.showRestrictionError = false;
                         } else {
                             this.previousBalance = 0;
                             this.previousOrders = [];
@@ -3391,6 +3422,10 @@
                         }
 
                         this.$nextTick(() => {
+                            if (draft.customerData) {
+                                this.customerData = draft.customerData;
+                                this.isCustomerRestricted = String(draft.customerData?.payment_restriction || '').toUpperCase() === 'Y';
+                            }
                             const customerPlaceholder = @json(__('order.form.select_customer'));
                             if (draft.formData?.customer_id) {
                                 const custText = (draft.customerText && draft.customerText !== customerPlaceholder)
@@ -3831,10 +3866,27 @@
                     const partialPayment = Number(this.formData.partial_payment_amount || 0);
                     const maxAllowedPayment = this.orderId && !this.canEditOrderItems()
                         ? Number(this.remainingAmount || 0) : Number(this.totalAmountDue() || 0);
-                    if (partialPayment < 0) {
-                        errors.partial_payment_amount = [@json(__('order.validation.partial_min'))];
-                    } else if (Math.round(partialPayment * 100) > Math.round(maxAllowedPayment * 100)) {
-                        errors.partial_payment_amount = [@json(__('order.validation.partial_max'))];
+                    const totalDue = Number(this.totalAmountDue() || 0);
+                    const paymentCents = Math.round(partialPayment * 100);
+                    const totalDueCents = Math.round(totalDue * 100);
+
+                    if (this.isCustomerRestricted && totalDueCents > 0) {
+                        if (paymentCents < totalDueCents) {
+                            this.showRestrictionError = true;
+                            errors.partial_payment_amount = [@json(__('order.validation.full_payment_required'))];
+                        } else {
+                            this.showRestrictionError = false;
+                            if (paymentCents > Math.round(maxAllowedPayment * 100)) {
+                                errors.partial_payment_amount = [@json(__('order.validation.partial_max'))];
+                            }
+                        }
+                    } else {
+                        this.showRestrictionError = false;
+                        if (partialPayment < 0) {
+                            errors.partial_payment_amount = [@json(__('order.validation.partial_min'))];
+                        } else if (paymentCents > Math.round(maxAllowedPayment * 100)) {
+                            errors.partial_payment_amount = [@json(__('order.validation.partial_max'))];
+                        }
                     }
                     if (this.formData.partial_payment_note && this.formData.partial_payment_note.length > 500) {
                         errors.partial_payment_note = ['Note cannot exceed 500 characters.'];
@@ -3844,6 +3896,16 @@
                 },
                 hasValidationErrors(errors) {
                     return Object.keys(errors || {}).length > 0;
+                },
+                clearError(field) {
+                    if (this.dataError && this.dataError[field]) {
+                        const updated = { ...this.dataError };
+                        delete updated[field];
+                        this.dataError = updated;
+                    }
+                    if (field === 'partial_payment_amount') {
+                        this.showRestrictionError = false;
+                    }
                 },
                 setValidationErrors(errors = {}) {
                     this.dataError = errors || {};

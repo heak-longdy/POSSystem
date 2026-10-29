@@ -11,7 +11,7 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'customers';
-    protected $fillable = ['name', 'ordering', 'phone', 'address', 'profile', 'password', 'status', 'total_point','user'];
+    protected $fillable = ['name', 'ordering', 'phone', 'address', 'profile', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
 
     protected $appends = ['image_url'];
     public function getImageUrlAttribute()
@@ -59,5 +59,10 @@ class Customer extends Model
         }
 
         return (string) $this->user === (string) $user->id;
+    }
+
+    public function isFullPaymentRestricted(): bool
+    {
+        return strtoupper((string) ($this->payment_restriction ?? 'N')) === 'Y';
     }
 }

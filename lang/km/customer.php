@@ -57,6 +57,11 @@ return [
             'label' => 'អត្តសញ្ញាណប័ណ្ណ',
             'placeholder' => 'បញ្ចូលអត្តសញ្ញាណប័ណ្ណ',
         ],
+        'payment_restriction' => [
+            'label' => 'ការកម្រិតការទូទាត់ប្រាក់',
+            'yes'   => 'បាទ/ចាស (Yes)',
+            'no'    => 'ទេ (No)',
+        ],
     ],
 
     'validation' => [
@@ -70,5 +75,7 @@ return [
         'status_required' => 'សូមជ្រើសរើសស្ថានភាព',
         'status_boolean' => 'ស្ថានភាពមិនត្រឹមត្រូវ',
         'status_invalid' => 'ស្ថានភាពដែលបានជ្រើសរើសមិនត្រឹមត្រូវ',
+        'payment_restriction_required' => 'សូមជ្រើសរើសការកម្រិតការទូទាត់ប្រាក់',
+        'payment_restriction_invalid' => 'ការកម្រិតការទូទាត់ប្រាក់ដែលបានជ្រើសមិនត្រឹមត្រូវ',
     ],
 ];

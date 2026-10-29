@@ -64,6 +64,8 @@ class OrderBalanceTransferService
         if ($customerId <= 0) {
             return [
                 'customer_id' => 0,
+                'payment_restriction' => 'N',
+                'is_restricted' => false,
                 'previous_balance' => 0.0,
                 'previous_balance_formatted' => '$0.00',
                 'previous_orders' => [],
@@ -71,6 +73,10 @@ class OrderBalanceTransferService
                 'fingerprint' => '',
             ];
         }
+
+        $customer = Customer::find($customerId);
+        $restriction = $customer ? (string) ($customer->payment_restriction ?? 'N') : 'N';
+        $isRestricted = strtoupper($restriction) === 'Y';
 
         $eligibleOrders = $this->getEligiblePreviousOrders($customerId, $excludeOrderId);
 
@@ -110,6 +116,8 @@ class OrderBalanceTransferService
 
         return [
             'customer_id' => $customerId,
+            'payment_restriction' => $restriction,
+            'is_restricted' => $isRestricted,
             'previous_balance' => $totalPreviousBalance,
             'previous_balance_formatted' => '$' . number_format($totalPreviousBalance, 2),
             'previous_orders' => $ordersData,

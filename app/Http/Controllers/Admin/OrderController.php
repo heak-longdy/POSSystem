@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\OrderRequest;
 use App\Models\Barber;
+use App\Models\Customer;
 use App\Models\CustomerPoint;
 use App\Models\Notification;
 use App\Models\Order;
@@ -312,6 +313,21 @@ class OrderController extends Controller
                 'total_commission' => $totals['total_commission'],
             ]);
             $this->adjustCustomerPoint($order, 1);
+
+            // Enforce customer full-payment restriction
+            $customer = Customer::find((int) $req->customer_id);
+            if ($customer && $customer->isFullPaymentRestricted()) {
+                $totalDueCents = $this->paymentCents((float) $totals['total_price'] + (float) $order->previous_balance);
+                $paidAmountCents = $this->paymentCents($req->partial_payment_amount ?? 0, 'partial_payment_amount');
+
+                if ($totalDueCents > 0 && $paidAmountCents < $totalDueCents) {
+                    throw ValidationException::withMessages([
+                        'partial_payment_amount' => [
+                            __('order.validation.full_payment_required'),
+                        ],
+                    ]);
+                }
+            }
 
             // Consolidate eligible previous balances if creating a new order with previous balance
             if (!$orderId && (float) $order->previous_balance > 0) {
