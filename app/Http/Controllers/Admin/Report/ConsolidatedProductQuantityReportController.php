@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin\Report;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Services\OrderPricing;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,12 +27,19 @@ class ConsolidatedProductQuantityReportController extends Controller
     {
         $filters = $this->filters($request);
         $query = $this->filteredQuery($filters);
+        $amounts = $this->totalAmounts(clone $query);
+        $rows = $this->groupedQuery(clone $query)->paginate(50)->withQueryString();
+        $rows->getCollection()->each(function ($row) use ($amounts) {
+            $row->total_amount = ($amounts[$row->product_id] ?? 0) / 100;
+        });
+        $summary = $this->summary(clone $query);
+        $summary->total_amount = array_sum($amounts) / 100;
 
         return view('admin::pages.report.consolidatedProductQuantity.index', [
             'routeName' => $this->routeName,
             'filters' => $filters,
-            'summary' => $this->summary(clone $query),
-            'rows' => $this->groupedQuery(clone $query)->paginate(50)->withQueryString(),
+            'summary' => $summary,
+            'rows' => $rows,
             'shops' => Shop::orderBy('name')->get(['id', 'name']),
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'products' => Product::withTrashed()->orderBy('name')->get(['id', 'name', 'code']),
@@ -41,12 +50,18 @@ class ConsolidatedProductQuantityReportController extends Controller
     {
         $filters = $this->filters($request);
         $query = $this->filteredQuery($filters);
+        $amounts = $this->totalAmounts(clone $query);
+        $rows = $this->groupedQuery(clone $query)->get()->each(function ($row) use ($amounts) {
+            $row->total_amount = ($amounts[$row->product_id] ?? 0) / 100;
+        });
+        $summary = $this->summary(clone $query);
+        $summary->total_amount = array_sum($amounts) / 100;
 
         return response()->json([
             'grouping' => 'product',
             'filters' => $filters,
-            'summary' => $this->summary(clone $query),
-            'rows' => $this->groupedQuery(clone $query)->get(),
+            'summary' => $summary,
+            'rows' => $rows,
         ]);
     }
 
@@ -130,5 +145,25 @@ class ConsolidatedProductQuantityReportController extends Controller
         return $query->selectRaw('COUNT(DISTINCT detail.product_id) as product_count,
             COUNT(DISTINCT detail.order_id) as order_count, COUNT(DISTINCT orders.shop_id) as shop_count,
             COALESCE(SUM(COALESCE(detail.qty, 1)), 0) as total_quantity')->first();
+    }
+
+    private function totalAmounts($query): array
+    {
+        $pricing = app(OrderPricing::class);
+        $amounts = [];
+        foreach ($query->select('detail.*')->cursor() as $line) {
+            $detail = (new OrderDetail())->setRawAttributes((array) $line);
+            // Preserve the report's quantity rules, including zero and legacy null qty.
+            $qty = (int) ($detail->qty ?? 1);
+            if ($detail->pricing_method === OrderPricing::AUTOMATIC) {
+                $cents = $pricing->usdCents($detail->unit_price) * $qty;
+            } else {
+                // Use the same PHP rounding as OrderPricing::line for fractional-cent discounts.
+                $cents = (int) round(round($pricing->legacyUnitPrice($detail) * $qty, 2) * 100);
+            }
+            $amounts[$detail->product_id] = ($amounts[$detail->product_id] ?? 0) + $cents;
+        }
+
+        return $amounts;
     }
 }

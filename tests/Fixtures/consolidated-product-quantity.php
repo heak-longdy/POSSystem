@@ -15,8 +15,8 @@ $source = file_get_contents('resources/admin/views/pages/report/consolidatedProd
 $source = preg_replace('/^@(extends|section|stop).*$/m', '', $source);
 $source = preg_replace("/^\s*@include\('admin::shared.header'.*$/m", '', $source);
 $rows = collect([(object) ['product_id' => 1, 'product_code' => 'P001', 'product_name' => 'Tea & ទឹកតែ',
-    'category_name' => 'Drinks', 'uom_name' => 'Box', 'order_count' => 2, 'total_quantity' => 12]]);
-$summary = (object) ['product_count' => 1, 'order_count' => 2, 'shop_count' => 2, 'total_quantity' => 12];
+    'category_name' => 'Drinks', 'uom_name' => 'Box', 'order_count' => 2, 'total_quantity' => 12, 'total_amount' => 1234.56]]);
+$summary = (object) ['product_count' => 1, 'order_count' => 2, 'shop_count' => 2, 'total_quantity' => 12, 'total_amount' => 1234.56];
 foreach (['en', 'km'] as $locale) {
     $app->setLocale($locale);
     $data = [

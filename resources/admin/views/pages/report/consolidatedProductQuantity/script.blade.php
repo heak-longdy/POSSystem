@@ -110,6 +110,7 @@
                     { header: @json(__('consolidated_product_quantity.uom_name')), key: 'uom_name', width: 16 },
                     { header: @json(__('consolidated_product_quantity.order_count')), key: 'order_count', width: 16 },
                     { header: @json(__('consolidated_product_quantity.total_quantity')), key: 'total_quantity', width: 20 },
+                    { header: @json(__('consolidated_product_quantity.total_amount')), key: 'total_amount', width: 20 },
                 ];
                 reportData.rows.forEach((row, index) => worksheet.addRow({
                     index: index + 1,
@@ -117,10 +118,12 @@
                     product_name: row.product_name || @json(__('consolidated_product_quantity.unknown_product')).replace(':id', row.product_id),
                     category_name: row.category_name || '—', uom_name: row.uom_name || '—',
                     order_count: Number(row.order_count), total_quantity: Number(row.total_quantity),
+                    total_amount: Number(row.total_amount),
                 }));
                 const total = worksheet.addRow({
                     product_code: @json(__('consolidated_product_quantity.total')),
                     order_count: Number(reportData.summary.order_count), total_quantity: Number(reportData.summary.total_quantity),
+                    total_amount: Number(reportData.summary.total_amount),
                 });
                 total.font = { bold: true };
                 for (const key of ['order_count', 'total_quantity']) {
@@ -128,6 +131,8 @@
                     worksheet.getColumn(key).alignment = { horizontal: 'right' };
                 }
                 worksheet.getRow(1).font = { bold: true };
+                worksheet.getColumn('total_amount').numFmt = '$#,##0.00';
+                worksheet.getColumn('total_amount').alignment = { horizontal: 'right' };
                 worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
                 worksheet.views = [{ state: 'frozen', ySplit: 1 }];
                 const buffer = await workbook.xlsx.writeBuffer();

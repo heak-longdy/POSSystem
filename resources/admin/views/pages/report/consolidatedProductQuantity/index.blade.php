@@ -120,8 +120,8 @@
                     <table class="report-data-table">
                         <thead><tr>
                             <th scope="col" class="text-center">{{ __('global.table.no') }}</th>
-                            @foreach (['product_code', 'product_name', 'category_name', 'uom_name', 'order_count', 'total_quantity'] as $key)
-                                <th scope="col" class="{{ in_array($key, ['order_count', 'total_quantity']) ? 'text-right' : '' }}">{{ __('consolidated_product_quantity.' . $key) }}</th>
+                            @foreach (['product_code', 'product_name', 'category_name', 'uom_name', 'order_count', 'total_quantity', 'total_amount'] as $key)
+                                <th scope="col" class="{{ in_array($key, ['order_count', 'total_quantity', 'total_amount']) ? 'text-right' : '' }}">{{ __('consolidated_product_quantity.' . $key) }}</th>
                             @endforeach
                         </tr></thead>
                         <tbody>
@@ -134,12 +134,13 @@
                                     <td>{{ $row->uom_name ?: '—' }}</td>
                                     <td class="text-right">{{ number_format($row->order_count) }}</td>
                                     <td class="text-right font-weight-bold">{{ number_format($row->total_quantity) }}</td>
+                                    <td class="text-right font-weight-bold">${{ number_format($row->total_amount, 2) }}</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="7"><div class="empty-placeholder"><i class="bx bx-package"></i><p>{{ __('consolidated_product_quantity.empty') }}</p></div></td></tr>
+                                <tr><td colspan="8"><div class="empty-placeholder"><i class="bx bx-package"></i><p>{{ __('consolidated_product_quantity.empty') }}</p></div></td></tr>
                             @endforelse
                         </tbody>
-                        <tfoot><tr><td colspan="5">{{ __('consolidated_product_quantity.total') }}</td><td class="text-right">{{ number_format($summary->order_count) }}</td><td class="text-right">{{ number_format($summary->total_quantity) }}</td></tr></tfoot>
+                        <tfoot><tr><td colspan="5">{{ __('consolidated_product_quantity.total') }}</td><td class="text-right">{{ number_format($summary->order_count) }}</td><td class="text-right">{{ number_format($summary->total_quantity) }}</td><td class="text-right">${{ number_format($summary->total_amount, 2) }}</td></tr></tfoot>
                     </table>
                 </div>
                 @include('admin::pages.report.customerRemaining.pagination', ['paginator' => $rows])

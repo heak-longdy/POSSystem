@@ -141,12 +141,24 @@ try {
         const downloaded = files().map(name => ({ name, time: fs.statSync(path.join(downloads, name)).mtimeMs })).sort((a,b) => b.time-a.time)[0].name;
         await workbook.xlsx.readFile(path.join(downloads, downloaded));
         const sheet = workbook.worksheets[0];
-        assert.equal(sheet.columnCount, 7);
+        assert.equal(sheet.columnCount, 8);
         assert.equal(sheet.getCell('C2').value, 'Tea & ទឹកតែ');
         assert.equal(sheet.getCell('F2').value, 2);
         assert.equal(sheet.getCell('G2').value, 12);
         assert.equal(sheet.getCell('G3').value, 12);
         assert.equal(sheet.getCell('G2').numFmt, '#,##0');
+        assert.equal(sheet.getCell('H1').value, locale === 'en' ? 'Total Amount' : 'ចំនួនទឹកប្រាក់សរុប');
+        assert.equal(sheet.getCell('H2').value, 1234.56);
+        assert.equal(sheet.getCell('H3').value, 1234.56);
+        assert.equal(sheet.getCell('H2').numFmt, '$#,##0.00');
+        assert.equal(sheet.getCell('H3').numFmt, '$#,##0.00');
+        assert.equal(await evaluate(`document.querySelector('.report-data-table tbody tr td:last-child').textContent`), '$1,234.56');
+        await send('Emulation.setEmulatedMedia', { media: 'print' });
+        assert.equal(await evaluate(`document.querySelector('.report-data-table thead th:last-child').textContent`), sheet.getCell('H1').value);
+        assert.equal(await evaluate(`document.querySelector('.report-data-table tfoot td:last-child').textContent`), '$1,234.56');
+        const pdf = await send('Page.printToPDF', { printBackground: true });
+        fs.writeFileSync(path.join(fixtures, `${locale}.pdf`), Buffer.from(pdf.data, 'base64'));
+        await send('Emulation.setEmulatedMedia', { media: '' });
         assert.deepEqual(await evaluate('alerts'), []);
         responseStatus = 403;
         await click('.btn-excel-export');
@@ -174,7 +186,7 @@ try {
         await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
     }
     assert.deepEqual(errors, []);
-    console.log('Consolidated quantity: calendars, Select2, tab isolation, mobile layout and native Excel downloads passed in English and Khmer.');
+    console.log('Consolidated quantity: amounts, browser print, calendars, Select2, tab isolation, mobile layout and native Excel downloads passed in English and Khmer.');
 } finally {
     ws.close(); server.close(); fs.rmSync(fixtures, { recursive: true, force: true });
 }
