@@ -16,7 +16,11 @@ class OrderPricing
             return null;
         }
         $value = trim((string) $value);
-        if (!preg_match('/^([0-9]+)(?:\.([0-9]{0,2}))?$/D', $value, $parts)) {
+        $value = strtr($value, [
+            '០' => '0', '១' => '1', '២' => '2', '៣' => '3', '៤' => '4',
+            '៥' => '5', '៦' => '6', '៧' => '7', '៨' => '8', '៩' => '9',
+        ]);
+        if (!preg_match('/^([0-9]+)(?:[.,]([0-9]{0,2}))?$/D', $value, $parts)) {
             return null;
         }
         $whole = ltrim($parts[1], '0') ?: '0';

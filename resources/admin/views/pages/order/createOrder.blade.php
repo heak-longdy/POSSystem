@@ -12,7 +12,7 @@
 @section('layout')
     @include('admin::shared.header', ['header_name' => $headerName])
     <div class="form-admin booking booking-dashboard booking-order-ui" x-data="XDatacreateorder"
-        x-id="['order-date', 'delivery-date', 'order-quantity-error']">
+        x-id="['order-date', 'delivery-date', 'order-quantity-error', 'order-unit-price-error']">
         <div class="booking-pos-workspace">
             <div class="booking-pos-header">
                 <div class="form-header">
@@ -192,6 +192,13 @@
                                 <span x-text="quantityValidationMessage()"></span>
                             </div>
                         </template>
+                        <template x-if="unitPriceValidationMessage()">
+                            <div class="booking-error-summary booking-unit-price-error" role="alert"
+                                :id="$id('order-unit-price-error')">
+                                <span x-html="getValidationIcon(unitPriceValidationMessage())" aria-hidden="true"></span>
+                                <span x-text="unitPriceValidationMessage()"></span>
+                            </div>
+                        </template>
                         <!-- Empty State -->
                         <template x-if="!dataCart?.length">
                             <div class="booking-pos-items-empty">
@@ -280,14 +287,17 @@
                                                     <div class="cell-label-mobile">{{ __('order.unit_price') }}</div>
                                                     <template x-if="item.product_type === 'product'">
                                                         <div class="item-price-editor">
-                                                            <div class="booking-discount-group">
+                                                            <div class="booking-discount-group"
+                                                                :class="{ 'has-unit-price-error': hasUnitPriceValidationError(item) }">
                                                                 <input type="text" inputmode="decimal" data-cart-price
                                                                     x-model.unintrusive="item.itemData.unitPrice"
                                                                     :disabled="!canEditOrderItems()"
                                                                     :aria-invalid="!validProductPrice(item)"
+                                                                    :aria-describedby="hasUnitPriceValidationError(item) ? $id('order-unit-price-error') : null"
                                                                     aria-label="{{ __('order.unit_price') }} (USD)"
                                                                     @input="priceRealTimeAction(item)"
-                                                                    @blur="normalizeUnitPrice(item)">
+                                                                    @blur="normalizeUnitPrice(item, $event)"
+                                                                    @change="normalizeUnitPrice(item, $event)">
                                                             </div>
                                                             <small class="item-original-price" data-original-price>
                                                                 <span>{{ __('order.original_price') }}:</span>
@@ -720,10 +730,12 @@
                     .form-admin.booking.booking-dashboard.booking-order-ui .booking-pos-items-section :is(button, button span) {
                         line-height: 1.5 !important;
                     }
-                    .booking-order-ui .booking-pos-items-section .booking-quantity-error {
+                    .booking-order-ui .booking-pos-items-section .booking-quantity-error,
+                    .booking-order-ui .booking-pos-items-section .booking-unit-price-error {
                         display: flex; align-items: flex-start; gap: 6px; margin: 16px 20px;
                     }
-                    .booking-order-ui .booking-quantity-error > span:first-child {
+                    .booking-order-ui .booking-quantity-error > span:first-child,
+                    .booking-order-ui .booking-unit-price-error > span:first-child {
                         display: inline-flex; flex-shrink: 0; margin-top: 2px;
                     }
                     .booking-order-ui .booking-pos-items-empty {
@@ -822,7 +834,8 @@
                     .booking-order-ui .order-items-table :is(.booking-discount-group, .booking-pos-qty-pill):focus-within {
                         border-color: var(--order-accent) !important; box-shadow: 0 0 0 3px rgba(37, 99, 235, .1) !important;
                     }
-                    .booking-order-ui .order-items-table .booking-pos-qty-pill.has-quantity-error {
+                    .booking-order-ui .order-items-table .booking-pos-qty-pill.has-quantity-error,
+                    .booking-order-ui .order-items-table .booking-discount-group.has-unit-price-error {
                         border-color: #ef4444 !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, .12) !important;
                     }
                     .booking-order-ui .order-items-table .discount-prefix-select {
@@ -2971,7 +2984,8 @@
                 },
                 usdCents(value) {
                     if (!['string', 'number'].includes(typeof value)) return null;
-                    const match = String(value).trim().match(/^([0-9]+)(?:\.([0-9]{0,2}))?$/);
+                    const clean = String(value).trim().replace(/[០-៩]/g, d => String(d.charCodeAt(0) - 0x17E0));
+                    const match = clean.match(/^([0-9]+)(?:[.,]([0-9]{0,2}))?$/);
                     if (!match) return null;
                     const cents = Number(match[1]) * 100 + Number((match[2] || '').padEnd(2, '0'));
                     return Number.isSafeInteger(cents) && cents <= 999999999999999 ? cents : null;
@@ -2996,9 +3010,11 @@
                 validProductPrice(item) {
                     if (this.isAutomaticProduct(item)) return this.automaticProductAmounts(item) !== null;
                     const data = item?.itemData;
+                    const clean = String(data?.unitPrice ?? '').replace(/[០-៩]/g, d => String(d.charCodeAt(0) - 0x17E0)).replace(',', '.');
+                    const numericUnit = Number(clean);
                     return data?.pricingMethod == null && data?.unitPrice !== ''
-                        && Number.isFinite(Number(data?.unitPrice))
-                        && Number(data.unitPrice) === data.legacyUnitPrice;
+                        && Number.isFinite(numericUnit)
+                        && numericUnit === data.legacyUnitPrice;
                 },
                 cartUnitDiscount(item) {
                     if (this.isAutomaticProduct(item)) return this.automaticProductAmounts(item)?.discount ?? 0;
@@ -3016,10 +3032,16 @@
                     data.unitPrice = exactCents ? this.usdString(Math.round(rounded * 100)) : String(unit);
                     data.pricingMethod = 'auto_unit_price_v1';
                 },
-                normalizeUnitPrice(item) {
+                normalizeUnitPrice(item, event = null) {
                     if (!this.canEditOrderItems() || !this.isAutomaticProduct(item)) return;
-                    const cents = this.usdCents(item.itemData.unitPrice);
-                    if (cents !== null) item.itemData.unitPrice = this.usdString(cents);
+                    const cents = this.usdCents(item?.itemData?.unitPrice);
+                    if (cents !== null) {
+                        const normalized = this.usdString(cents);
+                        item.itemData.unitPrice = normalized;
+                        if (event?.target && event.target.value !== normalized) {
+                            event.target.value = normalized;
+                        }
+                    }
                 },
                 cartQuantity(item) {
                     return item?.product_type === 'service' ? 1 : Math.max(1, Math.trunc(Number(item?.product_qty || 1)));
@@ -3267,8 +3289,10 @@
                     if (!this.canEditOrderItems()) return;
                     if (item.product_type === 'product') {
                         const data = item.itemData;
+                        const clean = String(data?.unitPrice ?? '').replace(/[០-៩]/g, d => String(d.charCodeAt(0) - 0x17E0)).replace(',', '.');
+                        const numericUnit = Number(clean);
                         if (data.pricingMethod !== 'auto_unit_price_v1'
-                            && (data.unitPrice === '' || Number(data.unitPrice) !== data.legacyUnitPrice)) {
+                            && (data.unitPrice === '' || numericUnit !== data.legacyUnitPrice)) {
                             data.pricingMethod = 'auto_unit_price_v1';
                         }
                         this.calculatorProductPrice();
@@ -3563,6 +3587,14 @@
                             payment_status: ['Only pending orders can be updated.']
                         });
                         return;
+                    }
+
+                    if (this.dataCart?.length) {
+                        this.dataCart.forEach((item) => {
+                            if (this.isAutomaticProduct(item)) {
+                                this.normalizeUnitPrice(item);
+                            }
+                        });
                     }
 
                     const clientErrors = this.validateOrderBeforeSubmit();
@@ -3929,10 +3961,20 @@
                     return Boolean(this.quantityValidationMessage()) && item?.product_type === 'product'
                         && (!Number.isSafeInteger(Number(item.product_qty)) || Number(item.product_qty) < 1);
                 },
+                unitPriceValidationMessage() {
+                    const messages = this.dataError?.dataCarts;
+                    return (Array.isArray(messages) ? messages : [messages])
+                        .find((message) => message === @json(__('order.validation.unit_price_invalid'))) || '';
+                },
+                hasUnitPriceValidationError(item) {
+                    return Boolean(this.unitPriceValidationMessage()) && item?.product_type === 'product'
+                        && !this.validProductPrice(item);
+                },
                 validationMessages(section = null) {
                     return Object.values(this.dataError || {})
                         .flatMap((messages) => Array.isArray(messages) ? messages : [messages])
-                        .filter((message) => message && (section !== 'details' || message !== this.quantityValidationMessage()));
+                        .filter((message) => message && (section !== 'details'
+                            || (message !== this.quantityValidationMessage() && message !== this.unitPriceValidationMessage())));
                 },
                 getValidationIcon(message = '') {
                     const text = String(message || '').toLowerCase();

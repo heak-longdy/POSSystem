@@ -1241,12 +1241,17 @@ class OrderController extends Controller
     {
         $pricing = app(OrderPricing::class);
         $unit = $itemData->unitPrice ?? null;
+        $normalizedUnit = is_string($unit) ? strtr(trim($unit), [
+            '០' => '0', '១' => '1', '២' => '2', '៣' => '3', '៤' => '4',
+            '៥' => '5', '៦' => '6', '៧' => '7', '៨' => '8', '៩' => '9',
+        ]) : $unit;
+        $normalizedUnit = is_string($normalizedUnit) ? str_replace(',', '.', $normalizedUnit) : $normalizedUnit;
         if ($source && $source->pricing_method === null
             && ($itemData->pricingMethod ?? null) !== OrderPricing::AUTOMATIC
-            && is_numeric($unit) && is_finite((float) $unit)) {
+            && is_numeric($normalizedUnit) && is_finite((float) $normalizedUnit)) {
             $legacyUnit = $pricing->legacyUnitPrice($source);
             // Preserve the historical rule and fractional-cent rounding until a price edit.
-            if (abs((float) $unit - $legacyUnit) <= max(1, abs($legacyUnit)) * PHP_FLOAT_EPSILON * 4) {
+            if (abs((float) $normalizedUnit - $legacyUnit) <= max(1, abs($legacyUnit)) * PHP_FLOAT_EPSILON * 4) {
                 return [
                     'price' => $source->price,
                     'product_discount' => $source->product_discount,

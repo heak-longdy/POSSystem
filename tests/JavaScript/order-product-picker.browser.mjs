@@ -341,6 +341,20 @@ try {
     assert.equal(await evaluate(`Boolean(${order}.validateOrderBeforeSubmit().dataCarts)`), true);
     await input('[data-cart-price]', '9.30');
     assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$0.00');
+
+    // Test Khmer comma decimal input and automatic normalization to dot format
+    await click('[data-cart-price]');
+    await input('[data-cart-price]', '');
+    for (const [text, expected] of [['8', '8'], [',', '8,'], ['3', '8,3'], ['0', '8,30']]) {
+        await send('Input.insertText', { text });
+        assert.equal(await evaluate(`document.querySelector('[data-cart-price]').value`), expected);
+        assert.equal(await evaluate(`document.querySelector('[data-automatic-discount]').textContent`), '$1.00');
+        assert.equal(await evaluate(`${order}.amountPaid`), 24.9);
+    }
+    assert.equal(await evaluate(`Boolean(${order}.validateOrderBeforeSubmit().dataCarts)`), false);
+    await evaluate(`document.querySelector('[data-cart-price]').blur()`);
+    assert.equal(await evaluate(`document.querySelector('[data-cart-price]').value`), '8.30');
+
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
     await click('[data-cart-price]');
     fs.writeFileSync(path.join(os.tmpdir(), 'pos-order-automatic-discount-mobile.png'), Buffer.from((await send('Page.captureScreenshot')).data, 'base64'));

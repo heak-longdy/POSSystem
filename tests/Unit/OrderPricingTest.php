@@ -45,12 +45,26 @@ class OrderPricingTest extends TestCase
         foreach (['9' => 900, '9.' => 900, '9.00' => 900, '0.29' => 29, '0' => 0] as $value => $expected) {
             $this->assertSame($expected, $pricing->usdCents($value));
         }
-        foreach (['', '-1', '9.001', 'NaN', '1e2', '0.5oops', '10000000000000', INF, true, [], null] as $value) {
+        foreach (['8,30' => 830, '9,' => 900, '9,00' => 900, '0,29' => 29, '៨,៣០' => 830, '៨.៣០' => 830] as $value => $expected) {
+            $this->assertSame($expected, $pricing->usdCents($value));
+        }
+        foreach (['', '-1', '9.001', '9,001', 'NaN', '1e2', '0.5oops', '10000000000000', INF, true, [], null, '8,,30', '8..30', '8.,30'] as $value) {
             $this->assertNull($pricing->usdCents($value));
         }
         $this->assertNull($pricing->automaticAmounts('9999999999999.99', '1', 2));
         $this->assertSame(999999999999999, $pricing->usdCents('9999999999999.99'));
         $this->assertSame('9999999999999.99', $pricing->usdString(OrderPricing::MAX_CENTS));
+
+        // Comma-based decimal in automaticAmounts normalizes unit_price to standard dot format
+        $amounts = $pricing->automaticAmounts('9.30', '8,30', 2);
+        $this->assertNotNull($amounts);
+        $this->assertSame('8.30', $amounts['unit_price']);
+        $this->assertSame('9.30', $amounts['original_price']);
+        $this->assertEquals(9.3, $amounts['price']);
+        $this->assertEquals(1.0, $amounts['product_discount']);
+        $this->assertEquals(18.6, $amounts['subtotal']);
+        $this->assertEquals(2.0, $amounts['discount']);
+        $this->assertEquals(16.6, $amounts['total']);
     }
 
     public function test_automatic_totals_ignore_stale_compatibility_discount_and_price(): void
