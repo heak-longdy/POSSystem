@@ -28,4 +28,13 @@ return [
     'unknown_product' => 'Product #:id',
     'order_count_note' => 'The total order count counts each order once, even when it contains multiple products.',
     'sheet_name' => 'Consolidated Product Qty',
+    'actions' => 'Actions',
+    'view_details' => 'View Details',
+    'order_item_details' => 'Order Item Details',
+    'details_description' => 'Original order items matching the consolidated report filters.',
+    'invoice_number' => 'Invoice Number',
+    'order_date' => 'Order Date',
+    'quantity' => 'Quantity',
+    'unit_price' => 'Unit Price',
+    'no_order_items' => 'No order items found for the selected filters.',
 ];

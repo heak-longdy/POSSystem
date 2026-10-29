@@ -227,7 +227,24 @@ class ConsolidatedProductQuantityReportTest extends TestCase
             $this->assertStringContainsString('$36.00', $html);
             $this->assertStringContainsString('Tea &amp; ទឹកតែ', $html);
             $this->assertStringContainsString('exceljs.min.js', $html);
+            $this->assertStringContainsString(__('consolidated_product_quantity.actions'), $html);
+            $this->assertStringContainsString(__('consolidated_product_quantity.view_details'), $html);
+            $this->assertStringContainsString('openDetailsModal(1)', $html);
+            $this->assertStringNotContainsString('view_order_item_details', $html);
+            $this->assertStringNotContainsString('View Order Item Details', $html);
             $this->assertStringNotContainsString('consolidated_product_quantity.', $html);
         }
+    }
+
+    public function test_details_route_returns_json_for_product_order_items(): void
+    {
+        $response = $this->getJson(self::URL . '/details?' . http_build_query($this->filters(['product_id' => 1])));
+        $response->assertOk()
+            ->assertJsonPath('status', 'success');
+
+        $this->assertEquals(1, $response->json('filters.product_id'));
+        $this->assertEquals(3, count($response->json('rows.data')));
+        $this->assertEquals('Tea & ទឹកតែ', $response->json('rows.data.0.product_name'));
+        $this->assertEquals(1, $response->json('rows.data.0.product_id'));
     }
 }

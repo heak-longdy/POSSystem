@@ -421,6 +421,7 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         ], function () {
             Route::get('/', [ConsolidatedProductQuantityReportController::class, 'index'])->name('index');
             Route::get('report', [ConsolidatedProductQuantityReportController::class, 'report'])->name('report');
+            Route::get('details', [ConsolidatedProductQuantityReportController::class, 'details'])->name('details');
         });
 
         // Report Management - Sales Report

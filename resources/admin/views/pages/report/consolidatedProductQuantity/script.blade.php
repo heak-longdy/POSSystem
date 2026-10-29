@@ -3,6 +3,10 @@
         const register = () => Alpine.data('xConsolidatedProductQuantityReport', () => ({
             exportLoading: false,
             filterValues: {},
+            showDetailsModal: false,
+            detailsLoading: false,
+            detailsData: null,
+            detailsProductId: null,
             init() {
                 this.$nextTick(() => {
                     this.initDatepickers();
@@ -39,6 +43,7 @@
                 syncFrom(); syncTo();
             },
             destroy() {
+                this.closeDetailsModal();
                 if (!window.jQuery) return;
                 $(this.$refs.filterForm).find('select.select2').each((index, element) => {
                     const $select = $(element).off('.consolidatedQuantity');
@@ -57,6 +62,78 @@
             },
             resetFilter(name) {
                 $(this.$refs.filterForm).find(`select[name="${name}"]`).val('').trigger('change');
+            },
+            async openDetailsModal(productId = null, page = 1) {
+                this.showDetailsModal = true;
+                this.detailsLoading = true;
+                this.detailsProductId = productId;
+                this.detailsData = null;
+                try {
+                    const params = this.getExportParams();
+                    if (productId) {
+                        params.set('product_id', productId);
+                    }
+                    if (page > 1) {
+                        params.set('page', page);
+                    }
+                    const url = `{{ route('admin-' . $routeName . '-details') }}?` + params.toString();
+                    const response = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to load details');
+                    this.detailsData = await response.json();
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    this.detailsLoading = false;
+                }
+            },
+            closeDetailsModal() {
+                this.showDetailsModal = false;
+                this.detailsData = null;
+                this.detailsProductId = null;
+            },
+            fetchDetails(productId = null, page = 1) {
+                this.openDetailsModal(productId, page);
+            },
+            async openDetailsModal(productId = null, page = 1) {
+                this.showDetailsModal = true;
+                this.detailsLoading = true;
+                this.detailsProductId = productId !== null ? productId : this.detailsProductId;
+                this.detailsData = null;
+                try {
+                    const params = this.getExportParams();
+                    if (this.detailsProductId) {
+                        params.set('product_id', this.detailsProductId);
+                    }
+                    if (page > 1) {
+                        params.set('page', page);
+                    }
+                    const url = `{{ route('admin-' . $routeName . '-details') }}?` + params.toString();
+                    const response = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to load details');
+                    this.detailsData = await response.json();
+                } catch (error) {
+                    console.error(error);
+                } finally {
+                    this.detailsLoading = false;
+                }
+            },
+            closeDetailsModal() {
+                this.showDetailsModal = false;
+                this.detailsData = null;
+                this.detailsProductId = null;
+            },
+            fetchDetails(productId = null, page = 1) {
+                this.openDetailsModal(productId !== null ? productId : this.detailsProductId, page);
             },
             @include('admin::pages.report.partials.excel-request')
             getExportParams() {

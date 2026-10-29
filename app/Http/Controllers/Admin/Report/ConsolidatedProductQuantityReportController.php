@@ -65,6 +65,35 @@ class ConsolidatedProductQuantityReportController extends Controller
         ]);
     }
 
+    public function details(Request $request)
+    {
+        $filters = $this->filters($request);
+        $rows = $this->filteredQuery($filters)
+            ->join('orders as source_order', 'source_order.id', '=', 'detail.order_id')
+            ->leftJoin('shops as shop', 'shop.id', '=', 'orders.shop_id')
+            ->select('detail.*', 'orders.invoice_number', 'source_order.order_date', 'shop.name as shop_name',
+                'product.code as product_code', 'product.name as product_name',
+                'category.name as category_name', 'uom.name as uom_name')
+            ->orderByDesc('source_order.order_date')->orderByDesc('detail.order_id')->orderBy('detail.id')
+            ->paginate(50)->appends($filters);
+
+        $pricing = app(OrderPricing::class);
+        $rows->getCollection()->each(function ($row) use ($pricing) {
+            $detail = (new OrderDetail())->setRawAttributes((array) $row);
+            $row->quantity = (int) ($detail->qty ?? 1);
+            $row->effective_unit_price = $detail->pricing_method === OrderPricing::AUTOMATIC
+                ? (float) $detail->unit_price : $pricing->legacyUnitPrice($detail);
+            $row->total_amount = $this->lineAmountCents($detail, $pricing) / 100;
+            $row->order_date_formatted = $row->order_date ? Carbon::parse($row->order_date)->format('Y-m-d H:i') : '—';
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'filters' => $filters,
+            'rows' => $rows,
+        ]);
+    }
+
     private function filters(Request $request): array
     {
         $filters = $request->validate([
@@ -153,17 +182,22 @@ class ConsolidatedProductQuantityReportController extends Controller
         $amounts = [];
         foreach ($query->select('detail.*')->cursor() as $line) {
             $detail = (new OrderDetail())->setRawAttributes((array) $line);
-            // Preserve the report's quantity rules, including zero and legacy null qty.
-            $qty = (int) ($detail->qty ?? 1);
-            if ($detail->pricing_method === OrderPricing::AUTOMATIC) {
-                $cents = $pricing->usdCents($detail->unit_price) * $qty;
-            } else {
-                // Use the same PHP rounding as OrderPricing::line for fractional-cent discounts.
-                $cents = (int) round(round($pricing->legacyUnitPrice($detail) * $qty, 2) * 100);
-            }
+            $cents = $this->lineAmountCents($detail, $pricing);
             $amounts[$detail->product_id] = ($amounts[$detail->product_id] ?? 0) + $cents;
         }
 
         return $amounts;
+    }
+
+    private function lineAmountCents(OrderDetail $detail, OrderPricing $pricing): int
+    {
+        // Preserve the report's quantity rules, including zero and legacy null qty.
+        $qty = (int) ($detail->qty ?? 1);
+        if ($detail->pricing_method === OrderPricing::AUTOMATIC) {
+            return $pricing->usdCents($detail->unit_price) * $qty;
+        }
+
+        // Use the same PHP rounding as OrderPricing::line for fractional-cent discounts.
+        return (int) round(round($pricing->legacyUnitPrice($detail) * $qty, 2) * 100);
     }
 }
