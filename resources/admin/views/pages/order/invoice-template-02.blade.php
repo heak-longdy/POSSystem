@@ -27,6 +27,12 @@
     $printAreaId = $printAreaId ?? "posSlipPrintArea_{$printLocale}";
 @endphp
 
+<style>
+.trHeight{
+    height: 30px !important;
+}
+</style>
+
 <div class="pos-slip-sheet" id="{{ $printAreaId }}">
     <!-- Header Top Section -->
     <div class="slip-top-row">
@@ -57,7 +63,7 @@
         <div class="slip-info-col col-cust">
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_name', [], $printLocale) }}</span>
-                <span class="info-val">@if($customerCode)<span class="cust-code">{{ $customerCode }}</span>@endif {{ $cName }}</span>
+                <span class="info-val"><span class="cust-code">{{ $customerCode ? $customerCode : $cName }}</span></span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_address', [], $printLocale) }}</span>
@@ -209,27 +215,26 @@
         <div class="slip-bottom-right">
             <table class="slip-calc-table">
                 <tbody>
-                    <tr>
+                    <tr class="trHeight">
                         <td class="slip-calc-label inv-foot-calc-label">{{ __('order.invoice.prev_balance', [], $printLocale) }}</td>
                         <td class="slip-calc-value inv-foot-calc-value">${{ number_format((float) ($invoicePreviousBalance ?? 0), 2) }}</td>
                     </tr>
-                    <tr>
+                    <tr class="trHeight">
                         <td class="slip-calc-label inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>
                         <td class="slip-calc-value inv-foot-calc-value font-bold">
                             ${{ number_format((float) ($order->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
                         </td>
                     </tr>
-                    <tr>
+                    <tr class="trHeight">
                         <td class="slip-calc-label inv-foot-calc-label">{{ __('order.invoice.paid', [], $printLocale) }}</td>
                         <td class="slip-calc-value inv-foot-calc-value">
-                            {{ (float) ($order->paid_amount ?? 0) > 0 ? '$' . number_format((float) $order->paid_amount, 2) : '' }}
+                            {{-- {{ (float) ($order->paid_amount ?? 0) > 0 ? '$' . number_format((float) $order->paid_amount, 2) : '' }} --}}
                         </td>
                     </tr>
-                    <tr>
+                    {{-- ${{ number_format(max(0, (float) ($order->remaining_amount ?? 0)), 2) }} --}}
+                    <tr class="trHeight">
                         <td class="slip-calc-label inv-foot-calc-label">{{ __('order.invoice.balance_due', [], $printLocale) }}</td>
-                        <td class="slip-calc-value inv-foot-calc-value">
-                            ${{ number_format(max(0, (float) ($order->remaining_amount ?? 0)), 2) }}
-                        </td>
+                        <td class="slip-calc-value inv-foot-calc-value"></td>
                     </tr>
                 </tbody>
             </table>

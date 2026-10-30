@@ -29,6 +29,12 @@
     $printAreaId = $printAreaId ?? "posInvoicePrintArea_{$printLocale}";
 @endphp
 
+<style>
+.trHeight{
+    height: 30px !important;
+}
+</style>
+
 <div class="pos-invoice-sheet" id="{{ $printAreaId }}">
     <!-- Invoice Header Block -->
     <div class="inv-header-row">
@@ -166,7 +172,7 @@
         </tbody>
         <tfoot>
             <!-- Dual Signatures (Cols 1-4) & Financial Summary (Cols 5-6) -->
-            <tr>
+            <tr class="trHeight">
                 <td colspan="4" rowspan="4" class="inv-foot-signatures-cell">
                     <div class="inv-signatures-wrap">
                         <div class="inv-signature-col buyer-sig">
@@ -190,22 +196,22 @@
                 <td class="inv-foot-calc-label">{{ __('order.invoice.prev_balance', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">${{ number_format((float) ($invoicePreviousBalance ?? 0), 2) }}</td>
             </tr>
-            <tr>
+            <tr class="trHeight">
                 <td class="inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value font-bold">
                     ${{ number_format((float) ($order->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
                 </td>
             </tr>
-            <tr>
+            <tr class="trHeight">
                 <td class="inv-foot-calc-label">{{ __('order.invoice.paid', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">
-                    {{ (float) ($order->paid_amount ?? 0) > 0 ? '$' . number_format((float) $order->paid_amount, 2) : '' }}
+                    {{-- {{ (float) ($order->paid_amount ?? 0) > 0 ? '$' . number_format((float) $order->paid_amount, 2) : '' }} --}}
                 </td>
             </tr>
-            <tr>
+            <tr class="trHeight">
                 <td class="inv-foot-calc-label">{{ __('order.invoice.balance_due', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value">
-                    ${{ number_format(max(0, (float) ($order->remaining_amount ?? 0)), 2) }}
+                    {{-- ${{ number_format(max(0, (float) ($order->remaining_amount ?? 0)), 2) }} --}}
                 </td>
             </tr>
         </tfoot>

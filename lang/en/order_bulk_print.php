@@ -17,8 +17,8 @@ return [
         'to_date' => 'To Date',
         'search' => 'Search orders...',
         'search_placeholder' => 'Invoice #, shop, customer, product...',
-        'apply' => 'Apply Filters',
-        'reset' => 'Reset Filters',
+        'apply' => 'Filters',
+        'reset' => 'Reset',
         'all_statuses' => 'All Statuses',
     ],
 

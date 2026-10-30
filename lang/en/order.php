@@ -274,7 +274,7 @@ return [
         'balance_due' => 'Balance Due',
         'sample_coca' => 'Coca-Cola Bottle 380ml',
 
-        'slip_title' => 'DELIVERY SLIP',
+        'slip_title' => 'Invoice',
         'slip_draft' => '(DRAFT) OEB',
         'slip_inv_no' => 'Inv. No.',
         'slip_issue_date' => 'Issue Date',
