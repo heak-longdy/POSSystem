@@ -143,6 +143,12 @@ return [
         'no'                 => 'No',
     ],
 
+    // Options
+    'option' => [
+        'yes' => 'Yes',
+        'no'  => 'No',
+    ],
+
     // Empty states
     'empty' => [
         'title'                          => 'No data found',

@@ -143,6 +143,12 @@ return [
         'no'                 => 'ទេ',
     ],
 
+    // Options
+    'option' => [
+        'yes' => 'បាទ/ចាស',
+        'no'  => 'ទេ',
+    ],
+
     // Empty states
     'empty' => [
         'title'                          => 'មិនមានទិន្នន័យទេ',

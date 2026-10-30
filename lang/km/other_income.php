@@ -171,10 +171,19 @@ return [
         'name'               => 'ឈ្មោះប្រភេទ',
         'code'               => 'លេខកូដប្រភេទ',
         'requires_supplier'  => 'តម្រូវឲ្យជ្រើសរើសអ្នកផ្គត់ផ្គង់',
+        'requires_supplier_yes' => 'បាទ/ចាស',
+        'requires_supplier_no'  => 'ទេ',
+        'requires_supplier_options' => [
+            'yes' => 'បាទ/ចាស',
+            'no'  => 'ទេ',
+        ],
         'description'        => 'ការពិពណ៌នា',
         'ordering'           => 'លំដាប់បង្ហាញ',
         'status'             => 'ស្ថានភាព',
         'is_system'          => 'ប្រភេទប្រព័ន្ធ',
+        'placeholder_name'   => 'ឧ. ប្រាក់លើកទឹកចិត្តបរិមាណអ្នកផ្គត់ផ្គង់',
+        'placeholder_code'   => 'ឧ. supplier_bonus',
+        'placeholder_description' => 'ការពិពណ៌នាអំពីប្រភេទចំណូលនេះ...',
     ],
 
     'validation' => [

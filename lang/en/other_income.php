@@ -171,10 +171,19 @@ return [
         'name'               => 'Category Name',
         'code'               => 'Unique Code',
         'requires_supplier'  => 'Requires Supplier Selection',
+        'requires_supplier_yes' => 'Yes',
+        'requires_supplier_no'  => 'No',
+        'requires_supplier_options' => [
+            'yes' => 'Yes',
+            'no'  => 'No',
+        ],
         'description'        => 'Description',
         'ordering'           => 'Display Order',
         'status'             => 'Status',
         'is_system'          => 'System Category',
+        'placeholder_name'   => 'e.g. Supplier Volume Bonus',
+        'placeholder_code'   => 'e.g. supplier_bonus',
+        'placeholder_description' => 'Description of this income category...',
     ],
 
     'validation' => [

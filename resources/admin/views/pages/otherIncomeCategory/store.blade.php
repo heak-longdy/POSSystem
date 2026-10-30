@@ -15,7 +15,7 @@
                 <div class="row-2">
                     <div class="form-row iconInput">
                         <label>{{ __('other_income.category.name') }} <span>*</span></label>
-                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="e.g. Supplier Volume Bonus" required>
+                        <input type="text" name="name" value="{!! request('id') ? $data?->name : old('name') !!}" placeholder="{{ __('other_income.category.placeholder_name') }}" required>
                         <i class='bx bx-font-family'></i>
                         @error('name')
                             <label class="error">{{ $message }}</label>
@@ -24,7 +24,7 @@
 
                     <div class="form-row iconInput">
                         <label>{{ __('other_income.category.code') }} <span>*</span></label>
-                        <input type="text" name="code" value="{!! request('id') ? $data?->code : old('code') !!}" placeholder="e.g. supplier_bonus" required {!! request('id') && $data?->is_system ? 'readonly' : '' !!}>
+                        <input type="text" name="code" value="{!! request('id') ? $data?->code : old('code') !!}" placeholder="{{ __('other_income.category.placeholder_code') }}" required {!! request('id') && $data?->is_system ? 'readonly' : '' !!}>
                         <i class='bx bx-code'></i>
                         @error('code')
                             <label class="error">{{ $message }}</label>
@@ -36,8 +36,8 @@
                     <div class="form-row">
                         <label>{{ __('other_income.category.requires_supplier') }}</label>
                         <select name="requires_supplier" id="requires_supplier">
-                            <option value="0" {!! (request('id') && !$data?->requires_supplier) || old('requires_supplier') == '0' ? 'selected' : '' !!}>{{ __('global.option.no') }}</option>
-                            <option value="1" {!! (request('id') && $data?->requires_supplier) || old('requires_supplier') == '1' ? 'selected' : '' !!}>{{ __('global.option.yes') }}</option>
+                            <option value="0" {!! (request('id') && !$data?->requires_supplier) || old('requires_supplier') == '0' ? 'selected' : '' !!}>{{ __('other_income.category.requires_supplier_options.no') }}</option>
+                            <option value="1" {!! (request('id') && $data?->requires_supplier) || old('requires_supplier') == '1' ? 'selected' : '' !!}>{{ __('other_income.category.requires_supplier_options.yes') }}</option>
                         </select>
                         @error('requires_supplier')
                             <label class="error">{{ $message }}</label>
@@ -57,7 +57,7 @@
                 <div class="row-1">
                     <div class="form-row">
                         <label>{{ __('other_income.category.description') }}</label>
-                        <textarea name="description" rows="3" placeholder="Description of this income category...">{!! request('id') ? $data?->description : old('description') !!}</textarea>
+                        <textarea name="description" rows="3" placeholder="{{ __('other_income.category.placeholder_description') }}">{!! request('id') ? $data?->description : old('description') !!}</textarea>
                         @error('description')
                             <label class="error">{{ $message }}</label>
                         @enderror
