@@ -4,6 +4,7 @@
     $isConsolidated = ($documentType ?? '') === 'consolidated';
     $isInvoice = ($documentType ?? 'invoice') === 'invoice';
     $isDeliverySlip = ($documentType ?? '') === 'delivery_slip';
+    $hasSidebar = $isInvoice || $isDeliverySlip;
 
     if ($isConsolidated) {
         $docTitle = __('order_bulk_print.preview.title_consolidated');
@@ -13,6 +14,12 @@
         $docTitle = __('order_bulk_print.preview.title_delivery_slip');
     }
     $headerTitle = $docTitle . ' (' . ($totalCount ?? 0) . ')';
+    $sidebarTitle = $isDeliverySlip
+        ? __('order_bulk_print.preview.delivery_slip_list')
+        : __('order_bulk_print.preview.invoice_list');
+    $selectToPrintMsg = $isDeliverySlip
+        ? __('order_bulk_print.preview.select_to_print_slip')
+        : __('order_bulk_print.preview.select_to_print');
 @endphp
 
 @section('title')
@@ -905,7 +912,7 @@
                     <div class="toolbar-title">
                         <span>{{ $docTitle }}</span>
                         <span class="toolbar-badge"
-                            @if ($isInvoice)
+                            @if ($hasSidebar)
                                 x-text="@js(__('order_bulk_print.preview.meta_docs', ['count' => ':count'])).replace(':count', selectedInvoiceIds.length)"
                             @endif>
                             {{ __('order_bulk_print.preview.meta_docs', ['count' => $totalCount]) }}
@@ -977,11 +984,11 @@
                 </div>
             </header>
 
-            @if ($isInvoice)
+            @if ($hasSidebar)
                 <div class="bulk-invoice-layout">
-                    <aside class="bulk-invoice-sidebar no-print" aria-label="{{ __('order_bulk_print.preview.invoice_list') }}">
+                    <aside class="bulk-invoice-sidebar no-print" aria-label="{{ $sidebarTitle }}">
                         <div class="bulk-invoice-sidebar-header">
-                            <h2>{{ __('order_bulk_print.preview.invoice_list') }}</h2>
+                            <h2>{{ $sidebarTitle }}</h2>
                             <div class="bulk-invoice-count" aria-live="polite" aria-atomic="true">
                                 <strong x-text="selectedInvoiceIds.length"></strong> / {{ count($items) }}
                                 {{ __('order_bulk_print.preview.selected') }}
@@ -1016,7 +1023,7 @@
                             @endforeach
                         </div>
                         <p class="bulk-invoice-empty" x-show="selectedInvoiceIds.length === 0" role="status">
-                            {{ __('order_bulk_print.preview.select_to_print') }}
+                            {{ $selectToPrintMsg }}
                         </p>
                     </aside>
                     <div class="bulk-invoice-main">
@@ -1050,8 +1057,8 @@
                             $order = $item['order'];
                             $invoiceNo = $order->invoice_number ?: sprintf('%05d', $order->id);
                         @endphp
-                        <section class="bulk-preview-item{{ $isInvoice ? ' bulk-invoice-item' : '' }}"
-                            @if ($isInvoice)
+                        <section class="bulk-preview-item{{ $hasSidebar ? ' bulk-invoice-item' : '' }}"
+                            @if ($hasSidebar)
                                 data-invoice-id="{{ $order->id }}"
                                 :class="{
                                     'is-active': activeInvoiceId === '{{ $order->id }}',
@@ -1069,7 +1076,7 @@
                                             'invoice' => $invoiceNo,
                                         ]) }}
                                     </span>
-                                    @if ($isInvoice)
+                                    @if ($hasSidebar)
                                         <span class="document-separator-status"
                                             :class="selectedInvoiceIds.includes('{{ $order->id }}') ? 'is-included' : 'is-excluded'"
                                             x-text="selectedInvoiceIds.includes('{{ $order->id }}') ? @js(__('order_bulk_print.preview.included_in_print')) : @js(__('order_bulk_print.preview.excluded_from_print'))">
@@ -1119,7 +1126,7 @@
                     @endforeach
                 @endif
             </div>
-            @if ($isInvoice)
+            @if ($hasSidebar)
                         </div>
                     </div>
                 </div>

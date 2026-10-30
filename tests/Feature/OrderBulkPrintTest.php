@@ -271,6 +271,11 @@ class OrderBulkPrintTest extends TestCase
         $responseEn->assertSee('INV-001');
         $responseEn->assertSee('INV-002');
         $responseEn->assertSee('Delivery Slip');
+        $responseEn->assertSee('Delivery Slip List');
+        $responseEn->assertSee('bulk-invoice-sidebar');
+        $responseEn->assertSee('btn-view-order-detail');
+        $responseEn->assertSee(route('admin-order-detail', $order1->id));
+        $responseEn->assertSee(route('admin-order-detail', $order2->id));
 
         // Test GET preview request as fetched by MDI tab manager
         $responseGet = $this->get(route('admin-order-bulk-print-preview', [
