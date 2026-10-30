@@ -95,6 +95,11 @@ class User extends Authenticatable
         return ($this->data_access ?? 'own') === 'all';
     }
 
+    public function hasOwnDataAccessOnly(): bool
+    {
+        return !$this->hasFullDataAccess();
+    }
+
     public function getDataAccessLabelAttribute(): string
     {
         return $this->hasFullDataAccess()

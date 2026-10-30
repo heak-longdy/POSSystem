@@ -21,6 +21,9 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $hasFullDataAccess = Auth::check() && Auth::user()->hasFullDataAccess();
+        $data['hasFullDataAccess'] = $hasFullDataAccess;
+
         $data['totalRevenueUsd'] = 0;
         $data['totalRevenueKhr'] =  0;
         $data['totalRevenueThb'] = 0;
@@ -29,11 +32,11 @@ class DashboardController extends Controller
         $data['totalExpenseKhr'] =  0;
         $data['totalExpenseThb'] =  0;
 
-        $data['totalCustomerPaidUsd'] = CustomerPaid::sum('amount_usd');
-        $data['totalCustomerPaidKhr'] = CustomerPaid::sum('amount_kh');
+        $data['totalCustomerPaidUsd'] = Schema::hasTable('customer_paid') ? CustomerPaid::sum('amount_usd') : 0;
+        $data['totalCustomerPaidKhr'] = Schema::hasTable('customer_paid') ? CustomerPaid::sum('amount_kh') : 0;
         $data['totalOrderRemainingAmount'] = (float) Order::forUser()
             ->whereIn('payment_status', ['Pending', 'Partial'])
-            ->sum(DB::raw('GREATEST(0, total_price - COALESCE(paid_amount, 0))'));
+            ->sum(DB::raw('CASE WHEN (total_price - COALESCE(paid_amount, 0)) > 0 THEN (total_price - COALESCE(paid_amount, 0)) ELSE 0 END'));
         $data['remainingOrderCount'] = (int) Order::forUser()
             ->whereIn('payment_status', ['Pending', 'Partial'])
             ->whereRaw('(total_price - COALESCE(paid_amount, 0)) > 0')
@@ -42,33 +45,76 @@ class DashboardController extends Controller
         $data['totalOrderPrice'] = (float) Order::forUser()->sum('total_price');
         $data['pendingOrderCount'] = (int) Order::forUser()->where('payment_status', 'Pending')->count();
 
-        // Products Count Dynamic Data
-        $data['totalProductsCount'] = (int) Product::count();
-        $data['totalProductCount'] = $data['totalProductsCount'];
-        $data['activeProductsCount'] = (int) Product::where('status', 1)->count();
-        $data['activeProductCount'] = $data['activeProductsCount'];
-
         // Customer Count Dynamic Data
         $data['totalCustomerCount'] = (int) Customer::forUser()->count();
         $data['totalCustomersCount'] = $data['totalCustomerCount'];
         $data['activeCustomerCount'] = (int) Customer::forUser()->where('status', 1)->count();
         $data['activeCustomersCount'] = $data['activeCustomerCount'];
 
-        // Staff Count Dynamic Data
-        $data['totalStaffCount'] = (int) Staff::count();
-        $data['activeStaffCount'] = (int) Staff::where('status', 1)->count();
+        if ($hasFullDataAccess) {
+            // Products Count Dynamic Data
+            $data['totalProductsCount'] = (int) Product::count();
+            $data['totalProductCount'] = $data['totalProductsCount'];
+            $data['activeProductsCount'] = (int) Product::where('status', 1)->count();
+            $data['activeProductCount'] = $data['activeProductsCount'];
 
-        // User Count Dynamic Data
-        $data['totalUserCount'] = (int) User::where('role', '!=', 'super_admin')->count();
-        $data['totalUsersCount'] = $data['totalUserCount'];
-        $data['activeUserCount'] = (int) User::where('role', '!=', 'super_admin')->where('status', 1)->count();
-        $data['activeUsersCount'] = $data['activeUserCount'];
+            // Staff Count Dynamic Data
+            $data['totalStaffCount'] = (int) Staff::count();
+            $data['activeStaffCount'] = (int) Staff::where('status', 1)->count();
 
-        $data['recentTransactions'] = Order::forUser()
-            ->with(['customer', 'shop'])
-            ->latest('id')
-            ->take(6)
-            ->get();
+            // User Count Dynamic Data
+            $data['totalUserCount'] = (int) User::where('role', '!=', 'super_admin')->count();
+            $data['totalUsersCount'] = $data['totalUserCount'];
+            $data['activeUserCount'] = (int) User::where('role', '!=', 'super_admin')->where('status', 1)->count();
+            $data['activeUsersCount'] = $data['activeUserCount'];
+
+            $data['recentTransactions'] = Order::forUser()
+                ->with(['customer', 'shop'])
+                ->latest('id')
+                ->take(6)
+                ->get();
+
+            // Product Performance Dynamic Data
+            $selectedMonth = $request->get('product_month', $request->get('month', 'all'));
+            $data['productPerformance'] = $this->getProductPerformanceData($selectedMonth);
+            $data['productPerformanceMonths'] = $this->getProductPerformanceMonths();
+            $data['selectedProductMonth'] = $selectedMonth;
+            $data['selectedPerformanceMonth'] = $selectedMonth;
+
+            // If AJAX request specifically for product performance filter
+            if ($request->get('ajax') === 'product_performance') {
+                return response()->json([
+                    'html' => view('admin::pages.dashboard_product_performance_rows', [
+                        'productPerformance' => $data['productPerformance'],
+                    ])->render(),
+                ]);
+            }
+        } else {
+            $data['totalProductsCount'] = 0;
+            $data['totalProductCount'] = 0;
+            $data['activeProductsCount'] = 0;
+            $data['activeProductCount'] = 0;
+
+            $data['totalStaffCount'] = 0;
+            $data['activeStaffCount'] = 0;
+
+            $data['totalUserCount'] = 0;
+            $data['totalUsersCount'] = 0;
+            $data['activeUserCount'] = 0;
+            $data['activeUsersCount'] = 0;
+
+            $data['recentTransactions'] = collect();
+            $data['productPerformance'] = collect();
+            $data['productPerformanceMonths'] = [];
+            $data['selectedProductMonth'] = 'all';
+            $data['selectedPerformanceMonth'] = 'all';
+
+            if ($request->get('ajax') === 'product_performance') {
+                return response()->json([
+                    'html' => '',
+                ]);
+            }
+        }
 
         // Weekly Stats Dynamic Data
         //$data['weeklyStats'] = $this->getWeeklyStatsData();
@@ -76,22 +122,6 @@ class DashboardController extends Controller
         // if ($request->get('ajax') === 'weekly_stats') {
         //     return response()->json($data['weeklyStats']);
         // }
-
-        // Product Performance Dynamic Data
-        $selectedMonth = $request->get('product_month', $request->get('month', 'all'));
-        $data['productPerformance'] = $this->getProductPerformanceData($selectedMonth);
-        $data['productPerformanceMonths'] = $this->getProductPerformanceMonths();
-        $data['selectedProductMonth'] = $selectedMonth;
-        $data['selectedPerformanceMonth'] = $selectedMonth;
-
-        // If AJAX request specifically for product performance filter
-        if ($request->get('ajax') === 'product_performance') {
-            return response()->json([
-                'html' => view('admin::pages.dashboard_product_performance_rows', [
-                    'productPerformance' => $data['productPerformance'],
-                ])->render(),
-            ]);
-        }
 
         // Yearly Sales Dynamic Data
         // $availableYears = $this->getYearlySalesAvailableYears();

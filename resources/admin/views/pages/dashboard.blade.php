@@ -1083,6 +1083,9 @@
     <div class="content-wrapper" id="app">
         <div class="content-body" style="overflow-y: auto; height: 100%; width: 100%; padding: 0;">
             <div class="dashboard-container">
+                @php
+                    $hasFullDataAccess = $hasFullDataAccess ?? (Auth::check() && Auth::user()->hasFullDataAccess());
+                @endphp
                 <!-- ================= ROW 1 ================= -->
                 <div class="dash-grid-row dash-grid-row-1">
                     <!-- 4. Orders (Total Price) Card -->
@@ -1164,32 +1167,61 @@
                         </div>
                     </div>
 
-                    <!-- 7. Products (Count) Card -->
-                    <div class="dash-card top-mini-card">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div>
-                                <h3 class="top-mini-amount">{{ number_format($totalProductCount ?? ($totalProductsCount ?? 0)) }}</h3>
-                                <p class="top-mini-label">@lang('dashboard.products_count')</p>
+                    @if ($hasFullDataAccess)
+                        <!-- 7. Products (Count) Card -->
+                        <div class="dash-card top-mini-card">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h3 class="top-mini-amount">{{ number_format($totalProductCount ?? ($totalProductsCount ?? 0)) }}</h3>
+                                    <p class="top-mini-label">@lang('dashboard.products_count')</p>
+                                </div>
+                                <div class="grid-icon-box purple">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                    </svg>
+                                </div>
                             </div>
-                            <div class="grid-icon-box purple">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg>
+                            <div style="margin-top: 14px;">
+                                <a @can('product-view') href="{{ Route::has('admin-product-list') ? route('admin-product-list', 1) : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-purple-subtle" style="text-decoration: none;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>{{ isset($activeProductCount) && $activeProductCount > 0 ? __('dashboard.active_products', ['count' => $activeProductCount]) : __('dashboard.active') }}</span>
+                                </a>
                             </div>
                         </div>
-                        <div style="margin-top: 14px;">
-                            <a @can('product-view') href="{{ Route::has('admin-product-list') ? route('admin-product-list', 1) : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-purple-subtle" style="text-decoration: none;">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                                <span>{{ isset($activeProductCount) && $activeProductCount > 0 ? __('dashboard.active_products', ['count' => $activeProductCount]) : __('dashboard.active') }}</span>
-                            </a>
+                    @else
+                        <!-- 8. Customer (Count) Card (Slot 4 for Own Records Only) -->
+                        <div class="dash-card top-mini-card">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h3 class="top-mini-amount">{{ number_format($totalCustomerCount ?? ($totalCustomersCount ?? 0)) }}</h3>
+                                    <p class="top-mini-label">@lang('dashboard.customers_count')</p>
+                                </div>
+                                <div class="grid-icon-box cyan">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div style="margin-top: 14px;">
+                                <a @can('customer-view') href="{{ Route::has('admin-customer-list') ? route('admin-customer-list', 1) : 'javascript:void(0);' }}" @endcan class="badge-subtle badge-cyan-subtle" style="text-decoration: none;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>{{ isset($activeCustomerCount) && $activeCustomerCount > 0 ? __('dashboard.active_customers', ['count' => $activeCustomerCount]) : __('dashboard.active') }}</span>
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
+                @if ($hasFullDataAccess)
                 <!-- ================= ROW 2: USER & STAFF COUNTS ================= -->
                 <div class="dash-grid-row dash-grid-row-secondary">
 
@@ -1269,8 +1301,10 @@
                     </div>
 
                 </div>
+                @endif
 
 
+                @if ($hasFullDataAccess)
                 <!-- ================= ROW 4 ================= -->
                 <div class="dash-grid-row dash-grid-row-4">
 
@@ -1442,6 +1476,7 @@
                     </div>
 
                 </div>
+                @endif
 
                 
 
@@ -1628,6 +1663,7 @@
                 monthlyChart.render();
             }
 
+            @if ($hasFullDataAccess)
             // 7. Product Performance Month Filter (AJAX)
             var productMonthSelect = document.getElementById('product-performance-month-select');
             var productTbody = document.getElementById('product-performance-tbody');
@@ -1661,6 +1697,7 @@
                     });
                 });
             }
+            @endif
 
         });
     </script>

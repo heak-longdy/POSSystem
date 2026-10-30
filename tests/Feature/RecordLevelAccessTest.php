@@ -140,6 +140,29 @@ class RecordLevelAccessTest extends TestCase
             $table->softDeletes();
         });
 
+        Schema::create('customer_paid', function (Blueprint $table) {
+            $table->id();
+            $table->double('amount_usd')->default(0);
+            $table->double('amount_kh')->default(0);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('barbers', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('staffs', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->nullable();
+            $table->integer('status')->default(1);
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         (new PermissionSeeder())->run();
 
         // User with data_access = 'all' (can view all records store-wide)
@@ -411,24 +434,29 @@ class RecordLevelAccessTest extends TestCase
             'order_date' => now(),
         ]);
 
-        // Regular user 1 dashboard
+        // Regular user 1 dashboard (Own Records Only: Products, Staff, User, Recent Transactions, Product Performance not shown)
         $this->actingAs($this->regularUser1);
         $controller = app(DashboardController::class);
         $viewUser1 = $controller->index(new Request());
         $dataUser1 = $viewUser1->getData();
 
+        $this->assertFalse($dataUser1['hasFullDataAccess']);
         $this->assertEquals(1, $dataUser1['totalCustomerCount']);
         $this->assertEquals(100.0, $dataUser1['totalOrderPrice']);
         $this->assertEquals(70.0, $dataUser1['totalOrderRemainingAmount']);
         $this->assertEquals(0, $dataUser1['pendingOrderCount']);
-        $this->assertCount(1, $dataUser1['recentTransactions']);
-        $this->assertEquals('INV-U1', $dataUser1['recentTransactions']->first()->invoice_number);
+        $this->assertEquals(0, $dataUser1['totalProductCount']);
+        $this->assertEquals(0, $dataUser1['totalStaffCount']);
+        $this->assertEquals(0, $dataUser1['totalUserCount']);
+        $this->assertCount(0, $dataUser1['recentTransactions']);
+        $this->assertCount(0, $dataUser1['productPerformance']);
 
         // Admin user dashboard sees all
         $this->actingAs($this->adminUser);
         $viewAdmin = $controller->index(new Request());
         $dataAdmin = $viewAdmin->getData();
 
+        $this->assertTrue($dataAdmin['hasFullDataAccess']);
         $this->assertEquals(2, $dataAdmin['totalCustomerCount']);
         $this->assertEquals(600.0, $dataAdmin['totalOrderPrice']);
         $this->assertEquals(570.0, $dataAdmin['totalOrderRemainingAmount']);
