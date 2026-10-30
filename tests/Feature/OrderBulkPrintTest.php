@@ -65,6 +65,7 @@ class OrderBulkPrintTest extends TestCase
             $table->dateTime('order_date')->nullable();
             $table->dateTime('delivery_date')->nullable();
             $table->dateTime('payment_date')->nullable();
+            $table->integer('created_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -119,6 +120,7 @@ class OrderBulkPrintTest extends TestCase
             'payment_status' => 'Pending',
             'order_date' => now()->format('Y-m-d H:i:s'),
             'invoice_number' => 'INV-' . rand(1000, 9999),
+            'created_by' => $this->permittedUser->id,
         ], $attributes));
     }
 

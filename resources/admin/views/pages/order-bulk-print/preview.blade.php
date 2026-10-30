@@ -297,10 +297,10 @@
         }
 
         .btn-print-all:disabled {
-            background: #475569;
-            color: #94a3b8;
-            cursor: not-allowed;
-            opacity: 0.7;
+            background: #475569 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed !important;
+            opacity: 0.7 !important;
         }
 
         .btn-close-preview {
@@ -327,6 +327,20 @@
 
         .bulk-preview-item {
             margin-bottom: 28px;
+            scroll-margin-top: 130px;
+            content-visibility: auto;
+            contain-intrinsic-size: 800px 520px;
+        }
+
+        .bulk-preview-item.bulk-invoice-item.is-active .paper-sheet-box {
+            border-color: #93c5fd;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .bulk-invoice-item.is-excluded .paper-sheet-box {
+            opacity: 0.65;
+            border-style: dashed;
+            transition: opacity 0.2s ease, border-style 0.2s ease;
         }
 
         .document-separator {
@@ -339,6 +353,33 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+
+        .document-separator-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .document-separator-status {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: normal;
+            padding: 2px 8px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .document-separator-status.is-included {
+            color: #15803d;
+            background: #dcfce7;
+        }
+
+        .document-separator-status.is-excluded {
+            color: #b45309;
+            background: #fef3c7;
         }
 
         .document-separator-line {
@@ -383,6 +424,200 @@
             line-height: 1.5;
         }
 
+        /* Invoice navigation stays outside the unchanged printable sheets. */
+        .bulk-invoice-layout {
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .bulk-invoice-sidebar {
+            position: sticky;
+            top: 125px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 145px);
+            z-index: 90;
+        }
+
+        .bulk-invoice-sidebar-header {
+            flex-shrink: 0;
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .bulk-invoice-sidebar-header h2 {
+            margin: 0 0 6px;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .bulk-invoice-count {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .bulk-invoice-count strong {
+            color: #2563eb;
+        }
+
+        .bulk-invoice-select-all {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+            padding: 12px 16px;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .bulk-invoice-sidebar input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            flex: 0 0 16px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+
+        .bulk-invoice-list {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            padding: 6px;
+        }
+
+        .bulk-invoice-row {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 10px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: all 0.15s ease;
+        }
+
+        .bulk-invoice-row:hover {
+            background: #f8fafc;
+        }
+
+        .bulk-invoice-row.is-active {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+        }
+
+        .bulk-invoice-row.is-active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 5px;
+            bottom: 5px;
+            width: 3px;
+            background: #2563eb;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .bulk-invoice-sidebar .bulk-invoice-row .bulk-invoice-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+            padding: 11px 10px 11px 0;
+            border: 0;
+            background: transparent;
+            color: #334155;
+            text-align: left;
+            font-size: 12.5px;
+            font-weight: 600;
+            line-height: 1.4;
+            white-space: normal;
+            cursor: pointer;
+        }
+
+        .bulk-invoice-link span {
+            overflow-wrap: anywhere;
+        }
+
+        .bulk-invoice-link svg {
+            flex: 0 0 14px;
+            color: #94a3b8;
+            transition: transform 0.15s ease;
+        }
+
+        .bulk-invoice-row.is-active .bulk-invoice-link,
+        .bulk-invoice-row.is-active svg {
+            color: #2563eb;
+        }
+
+        .bulk-invoice-sidebar input:focus-visible,
+        .bulk-invoice-link:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+
+        .bulk-invoice-empty {
+            flex-shrink: 0;
+            margin: 0;
+            padding: 12px 16px;
+            border-top: 1px solid #e2e8f0;
+            color: #b45309;
+            font-size: 12px;
+        }
+
+        .bulk-invoice-main {
+            min-width: 0;
+        }
+
+        @media screen {
+            .bulk-invoice-viewport {
+                overflow-x: auto;
+                padding: 2px 4px 12px;
+            }
+        }
+
+        @media screen and (min-width: 1440px) {
+            .bulk-invoice-layout {
+                grid-template-columns: 220px minmax(0, 820px) 220px;
+                justify-content: center;
+            }
+        }
+
+        @media screen and (max-width: 900px) {
+            .bulk-invoice-layout {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 16px;
+            }
+
+            .bulk-invoice-sidebar {
+                position: static;
+                max-height: none;
+            }
+
+            .bulk-invoice-list {
+                max-height: 180px;
+            }
+
+            .bulk-invoice-viewport .preview-stack-container {
+                min-width: 740px;
+                transform-origin: top left !important;
+            }
+        }
+
         /* Print Media Setup */
         @media print {
             @page {
@@ -425,6 +660,7 @@
             .preview-breadcrumb,
             .preview-toolbar,
             .document-separator,
+            .bulk-invoice-sidebar,
             .no-print,
             #jsScroll,
             .scroll,
@@ -511,10 +747,35 @@
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 box-sizing: border-box !important;
+                content-visibility: visible !important;
             }
 
             /* Force page break between orders (except the first) */
             .bulk-preview-item + .bulk-preview-item {
+                page-break-before: always !important;
+                break-before: page !important;
+            }
+
+            .bulk-invoice-layout,
+            .bulk-invoice-main,
+            .bulk-invoice-viewport {
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                overflow: visible !important;
+            }
+
+            .bulk-preview-item.bulk-invoice-item {
+                page-break-before: auto !important;
+                break-before: auto !important;
+            }
+
+            .bulk-preview-item.bulk-invoice-item:not(.is-selected) {
+                display: none !important;
+            }
+
+            .bulk-invoice-item.is-selected ~ .bulk-invoice-item.is-selected {
                 page-break-before: always !important;
                 break-before: page !important;
             }
@@ -598,7 +859,10 @@
                 <div class="toolbar-info">
                     <div class="toolbar-title">
                         <span>{{ $docTitle }}</span>
-                        <span class="toolbar-badge">
+                        <span class="toolbar-badge"
+                            @if ($isInvoice)
+                                x-text="@js(__('order_bulk_print.preview.meta_docs', ['count' => ':count'])).replace(':count', selectedInvoiceIds.length)"
+                            @endif>
                             {{ __('order_bulk_print.preview.meta_docs', ['count' => $totalCount]) }}
                         </span>
                         @if ($isConsolidated)
@@ -640,13 +904,22 @@
                         <button type="button" class="btn-zoom" @click="adjustZoom(0.1)" title="{{ __('order_bulk_print.preview.zoom_in') }}">+</button>
                     </div>
 
-                    <button type="button" class="btn-toolbar btn-print-all" :disabled="!isReady" @click="printAll()">
+                    <button type="button" class="btn-toolbar btn-print-all" :disabled="!canPrint" @click="printAll()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 6 2 18 2 18 9"></polyline>
                             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                             <rect x="6" y="14" width="12" height="8"></rect>
                         </svg>
                         {{ __('order_bulk_print.preview.print_all') }}
+                    </button>
+
+                    <button type="button" class="btn-toolbar btn-close-preview" @click="refreshPreview()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        {{ __('global.button.refresh') }}
                     </button>
 
                     <button type="button" class="btn-toolbar btn-close-preview" @click="closeTab()">
@@ -658,6 +931,52 @@
                     </button>
                 </div>
             </header>
+
+            @if ($isInvoice)
+                <div class="bulk-invoice-layout">
+                    <aside class="bulk-invoice-sidebar no-print" aria-label="{{ __('order_bulk_print.preview.invoice_list') }}">
+                        <div class="bulk-invoice-sidebar-header">
+                            <h2>{{ __('order_bulk_print.preview.invoice_list') }}</h2>
+                            <div class="bulk-invoice-count" aria-live="polite" aria-atomic="true">
+                                <strong x-text="selectedInvoiceIds.length"></strong> / {{ count($items) }}
+                                {{ __('order_bulk_print.preview.selected') }}
+                            </div>
+                        </div>
+                        <label class="bulk-invoice-select-all">
+                            <input type="checkbox" :checked="allInvoicesSelected"
+                                x-effect="$el.indeterminate = selectedInvoiceIds.length > 0 && !allInvoicesSelected"
+                                @change="toggleAllInvoices()">
+                            <span x-text="allInvoicesSelected ? @js(__('order_bulk_print.preview.deselect_all')) : @js(__('order_bulk_print.preview.select_all'))"></span>
+                        </label>
+                        <div class="bulk-invoice-list">
+                            @foreach ($items as $item)
+                                @php
+                                    $listOrder = $item['order'];
+                                    $listInvoiceNo = $listOrder->invoice_number ?: sprintf('%05d', $listOrder->id);
+                                @endphp
+                                <div class="bulk-invoice-row" data-invoice-row="{{ $listOrder->id }}"
+                                    :class="{ 'is-active': activeInvoiceId === '{{ $listOrder->id }}' }">
+                                    <input type="checkbox" value="{{ $listOrder->id }}"
+                                        aria-label="{{ __('order_bulk_print.preview.include_invoice', ['invoice' => $listInvoiceNo]) }}"
+                                        :checked="selectedInvoiceIds.includes('{{ $listOrder->id }}')"
+                                        @change="toggleInvoice('{{ $listOrder->id }}', $event.target.checked)">
+                                    <button type="button" class="bulk-invoice-link" @click="scrollToInvoice('{{ $listOrder->id }}')"
+                                        :aria-current="activeInvoiceId === '{{ $listOrder->id }}' ? 'true' : null">
+                                        <span>{{ $listInvoiceNo }}</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <polyline points="9 5 16 12 9 19"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="bulk-invoice-empty" x-show="selectedInvoiceIds.length === 0" role="status">
+                            {{ __('order_bulk_print.preview.select_to_print') }}
+                        </p>
+                    </aside>
+                    <div class="bulk-invoice-main">
+                        <div class="bulk-invoice-viewport">
+            @endif
 
             <!-- Document Stack: Natural outer page scroll, using div (not main) to prevent #content main scroll rules -->
             <div class="preview-stack-container" :style="scale !== 1 ? 'transform: scale(' + scale + '); transform-origin: top center;' : ''">
@@ -686,16 +1005,32 @@
                             $order = $item['order'];
                             $invoiceNo = $order->invoice_number ?: sprintf('%05d', $order->id);
                         @endphp
-                        <section class="bulk-preview-item">
+                        <section class="bulk-preview-item{{ $isInvoice ? ' bulk-invoice-item' : '' }}"
+                            @if ($isInvoice)
+                                data-invoice-id="{{ $order->id }}"
+                                :class="{
+                                    'is-active': activeInvoiceId === '{{ $order->id }}',
+                                    'is-selected': selectedInvoiceIds.includes('{{ $order->id }}'),
+                                    'is-excluded': !selectedInvoiceIds.includes('{{ $order->id }}')
+                                }"
+                            @endif>
                             <!-- Screen-only separator between documents -->
                             <div class="document-separator no-print">
-                                <span>
-                                    {{ __('order_bulk_print.preview.doc_separator', [
-                                        'current' => $index + 1,
-                                        'total' => $totalCount,
-                                        'invoice' => $invoiceNo,
-                                    ]) }}
-                                </span>
+                                <div class="document-separator-title">
+                                    <span>
+                                        {{ __('order_bulk_print.preview.doc_separator', [
+                                            'current' => $index + 1,
+                                            'total' => $totalCount,
+                                            'invoice' => $invoiceNo,
+                                        ]) }}
+                                    </span>
+                                    @if ($isInvoice)
+                                        <span class="document-separator-status"
+                                            :class="selectedInvoiceIds.includes('{{ $order->id }}') ? 'is-included' : 'is-excluded'"
+                                            x-text="selectedInvoiceIds.includes('{{ $order->id }}') ? @js(__('order_bulk_print.preview.included_in_print')) : @js(__('order_bulk_print.preview.excluded_from_print'))">
+                                        </span>
+                                    @endif
+                                </div>
                                 <div class="document-separator-line"></div>
                             </div>
 
@@ -727,6 +1062,11 @@
                     @endforeach
                 @endif
             </div>
+            @if ($isInvoice)
+                        </div>
+                    </div>
+                </div>
+            @endif
         @endif
     </div>
 
@@ -735,6 +1075,125 @@
             return {
                 scale: 1,
                 isReady: false,
+                isPrinting: false,
+                invoiceIds: [],
+                selectedInvoiceIds: [],
+                activeInvoiceId: null,
+                isProgrammaticScroll: false,
+                ticking: false,
+                itemElements: null,
+                scrollTimeout: null,
+                _scrollHandler: null,
+
+                get allInvoicesSelected() {
+                    return this.invoiceIds.length > 0 && this.selectedInvoiceIds.length === this.invoiceIds.length;
+                },
+
+                get canPrint() {
+                    return this.isReady && !this.isPrinting && (this.invoiceIds.length === 0 || this.selectedInvoiceIds.length > 0);
+                },
+
+                toggleInvoice(id, checked) {
+                    if (!this.invoiceIds.includes(id)) return;
+                    this.selectedInvoiceIds = this.selectedInvoiceIds.filter(invoiceId => invoiceId !== id);
+                    if (checked) this.selectedInvoiceIds.push(id);
+                },
+
+                toggleAllInvoices() {
+                    this.selectedInvoiceIds = this.allInvoicesSelected ? [] : [...this.invoiceIds];
+                },
+
+                scrollToInvoice(id) {
+                    if (!this.invoiceIds.includes(id)) return;
+                    this.activeInvoiceId = id;
+
+                    const docEl = this.$root.querySelector(`.bulk-preview-item[data-invoice-id="${id}"]`);
+                    if (docEl) {
+                        this.isProgrammaticScroll = true;
+
+                        try {
+                            docEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        } catch (e) {
+                            const rect = docEl.getBoundingClientRect();
+                            const topOffset = window.pageYOffset + rect.top - 125;
+                            window.scrollTo({ top: topOffset, behavior: 'smooth' });
+                        }
+
+                        this.scrollSidebarToActive();
+
+                        if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+                        this.scrollTimeout = setTimeout(() => {
+                            this.isProgrammaticScroll = false;
+                        }, 700);
+                    }
+                },
+
+                viewInvoice(id) {
+                    this.scrollToInvoice(id);
+                },
+
+                scrollSidebarToActive() {
+                    this.$nextTick(() => {
+                        const row = this.$root.querySelector(`.bulk-invoice-row[data-invoice-row="${this.activeInvoiceId}"]`);
+                        const list = this.$root.querySelector('.bulk-invoice-list');
+                        if (!row || !list) return;
+
+                        const rowBounds = row.getBoundingClientRect();
+                        const listBounds = list.getBoundingClientRect();
+
+                        if (rowBounds.top < listBounds.top) {
+                            list.scrollTop -= (listBounds.top - rowBounds.top) + 8;
+                        } else if (rowBounds.bottom > listBounds.bottom) {
+                            list.scrollTop += (rowBounds.bottom - listBounds.bottom) + 8;
+                        }
+                    });
+                },
+
+                setupScrollSpy() {
+                    this.itemElements = null;
+                    this.ticking = false;
+
+                    this._scrollHandler = () => {
+                        if (this.isProgrammaticScroll || this.ticking) return;
+                        this.ticking = true;
+                        requestAnimationFrame(() => {
+                            this.updateActiveOnScroll();
+                            this.ticking = false;
+                        });
+                    };
+
+                    window.addEventListener('scroll', this._scrollHandler, { passive: true, capture: true });
+                },
+
+                updateActiveOnScroll() {
+                    if (this.isProgrammaticScroll) return;
+
+                    if (!this.itemElements || this.itemElements.length === 0) {
+                        this.itemElements = Array.from(this.$root.querySelectorAll('.bulk-preview-item[data-invoice-id]'));
+                    }
+                    if (this.itemElements.length === 0) return;
+
+                    const offset = 180;
+                    let currentId = null;
+
+                    for (let i = 0; i < this.itemElements.length; i++) {
+                        const rect = this.itemElements[i].getBoundingClientRect();
+                        if (rect.top <= offset) {
+                            currentId = this.itemElements[i].dataset.invoiceId;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (!currentId && this.itemElements.length > 0) {
+                        currentId = this.itemElements[0].dataset.invoiceId;
+                    }
+
+                    if (currentId && currentId !== this.activeInvoiceId) {
+                        this.activeInvoiceId = currentId;
+                        this.scrollSidebarToActive();
+                    }
+                },
 
                 adjustZoom(delta) {
                     this.scale = Math.min(1.5, Math.max(0.6, Math.round((this.scale + delta) * 10) / 10));
@@ -745,10 +1204,24 @@
                 },
 
                 init() {
+                    // Read this preview's documents locally; other MDI tabs may use the same component.
+                    this.invoiceIds = Array.from(this.$root.querySelectorAll('.bulk-invoice-item'), item => item.dataset.invoiceId);
+                    this.selectedInvoiceIds = [...this.invoiceIds];
+                    this.activeInvoiceId = this.invoiceIds[0] ?? null;
                     this.$nextTick(() => {
                         this.removeInternalScroll();
                         this.checkAssetsReady();
+                        this.setupScrollSpy();
                     });
+
+                    if (typeof this.$cleanup === 'function') {
+                        this.$cleanup(() => {
+                            if (this._scrollHandler) {
+                                window.removeEventListener('scroll', this._scrollHandler, { capture: true });
+                            }
+                            if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+                        });
+                    }
                 },
 
                 removeInternalScroll() {
@@ -798,6 +1271,8 @@
                 },
 
                 printAll() {
+                    if (!this.canPrint) return;
+                    this.isPrinting = true;
                     // Temporarily reset interactive zoom so CSS transform does not block paged media page breaks
                     const savedScale = this.scale;
                     this.scale = 1;
@@ -839,6 +1314,7 @@
                         if (cleanedUp) return;
                         cleanedUp = true;
 
+                        this.isPrinting = false;
                         this.scale = savedScale;
                         if (activePane) {
                             activePane.style.setProperty('display', 'flex', 'important');
@@ -874,6 +1350,17 @@
                             setTimeout(cleanup, 500);
                         }, 80);
                     });
+                },
+
+                refreshPreview() {
+                    const tabKey = this.$root.closest('.workspace-tab-pane')?.getAttribute('data-tab-key');
+
+                    if (tabKey && window.MDI && typeof window.MDI.refreshTab === 'function') {
+                        window.MDI.refreshTab(tabKey);
+                        return;
+                    }
+
+                    window.location.reload();
                 },
 
                 closeTab() {
