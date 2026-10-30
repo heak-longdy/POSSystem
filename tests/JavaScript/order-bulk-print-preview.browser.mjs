@@ -111,6 +111,8 @@ try {
     assert.deepEqual(await selected(), ['42', '43', '44']);
     assert.deepEqual(await visible(), ['44', '43', '42'], 'All selected invoices must appear vertically in one continuous preview');
     assert.equal(await evaluate(`document.querySelectorAll('${scope}.bulk-invoice-row input:checked').length`), 3);
+    assert.equal(await evaluate(`document.querySelectorAll('${scope}.btn-view-order-detail').length`), 3, 'Each invoice has a View Detail button');
+    assert.match(await evaluate(`document.querySelector('${scope}.bulk-preview-item[data-invoice-id="44"] .btn-view-order-detail').href`), /\/admin\/order\/detail\/44$/);
     await screenshot('desktop');
     await click(link(42));
     assert.deepEqual(await selected(), ['42', '43', '44'], 'Navigating must not change selection');

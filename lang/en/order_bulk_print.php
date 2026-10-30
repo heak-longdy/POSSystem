@@ -82,6 +82,7 @@ return [
         'select_to_print' => 'Select at least one invoice to print.',
         'included_in_print' => 'Included in print',
         'excluded_from_print' => 'Not selected for printing',
+        'view_detail' => 'View Detail',
         'previous_invoice' => 'Previous invoice',
         'next_invoice' => 'Next invoice',
         'print' => 'Print',

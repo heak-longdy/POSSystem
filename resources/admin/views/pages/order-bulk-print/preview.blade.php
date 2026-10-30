@@ -360,6 +360,7 @@
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
 
         .document-separator-status {
@@ -370,6 +371,9 @@
             padding: 2px 8px;
             border-radius: 10px;
             transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.4;
         }
 
         .document-separator-status.is-included {
@@ -380,6 +384,46 @@
         .document-separator-status.is-excluded {
             color: #b45309;
             background: #fef3c7;
+        }
+
+        .btn-view-order-detail {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: normal;
+            color: #2563eb;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 2px 8px;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            line-height: 1.4;
+        }
+
+        .btn-view-order-detail:hover {
+            color: #1d4ed8;
+            background: #eff6ff;
+            border-color: #93c5fd;
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn-view-order-detail:active {
+            transform: translateY(0);
+        }
+
+        .btn-view-order-detail svg {
+            flex-shrink: 0;
+            width: 13px;
+            height: 13px;
+            stroke-width: 2;
         }
 
         .document-separator-line {
@@ -660,6 +704,7 @@
             .preview-breadcrumb,
             .preview-toolbar,
             .document-separator,
+            .btn-view-order-detail,
             .bulk-invoice-sidebar,
             .no-print,
             #jsScroll,
@@ -1029,6 +1074,18 @@
                                             :class="selectedInvoiceIds.includes('{{ $order->id }}') ? 'is-included' : 'is-excluded'"
                                             x-text="selectedInvoiceIds.includes('{{ $order->id }}') ? @js(__('order_bulk_print.preview.included_in_print')) : @js(__('order_bulk_print.preview.excluded_from_print'))">
                                         </span>
+                                        @if (!auth()->check() || auth()->user()->can('order-view'))
+                                            <a href="{{ route('admin-order-detail', $order->id) }}"
+                                                @click="openOrderDetail($event, '{{ route('admin-order-detail', $order->id) }}', '{{ $invoiceNo }}')"
+                                                class="btn-view-order-detail no-print"
+                                                title="{{ __('order_bulk_print.preview.view_detail') }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                </svg>
+                                                <span>{{ __('order_bulk_print.preview.view_detail') }}</span>
+                                            </a>
+                                        @endif
                                     @endif
                                 </div>
                                 <div class="document-separator-line"></div>
@@ -1130,6 +1187,21 @@
 
                 viewInvoice(id) {
                     this.scrollToInvoice(id);
+                },
+
+                openOrderDetail(e, url, invoiceNo) {
+                    if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)) {
+                        return;
+                    }
+                    if (e && typeof e.preventDefault === 'function') {
+                        e.preventDefault();
+                    }
+                    const tabTitle = invoiceNo ? (@js(__('order.detail.title')) + ' #' + invoiceNo) : @js(__('order.detail.title'));
+                    if (window.MDI && typeof window.MDI.openUrlInTab === 'function') {
+                        window.MDI.openUrlInTab(url, tabTitle, 'bx bx-show');
+                    } else {
+                        window.open(url, '_blank');
+                    }
                 },
 
                 scrollSidebarToActive() {

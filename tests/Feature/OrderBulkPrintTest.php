@@ -105,7 +105,7 @@ class OrderBulkPrintTest extends TestCase
 
         // Users
         $this->permittedUser = User::forceCreate(['name' => 'Permitted User', 'status' => 1]);
-        $this->permittedUser->givePermissionTo('order-bulk-print-view');
+        $this->permittedUser->givePermissionTo(['order-bulk-print-view', 'order-view']);
 
         $this->unpermittedUser = User::forceCreate(['name' => 'Unpermitted User', 'status' => 1]);
     }
@@ -257,6 +257,9 @@ class OrderBulkPrintTest extends TestCase
         $responseKm->assertSee('INV-002');
         $responseKm->assertSee('វិក្កយបត្រ'); // Khmer invoice title
         $responseKm->assertSee('bulk_print_invoice_' . $order1->id . '_km');
+        $responseKm->assertSee(route('admin-order-detail', $order1->id));
+        $responseKm->assertSee(route('admin-order-detail', $order2->id));
+        $responseKm->assertSee('btn-view-order-detail');
 
         // Test Delivery Slip preview in English
         $responseEn = $this->post(route('admin-order-bulk-print-preview'), [
