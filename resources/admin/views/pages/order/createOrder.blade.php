@@ -466,7 +466,7 @@
                                     <template x-if="previousOrdersCount > 0">
                                         <button type="button" @click="showPreviousBalanceBreakdown = !showPreviousBalanceBreakdown"
                                             class="badge-transfer-toggle"
-                                            style="border: none; background: #e0f2fe; color: #0369a1; border-radius: 9999px; font-size: 11px; font-weight: 600; padding: 2px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                            style="border: none; background: #e0f2fe; color: #0369a1; border-radius: 9999px; font-size: 11px; font-weight: 600; padding: 11px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                                             <span x-text="previousOrdersCount + ' ' + (previousOrdersCount === 1 ? '{{ __('order.order_singular') }}' : '{{ __('order.orders_plural') }}')"></span>
                                             <span x-text="showPreviousBalanceBreakdown ? '▲' : '▼'" style="font-size: 8px;"></span>
                                         </button>
@@ -2347,11 +2347,11 @@
                                 }),
                                 processResults: (data) => ({
                                     results: $.map(data.data, (item) => {
-                                        const code = item?.code || (item?.id ? String(item.id).padStart(10, '0') : '');
+                                        const code = String(item?.code ?? '').trim();
                                         const displayName = item?.name ? item.name : (item?.phone || '');
                                         const phoneSuffix = item?.name && item?.phone ? ` (${item.phone})` : '';
                                         return {
-                                            text: code ? `[${code}] ${displayName}${phoneSuffix}` : displayName,
+                                            text: `${code ? `[${code}] ` : ''}${displayName}${phoneSuffix}`,
                                             id: item.id,
                                             item: item
                                         };
@@ -3431,7 +3431,7 @@
                                     digit => String(digit.charCodeAt(0) - 0x17E0));
                             });
                             if (this.formData.order_date) {
-                                this.formData.order_date = moment(this.formData.order_date).format('YYYY-MM-DD');
+                                this.formData.order_date = moment(this.formData.order_date).locale('en').format('YYYY-MM-DD');
                             }
                         }
                         if (draft.shopData) {
@@ -3789,9 +3789,9 @@
                     const orderDateBase = this.formData.order_date
                         ? String(this.formData.order_date).split('T')[0].split(' ')[0]
                         : '';
-                    let orderTime = moment().format('HH:mm:ss');
+                    let orderTime = moment().locale('en').format('HH:mm:ss');
                     if (this.orderId && this.initialOrder?.order_date) {
-                        const existingTime = moment(this.initialOrder.order_date).format('HH:mm:ss');
+                        const existingTime = moment(this.initialOrder.order_date).locale('en').format('HH:mm:ss');
                         if (existingTime && existingTime !== '00:00:00') {
                             orderTime = existingTime;
                         }

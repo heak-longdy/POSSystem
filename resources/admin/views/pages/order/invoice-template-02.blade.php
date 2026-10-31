@@ -11,7 +11,7 @@
     $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
     $cPhone = $customerPhone ?? ($order->customer?->phone ?: '012399252');
     $cAddress = $customerAddress ?? ($order->customer?->address ?: 'N/A ST 07 ផ្ទះជិត Mokwath Viheato');
-    $customerCode = $order->customer?->code ?: ($order->customer?->id ? sprintf('%010d', $order->customer->id) : '0200042419');
+    $customerCode = trim((string) ($order->customer?->code ?? ''));
 
     $invoiceNo = $order->invoice_number ?: sprintf('%05d', $order->id);
     $orderDate = $order->order_date ? \Carbon\Carbon::parse($order->order_date) : now();
@@ -63,7 +63,7 @@
         <div class="slip-info-col col-cust">
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_name', [], $printLocale) }}</span>
-                <span class="info-val"><span class="cust-code">{{ $customerCode ? $customerCode : $cName }}</span></span>
+                <span class="info-val"><span class="cust-code">{{ $cName }}@if ($customerCode !== '')&nbsp;({{ $customerCode }})@endif</span></span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_address', [], $printLocale) }}</span>
