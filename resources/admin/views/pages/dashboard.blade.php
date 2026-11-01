@@ -1082,13 +1082,13 @@
 
     <div class="content-wrapper" id="app">
         <div class="content-body" style="overflow-y: auto; height: 100%; width: 100%; padding: 0;">
-            <div class="dashboard-container" x-data="dashboardDateFilter"
-                data-dashboard-url="{{ route('admin-dashboard') }}"
+            <div class="dashboard-container" id="dashboard-container" x-data="dashboardDateFilter"
+                data-dashboard-url="{{ route('admin-dashboard', [], false) }}"
                 data-from-date="{{ $dashboardFromDate ?? '' }}" data-to-date="{{ $dashboardToDate ?? '' }}"
                 data-all-time="{{ ($dashboardAllTime ?? false) ? '1' : '0' }}"
                 data-product-month="{{ $selectedProductMonth ?? 'all' }}">
                 @include('admin::pages.dashboard_filter')
-                <div x-ref="dashboardContent" :aria-busy="loading" :inert="loading"
+                <div id="dashboard-content-area" x-ref="dashboardContent" :aria-busy="loading" :inert="loading"
                     :style="{ opacity: loading ? 0.45 : 1 }"
                     @change="if ($event.target.matches('[data-product-month]')) changeProductMonth($event.target.value)">
                     @include('admin::pages.dashboard_content')

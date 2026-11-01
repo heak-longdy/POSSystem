@@ -13,10 +13,37 @@
         invalidField: '',
         requestController: null,
 
+        getRootElement() {
+            return (this.$root && this.$root.nodeType === 1)
+                ? this.$root
+                : (document.querySelector('.dashboard-container') || document.getElementById('dashboard-container'));
+        },
+
+        getDashboardContent() {
+            const rootEl = this.getRootElement();
+            return (this.$refs && this.$refs.dashboardContent)
+                || rootEl?.querySelector('[x-ref="dashboardContent"]')
+                || document.getElementById('dashboard-content-area')
+                || document.querySelector('.dashboard-container [x-ref="dashboardContent"]')
+                || rootEl;
+        },
+
+        getDashboardUrl() {
+            const rootEl = this.getRootElement();
+            const raw = rootEl?.dataset?.dashboardUrl || '{{ route('admin-dashboard', [], false) }}';
+            try {
+                const parsed = new URL(raw, window.location.origin);
+                return `${window.location.origin}${parsed.pathname}`;
+            } catch (_) {
+                return `${window.location.origin}/admin/dashboard`;
+            }
+        },
+
         init() {
-            this.fromDate = this.$root.dataset.fromDate || '';
-            this.toDate = this.$root.dataset.toDate || '';
-            if (!this.fromDate && !this.toDate && this.$root.dataset.allTime !== '1') {
+            const rootEl = this.getRootElement();
+            this.fromDate = rootEl?.dataset?.fromDate || '';
+            this.toDate = rootEl?.dataset?.toDate || '';
+            if (!this.fromDate && !this.toDate && rootEl?.dataset?.allTime !== '1') {
                 const presets = this.getPresetDates();
                 const [start, end] = presets.this_month;
                 this.fromDate = start;
@@ -24,7 +51,7 @@
             }
             this.draftFromDate = this.fromDate;
             this.draftToDate = this.toDate;
-            this.productMonth = this.$root.dataset.productMonth || 'all';
+            this.productMonth = rootEl?.dataset?.productMonth || 'all';
             this.updateDraftPresetFromInputs();
             this.$nextTick(() => this.initDatepickers());
         },
@@ -258,7 +285,8 @@
             this.showFilter = false;
             this.validationError = '';
             this.invalidField = '';
-            this.$nextTick(() => this.$refs.filterButton?.focus());
+            const btn = (this.$refs && this.$refs.filterButton) || document.querySelector('.dashboard-filter-button');
+            this.$nextTick(() => btn?.focus());
         },
 
         hideCalendar() {
@@ -339,7 +367,7 @@
 
         async changeProductMonth(month) {
             if (!await this.refreshDashboard(this.fromDate, this.toDate, month, true)) {
-                const select = this.$refs.dashboardContent?.querySelector('[data-product-month]');
+                const select = this.getDashboardContent()?.querySelector('[data-product-month]');
                 if (select) select.value = this.productMonth;
             }
         },
@@ -350,7 +378,7 @@
             this.loading = true;
             this.requestError = '';
             this.requestController = new AbortController();
-            const url = new URL(this.$root.dataset.dashboardUrl, window.location.origin);
+            const url = new URL(this.getDashboardUrl());
             url.searchParams.set('ajax', productOnly ? 'product_performance' : 'dashboard');
             url.searchParams.set('product_month', month);
             if (from && to) {
@@ -363,7 +391,7 @@
                 url.searchParams.delete('to_date');
             }
             try {
-                const response = await fetch(url, {
+                const response = await fetch(url.toString(), {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     signal: this.requestController.signal,
                 });
@@ -375,15 +403,23 @@
                     const data = await response.json();
                     throw new Error(Object.values(data.errors || {}).flat()[0] || @js(__('dashboard.filter.invalid_range')));
                 }
-                if (!response.ok || !(response.headers.get('content-type') || '').includes('application/json')) {
+                if (!response.ok) {
+                    throw new Error(@js(__('dashboard.filter.failed')));
+                }
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
                     throw new Error(@js(__('dashboard.filter.failed')));
                 }
                 const data = await response.json();
-                if (typeof data.html !== 'string') throw new Error(@js(__('dashboard.filter.failed')));
+                if (!data || typeof data.html !== 'string') throw new Error(@js(__('dashboard.filter.failed')));
+                const contentEl = this.getDashboardContent();
                 const target = productOnly
-                    ? this.$refs.dashboardContent?.querySelector('[data-product-performance-rows]')
-                    : this.$refs.dashboardContent;
-                if (!target) throw new Error(@js(__('dashboard.filter.failed')));
+                    ? contentEl?.querySelector('[data-product-performance-rows]')
+                    : contentEl;
+                if (!target) {
+                    console.error('Target dashboard content element not found:', contentEl);
+                    throw new Error(@js(__('dashboard.filter.failed')));
+                }
                 target.innerHTML = data.html;
                 this.fromDate = from;
                 this.toDate = to;
@@ -391,6 +427,7 @@
                 return true;
             } catch (error) {
                 if (error.name !== 'AbortError') {
+                    console.error('Dashboard refresh failed:', error);
                     this.requestError = error instanceof TypeError ? @js(__('dashboard.filter.failed')) : error.message;
                 }
                 return false;

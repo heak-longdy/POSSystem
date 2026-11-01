@@ -3,29 +3,30 @@
     $isKm = $printLocale === 'km';
     $order = $order ?? null;
 
-    $shopName = $order->shop?->name ?: ($isKm ? 'រ៉ុង ស៊ុយ ហ័រ ( ផែ ស៊ុយហ័រ )' : 'Rong Suy Hor (Phe Suyhor)');
-    $shopSub = $order->shop?->nick_name ?: ($order->shop?->name ? '' : 'phe suy horh');
-    $shopPhone = $order->shop?->phone ?: '092 98 99 28 / 096 088 6666 367';
-    $shopAddress = $order->shop?->address ?: ($isKm ? 'ផ្លូវជាតិលេខ៤ សង្កាត់ស្នោរ ក្រុងសំរោង ខេត្តតាកែវ' : 'National Road 4, Sangkat Sno, Samraong, Takeo');
+    $shopName = $order?->shop?->name ?: '---';
+    $shopSub = $order?->shop?->nick_name ?: '';
+    $shopPhone = $order?->shop?->phone ?: '';
+    $shopAddress = $order?->shop?->address ?: '---';
 
-    $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
-    $cPhone = $customerPhone ?? ($order->customer?->phone ?: '---');
-    $cAddress = $customerAddress ?? ($order->customer?->address ?: $shopAddress);
+    $cName = $customerName ?? ($order?->customer?->name ?: ($order?->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
+    $cPhone = $customerPhone ?? ($order?->customer?->phone ?: '---');
+    $cAddress = $customerAddress ?? ($order?->customer?->address ?: '---');
 
-    $invoiceNo = $order->invoice_number ?: sprintf('%05d', $order->id);
-    $orderDate = $order->order_date ? \Carbon\Carbon::parse($order->order_date) : now();
-    $cashierName = $order->barber?->name ?: ($order->payments->first()?->createdBy?->name ?: '113');
+    $invoiceNo = $order?->invoice_number ?: ($order?->id ? sprintf('%05d', $order->id) : '---');
+    $orderDate = $order?->order_date ? \Carbon\Carbon::parse($order->order_date) : now();
+    $cashierName = $order?->createdBy?->name ?: ($order?->payments?->first()?->createdBy?->name ?: ($order?->barber?->name ?: '---'));
 
-    $paymentStatus = $order->payment_status ?: 'Pending';
+    $paymentStatus = $order?->payment_status ?: 'Pending';
     $buyerStatusNote = match ($paymentStatus) {
         'Paid' => __('order.invoice.status_paid', [], $printLocale),
         'Partial' => __('order.invoice.status_partial', [], $printLocale),
         default => __('order.invoice.status_unpaid', [], $printLocale),
     };
 
-    $details = $order->orderDetails ?: collect();
+    $details = $order?->orderDetails ?: collect();
     $minRows = 0;
     $emptyRowsCount = max(0, $minRows - $details->count());
+    $invoicePreviousBalance = $invoicePreviousBalance ?? (float) ($order?->previous_balance ?? 0);
     $printAreaId = $printAreaId ?? "posInvoicePrintArea_{$printLocale}";
 @endphp
 
@@ -52,7 +53,7 @@
     <div class="inv-header-row">
         <!-- Left: Logo & Company Name -->
         <div class="inv-brand-box">
-            @if (!empty($order->shop?->image_url))
+            @if (!empty($order?->shop?->image_url))
                 <img src="{{ $order->shop->image_url }}" alt="{{ $shopName }}" class="inv-shop-logo-img"
                     style="display: none;" onload="this.style.display = '';" onerror="this.style.display = 'none';">
             @endif
@@ -62,9 +63,11 @@
                 @if ($shopSub)
                     <div class="inv-shop-subtitle-en">{{ $shopSub }}</div>
                 @endif
-                <div class="inv-shop-phone">
-                    <span class="phone-label">{{ __('order.invoice.tel', [], $printLocale) }}</span> {{ $shopPhone }}
-                </div>
+                @if ($shopPhone)
+                    <div class="inv-shop-phone">
+                        <span class="phone-label">{{ __('order.invoice.tel', [], $printLocale) }}</span> {{ $shopPhone }}
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -142,7 +145,7 @@
                     } else {
                         $itemName = $rawItemName;
                     }
-                    $unitPrice = (float) ($detail->price ?? 0);
+                    $unitPrice = (float) ($detail->unit_price ?? ($detail->price ?? 0));
                     $qty = (int) ($detail->qty ?: 1);
                     $line = app(\App\Services\OrderPricing::class)->line($detail);
                 @endphp
@@ -157,13 +160,9 @@
                 </tr>
             @empty
                 <tr class="inv-item-row">
-                    <td class="cell-num">1</td>
-                    <td class="cell-desc">
-                        <span class="item-name">{{ __('order.invoice.sample_coca', [], $printLocale) }}</span>
+                    <td colspan="5" class="cell-empty" style="text-align: center; color: #64748b; padding: 12px 6px;">
+                        {{ __('order.empty_cart.title', [], $printLocale) }}
                     </td>
-                    <td class="cell-qty">50</td>
-                    <td class="cell-price">$2.26</td>
-                    <td class="cell-total">$113.00</td>
                 </tr>
             @endforelse
 
@@ -207,7 +206,7 @@
             <tr class="trHeight">
                 <td class="inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>
                 <td class="inv-foot-calc-value font-bold">
-                    ${{ number_format((float) ($order->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
+                    ${{ number_format((float) ($order?->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
                 </td>
             </tr>
             <tr class="trHeight">

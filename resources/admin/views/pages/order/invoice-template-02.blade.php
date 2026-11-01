@@ -3,27 +3,25 @@
     $isKm = $printLocale === 'km';
     $order = $order ?? null;
 
-    $shopName = $order->shop?->name ?: 'ER-MLP1-TBK(PHE SUYHORTH)';
-    $shopPhone = $order->shop?->phone ?: '092 989 928/088 666 6367';
-    $shopAddress = $order->shop?->address ?: 'TBONG KHMUM';
-    $shopCity = $order->shop?->city ?: ($isKm ? 'N/A' : 'N/A');
+    $shopName = $order?->shop?->name ?: '---';
+    $shopPhone = $order?->shop?->phone ?: '---';
+    $shopAddress = $order?->shop?->address ?: '---';
+    $shopCity = $order?->shop?->city ?: '---';
 
-    $cName = $customerName ?? ($order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
-    $cPhone = $customerPhone ?? ($order->customer?->phone ?: '012399252');
-    $cAddress = $customerAddress ?? ($order->customer?->address ?: 'N/A ST 07 ផ្ទះជិត Mokwath Viheato');
-    $customerCode = trim((string) ($order->customer?->code ?? ''));
+    $cName = $customerName ?? ($order?->customer?->name ?: ($order?->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
+    $cPhone = $customerPhone ?? ($order?->customer?->phone ?: '---');
+    $cAddress = $customerAddress ?? ($order?->customer?->address ?: '---');
+    $customerCode = trim((string) ($order?->customer?->code ?? ''));
 
-    $invoiceNo = $order->invoice_number ?: sprintf('%05d', $order->id);
-    $orderDate = $order->order_date ? \Carbon\Carbon::parse($order->order_date) : now();
-    $deliveryDate = $order->delivery_date
+    $invoiceNo = $order?->invoice_number ?: ($order?->id ? sprintf('%05d', $order->id) : '---');
+    $orderDate = $order?->order_date ? \Carbon\Carbon::parse($order->order_date) : now();
+    $deliveryDate = $order?->delivery_date
         ? \Carbon\Carbon::parse($order->delivery_date)
-        : ($order->order_date ? \Carbon\Carbon::parse($order->order_date)->addDays(2) : now()->addDays(2));
-    $creatorPhone = $creatorPhone ?? ($order->createdBy?->phone ?: '---');
+        : null;
+    $creatorPhone = $creatorPhone ?? ($order?->createdBy?->phone ?: '---');
 
-    $details = $order->orderDetails ?: collect();
-    $minRows = 3;
-    $emptyRowsCount = max(0, min(3, $minRows - $details->count()));
-    $invoicePreviousBalance = $invoicePreviousBalance ?? 0;
+    $details = $order?->orderDetails ?: collect();
+    $invoicePreviousBalance = $invoicePreviousBalance ?? (float) ($order?->previous_balance ?? 0);
     $printAreaId = $printAreaId ?? "posSlipPrintArea_{$printLocale}";
 @endphp
 
@@ -52,7 +50,7 @@
             </div>
             <div class="slip-meta-item">
                 <span class="lbl">{{ __('order.invoice.slip_delivery_date', [], $printLocale) }}</span> 
-                <span class="val">{{ $deliveryDate->format('d/m/Y') }}</span>
+                <span class="val">{{ $deliveryDate ? $deliveryDate->format('d/m/Y') : '---' }}</span>
             </div>
         </div>
     </div>
@@ -99,7 +97,7 @@
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.detail.created_by', [], $printLocale) }}:</span>
-                <span class="info-val">{{ $order->createdBy?->name ?: '---' }}</span>
+                <span class="info-val">{{ $order?->createdBy?->name ?: '---' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.detail.phone', [], $printLocale) }}:</span>
@@ -145,9 +143,9 @@
                     } else {
                         $itemName = $rawItemName;
                     }
-                    $itemCode = $detail->product?->code ?: ($detail->product?->barcode ?: sprintf('%04d', $detail->item_id ?: ($index + 101)));
-                    $uomName = $detail->product?->uom?->name ?: '12';
-                    $unitPrice = (float) ($detail->price ?? 0);
+                    $itemCode = $detail->product?->code ?: ($detail->product?->barcode ?: ($detail->product_id ? sprintf('%04d', $detail->product_id) : '---'));
+                    $uomName = $detail->product?->uom?->name ?: '---';
+                    $unitPrice = (float) ($detail->unit_price ?? ($detail->price ?? 0));
                     $qty = (int) ($detail->qty ?: 1);
                     $line = app(\App\Services\OrderPricing::class)->line($detail);
                     $disc = $line['discount'] / max(1, $qty);
@@ -168,34 +166,11 @@
                 </tr>
             @empty
                 <tr class="slip-row">
-                    <td class="td-no">1</td>
-                    <td class="td-code">3801</td>
-                    <td class="td-desc">{{ __('order.invoice.sample_coca_12', [], $printLocale) }}</td>
-                    <td class="td-uom">12</td>
-                    <td class="td-cases td-qty">35</td>
-                    <td class="td-cases td-deliv-qty">35</td>
-                    <td class="td-price">$2.40</td>
-                    <td class="td-disc">$0.14</td>
-                    <td class="td-net">$2.26</td>
-                    <td class="td-total">$79.10</td>
+                    <td colspan="10" class="slip-empty" style="text-align: center; color: #64748b; padding: 12px 6px;">
+                        {{ __('order.empty_cart.title', [], $printLocale) }}
+                    </td>
                 </tr>
             @endforelse
-
-            {{-- Pad blank rows matching continuous slip layout in invoice_02.png --}}
-            @for ($i = 0; $i < $emptyRowsCount; $i++)
-                <tr class="slip-empty-row">
-                    <td class="td-no">&nbsp;</td>
-                    <td class="td-code">&nbsp;</td>
-                    <td class="td-desc">&nbsp;</td>
-                    <td class="td-uom">&nbsp;</td>
-                    <td class="td-cases td-qty">&nbsp;</td>
-                    <td class="td-cases td-deliv-qty">&nbsp;</td>
-                    <td class="td-price">&nbsp;</td>
-                    <td class="td-disc">&nbsp;</td>
-                    <td class="td-net">&nbsp;</td>
-                    <td class="td-total">&nbsp;</td>
-                </tr>
-            @endfor
         </tbody>
     </table>
 
@@ -214,7 +189,7 @@
                     <tr class="trHeight">
                         <td class="slip-calc-label inv-foot-calc-label font-bold">{{ __('order.invoice.subtotal', [], $printLocale) }}</td>
                         <td class="slip-calc-value inv-foot-calc-value font-bold">
-                            ${{ number_format((float) ($order->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
+                            ${{ number_format((float) ($order?->total_price ?? 0) + (float) ($invoicePreviousBalance ?? 0), 2) }}
                         </td>
                     </tr>
                     <tr class="trHeight">
