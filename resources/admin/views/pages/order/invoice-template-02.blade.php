@@ -23,6 +23,8 @@
     $details = $order?->orderDetails ?: collect();
     $invoicePreviousBalance = $invoicePreviousBalance ?? (float) ($order?->previous_balance ?? 0);
     $printAreaId = $printAreaId ?? "posSlipPrintArea_{$printLocale}";
+    $latestPaymentRecord = $latestPaymentRecord ?? ($order && method_exists($order, 'getLatestPaymentRecord') ? $order->getLatestPaymentRecord() : null);
+    $latestPaymentNote = trim((string) ($latestPaymentNote ?? ($latestPaymentRecord?->note ?? '')));
 @endphp
 
 <style>
@@ -177,7 +179,11 @@
     <!-- Bottom Table Extension & Summary -->
     <div class="slip-table-bottom-bar">
         <div class="slip-bottom-left">
-            <span class="slip-free-goods-note">{{ __('order.invoice.slip_free_goods', [], $printLocale) }}</span>
+            @if ($latestPaymentNote !== '')
+                <span class="slip-free-goods-note">
+                    <strong>{{ __('order.note', [], $printLocale) }}:</strong> {!! nl2br(e($latestPaymentNote)) !!}
+                </span>
+            @endif
         </div>
         <div class="slip-bottom-right">
             <table class="slip-calc-table">

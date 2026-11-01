@@ -569,4 +569,205 @@ class OrderAddPaymentNoteTest extends TestCase
 
         $this->assertSame(0, $order->payments()->count());
     }
+
+    public function test_delivery_slip_displays_note_from_only_latest_payment_record(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0030',
+            'total_price' => 200.0,
+            'paid_amount' => 50.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 20.0,
+            'note' => 'First older payment note',
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 30.0,
+            'note' => 'Latest payment note for delivery',
+            'created_at' => Carbon::parse('2026-06-02 10:00:00'),
+        ]);
+
+        $html = view('admin::pages.order.invoice-template-02', [
+            'order' => $order->fresh(),
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringContainsString('<strong>Note:</strong> Latest payment note for delivery', $html);
+        $this->assertStringNotContainsString('First older payment note', $html);
+        $this->assertStringNotContainsString('Free of charge items', $html);
+    }
+
+    public function test_delivery_slip_displays_translated_note_label_in_khmer(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0031',
+            'total_price' => 150.0,
+            'paid_amount' => 50.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 50.0,
+            'note' => 'ប្រាក់កក់តាម ABA',
+            'created_at' => Carbon::parse('2026-06-03 10:00:00'),
+        ]);
+
+        $html = view('admin::pages.order.invoice-template-02', [
+            'order' => $order->fresh(),
+            'printLocale' => 'km',
+        ])->render();
+
+        $this->assertStringContainsString('<strong>ចំណាំ:</strong> ប្រាក់កក់តាម ABA', $html);
+        $this->assertStringNotContainsString('ផលិតផលមិនគិតថ្លៃ', $html);
+    }
+
+    public function test_delivery_slip_does_not_combine_notes_from_multiple_payments(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0032',
+            'total_price' => 300.0,
+            'paid_amount' => 90.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 30.0,
+            'note' => 'Payment A',
+            'created_at' => Carbon::parse('2026-06-01 09:00:00'),
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 30.0,
+            'note' => 'Payment B',
+            'created_at' => Carbon::parse('2026-06-02 09:00:00'),
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 30.0,
+            'note' => 'Payment C',
+            'created_at' => Carbon::parse('2026-06-03 09:00:00'),
+        ]);
+
+        $html = view('admin::pages.order.invoice-template-02', [
+            'order' => $order->fresh(),
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringContainsString('Payment C', $html);
+        $this->assertStringNotContainsString('Payment A', $html);
+        $this->assertStringNotContainsString('Payment B', $html);
+    }
+
+    public function test_delivery_slip_leaves_note_section_empty_when_no_payments(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0033',
+            'total_price' => 100.0,
+            'paid_amount' => 0.0,
+            'payment_status' => 'Pending',
+        ]);
+
+        $html = view('admin::pages.order.invoice-template-02', [
+            'order' => $order->fresh(),
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringNotContainsString('<strong>Note:</strong>', $html);
+        $this->assertStringNotContainsString('slip-free-goods-note', $html);
+        $this->assertStringNotContainsString('Free of charge items', $html);
+    }
+
+    public function test_delivery_slip_leaves_note_section_empty_when_latest_payment_note_is_blank(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0034',
+            'total_price' => 100.0,
+            'paid_amount' => 20.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        // Older payment has note, but latest has null/whitespace note
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 10.0,
+            'note' => 'Older note',
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 10.0,
+            'note' => '   ',
+            'created_at' => Carbon::parse('2026-06-02 10:00:00'),
+        ]);
+
+        $html = view('admin::pages.order.invoice-template-02', [
+            'order' => $order->fresh(),
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringNotContainsString('Older note', $html);
+        $this->assertStringNotContainsString('<strong>Note:</strong>', $html);
+        $this->assertStringNotContainsString('slip-free-goods-note', $html);
+    }
+
+    public function test_delivery_slip_preserves_multiline_notes_and_escapes_html(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0035',
+            'total_price' => 100.0,
+            'paid_amount' => 50.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 50.0,
+            'note' => "Line 1\n<script>alert('xss')</script>Line 2",
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        $html = view('admin::pages.order.invoice-template-02', [
+            'order' => $order->fresh(),
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringContainsString('Line 1<br />', $html);
+        $this->assertStringContainsString('&lt;script&gt;alert(&#039;xss&#039;)&lt;/script&gt;Line 2', $html);
+        $this->assertStringNotContainsString('<script>alert', $html);
+    }
+
+    public function test_print_invoice_template_is_not_modified_with_payment_note_section(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0036',
+            'total_price' => 100.0,
+            'paid_amount' => 50.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 50.0,
+            'note' => 'Delivery slip note only',
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        $html = view('admin::pages.order.invoice-template', [
+            'order' => $order->fresh(),
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringNotContainsString('Delivery slip note only', $html);
+    }
 }
