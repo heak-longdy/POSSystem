@@ -79,6 +79,34 @@ class Order extends Model
             ->orderBy('id', 'asc');
     }
 
+    public function latestPayment()
+    {
+        return $this->hasOne(OrderPayment::class, 'order_id')->latestOfMany();
+    }
+
+    public function getLatestPaymentRecord(): ?OrderPayment
+    {
+        if ($this->relationLoaded('payments')) {
+            return $this->payments->sort(function ($a, $b) {
+                $aTime = $a->created_at ? ($a->created_at instanceof \Carbon\CarbonInterface ? $a->created_at->timestamp : strtotime((string) $a->created_at)) : 0;
+                $bTime = $b->created_at ? ($b->created_at instanceof \Carbon\CarbonInterface ? $b->created_at->timestamp : strtotime((string) $b->created_at)) : 0;
+                if ($aTime !== $bTime) {
+                    return $bTime <=> $aTime;
+                }
+                return ($b->id ?? 0) <=> ($a->id ?? 0);
+            })->first();
+        }
+
+        if ($this->relationLoaded('latestPayment') && $this->latestPayment) {
+            return $this->latestPayment;
+        }
+
+        return $this->hasMany(OrderPayment::class, 'order_id')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->first();
+    }
+
     public function incomingBalanceTransfers()
     {
         return $this->hasMany(OrderBalanceTransfer::class, 'new_order_id');

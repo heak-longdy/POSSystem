@@ -1092,11 +1092,14 @@
                     const initialAmount = (item && Number(item.remaining_amount) > 0)
                         ? Number(item.remaining_amount)
                         : null;
+                    const initialNote = (item && typeof item.latest_payment_note === 'string')
+                        ? item.latest_payment_note
+                        : '';
                     this.addPaymentForm = {
                         amount: initialAmount,
                         payment_method: 'Cash',
                         payment_date: moment().format('YYYY-MM-DDTHH:mm'),
-                        note: '',
+                        note: initialNote,
                     };
 
                     this.$nextTick(() => {
@@ -1113,6 +1116,11 @@
                                     if (!this.addPaymentForm.amount && res.data.remaining_amount) {
                                         this.addPaymentForm.amount = Number(res.data.remaining_amount);
                                     }
+                                    if (typeof res.data.latest_payment_note === 'string') {
+                                        if (!this.addPaymentForm.note || this.addPaymentForm.note === initialNote) {
+                                            this.addPaymentForm.note = res.data.latest_payment_note;
+                                        }
+                                    }
                                 }
                             })
                             .catch((err) => {
@@ -1124,6 +1132,12 @@
                     this.showAddPaymentModal = false;
                     this.addPaymentOrder = null;
                     this.addPaymentSubmitting = false;
+                    this.addPaymentForm = {
+                        amount: null,
+                        payment_method: 'Cash',
+                        payment_date: moment().format('YYYY-MM-DDTHH:mm'),
+                        note: '',
+                    };
                 },
                 async submitAddPayment() {
                     if (this.addPaymentSubmitting || !this.addPaymentOrder?.id) return;

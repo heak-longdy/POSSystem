@@ -62,6 +62,7 @@ class OrderController extends Controller
                 'shop',
                 'customer',
                 'completedOutgoingBalanceTransfer.newOrder',
+                'latestPayment',
                 'orderDetails' => function ($detail) {
                     $detail->withTrashed()->with(['service', 'product']);
                 },
@@ -230,6 +231,7 @@ class OrderController extends Controller
         $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && $data['paymentRemainingAmount'] > 0 && !$order->isTransferred();
         $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0 && !$order->isTransferred();
         $data['canReject'] = $data['canCancel'];
+        $data['latestPaymentNote'] = (string) ($order->getLatestPaymentRecord()?->note ?? '');
 
         return view($this->layout . 'detail', $data);
     }
@@ -1038,6 +1040,7 @@ class OrderController extends Controller
             'transferred_to_invoice' => $order->completedOutgoingBalanceTransfer?->newOrder?->invoice_number,
             'transferred_to_order_id' => $order->completedOutgoingBalanceTransfer?->new_order_id,
             'payments' => $payments,
+            'latest_payment_note' => (string) ($order->getLatestPaymentRecord()?->note ?? ''),
         ];
     }
 
@@ -1541,6 +1544,7 @@ class OrderController extends Controller
             $item->total_discount_title = '$' . number_format((float) ($item->total_discount ?? 0), 2);
             $item->can_reject = $item->payment_status === 'Pending' && (float) ($item->paid_amount ?? 0) <= 0 && !$item->isTransferred();
             $item->can_add_payment = ($item->payment_status !== 'Cancel' && (float) ($item->remaining_amount ?? 0) > 0 && !$item->isTransferred());
+            $item->latest_payment_note = (string) ($item->getLatestPaymentRecord()?->note ?? '');
             $itemDate = $item->order_date;
             $item->order_date_title = $itemDate
                 ? Carbon::parse($itemDate)->format('Y-m-d H:i')

@@ -81,7 +81,7 @@
                         <!-- Primary order actions -->
                         <div class="header-right-actions">
                             @if ($canAddPayment)
-                                <button type="button" class="btn btn-create bg-success btn-system btn-system-success" :disabled="paymentSubmitting" @click="openPaymentModal = true">
+                                <button type="button" class="btn btn-create bg-success btn-system btn-system-success" :disabled="paymentSubmitting" @click="openAddPaymentModal()">
                                     <i data-feather="plus-circle"></i>
                                     <span>{{ __('order.detail.add_payment') }}</span>
                                 </button>
@@ -382,7 +382,7 @@
                                     <span class="count-badge">{{ $order->payments ? $order->payments->count() : 0 }}</span>
                                 </div>
                                 @if ($canAddPayment)
-                                    <button type="button" class="btn btn-create bg-success btn-system-sm btn-system-success" :disabled="paymentSubmitting" @click="openPaymentModal = true">
+                                    <button type="button" class="btn btn-create bg-success btn-system-sm btn-system-success" :disabled="paymentSubmitting" @click="openAddPaymentModal()">
                                         <i data-feather="plus"></i>
                                         <span>{{ __('order.detail.add_payment') }}</span>
                                     </button>
@@ -626,7 +626,7 @@
                                 </div>
 
                                 @if ($canAddPayment)
-                                    <button type="button" class="btn btn-create bg-success btn-system btn-system-success btn-full-width mt-3" :disabled="paymentSubmitting" @click="openPaymentModal = true">
+                                    <button type="button" class="btn btn-create bg-success btn-system btn-system-success btn-full-width mt-3" :disabled="paymentSubmitting" @click="openAddPaymentModal()">
                                         <i data-feather="check-circle"></i>
                                         <span>{{ __('order.button.make_payment') }}</span>
                                     </button>
@@ -1878,6 +1878,7 @@
         });
 
         function xOrderDetail() {
+            const latestNote = @json($latestPaymentNote ?? ($order->getLatestPaymentRecord()?->note ?? ''));
             return {
                 refreshing: false,
                 openPaymentModal: false,
@@ -1885,11 +1886,21 @@
                 printLanguage: '{{ app()->getLocale() === 'km' ? 'km' : 'en' }}',
                 paymentSubmitting: false,
                 paymentNoticeKey: 'order-payment-success:{{ $order->id }}',
+                latestPaymentNote: latestNote,
                 paymentForm: {
                     amount: {{ $paymentRemainingAmount }},
                     payment_method: 'Cash',
                     payment_date: '{{ \Carbon\Carbon::now()->format('Y-m-d\TH:i') }}',
-                    note: ''
+                    note: latestNote
+                },
+                openAddPaymentModal() {
+                    this.paymentForm.note = this.latestPaymentNote;
+                    this.openPaymentModal = true;
+                    this.$nextTick(() => {
+                        if (window.feather) {
+                            feather.replace();
+                        }
+                    });
                 },
                 refreshPage(e) {
                     if (this.refreshing) return;
