@@ -399,7 +399,7 @@
                                             <th class="text-right">{{ __('order.table.paid') }}</th>
                                             <th>{{ __('order.detail.cashier') }}</th>
                                             <th>{{ __('order.table.note') }}</th>
-                                            <th class="text-center" style="width: 70px;">{{ __('global.table.action') }}</th>
+                                            <th class="text-center" style="width: 90px;">{{ __('global.table.action') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -413,6 +413,8 @@
                                                     'qr' => 'chip-qr',
                                                     default => 'chip-default'
                                                 };
+                                                $latestPaymentRec = $latestPaymentRecord ?? ($order->getLatestPaymentRecord());
+                                                $isLatestPayment = $latestPaymentRec && ((int) $pay->id === (int) $latestPaymentRec->id);
                                             @endphp
                                             <tr>
                                                 <td>{{ $pIdx + 1 }}</td>
@@ -427,16 +429,36 @@
                                                 <td>
                                                     <span class="text-muted">{{ $pay->note ?: '---' }}</span>
                                                 </td>
-                                                <td class="text-center">
-                                                    @if ($order->payment_status !== 'Cancel')
-                                                        @can('order-delete')
-                                                            <button type="button"
-                                                                class="btn-action-delete"
-                                                                title="{{ __('order.action.delete_payment') }}"
-                                                                @click="deletePaymentRecord({{ $pay->id }}, '{{ number_format((float)$pay->amount, 2) }}', '{{ $method }}')">
-                                                                <i data-feather="trash-2"></i>
-                                                            </button>
-                                                        @endcan
+                                                <td class="text-center" style="white-space: nowrap;">
+                                                    @if ($order->payment_status !== 'Cancel' && !$order->isTransferred())
+                                                        @if ($isLatestPayment)
+                                                            <div style="display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                                                                @can('order-update')
+                                                                    <button type="button"
+                                                                        class="btn-action-edit"
+                                                                        title="{{ __('order.detail.edit_payment') }}"
+                                                                        @click="openEditPaymentModal(@js([
+                                                                            'id' => $pay->id,
+                                                                            'amount' => (float) $pay->amount,
+                                                                            'payment_method' => $method,
+                                                                            'payment_date' => $pay->payment_date ? \Carbon\Carbon::parse($pay->payment_date)->format('Y-m-d\TH:i') : ($pay->created_at ? \Carbon\Carbon::parse($pay->created_at)->format('Y-m-d\TH:i') : ''),
+                                                                            'note' => (string) ($pay->note ?? '')
+                                                                        ]))">
+                                                                        <i data-feather="edit-2"></i>
+                                                                    </button>
+                                                                @endcan
+                                                                @can('order-delete')
+                                                                    <button type="button"
+                                                                        class="btn-action-delete"
+                                                                        title="{{ __('order.action.delete_payment') }}"
+                                                                        @click="deletePaymentRecord({{ $pay->id }}, '{{ number_format((float)$pay->amount, 2) }}', '{{ $method }}')">
+                                                                        <i data-feather="trash-2"></i>
+                                                                    </button>
+                                                                @endcan
+                                                            </div>
+                                                        @else
+                                                            <span class="text-muted">---</span>
+                                                        @endif
                                                     @else
                                                         <span class="text-muted">---</span>
                                                     @endif
@@ -707,6 +729,83 @@
                                 <button type="submit" class="btn btn-create bg-success btn-system btn-system-success" :disabled="paymentSubmitting" :aria-busy="paymentSubmitting">
                                     <span class="bx bx-loader-alt bx-spin" x-show="paymentSubmitting" style="display: none;" aria-hidden="true"></span>
                                     <span aria-live="polite" x-text="paymentSubmitting ? @js(__('order.button.processing_payment')) : @js(__('order.detail.add_payment'))"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Edit Payment Modal (Alpine.js) -->
+                <div class="modal-backdrop-custom" x-show="openEditPaymentModalState" x-transition.opacity style="display: none;">
+                    <div class="modal-dialog-custom" @click.away="if (!editPaymentSubmitting) closeEditPaymentModal()">
+                        <div class="modal-header-custom">
+                            <div class="modal-title-wrap">
+                                <i data-feather="edit-2" class="text-primary"></i>
+                                <h3>{{ __('order.detail.edit_payment') }}</h3>
+                            </div>
+                            <button type="button" class="btn-close-modal" :disabled="editPaymentSubmitting" @click="closeEditPaymentModal()">
+                                &times;
+                            </button>
+                        </div>
+
+                        <form @submit.prevent="submitEditPayment()" :aria-busy="editPaymentSubmitting">
+                            <fieldset class="modal-body-custom" :disabled="editPaymentSubmitting" style="border: 0; margin: 0; min-width: 0;">
+                                <div class="form-group-modal">
+                                    <label>{{ __('order.amount') }} ($) <span class="text-danger">*</span></label>
+                                    <div class="input-action-wrap">
+                                        <input type="number" step="0.01" min="0.01" :max="editPaymentMaxAmount"
+                                            class="modal-input" x-model="editPaymentForm.amount" required>
+                                        <button type="button" class="btn-fill-max" @click="editPaymentForm.amount = editPaymentMaxAmount">
+                                            {{ __('order.button.full_balance') }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-group-modal">
+                                    <label>{{ __('order.detail.method') }}</label>
+                                    <div class="payment-method-selector">
+                                        <label class="method-option" :class="editPaymentForm.payment_method === 'Cash' ? 'is-active' : ''">
+                                            <input type="radio" value="Cash" x-model="editPaymentForm.payment_method">
+                                            <i data-feather="dollar-sign"></i>
+                                            <span>{{ __('order.payment.cash') }}</span>
+                                        </label>
+                                        <label class="method-option" :class="editPaymentForm.payment_method === 'ABA' ? 'is-active' : ''">
+                                            <input type="radio" value="ABA" x-model="editPaymentForm.payment_method">
+                                            <i data-feather="credit-card"></i>
+                                            <span>{{ __('order.payment.aba') }}</span>
+                                        </label>
+                                        <label class="method-option" :class="editPaymentForm.payment_method === 'Card' ? 'is-active' : ''">
+                                            <input type="radio" value="Card" x-model="editPaymentForm.payment_method">
+                                            <i data-feather="server"></i>
+                                            <span>{{ __('order.payment.card') }}</span>
+                                        </label>
+                                        <label class="method-option" :class="editPaymentForm.payment_method === 'QR' ? 'is-active' : ''">
+                                            <input type="radio" value="QR" x-model="editPaymentForm.payment_method">
+                                            <i data-feather="maximize"></i>
+                                            <span>{{ __('order.payment.qr') }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group-modal">
+                                    <label>{{ __('order.table.pay_date') }}</label>
+                                    <input type="datetime-local" class="modal-input" x-model="editPaymentForm.payment_date">
+                                </div>
+
+                                <div class="form-group-modal">
+                                    <label>{{ __('order.note') }}</label>
+                                    <textarea class="modal-textarea" rows="3" x-model="editPaymentForm.note"
+                                        placeholder="{{ __('order.placeholder.note') }}"></textarea>
+                                </div>
+                            </fieldset>
+
+                            <div class="modal-footer-custom">
+                                <button type="button" class="btn btn-system btn-system-outline btn-system-neutral" :disabled="editPaymentSubmitting" @click="closeEditPaymentModal()">
+                                    <span>{{ __('order.button.close') }}</span>
+                                </button>
+                                <button type="submit" class="btn btn-create bg-primary btn-system btn-system-primary" :disabled="editPaymentSubmitting" :aria-busy="editPaymentSubmitting">
+                                    <span class="bx bx-loader-alt bx-spin" x-show="editPaymentSubmitting" style="display: none;" aria-hidden="true"></span>
+                                    <span aria-live="polite" x-text="editPaymentSubmitting ? @js(__('order.button.processing_payment')) : @js(__('global.button.save'))"></span>
                                 </button>
                             </div>
                         </form>
@@ -1126,6 +1225,31 @@
         }
         .btn-full-width {
             width: 100% !important;
+        }
+        .btn-action-edit {
+            width: 30px !important;
+            height: 30px !important;
+            min-width: unset !important;
+            padding: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border-radius: 6px !important;
+            border: 1px solid #dbeafe !important;
+            background: #eff6ff !important;
+            color: #2563eb !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+        }
+        .btn-action-edit:hover {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #2563eb !important;
+            transform: scale(1.05);
+        }
+        .btn-action-edit svg {
+            width: 14px !important;
+            height: 14px !important;
         }
         .btn-action-delete {
             width: 30px !important;
@@ -1901,6 +2025,98 @@
                             feather.replace();
                         }
                     });
+                },
+                openEditPaymentModalState: false,
+                editPaymentSubmitting: false,
+                editPaymentMaxAmount: 0,
+                editPaymentRecordId: null,
+                editPaymentForm: {
+                    id: null,
+                    amount: null,
+                    payment_method: 'Cash',
+                    payment_date: '',
+                    note: ''
+                },
+                openEditPaymentModal(pay) {
+                    if (!pay || !pay.id) return;
+                    this.editPaymentRecordId = pay.id;
+                    const currentRem = Number({{ $paymentRemainingAmount }});
+                    const payAmt = Number(pay.amount || 0);
+                    this.editPaymentMaxAmount = Number((currentRem + payAmt).toFixed(2));
+                    this.editPaymentForm = {
+                        id: pay.id,
+                        amount: payAmt,
+                        payment_method: pay.payment_method || 'Cash',
+                        payment_date: pay.payment_date || moment().format('YYYY-MM-DDTHH:mm'),
+                        note: pay.note || ''
+                    };
+                    this.openEditPaymentModalState = true;
+                    this.$nextTick(() => {
+                        if (window.feather) {
+                            feather.replace();
+                        }
+                    });
+                },
+                closeEditPaymentModal() {
+                    this.openEditPaymentModalState = false;
+                    this.editPaymentRecordId = null;
+                    this.editPaymentSubmitting = false;
+                },
+                async submitEditPayment() {
+                    if (this.editPaymentSubmitting || !this.editPaymentRecordId) return;
+                    if (!this.editPaymentForm.amount || Number(this.editPaymentForm.amount) <= 0) {
+                        this.notifyPayment('error', 'Please enter a valid payment amount.');
+                        return;
+                    }
+                    if (Number(this.editPaymentForm.amount) > Number(this.editPaymentMaxAmount)) {
+                        this.notifyPayment('error', @json(__('order.validation.payment_amount_exceeds') ?: 'Payment amount exceeds available balance.'));
+                        return;
+                    }
+
+                    this.editPaymentSubmitting = true;
+                    const url = `{{ url('admin/order/update-payment') }}/${this.editPaymentRecordId}`;
+                    const tabKey = this.$root.closest('.workspace-tab-pane')?.getAttribute('data-tab-key');
+                    let response;
+
+                    try {
+                        response = await Axios.put(url, {
+                            _token: '{{ csrf_token() }}',
+                            amount: this.editPaymentForm.amount,
+                            payment_method: this.editPaymentForm.payment_method,
+                            payment_date: this.editPaymentForm.payment_date,
+                            note: this.editPaymentForm.note
+                        });
+                    } catch (error) {
+                        this.editPaymentSubmitting = false;
+                        const errorMsg = error.response?.data?.error ||
+                            Object.values(error.response?.data?.errors || {})?.[0]?.[0] ||
+                            @json(__('order.payment.error_update_payment') ?: 'Failed to update payment.');
+                        this.notifyPayment('error', errorMsg);
+                        return;
+                    }
+
+                    if (!(response.data && (response.data.message === 'success' || response.status === 200))) {
+                        this.editPaymentSubmitting = false;
+                        this.notifyPayment('error', response.data?.error || @json(__('order.payment.error_update_payment') ?: 'Failed to update payment.'));
+                        return;
+                    }
+
+                    this.openEditPaymentModalState = false;
+                    const workspace = window.MDI;
+                    const tab = workspace?.tabs.find(item => item.key === tabKey);
+                    if (tab && typeof workspace.fetchAndMountTab === 'function') {
+                        this.notifyPayment('success', @json(__('order.message.payment_status_success')));
+                        this.$nextTick(() => workspace.fetchAndMountTab(tab));
+                    } else if (this.$root.isConnected) {
+                        try {
+                            sessionStorage.setItem(this.paymentNoticeKey, '1');
+                        } catch (error) {
+                            this.notifyPayment('success', @json(__('order.message.payment_status_success')));
+                        }
+                        window.location.reload();
+                    } else {
+                        this.notifyPayment('success', @json(__('order.message.payment_status_success')));
+                    }
                 },
                 refreshPage(e) {
                     if (this.refreshing) return;

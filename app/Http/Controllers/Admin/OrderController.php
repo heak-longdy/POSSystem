@@ -231,7 +231,8 @@ class OrderController extends Controller
         $data['canAddPayment'] = $order->payment_status !== 'Cancel' && !$order->trashed() && $data['paymentRemainingAmount'] > 0 && !$order->isTransferred();
         $data['canCancel'] = $order->payment_status === 'Pending' && !$order->trashed() && (float) ($order->paid_amount ?? 0) <= 0 && !$order->isTransferred();
         $data['canReject'] = $data['canCancel'];
-        $data['latestPaymentNote'] = (string) ($order->getLatestPaymentRecord()?->note ?? '');
+        $data['latestPaymentRecord'] = $order->getLatestPaymentRecord();
+        $data['latestPaymentNote'] = (string) ($data['latestPaymentRecord']?->note ?? '');
 
         return view($this->layout . 'detail', $data);
     }
@@ -637,6 +638,13 @@ class OrderController extends Controller
             if ($order->payment_status === 'Cancel') {
                 throw ValidationException::withMessages([
                     'payment_status' => 'Cannot delete payment on a rejected order.',
+                ]);
+            }
+
+            $latestPayment = $order->getLatestPaymentRecord();
+            if (!$latestPayment || (int) $payment->id !== (int) $latestPayment->id) {
+                throw ValidationException::withMessages([
+                    'payment_id' => 'Only the most recent payment record can be deleted.',
                 ]);
             }
 

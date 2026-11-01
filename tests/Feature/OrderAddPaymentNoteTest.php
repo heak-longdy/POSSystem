@@ -385,4 +385,188 @@ class OrderAddPaymentNoteTest extends TestCase
         $response = $this->get('/admin/order/list/Partial')->assertOk();
         $response->assertSee('List page note population test', false);
     }
+
+    public function test_payment_history_shows_edit_button_only_for_latest_payment(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0020',
+            'total_price' => 100.0,
+            'paid_amount' => 30.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        $p1 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 10.0,
+            'note' => 'Older payment record',
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        $p2 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 20.0,
+            'note' => 'Latest payment record',
+            'created_at' => Carbon::parse('2026-06-02 10:00:00'),
+        ]);
+
+        $response = $this->get('/admin/order/detail/' . $order->id)->assertOk();
+        $html = $response->getContent();
+
+        // Count occurrences of btn-action-edit in the response
+        $editButtonCount = substr_count($html, 'class="btn-action-edit"');
+        $this->assertSame(1, $editButtonCount, 'Expected exactly 1 edit action button in payment history');
+
+        // Verify the edit button is for p2, not p1
+        $this->assertStringContainsString('openEditPaymentModal', $html);
+        $this->assertStringContainsString('\u0022id\u0022:' . $p2->id, $html);
+        $this->assertStringNotContainsString('\u0022id\u0022:' . $p1->id, $html);
+    }
+
+    public function test_editing_latest_payment_recalculates_balance_and_status(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0021',
+            'total_price' => 100.0,
+            'paid_amount' => 50.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        $p1 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 30.0,
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        $p2 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 20.0,
+            'created_at' => Carbon::parse('2026-06-02 10:00:00'),
+        ]);
+
+        // Increase p2 to 70 to fully pay the order (30 + 70 = 100)
+        $this->putJson('/admin/order/update-payment/' . $p2->id, [
+            'amount' => 70.0,
+            'payment_method' => 'ABA',
+            'payment_date' => '2026-06-03 14:00:00',
+            'note' => 'Paid in full after edit',
+        ])->assertOk()
+            ->assertJsonPath('payment_status', 'Paid')
+            ->assertJsonPath('paid_amount', 100)
+            ->assertJsonPath('remaining_amount', 0);
+
+        $order->refresh();
+        $this->assertSame('Paid', $order->payment_status);
+        $this->assertSame(100.0, (float) $order->paid_amount);
+        $this->assertSame(0.0, (float) $order->remaining_amount);
+        $this->assertSame('Paid in full after edit', $p2->fresh()->note);
+        $this->assertSame('ABA', $p2->fresh()->payment_method);
+    }
+
+    public function test_editing_latest_payment_rejects_amount_exceeding_available_balance(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0022',
+            'total_price' => 100.0,
+            'paid_amount' => 50.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 30.0,
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        $p2 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 20.0,
+            'created_at' => Carbon::parse('2026-06-02 10:00:00'),
+        ]);
+
+        // Available balance is 50 remaining + 20 current = 70. Amount 70.01 must be rejected.
+        $this->putJson('/admin/order/update-payment/' . $p2->id, [
+            'amount' => 70.01,
+        ])->assertUnprocessable()->assertJsonValidationErrors('amount');
+
+        // Order remains unchanged
+        $order->refresh();
+        $this->assertSame('Partial', $order->payment_status);
+        $this->assertSame(50.0, (float) $order->paid_amount);
+    }
+
+    public function test_payment_history_shows_delete_button_only_for_latest_payment(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0023',
+            'total_price' => 100.0,
+            'paid_amount' => 30.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        $p1 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 10.0,
+            'note' => 'First payment',
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        $p2 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 20.0,
+            'note' => 'Second payment',
+            'created_at' => Carbon::parse('2026-06-02 10:00:00'),
+        ]);
+
+        $response = $this->get('/admin/order/detail/' . $order->id)->assertOk();
+        $html = $response->getContent();
+
+        // Count occurrences of btn-action-delete in the response
+        $deleteButtonCount = substr_count($html, 'class="btn-action-delete"');
+        $this->assertSame(1, $deleteButtonCount, 'Expected exactly 1 delete action button in payment history');
+
+        // Verify the delete button targets p2, not p1
+        $this->assertStringContainsString('deletePaymentRecord(' . $p2->id . ',', $html);
+        $this->assertStringNotContainsString('deletePaymentRecord(' . $p1->id . ',', $html);
+    }
+
+    public function test_deleting_older_payment_is_rejected_until_it_becomes_latest(): void
+    {
+        $order = Order::create([
+            'invoice_number' => 'NO-0024',
+            'total_price' => 100.0,
+            'paid_amount' => 30.0,
+            'payment_status' => 'Partial',
+        ]);
+
+        $p1 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 10.0,
+            'created_at' => Carbon::parse('2026-06-01 10:00:00'),
+        ]);
+
+        $p2 = OrderPayment::create([
+            'order_id' => $order->id,
+            'amount' => 20.0,
+            'created_at' => Carbon::parse('2026-06-02 10:00:00'),
+        ]);
+
+        // Attempting to delete p1 when p2 exists must be rejected
+        $this->deleteJson('/admin/order/delete-payment/' . $p1->id)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('payment_id');
+
+        // Deleting p2 succeeds because it is the latest payment
+        $this->deleteJson('/admin/order/delete-payment/' . $p2->id)
+            ->assertOk()
+            ->assertJsonPath('paid_amount', 10)
+            ->assertJsonPath('remaining_amount', 90);
+
+        // Now p1 is the latest active payment, so deleting p1 succeeds
+        $this->deleteJson('/admin/order/delete-payment/' . $p1->id)
+            ->assertOk()
+            ->assertJsonPath('paid_amount', 0)
+            ->assertJsonPath('remaining_amount', 100);
+
+        $this->assertSame(0, $order->payments()->count());
+    }
 }
