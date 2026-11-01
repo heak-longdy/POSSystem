@@ -72,9 +72,12 @@
                 <thead>
                     <tr>
                         <th scope="col" class="order-product-picker__check">
-                            <input type="checkbox" :checked="allSelected" x-effect="$el.indeterminate = someSelected && !allSelected"
-                                :disabled="!canSelect || !selectableItems.length" @change="togglePage($event.target.checked)"
-                                aria-label="{{ __('order.product_picker.select_page') }}">
+                            <label class="evil-shrimp-checkbox" style="margin: 0; font-size: 12.5px;" :class="{ 'disabled': !canSelect || !selectableItems.length }">
+                                <input type="checkbox" :checked="allSelected" x-effect="$el.indeterminate = someSelected && !allSelected"
+                                    :disabled="!canSelect || !selectableItems.length" @change="togglePage($event.target.checked)"
+                                    aria-label="{{ __('order.product_picker.select_page') }}">
+                                <div class="checkmark"></div>
+                            </label>
                         </th>
                         <th scope="col" class="order-product-picker__no">Nº</th>
                         <th scope="col" class="order-product-picker__code">{{ __('order.product_picker.code') }}</th>
@@ -89,8 +92,11 @@
                     <template x-for="(item, index) in products" :key="key(item)">
                         <tr :class="{ 'is-selected': isSelected(item) && !inOrder(item), 'is-added': inOrder(item) }">
                             <td class="order-product-picker__check">
-                                <input type="checkbox" :checked="inOrder(item) || isSelected(item)" :disabled="!canSelect || inOrder(item)"
-                                    @change="toggle(item)" :aria-label="name(item)">
+                                <label class="evil-shrimp-checkbox" style="margin: 0; font-size: 12.5px;" :class="{ 'disabled': !canSelect || inOrder(item) }">
+                                    <input type="checkbox" :checked="inOrder(item) || isSelected(item)" :disabled="!canSelect || inOrder(item)"
+                                        @change="toggle(item)" :aria-label="name(item)">
+                                    <div class="checkmark"></div>
+                                </label>
                             </td>
                             <td class="order-product-picker__no" data-label="Nº" x-text="itemNo(index)"></td>
                             <td class="order-product-picker__code" data-label="{{ __('order.product_picker.code') }}">
@@ -239,7 +245,7 @@
         .order-product-picker__uom { width: 96px; }
         .order-product-picker__category { width: 148px; }
         .order-product-picker td.order-product-picker__metadata { color: #475569; font-size: 12px; line-height: 1.6; }
-        .order-product-picker input[type="checkbox"] { display: inline-block; width: 18px; height: 18px; margin: 0; accent-color: #2563eb; cursor: pointer; vertical-align: middle; }
+        .order-product-picker input[type="checkbox"] { cursor: pointer; }
         .order-product-picker input[type="checkbox"]:disabled { cursor: not-allowed; }
         .order-product-picker__numeric { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
         .order-product-picker td.order-product-picker__numeric { font-size: 13px; font-weight: 600; color: var(--order-ink); }

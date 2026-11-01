@@ -116,8 +116,8 @@
                 <th rowspan="2" class="th-code">{{ __('order.invoice.slip_col_code', [], $printLocale) }}</th>
                 <th rowspan="2" class="th-desc">{{ __('order.invoice.slip_col_desc', [], $printLocale) }}</th>
                 <th rowspan="2" class="th-uom">{{ __('order.invoice.slip_col_uom', [], $printLocale) }}</th>
-                <th colspan="2" class="th-qty-group">{{ __('order.invoice.slip_col_qty', [], $printLocale) }}</th>
-                <th colspan="2" class="th-qty-group">{{ __('order.invoice.slip_col_deliv_qty', [], $printLocale) }}</th>
+                <th class="th-qty">{{ __('order.invoice.slip_col_qty', [], $printLocale) }}</th>
+                <th class="th-deliv-qty">{{ __('order.invoice.slip_col_deliv_qty', [], $printLocale) }}</th>
                 <th rowspan="2" class="th-price">{{ __('order.invoice.slip_col_cost', [], $printLocale) }}</th>
                 <th rowspan="2" class="th-disc">
                     {{ __('order.invoice.slip_col_discount', [], $printLocale) }}<br>
@@ -130,10 +130,8 @@
                 <th rowspan="2" class="th-total">{{ __('order.invoice.slip_col_total', [], $printLocale) }}</th>
             </tr>
             <tr class="th-sub-row">
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_case', [], $printLocale) }}</th>
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_can', [], $printLocale) }}</th>
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_case', [], $printLocale) }}</th>
-                <th class="th-sub-col">{{ __('order.invoice.slip_col_can', [], $printLocale) }}</th>
+                <th class="th-sub-col th-sub-qty">{{ __('order.invoice.slip_col_case', [], $printLocale) }}</th>
+                <th class="th-sub-col th-sub-deliv">{{ __('order.invoice.slip_col_case', [], $printLocale) }}</th>
             </tr>
         </thead>
         <tbody>
@@ -161,10 +159,8 @@
                     <td class="td-code">{{ $itemCode }}</td>
                     <td class="td-desc">{{ $itemName }}</td>
                     <td class="td-uom">{{ $uomName }}</td>
-                    <td class="td-cases">{{ $qty }}</td>
-                    <td class="td-cans">0</td>
-                    <td class="td-cases">{{ $qty }}</td>
-                    <td class="td-cans">0</td>
+                    <td class="td-cases td-qty">{{ $qty }}</td>
+                    <td class="td-cases td-deliv-qty">{{ $qty }}</td>
                     <td class="td-price">${{ number_format($unitPrice, 2) }}</td>
                     <td class="td-disc">${{ $disc > 0 ? number_format($disc, 2) : '0.00' }}</td>
                     <td class="td-net">${{ number_format($netUnitPrice, 2) }}</td>
@@ -176,10 +172,8 @@
                     <td class="td-code">3801</td>
                     <td class="td-desc">{{ __('order.invoice.sample_coca_12', [], $printLocale) }}</td>
                     <td class="td-uom">12</td>
-                    <td class="td-cases">35</td>
-                    <td class="td-cans">0</td>
-                    <td class="td-cases">35</td>
-                    <td class="td-cans">0</td>
+                    <td class="td-cases td-qty">35</td>
+                    <td class="td-cases td-deliv-qty">35</td>
                     <td class="td-price">$2.40</td>
                     <td class="td-disc">$0.14</td>
                     <td class="td-net">$2.26</td>
@@ -194,10 +188,8 @@
                     <td class="td-code">&nbsp;</td>
                     <td class="td-desc">&nbsp;</td>
                     <td class="td-uom">&nbsp;</td>
-                    <td class="td-cases">&nbsp;</td>
-                    <td class="td-cans">&nbsp;</td>
-                    <td class="td-cases">&nbsp;</td>
-                    <td class="td-cans">&nbsp;</td>
+                    <td class="td-cases td-qty">&nbsp;</td>
+                    <td class="td-cases td-deliv-qty">&nbsp;</td>
                     <td class="td-price">&nbsp;</td>
                     <td class="td-disc">&nbsp;</td>
                     <td class="td-net">&nbsp;</td>

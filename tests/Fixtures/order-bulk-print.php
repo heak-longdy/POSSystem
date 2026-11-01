@@ -20,6 +20,7 @@ $orders = collect(range($total, 1))->slice(($page - 1) * 50, 50)->map(fn ($id) =
     'display_date' => '2026-10-29',
     'display_shop_name' => 'Central',
     'display_customer_name' => 'Customer ' . $id,
+    'display_created_by' => 'User ' . $id,
     'display_total_price' => '$100.00',
     'display_payment_status' => $status === 'Paid' ? 'Paid' : 'Pending',
 ]);

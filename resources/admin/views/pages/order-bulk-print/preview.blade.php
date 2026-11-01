@@ -534,11 +534,6 @@
         }
 
         .bulk-invoice-sidebar input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            margin: 0;
-            flex: 0 0 16px;
-            accent-color: #2563eb;
             cursor: pointer;
         }
 
@@ -995,9 +990,12 @@
                             </div>
                         </div>
                         <label class="bulk-invoice-select-all">
-                            <input type="checkbox" :checked="allInvoicesSelected"
-                                x-effect="$el.indeterminate = selectedInvoiceIds.length > 0 && !allInvoicesSelected"
-                                @change="toggleAllInvoices()">
+                            <span class="evil-shrimp-checkbox" style="margin: 0; font-size: 11.5px; flex-shrink: 0;">
+                                <input type="checkbox" :checked="allInvoicesSelected"
+                                    x-effect="$el.indeterminate = selectedInvoiceIds.length > 0 && !allInvoicesSelected"
+                                    @change="toggleAllInvoices()">
+                                <div class="checkmark"></div>
+                            </span>
                             <span x-text="allInvoicesSelected ? @js(__('order_bulk_print.preview.deselect_all')) : @js(__('order_bulk_print.preview.select_all'))"></span>
                         </label>
                         <div class="bulk-invoice-list">
@@ -1008,10 +1006,13 @@
                                 @endphp
                                 <div class="bulk-invoice-row" data-invoice-row="{{ $listOrder->id }}"
                                     :class="{ 'is-active': activeInvoiceId === '{{ $listOrder->id }}' }">
-                                    <input type="checkbox" value="{{ $listOrder->id }}"
-                                        aria-label="{{ __('order_bulk_print.preview.include_invoice', ['invoice' => $listInvoiceNo]) }}"
-                                        :checked="selectedInvoiceIds.includes('{{ $listOrder->id }}')"
-                                        @change="toggleInvoice('{{ $listOrder->id }}', $event.target.checked)">
+                                    <label class="evil-shrimp-checkbox" style="margin: 0; font-size: 11.5px; flex-shrink: 0;">
+                                        <input type="checkbox" value="{{ $listOrder->id }}"
+                                            aria-label="{{ __('order_bulk_print.preview.include_invoice', ['invoice' => $listInvoiceNo]) }}"
+                                            :checked="selectedInvoiceIds.includes('{{ $listOrder->id }}')"
+                                            @change="toggleInvoice('{{ $listOrder->id }}', $event.target.checked)">
+                                        <div class="checkmark"></div>
+                                    </label>
                                     <button type="button" class="bulk-invoice-link" @click="scrollToInvoice('{{ $listOrder->id }}')"
                                         :aria-current="activeInvoiceId === '{{ $listOrder->id }}' ? 'true' : null">
                                         <span>{{ $listInvoiceNo }}</span>

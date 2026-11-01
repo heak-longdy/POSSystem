@@ -19,6 +19,7 @@ return [
     'shop_count' => 'ចំនួនហាង',
     'total_quantity' => 'បរិមាណសរុប',
     'total_amount' => 'ចំនួនទឹកប្រាក់សរុប',
+    'total_income_amount' => 'ចំនួនទឹកប្រាក់ចំណូលសរុប',
     'product_code' => 'លេខកូដផលិតផល',
     'product_name' => 'ផលិតផល',
     'category_name' => 'ប្រភេទ',

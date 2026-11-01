@@ -27,9 +27,12 @@ class ConsolidatedProductQuantityReportTest extends TestCase
         (new \CreatePermissionTables())->up();
         (new ConsolidatedProductQuantityPermissionSeeder())->run();
         foreach (['shops', 'categories', 'uoms', 'products'] as $name) {
-            Schema::create($name, function (Blueprint $table) {
+            Schema::create($name, function (Blueprint $table) use ($name) {
                 $table->id(); $table->string('name'); $table->string('code')->nullable();
                 $table->integer('category_id')->nullable(); $table->integer('uom_id')->nullable();
+                if ($name === 'products') {
+                    $table->double('cost')->nullable();
+                }
                 $table->softDeletes();
             });
             DB::table($name)->insert([
@@ -97,15 +100,17 @@ class ConsolidatedProductQuantityReportTest extends TestCase
     public function test_quantities_are_consolidated_and_order_totals_are_distinct(): void
     {
         $data = $this->export()->assertOk()->assertJsonCount(2, 'rows')->json();
-        $this->assertEquals(['product_count' => 2, 'order_count' => 2, 'shop_count' => 2, 'total_quantity' => 16, 'total_amount' => 36], $data['summary']);
+        $this->assertEquals(['product_count' => 2, 'order_count' => 2, 'shop_count' => 2, 'total_quantity' => 16, 'total_amount' => 36, 'total_income_amount' => 36], $data['summary']);
         $this->assertEquals(27, $data['rows'][0]['total_amount']);
         $this->assertEquals(9, $data['rows'][1]['total_amount']);
+        $this->assertEquals(27, $data['rows'][0]['total_income_amount']);
+        $this->assertEquals(9, $data['rows'][1]['total_income_amount']);
         $this->assertEquals(12, $data['rows'][0]['total_quantity']);
         $this->assertEquals(2, $data['rows'][0]['order_count']);
         $this->assertEquals(4, $data['rows'][1]['total_quantity']);
         $this->assertEquals(1, $data['rows'][1]['order_count']);
         DB::table('orders')->where('id', 2)->update(['deleted_at' => '2026-10-27']);
-        $this->export()->assertJsonPath('summary.total_quantity', 9)->assertJsonPath('summary.total_amount', 20.25);
+        $this->export()->assertJsonPath('summary.total_quantity', 9)->assertJsonPath('summary.total_amount', 20.25)->assertJsonPath('summary.total_income_amount', 20.25);
     }
 
     public function test_filters_defaults_empty_results_and_validation(): void
@@ -223,6 +228,7 @@ class ConsolidatedProductQuantityReportTest extends TestCase
             $html = Blade::render($source, $data + ['errors' => new \Illuminate\Support\ViewErrorBag()]);
             $this->assertStringContainsString(__('consolidated_product_quantity.title'), $html);
             $this->assertStringContainsString(__('consolidated_product_quantity.total_amount'), $html);
+            $this->assertStringContainsString(__('consolidated_product_quantity.total_income_amount'), $html);
             $this->assertStringContainsString('$27.00', $html);
             $this->assertStringContainsString('$36.00', $html);
             $this->assertStringContainsString('Tea &amp; ទឹកតែ', $html);
@@ -246,5 +252,81 @@ class ConsolidatedProductQuantityReportTest extends TestCase
         $this->assertEquals(3, count($response->json('rows.data')));
         $this->assertEquals('Tea & ទឹកតែ', $response->json('rows.data.0.product_name'));
         $this->assertEquals(1, $response->json('rows.data.0.product_id'));
+        $this->assertArrayHasKey('total_income_amount', $response->json('rows.data.0'));
+    }
+
+    public function test_total_income_amount_calculation_with_cost_price_and_multiple_orders(): void
+    {
+        DB::table('order_details')->delete();
+        DB::table('orders')->whereNull('deleted_at')->delete();
+
+        // Product A (id 1): Cost Price $10.00
+        DB::table('products')->where('id', 1)->update(['cost' => 10.00]);
+        // Product B (id 2): Cost Price $20.00
+        DB::table('products')->where('id', 2)->update(['cost' => 20.00]);
+
+        // Order 1: Product A (qty 2, price 15.00)
+        DB::table('orders')->insert([
+            'id' => 10, 'shop_id' => 1, 'created_by' => 1,
+            'invoice_number' => 'INV-010', 'payment_status' => 'Paid', 'order_date' => '2026-10-10 10:00:00',
+        ]);
+        $this->line(10, 1, 2, ['price' => 15.00]);
+
+        // Order 2: Product A (qty 3, price 15.00) and Product B (qty 2, price 30.00)
+        DB::table('orders')->insert([
+            'id' => 20, 'shop_id' => 1, 'created_by' => 1,
+            'invoice_number' => 'INV-020', 'payment_status' => 'Paid', 'order_date' => '2026-10-12 11:00:00',
+        ]);
+        $this->line(20, 1, 3, ['price' => 15.00]);
+        $this->line(20, 2, 2, ['price' => 30.00]);
+
+        // Total Product A across orders:
+        // Quantity Sold: 2 + 3 = 5
+        // Total Sales Amount: 15 * 5 = $75.00
+        // Total Income Amount: (15 - 10) * 5 = $25.00
+
+        // Total Product B:
+        // Quantity Sold: 2
+        // Total Sales Amount: 30 * 2 = $60.00
+        // Total Income Amount: (30 - 20) * 2 = $20.00
+
+        $data = $this->export()->assertOk()->assertJsonCount(2, 'rows')->json();
+
+        $productA = collect($data['rows'])->firstWhere('product_id', 1);
+        $productB = collect($data['rows'])->firstWhere('product_id', 2);
+
+        $this->assertEquals(5, $productA['total_quantity']);
+        $this->assertEquals(75.00, $productA['total_amount']);
+        $this->assertEquals(25.00, $productA['total_income_amount']);
+
+        $this->assertEquals(2, $productB['total_quantity']);
+        $this->assertEquals(60.00, $productB['total_amount']);
+        $this->assertEquals(20.00, $productB['total_income_amount']);
+
+        // Overall Summary:
+        $this->assertEquals(7, $data['summary']['total_quantity']);
+        $this->assertEquals(135.00, $data['summary']['total_amount']);
+        $this->assertEquals(45.00, $data['summary']['total_income_amount']);
+
+        // Check index blade rendering with values
+        $request = Request::create(self::URL, 'GET', $this->filters());
+        $viewData = app(ConsolidatedProductQuantityReportController::class)->index($request)->getData();
+        $source = file_get_contents(resource_path('admin/views/pages/report/consolidatedProductQuantity/index.blade.php'));
+        $source = preg_replace('/^@(extends|section|stop).*$/m', '', $source);
+        $source = preg_replace("/^\s*@include\('admin::shared.header'.*$/m", '', $source);
+        $html = Blade::render($source, $viewData + ['errors' => new \Illuminate\Support\ViewErrorBag()]);
+
+        $this->assertStringContainsString('$75.00', $html);
+        $this->assertStringContainsString('$25.00', $html);
+        $this->assertStringContainsString('$60.00', $html);
+        $this->assertStringContainsString('$20.00', $html);
+        $this->assertStringContainsString('$45.00', $html);
+
+        // Details route check
+        $details = $this->getJson(self::URL . '/details?' . http_build_query($this->filters(['product_id' => 1])))->json();
+        $this->assertEquals(2, count($details['rows']['data']));
+        $incomeDetails = array_column($details['rows']['data'], 'total_income_amount');
+        sort($incomeDetails);
+        $this->assertEquals([10.00, 15.00], $incomeDetails);
     }
 }

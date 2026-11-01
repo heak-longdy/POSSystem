@@ -19,6 +19,7 @@ return [
     'shop_count' => 'Shops',
     'total_quantity' => 'Total Quantity',
     'total_amount' => 'Total Amount',
+    'total_income_amount' => 'Total Income Amount',
     'product_code' => 'Product Code',
     'product_name' => 'Product',
     'category_name' => 'Category',

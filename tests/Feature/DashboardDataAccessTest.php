@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Staff;
 use App\Models\User;
@@ -12,6 +13,8 @@ use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class DashboardDataAccessTest extends TestCase
@@ -302,5 +305,177 @@ class DashboardDataAccessTest extends TestCase
         $this->assertStringContainsString(__('dashboard.product_performance'), $html);
         $this->assertStringContainsString(__('dashboard.orders_total_price'), $html);
         $this->assertStringContainsString(__('dashboard.customers_count'), $html);
+    }
+
+    private function dashboardOrder(string $invoice, ?string $date, string $status, float $total, float $paid = 0, array $extra = []): Order
+    {
+        $order = Order::create(array_merge([
+            'invoice_number' => $invoice,
+            'created_by' => $this->ownUser->id,
+            'order_date' => $date,
+            'payment_status' => $status,
+            'total_price' => $total,
+            'paid_amount' => $paid,
+        ], $extra));
+        if (isset($extra['created_at'])) {
+            $order->forceFill(['created_at' => $extra['created_at']])->save();
+        }
+        return $order;
+    }
+
+    private function dashboardData(array $filters = []): array
+    {
+        return app(DashboardController::class)->index(new Request($filters))->getData();
+    }
+
+    public function test_custom_range_includes_full_days_and_preserves_existing_formulas_and_counts(): void
+    {
+        $this->actingAs($this->allUser);
+        Product::create(['name' => 'Catalog item', 'status' => 1]);
+        Customer::create(['name' => 'Customer', 'user' => (string) $this->ownUser->id, 'status' => 1]);
+        Staff::create(['name' => 'Staff', 'status' => 1]);
+        $first = $this->dashboardOrder('START', '2026-10-01 00:00:00', 'Pending', 100);
+        $last = $this->dashboardOrder('END', '2026-10-31 23:59:59', 'Partial', 80, 30);
+        // Fractional seconds must also be included; bypass Eloquent timestamp formatting.
+        DB::table('orders')->where('id', $last->id)->update(['order_date' => '2026-10-31 23:59:59.999999']);
+        $fallback = $this->dashboardOrder('FALLBACK', null, 'Paid', 40, 40, ['created_at' => '2026-10-15 10:00:00']);
+        $cancel = $this->dashboardOrder('CANCEL', '2026-10-10', 'Cancel', 20);
+        $overpaid = $this->dashboardOrder('OVERPAID', '2026-10-11', 'Partial', 10, 20);
+        $this->dashboardOrder('BEFORE', '2026-09-30 23:59:59', 'Pending', 900);
+        $this->dashboardOrder('AFTER', '2026-11-01 00:00:00', 'Pending', 800);
+        $this->dashboardOrder('ORDER-DATE-WINS', '2026-09-20', 'Pending', 700, 0, ['created_at' => '2026-10-15 10:00:00']);
+        $this->dashboardOrder('UNDATED-OUTSIDE', null, 'Pending', 600, 0, ['created_at' => '2026-11-01 00:00:00']);
+        $this->dashboardOrder('DELETED', '2026-10-12', 'Pending', 500)->delete();
+
+        $default = $this->dashboardData();
+        $this->assertSame(now()->startOfMonth()->toDateString(), $default['dashboardFromDate']);
+        $this->assertSame(now()->endOfMonth()->toDateString(), $default['dashboardToDate']);
+        $this->assertFalse($default['dashboardAllTime']);
+
+        $allTime = $this->dashboardData(['all_time' => 1]);
+        $this->assertNull($allTime['dashboardFromDate']);
+        $this->assertNull($allTime['dashboardToDate']);
+        $this->assertTrue($allTime['dashboardAllTime']);
+
+        $data = $this->dashboardData(['from_date' => '2026-10-01', 'to_date' => '2026-10-31']);
+        $this->assertEquals(250, $data['totalOrderPrice']); // Existing total includes cancelled orders.
+        $this->assertEquals(1, $data['pendingOrderCount']);
+        $this->assertEquals(150, $data['totalOrderRemainingAmount']);
+        $this->assertEquals(2, $data['remainingOrderCount']);
+        $this->assertSame([$overpaid->id, $cancel->id, $fallback->id, $last->id, $first->id], $data['recentTransactions']->modelKeys());
+        foreach (['totalProductCount', 'activeProductCount', 'totalCustomerCount', 'activeCustomerCount', 'totalStaffCount', 'activeStaffCount', 'totalUserCount', 'activeUserCount'] as $key) {
+            $this->assertSame($allTime[$key], $data[$key], $key);
+        }
+        $reset = $this->dashboardData(['from_date' => '', 'to_date' => '']);
+        $this->assertSame($allTime['totalOrderPrice'], $reset['totalOrderPrice']);
+        $this->assertSame($allTime['totalOrderRemainingAmount'], $reset['totalOrderRemainingAmount']);
+        $this->assertSame($allTime['recentTransactions']->modelKeys(), $reset['recentTransactions']->modelKeys());
+    }
+
+    public function test_dashboard_defaults_to_this_month_filter(): void
+    {
+        $this->actingAs($this->allUser);
+        $startOfMonth = now()->startOfMonth()->toDateString();
+        $endOfMonth = now()->endOfMonth()->toDateString();
+
+        $this->dashboardOrder('THIS-MONTH', now()->toDateString(), 'Paid', 300);
+        $this->dashboardOrder('LAST-YEAR', now()->subYear()->toDateString(), 'Paid', 500);
+
+        $default = $this->dashboardData();
+        $this->assertSame($startOfMonth, $default['dashboardFromDate']);
+        $this->assertSame($endOfMonth, $default['dashboardToDate']);
+        $this->assertFalse($default['dashboardAllTime']);
+        $this->assertEquals(300, $default['totalOrderPrice']);
+
+        $allTime = $this->dashboardData(['all_time' => 1]);
+        $this->assertNull($allTime['dashboardFromDate']);
+        $this->assertNull($allTime['dashboardToDate']);
+        $this->assertTrue($allTime['dashboardAllTime']);
+        $this->assertEquals(800, $allTime['totalOrderPrice']);
+    }
+
+    public function test_product_month_intersects_custom_dates_and_empty_ranges_do_not_use_catalog_fallback(): void
+    {
+        $this->actingAs($this->allUser);
+        $product = Product::create(['name' => 'Sold product', 'price' => 20, 'cost' => 5, 'status' => 1]);
+        $catalog = Product::create(['name' => 'Unsold catalog item', 'price' => 99, 'status' => 1]);
+        foreach ([['SEP', '2026-09-30', 2, 5], ['OCT', '2026-10-01', 3, 10], ['NOV', '2026-11-01', 4, 0], ['CANCELLED', '2026-10-02', 10, 0]] as [$invoice, $date, $qty, $discount]) {
+            $order = $this->dashboardOrder($invoice, $date, $invoice === 'CANCELLED' ? 'Cancel' : 'Paid', 100);
+            OrderDetail::create(['order_id' => $order->id, 'product_id' => $product->id, 'qty' => $qty, 'price' => 20, 'product_discount' => $discount]);
+        }
+        $range = ['from_date' => '2026-09-30', 'to_date' => '2026-10-31'];
+        $all = $this->dashboardData($range)['productPerformance'];
+        $this->assertCount(1, $all);
+        $this->assertEquals(85, $all->first()['revenue']);
+        $this->assertEquals(5, $all->first()['units_sold']);
+        $this->assertSame('$85.00', $all->first()['budget']);
+        $october = $this->dashboardData($range + ['product_month' => '2026-10'])['productPerformance'];
+        $this->assertEquals(50, $october->first()['revenue']);
+        $this->assertEquals(3, $october->first()['units_sold']);
+        $this->assertCount(0, $this->dashboardData($range + ['product_month' => '2026-11'])['productPerformance']);
+        $this->assertTrue($this->dashboardData(['all_time' => 1])['productPerformance']->contains('product_id', $catalog->id));
+
+        $empty = $this->dashboardData(['from_date' => '2025-01-01', 'to_date' => '2025-01-01']);
+        $this->assertEquals(0, $empty['totalOrderPrice']);
+        $this->assertEquals(0, $empty['pendingOrderCount']);
+        $this->assertEquals(0, $empty['totalOrderRemainingAmount']);
+        $this->assertEmpty($empty['recentTransactions']);
+        $this->assertEmpty($empty['productPerformance']);
+    }
+
+    public function test_product_performance_uses_creation_date_fallback_and_displays_zero_sales_as_zero(): void
+    {
+        $this->actingAs($this->allUser);
+        $product = Product::create(['name' => 'Free product', 'price' => 25, 'status' => 1]);
+        $order = $this->dashboardOrder('FREE', null, 'Paid', 0, 0, ['created_at' => '2026-10-31 23:59:59']);
+        OrderDetail::create(['order_id' => $order->id, 'product_id' => $product->id, 'qty' => 1, 'price' => 25, 'product_discount' => 25]);
+        $filters = ['from_date' => '2026-10-31', 'to_date' => '2026-10-31', 'product_month' => '2026-10'];
+        $data = $this->dashboardData($filters);
+        $this->assertCount(1, $data['recentTransactions']);
+        $this->assertCount(1, $data['productPerformance']);
+        $this->assertSame('$0.00', $data['productPerformance']->first()['budget']);
+        $response = app(DashboardController::class)->index(new Request($filters + ['ajax' => 'product_performance']));
+        $this->assertStringContainsString('$0.00', $response->getData(true)['html']);
+        $this->assertStringNotContainsString('$25.00', $response->getData(true)['html']);
+    }
+
+    public function test_custom_range_keeps_own_record_scope_and_ajax_widget_restrictions(): void
+    {
+        $this->actingAs($this->ownUser);
+        $this->dashboardOrder('OWN', '2026-10-01', 'Pending', 50);
+        $this->dashboardOrder('OTHER', '2026-10-01', 'Pending', 900, 0, ['created_by' => $this->allUser->id]);
+        $this->dashboardOrder('OUTSIDE', '2026-09-01', 'Pending', 800);
+        $filters = ['from_date' => '2026-10-01', 'to_date' => '2026-10-01'];
+        $data = $this->dashboardData($filters);
+        $this->assertEquals(50, $data['totalOrderPrice']);
+        $this->assertEquals(50, $data['totalOrderRemainingAmount']);
+        $this->assertEquals(1, $data['pendingOrderCount']);
+        $response = app(DashboardController::class)->index(new Request($filters + ['ajax' => 'dashboard']));
+        $html = $response->getData(true)['html'];
+        $this->assertStringContainsString('$50.00', $html);
+        $this->assertStringNotContainsString('$900.00', $html);
+        $this->assertStringNotContainsString('data-product-month', $html);
+        $this->assertStringNotContainsString('timeline-container', $html);
+        $this->assertStringNotContainsString(__('dashboard.products_count'), $html);
+    }
+
+    /** @dataProvider invalidDashboardDateRanges */
+    public function test_custom_range_rejects_invalid_dates_before_querying(array $filters): void
+    {
+        $this->actingAs($this->allUser);
+        $this->expectException(ValidationException::class);
+        $this->dashboardData($filters);
+    }
+
+    public function invalidDashboardDateRanges(): array
+    {
+        return [
+            [['from_date' => '2026-10-02', 'to_date' => '2026-10-01']],
+            [['from_date' => '2026-02-30', 'to_date' => '2026-03-01']],
+            [['from_date' => '10/01/2026', 'to_date' => '2026-10-01']],
+            [['from_date' => '2026-10-01']],
+            [['to_date' => '2026-10-01']],
+            [['from_date' => ['2026-10-01'], 'to_date' => '2026-10-01']],
+        ];
     }
 }

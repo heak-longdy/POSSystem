@@ -29,7 +29,7 @@
         border: 1px solid #cbd5e1 !important;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
         font-family: Arial, "Helvetica Neue", Helvetica, "Khmer OS Battambang", sans-serif !important;
-        font-size: 11px !important;
+        font-size: 11.5px !important;
         color: #000000 !important;
         line-height: 1.4 !important;
     }
@@ -41,7 +41,7 @@
         align-items: flex-end !important;
         width: 100% !important;
         margin-bottom: 14px !important;
-        font-size: 11px !important;
+        font-size: 11.5px !important;
         line-height: 1.45 !important;
     }
 
@@ -109,7 +109,7 @@
         width: 100% !important;
         border-collapse: collapse !important;
         border: 1px solid #000000 !important;
-        font-size: 11px !important;
+        font-size: 11.5px !important;
         background: #ffffff !important;
     }
 
@@ -138,12 +138,7 @@
 
     .load-report-table td.col-art-name {
         text-align: left !important;
-        width: 50% !important;
-    }
-
-    .load-report-table td.col-uom {
-        text-align: center !important;
-        width: 12% !important;
+        width: 62% !important;
     }
 
     .load-report-table td.col-units {
@@ -192,7 +187,7 @@
     /* Footer Checklist & Signatures */
     .load-footer-signatures {
         margin-top: 40px !important;
-        font-size: 11px !important;
+        font-size: 11.5px !important;
         color: #000000 !important;
     }
 
@@ -323,8 +318,7 @@
                 <thead>
                     <tr>
                         <th style="width: 14%;">Article No.</th>
-                        <th style="width: 50%;">Article Name</th>
-                        <th style="width: 12%;">UOM</th>
+                        <th style="width: 62%;">Article Name</th>
                         <th style="width: 12%;">Units</th>
                         <th style="width: 12%;">Subunits</th>
                     </tr>
@@ -334,13 +328,12 @@
                         <tr>
                             <td class="col-art-no">{{ $prod['product_code'] }}</td>
                             <td class="col-art-name">{{ $prod['product_name'] }}</td>
-                            <td class="col-uom">{{ $prod['uom_name'] }}</td>
                             <td class="col-units">{{ number_format($prod['total_qty']) }}</td>
                             <td class="col-subunits">0</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="col-empty">
+                            <td colspan="4" class="col-empty">
                                 {{ __('order_bulk_print.preview.no_products_found') }}
                             </td>
                         </tr>

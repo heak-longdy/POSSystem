@@ -6708,6 +6708,22 @@ body:not(.is-using-mouse) .fancybox__container :focus {
             user-select: none
 }
 
+.fancybox__container:-webkit-full-screen::-webkit-backdrop {
+    opacity: 0
+}
+
+.fancybox__container:-webkit-full-screen::backdrop {
+    opacity: 0
+}
+
+.fancybox__container:-ms-fullscreen::backdrop {
+    opacity: 0
+}
+
+.fancybox__container:fullscreen::-webkit-backdrop {
+    opacity: 0
+}
+
 .fancybox__container:-webkit-full-screen::backdrop {
     opacity: 0
 }

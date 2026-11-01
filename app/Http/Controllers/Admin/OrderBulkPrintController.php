@@ -35,6 +35,7 @@ class OrderBulkPrintController extends Controller
         $orders = $query->with([
                 'shop',
                 'customer',
+                'createdBy',
                 'orderDetails' => function ($detail) {
                     $detail->withTrashed()->with(['service', 'product']);
                 },
@@ -49,6 +50,7 @@ class OrderBulkPrintController extends Controller
             $order->display_date = $order->order_date ? Carbon::parse($order->order_date)->format('Y-m-d') : '---';
             $order->display_shop_name = $order->shop?->name ?: '---';
             $order->display_customer_name = $order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer'));
+            $order->display_created_by = $order->createdBy?->name ?: '---';
             $order->display_total_price = '$' . number_format((float) ($order->total_price ?? 0), 2);
             $order->display_payment_status = $order->payment_status ?: 'Pending';
         }

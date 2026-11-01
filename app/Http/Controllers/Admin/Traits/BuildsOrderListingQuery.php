@@ -82,6 +82,9 @@ trait BuildsOrderListingQuery
             ->when($req->shop_id, function ($q) use ($req) {
                 $q->where('shop_id', $req->shop_id);
             })
+            ->when($req->created_by, function ($q) use ($req) {
+                $q->where('orders.created_by', $req->created_by);
+            })
             ->when($paymentStatus, function ($q) use ($paymentStatus) {
                 $q->where('payment_status', $paymentStatus);
             })
@@ -109,6 +112,9 @@ trait BuildsOrderListingQuery
                         })
                         ->orWhereHas('orderDetails.service', function ($service) use ($search) {
                             $service->where('name', 'like', '%' . $search . '%');
+                        })
+                        ->orWhereHas('createdBy', function ($user) use ($search) {
+                            $user->where('name', 'like', '%' . $search . '%');
                         });
                 });
             });

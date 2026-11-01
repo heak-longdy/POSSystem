@@ -66,42 +66,6 @@
             async openDetailsModal(productId = null, page = 1) {
                 this.showDetailsModal = true;
                 this.detailsLoading = true;
-                this.detailsProductId = productId;
-                this.detailsData = null;
-                try {
-                    const params = this.getExportParams();
-                    if (productId) {
-                        params.set('product_id', productId);
-                    }
-                    if (page > 1) {
-                        params.set('page', page);
-                    }
-                    const url = `{{ route('admin-' . $routeName . '-details') }}?` + params.toString();
-                    const response = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    });
-                    if (!response.ok) throw new Error('Failed to load details');
-                    this.detailsData = await response.json();
-                } catch (error) {
-                    console.error(error);
-                } finally {
-                    this.detailsLoading = false;
-                }
-            },
-            closeDetailsModal() {
-                this.showDetailsModal = false;
-                this.detailsData = null;
-                this.detailsProductId = null;
-            },
-            fetchDetails(productId = null, page = 1) {
-                this.openDetailsModal(productId, page);
-            },
-            async openDetailsModal(productId = null, page = 1) {
-                this.showDetailsModal = true;
-                this.detailsLoading = true;
                 this.detailsProductId = productId !== null ? productId : this.detailsProductId;
                 this.detailsData = null;
                 try {
@@ -188,6 +152,7 @@
                     { header: @json(__('consolidated_product_quantity.order_count')), key: 'order_count', width: 16 },
                     { header: @json(__('consolidated_product_quantity.total_quantity')), key: 'total_quantity', width: 20 },
                     { header: @json(__('consolidated_product_quantity.total_amount')), key: 'total_amount', width: 20 },
+                    { header: @json(__('consolidated_product_quantity.total_income_amount')), key: 'total_income_amount', width: 22 },
                 ];
                 reportData.rows.forEach((row, index) => worksheet.addRow({
                     index: index + 1,
@@ -196,11 +161,13 @@
                     category_name: row.category_name || '—', uom_name: row.uom_name || '—',
                     order_count: Number(row.order_count), total_quantity: Number(row.total_quantity),
                     total_amount: Number(row.total_amount),
+                    total_income_amount: Number(row.total_income_amount),
                 }));
                 const total = worksheet.addRow({
                     product_code: @json(__('consolidated_product_quantity.total')),
                     order_count: Number(reportData.summary.order_count), total_quantity: Number(reportData.summary.total_quantity),
                     total_amount: Number(reportData.summary.total_amount),
+                    total_income_amount: Number(reportData.summary.total_income_amount),
                 });
                 total.font = { bold: true };
                 for (const key of ['order_count', 'total_quantity']) {
@@ -210,6 +177,8 @@
                 worksheet.getRow(1).font = { bold: true };
                 worksheet.getColumn('total_amount').numFmt = '$#,##0.00';
                 worksheet.getColumn('total_amount').alignment = { horizontal: 'right' };
+                worksheet.getColumn('total_income_amount').numFmt = '$#,##0.00';
+                worksheet.getColumn('total_income_amount').alignment = { horizontal: 'right' };
                 worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
                 worksheet.views = [{ state: 'frozen', ySplit: 1 }];
                 const buffer = await workbook.xlsx.writeBuffer();

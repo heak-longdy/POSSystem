@@ -1,83 +1,287 @@
-/* From Uiverse.io by bociKond */ 
+/* ==========================================================================
+   Old Checkbox Style - From Uiverse.io by bociKond
+   ========================================================================== */
 /* Hide the default checkbox */
 .containerInputCheckBox input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.containerInputCheckBox {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  font-size: 1.5rem;
+  user-select: none;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  --clr: #024de3;
+  position: relative;
+  top: 0;
+  left: 0;
+  height: 1em;
+  width: 1em;
+  background-color: #ccc;
+  border-radius: 7px;
+  transition: 300ms;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* When the checkbox is checked, add a blue background */
+.containerInputCheckBox input:checked ~ .checkmark {
+  background-color: var(--clr);
+  border-radius: .5rem;
+  animation: pulse 500ms ease-in-out;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.containerInputCheckBox input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.containerInputCheckBox .checkmark:after {
+  // left: 0.45em;
+  // top: 0.25em;
+  width: 0.25em;
+  height: 0.5em;
+  border: solid #E0E0E2;
+  border-width: 0 0.15em 0.15em 0;
+  transform: rotate(45deg);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 #0B6E4F90;
+    rotate: 20deg;
   }
-  
-  .containerInputCheckBox {
-    display: block;
-    position: relative;
-    cursor: pointer;
-    font-size: 1.5rem;
-    user-select: none;
+
+  50% {
+    rotate: -20deg;
   }
-  
-  /* Create a custom checkbox */
+
+  75% {
+    box-shadow: 0 0 0 10px #0B6E4F60;
+  }
+
+  100% {
+    box-shadow: 0 0 0 13px #0B6E4F30;
+    rotate: 0;
+  }
+}
+
+/* ==========================================================================
+   New Checkbox Style - From Uiverse.io by Shammy2002 (evil-shrimp-6)
+   Modern glassmorphic squircle checkbox with animated checkmark
+   ========================================================================== */
+.evil-shrimp-checkbox,
+.uiverse-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+  vertical-align: middle;
+
+  /* Hide default native checkbox while preserving accessibility & form behavior */
+  input[type="checkbox"] {
+    position: absolute !important;
+    opacity: 0 !important;
+    cursor: pointer;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* The outer checkbox box (Signature evil-shrimp-6 rounded squircle) */
   .checkmark {
-    --clr: #024de3;
     position: relative;
     top: 0;
     left: 0;
-    height: 1em;
-    width: 1em;
-    background-color: #ccc;
-    border-radius: 7px;
-    transition: 300ms;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    height: 1.6em;
+    width: 1.6em;
+    min-width: 1.6em;
+    box-sizing: border-box;
+    border-radius: 38%;
+    background: rgba(241, 245, 249, 0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1.5px solid rgba(203, 213, 225, 0.9);
+    box-shadow: 
+      0 8px 20px rgba(0, 0, 0, 0.08), 
+      0 2px 6px rgba(0, 0, 0, 0.05), 
+      inset 0 1px 2px rgba(255, 255, 255, 0.85), 
+      inset 0 -1px 2px rgba(0, 0, 0, 0.06);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: block;
   }
-  
-  /* When the checkbox is checked, add a blue background */
-  .containerInputCheckBox input:checked ~ .checkmark {
-    background-color: var(--clr);
-    border-radius: .5rem;
-    animation: pulse 500ms ease-in-out;
+
+  /* Hover state when unchecked */
+  &:hover input[type="checkbox"]:not(:checked):not(:disabled) ~ .checkmark {
+    background: #ffffff;
+    border-color: rgba(0, 76, 255, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 
+      0 12px 24px rgba(0, 0, 0, 0.12), 
+      0 4px 8px rgba(0, 0, 0, 0.06), 
+      inset 0 1.5px 3px rgba(255, 255, 255, 0.95);
   }
-  
-  /* Create the checkmark/indicator (hidden when not checked) */
+
+  /* Checked state */
+  input[type="checkbox"]:checked ~ .checkmark {
+    transform: scale(1.15);
+    // background: linear-gradient(145deg, #004cff 0%, #0e34b3 50%, hsl(217, 100%, 25%) 100%);
+    border-color: rgba(255, 255, 255, 0.45);
+    background: #024de3;
+    // box-shadow: 
+    //   0 12px 28px rgba(0, 81, 255, 0.45), 
+    //   0 4px 10px rgba(0, 76, 255, 0.2), 
+    //   inset 0 2px 4px rgba(255, 255, 255, 0.6), 
+    //   inset 0 -2px 6px rgba(255, 255, 255, 0.35);
+  }
+
+  /* Indeterminate state (e.g. select-all header with partial selection) */
+  input[type="checkbox"]:indeterminate ~ .checkmark {
+    transform: scale(1.15);
+    background: linear-gradient(145deg, #004cff 0%, #0e34b3 50%, hsl(217, 100%, 25%) 100%);
+    border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: 
+      0 12px 28px rgba(0, 81, 255, 0.45), 
+      0 4px 10px rgba(0, 76, 255, 0.2), 
+      inset 0 2px 4px rgba(255, 255, 255, 0.6), 
+      inset 0 -2px 6px rgba(255, 255, 255, 0.35);
+  }
+
+  /* Hover state when checked or indeterminate */
+  &:hover input[type="checkbox"]:checked:not(:disabled) ~ .checkmark,
+  &:hover input[type="checkbox"]:indeterminate:not(:disabled) ~ .checkmark {
+    transform: scale(1.18) translateY(-1px);
+    box-shadow: 
+      0 14px 30px rgba(0, 81, 255, 0.52), 
+      0 6px 12px rgba(0, 76, 255, 0.3), 
+      inset 0 2px 4px rgba(255, 255, 255, 0.7), 
+      inset 0 -2px 6px rgba(255, 255, 255, 0.4);
+  }
+
+  /* Active / press state */
+  &:active input[type="checkbox"]:not(:disabled) ~ .checkmark {
+    transform: scale(0.95);
+  }
+
+  /* Focus indicator for keyboard navigation & accessibility */
+  input[type="checkbox"]:focus-visible ~ .checkmark,
+  input[type="checkbox"]:focus ~ .checkmark {
+    outline: 2px solid #2563eb;
+    outline-offset: 3px;
+  }
+
+  /* Checkmark SVG/pseudo-element tick */
   .checkmark:after {
     content: "";
     position: absolute;
-    display: none;
-  }
-  
-  /* Show the checkmark when checked */
-  .containerInputCheckBox input:checked ~ .checkmark:after {
+    box-sizing: border-box;
+    left: 0.53em;
+    top: 0.3em;
+    width: 0.32em;
+    height: 0.64em;
+    border: solid #ffffff;
+    border-width: 0 0.16em 0.16em 0;
+    border-radius: 2px;
+    transform: rotate(45deg) scale(0.3);
+    opacity: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     display: block;
   }
-  
-  /* Style the checkmark/indicator */
-  .containerInputCheckBox .checkmark:after {
-    // left: 0.45em;
-    // top: 0.25em;
-    width: 0.25em;
-    height: 0.5em;
-    border: solid #E0E0E2;
-    border-width: 0 0.15em 0.15em 0;
-    transform: rotate(45deg);
+
+  /* Checked checkmark animation */
+  input[type="checkbox"]:checked ~ .checkmark:after {
+    transform: rotate(45deg) scale(1);
+    opacity: 1;
   }
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 #0B6E4F90;
-      rotate: 20deg;
+
+  /* Indeterminate dash line animation */
+  input[type="checkbox"]:indeterminate ~ .checkmark:after {
+    left: 0.36em;
+    top: 0.65em;
+    width: 0.65em;
+    height: 0;
+    border: solid #ffffff;
+    border-width: 0.18em 0 0 0;
+    border-radius: 2px;
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+
+  /* Disabled state */
+  &.disabled,
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  input[type="checkbox"]:disabled ~ .checkmark {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none !important;
+    box-shadow: none !important;
+    filter: grayscale(40%);
+  }
+
+  /* Optional label text adjacent to checkmark within the container */
+  .checkbox-label,
+  > span:not(.checkmark) {
+    margin-left: 8px;
+    font-size: 1em;
+    line-height: normal;
+    color: inherit;
+    cursor: pointer;
+  }
+}
+
+/* Dark mode support */
+body.dark {
+  .evil-shrimp-checkbox,
+  .uiverse-checkbox {
+    .checkmark {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.25), 
+        0 2px 6px rgba(0, 0, 0, 0.15), 
+        inset 0 1px 2px rgba(255, 255, 255, 0.5), 
+        inset 0 -1px 2px rgba(0, 0, 0, 0.15);
     }
-  
-    50% {
-      rotate: -20deg;
-    }
-  
-    75% {
-      box-shadow: 0 0 0 10px #0B6E4F60;
-    }
-  
-    100% {
-      box-shadow: 0 0 0 13px #0B6E4F30;
-      rotate: 0;
+
+    &:hover input[type="checkbox"]:not(:checked):not(:disabled) ~ .checkmark {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 
+        0 12px 24px rgba(0, 0, 0, 0.3), 
+        0 4px 8px rgba(0, 0, 0, 0.15), 
+        inset 0 1.5px 3px rgba(255, 255, 255, 0.7);
     }
   }
+}

@@ -12,6 +12,7 @@ use App\Services\OrderPricing;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 
 class ConsolidatedProductQuantityReportController extends Controller
@@ -30,10 +31,12 @@ class ConsolidatedProductQuantityReportController extends Controller
         $amounts = $this->totalAmounts(clone $query);
         $rows = $this->groupedQuery(clone $query)->paginate(50)->withQueryString();
         $rows->getCollection()->each(function ($row) use ($amounts) {
-            $row->total_amount = ($amounts[$row->product_id] ?? 0) / 100;
+            $row->total_amount = ($amounts['sales'][$row->product_id] ?? 0) / 100;
+            $row->total_income_amount = ($amounts['income'][$row->product_id] ?? 0) / 100;
         });
         $summary = $this->summary(clone $query);
-        $summary->total_amount = array_sum($amounts) / 100;
+        $summary->total_amount = array_sum($amounts['sales']) / 100;
+        $summary->total_income_amount = array_sum($amounts['income']) / 100;
 
         return view('admin::pages.report.consolidatedProductQuantity.index', [
             'routeName' => $this->routeName,
@@ -52,10 +55,12 @@ class ConsolidatedProductQuantityReportController extends Controller
         $query = $this->filteredQuery($filters);
         $amounts = $this->totalAmounts(clone $query);
         $rows = $this->groupedQuery(clone $query)->get()->each(function ($row) use ($amounts) {
-            $row->total_amount = ($amounts[$row->product_id] ?? 0) / 100;
+            $row->total_amount = ($amounts['sales'][$row->product_id] ?? 0) / 100;
+            $row->total_income_amount = ($amounts['income'][$row->product_id] ?? 0) / 100;
         });
         $summary = $this->summary(clone $query);
-        $summary->total_amount = array_sum($amounts) / 100;
+        $summary->total_amount = array_sum($amounts['sales']) / 100;
+        $summary->total_income_amount = array_sum($amounts['income']) / 100;
 
         return response()->json([
             'grouping' => 'product',
@@ -68,11 +73,12 @@ class ConsolidatedProductQuantityReportController extends Controller
     public function details(Request $request)
     {
         $filters = $this->filters($request);
+        $costSelect = $this->hasCostColumn() ? 'product.cost as product_cost' : DB::raw('0 as product_cost');
         $rows = $this->filteredQuery($filters)
             ->join('orders as source_order', 'source_order.id', '=', 'detail.order_id')
             ->leftJoin('shops as shop', 'shop.id', '=', 'orders.shop_id')
             ->select('detail.*', 'orders.invoice_number', 'source_order.order_date', 'shop.name as shop_name',
-                'product.code as product_code', 'product.name as product_name',
+                'product.code as product_code', 'product.name as product_name', $costSelect,
                 'category.name as category_name', 'uom.name as uom_name')
             ->orderByDesc('source_order.order_date')->orderByDesc('detail.order_id')->orderBy('detail.id')
             ->paginate(50)->appends($filters);
@@ -84,6 +90,9 @@ class ConsolidatedProductQuantityReportController extends Controller
             $row->effective_unit_price = $detail->pricing_method === OrderPricing::AUTOMATIC
                 ? (float) $detail->unit_price : $pricing->legacyUnitPrice($detail);
             $row->total_amount = $this->lineAmountCents($detail, $pricing) / 100;
+            $cost = (float) ($row->product_cost ?? 0);
+            $row->cost_price = $cost;
+            $row->total_income_amount = round($row->total_amount - ($cost * $row->quantity), 2);
             $row->order_date_formatted = $row->order_date ? Carbon::parse($row->order_date)->format('Y-m-d H:i') : '—';
         });
 
@@ -179,14 +188,36 @@ class ConsolidatedProductQuantityReportController extends Controller
     private function totalAmounts($query): array
     {
         $pricing = app(OrderPricing::class);
-        $amounts = [];
-        foreach ($query->select('detail.*')->cursor() as $line) {
+        $sales = [];
+        $income = [];
+        $costSelect = $this->hasCostColumn() ? 'product.cost as product_cost' : DB::raw('0 as product_cost');
+
+        foreach ($query->select('detail.*', $costSelect)->cursor() as $line) {
             $detail = (new OrderDetail())->setRawAttributes((array) $line);
-            $cents = $this->lineAmountCents($detail, $pricing);
-            $amounts[$detail->product_id] = ($amounts[$detail->product_id] ?? 0) + $cents;
+            $qty = (int) ($detail->qty ?? 1);
+            $salesCents = $this->lineAmountCents($detail, $pricing);
+            $cost = (float) ($line->product_cost ?? 0);
+            $costCents = (int) round($cost * $qty * 100);
+            $incomeCents = $salesCents - $costCents;
+
+            $productId = $detail->product_id;
+            $sales[$productId] = ($sales[$productId] ?? 0) + $salesCents;
+            $income[$productId] = ($income[$productId] ?? 0) + $incomeCents;
         }
 
-        return $amounts;
+        return [
+            'sales' => $sales,
+            'income' => $income,
+        ];
+    }
+
+    private function hasCostColumn(): bool
+    {
+        static $hasCost = null;
+        if ($hasCost === null) {
+            $hasCost = Schema::hasColumn('products', 'cost');
+        }
+        return $hasCost;
     }
 
     private function lineAmountCents(OrderDetail $detail, OrderPricing $pricing): int

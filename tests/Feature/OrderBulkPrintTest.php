@@ -43,6 +43,10 @@ class OrderBulkPrintTest extends TestCase
                 if ($name === 'products') {
                     $table->integer('uom_id')->nullable();
                 }
+                if ($name === 'users') {
+                    $table->string('role')->nullable();
+                    $table->string('data_access')->nullable();
+                }
                 $table->timestamps();
                 $table->softDeletes();
             });
@@ -152,14 +156,63 @@ class OrderBulkPrintTest extends TestCase
 
     public function test_permitted_users_can_view_bulk_print_index(): void
     {
-        $order = $this->createOrder(['invoice_number' => 'INV-TEST-001']);
+        $order = $this->createOrder(['invoice_number' => 'INV-TEST-001', 'created_by' => $this->permittedUser->id]);
 
         $response = $this->actingAs($this->permittedUser)
             ->get(route('admin-order-bulk-print-index'))
             ->assertOk();
 
         $response->assertSee('INV-TEST-001');
+        $response->assertSee(__('order_bulk_print.table.created_by'));
+        $response->assertSee($this->permittedUser->name);
         $response->assertSee(route('admin-order-bulk-print-preview'));
+    }
+
+    public function test_bulk_print_supports_searching_by_creator_name(): void
+    {
+        $creatorA = User::forceCreate(['name' => 'Alice Creator', 'status' => 1]);
+        $creatorB = User::forceCreate(['name' => 'Bob Creator', 'status' => 1]);
+
+        $this->permittedUser->update(['role' => 'super_admin', 'data_access' => 'all']);
+
+        $orderA = $this->createOrder(['invoice_number' => 'INV-ALICE-01', 'created_by' => $creatorA->id]);
+        $orderB = $this->createOrder(['invoice_number' => 'INV-BOB-01', 'created_by' => $creatorB->id]);
+
+        $this->actingAs($this->permittedUser);
+
+        // Search for "Alice"
+        $response = $this->get(route('admin-order-bulk-print-index', ['search' => 'Alice']))
+            ->assertOk();
+
+        $response->assertSee('INV-ALICE-01');
+        $response->assertSee('Alice Creator');
+        $response->assertDontSee('INV-BOB-01');
+
+        // Selection endpoint also respects searching by creator name
+        $selectionRes = $this->postJson(route('admin-order-bulk-print-selection', ['search' => 'Alice']));
+        $selectionRes->assertOk()->assertJson([
+            'success' => true,
+            'count' => 1,
+            'ids' => [$orderA->id],
+        ]);
+    }
+
+    public function test_bulk_print_displays_soft_deleted_creator(): void
+    {
+        $creator = User::forceCreate(['name' => 'Deleted User', 'status' => 1]);
+        $order = $this->createOrder(['invoice_number' => 'INV-DEL-01', 'created_by' => $creator->id]);
+
+        // Soft-delete the creator
+        $creator->delete();
+        $this->assertTrue($creator->trashed());
+
+        $this->permittedUser->update(['role' => 'super_admin', 'data_access' => 'all']);
+        $this->actingAs($this->permittedUser);
+        $response = $this->get(route('admin-order-bulk-print-index'))
+            ->assertOk();
+
+        $response->assertSee('INV-DEL-01');
+        $response->assertSee('Deleted User');
     }
 
     public function test_selection_returns_matching_order_ids_and_obeys_filters(): void

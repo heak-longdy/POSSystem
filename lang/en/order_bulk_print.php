@@ -44,6 +44,7 @@ return [
         'date' => 'Order Date',
         'shop' => 'Shop',
         'customer' => 'Customer',
+        'created_by' => 'Created By',
         'total' => 'Total Amount',
         'payment_status' => 'Status',
         'no_records' => 'No orders found matching the applied filters.',

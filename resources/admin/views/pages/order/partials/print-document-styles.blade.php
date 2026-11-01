@@ -72,7 +72,7 @@
         }
 
         .inv-shop-phone {
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 600;
             color: #000000;
             margin-top: 1px;
@@ -91,7 +91,7 @@
         }
 
         .inv-copy-notice {
-            font-size: 11px;
+            font-size: 11.5px;
             color: #333333;
             margin-bottom: 1px;
         }
@@ -199,7 +199,7 @@
         }
 
         .inv-grid-table .col-desc {
-            width: 36% !important;
+            width: 50% !important;
             text-align: center !important;
         }
 
@@ -209,18 +209,13 @@
         }
 
         .inv-grid-table .col-price {
-            width: 14% !important;
-            text-align: center !important;
-        }
-
-        .inv-grid-table .col-discount {
             width: 16% !important;
-            text-align: center !important;
+            text-align: right !important;
         }
 
         .inv-grid-table .col-total {
             width: 18% !important;
-            text-align: center !important;
+            text-align: right !important;
         }
 
         .inv-grid-table tbody tr {
@@ -241,8 +236,7 @@
             text-align: center !important;
         }
 
-        .inv-grid-table tbody td.cell-price,
-        .inv-grid-table tbody td.cell-discount {
+        .inv-grid-table tbody td.cell-price {
             text-align: right !important;
             padding-right: 6px !important;
         }
@@ -306,7 +300,7 @@
         }
 
         .inv-signature-col .sig-status-tag {
-            font-size: 11px !important;
+            font-size: 11.5px !important;
             font-weight: normal !important;
             color: #333333 !important;
         }
@@ -317,7 +311,7 @@
         }
 
         .inv-signature-col .sig-action-label {
-            font-size: 11px !important;
+            font-size: 11.5px !important;
             font-weight: 600 !important;
             color: #000000 !important;
             text-align: center !important;
@@ -354,7 +348,7 @@
             background: #ffffff;
             color: #000000;
             font-family: 'Hanuman', 'Khmer OS Battambang', 'Segoe UI', Arial, sans-serif;
-            font-size: 11px;
+            font-size: 11.5px;
             line-height: 1.35;
             padding: 4px 8px;
             box-sizing: border-box;
@@ -384,12 +378,12 @@
         }
         .slip-top-right {
             text-align: right;
-            font-size: 10.5px;
+            font-size: 11.5px;
             line-height: 1.25;
             color: #000000;
         }
         .slip-meta-text {
-            font-size: 10px;
+            font-size: 11.5px;
             margin-bottom: 2px;
         }
         .draft-tag {
@@ -416,7 +410,7 @@
             border: 1px solid #000000;
             padding: 4px 8px;
             margin-bottom: 4px;
-            font-size: 10.5px;
+            font-size: 11.5px;
             line-height: 1.35;
             background: #ffffff;
             gap: 8px;
@@ -463,9 +457,11 @@
             width: 100% !important;
             border-collapse: collapse !important;
             border: 1px solid #000000 !important;
-            font-size: 10.5px !important;
+            font-size: 11.5px !important;
             margin-bottom: 0 !important;
             background: #ffffff !important;
+            table-layout: fixed !important;
+            box-sizing: border-box !important;
         }
         .slip-grid-table th,
         .slip-grid-table td {
@@ -483,11 +479,11 @@
         }
         .th-sub-row th {
             font-weight: 500 !important;
-            font-size: 10px !important;
+            font-size: 11.5px !important;
             padding: 1px 2px !important;
         }
         .th-subtext {
-            font-size: 9px !important;
+            font-size: 11.5px !important;
             font-weight: normal !important;
         }
 
@@ -495,12 +491,13 @@
         .th-no, .td-no { width: 4% !important; }
         .th-code, .td-code { width: 8% !important; font-weight: 600 !important; }
         .th-desc, .td-desc { width: 32% !important; text-align: left !important; padding-left: 5px !important; }
-        .th-uom, .td-uom { width: 6% !important; }
-        .th-qty-group { width: 12% !important; }
-        .th-sub-col, .td-cases, .td-cans { width: 6% !important; }
-        .th-price, .td-price { width: 9% !important; text-align: right !important; padding-right: 3px !important; }
+        .th-uom, .td-uom { width: 5% !important; }
+        .th-qty, .th-sub-qty, .td-qty { width: 7% !important; }
+        .th-deliv-qty, .th-sub-deliv, .td-deliv-qty { width: 8% !important; }
+        .th-sub-col, .td-cases { width: 7.5% !important; }
+        .th-price, .td-price { width: 8% !important; text-align: right !important; padding-right: 3px !important; }
         .th-disc, .td-disc { width: 10% !important; text-align: right !important; padding-right: 3px !important; }
-        .th-net, .td-net { width: 9% !important; text-align: right !important; padding-right: 3px !important; }
+        .th-net, .td-net { width: 8% !important; text-align: right !important; padding-right: 3px !important; }
         .th-total, .td-total { width: 10% !important; text-align: right !important; padding-right: 3px !important; font-weight: 600 !important; }
 
         .slip-row td {
@@ -519,7 +516,7 @@
             margin-top: 2px;
         }
         .slip-free-goods-note {
-            font-size: 10px;
+            font-size: 11.5px;
             font-style: italic;
             color: #111111;
         }
@@ -531,7 +528,7 @@
         .slip-total-pay-box .pay-lbl {
             padding: 2px 8px;
             font-weight: 700;
-            font-size: 11px;
+            font-size: 11.5px;
             border-right: 1px solid #000000;
         }
         .slip-total-pay-box .pay-val {
@@ -594,7 +591,7 @@
             width: 200px;
         }
         .slip-sig-col .sig-title {
-            font-size: 11px;
+            font-size: 11.5px;
             font-weight: 600;
             margin-bottom: 22px;
         }
@@ -606,7 +603,7 @@
 
         /* Footer Disclaimer */
         .slip-footer-disclaimer {
-            font-size: 9.5px;
+            font-size: 11.5px;
             line-height: 1.25;
             color: #111111;
             text-align: left;

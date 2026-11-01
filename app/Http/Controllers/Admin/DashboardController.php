@@ -16,11 +16,43 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $isAllTime = $request->boolean('all_time') || $request->get('range') === 'all_time';
+
+        if ($isAllTime) {
+            $fromDate = null;
+            $toDate = null;
+        } elseif ($request->has('from_date') || $request->has('to_date')) {
+            $dates = $request->validate([
+                'from_date' => ['nullable', 'required_with:to_date', 'date_format:Y-m-d'],
+                'to_date' => ['nullable', 'required_with:from_date', 'date_format:Y-m-d'],
+            ], [
+                'from_date.required_with' => __('dashboard.filter.dates_required'),
+                'to_date.required_with' => __('dashboard.filter.dates_required'),
+                'from_date.date_format' => __('dashboard.filter.invalid_date'),
+                'to_date.date_format' => __('dashboard.filter.invalid_date'),
+            ]);
+            $fromDate = $dates['from_date'] ?? null;
+            $toDate = $dates['to_date'] ?? null;
+            if ($fromDate && $toDate && $fromDate > $toDate) {
+                throw ValidationException::withMessages(['to_date' => __('dashboard.filter.invalid_range')]);
+            }
+        } else {
+            $now = Carbon::now();
+            $fromDate = $now->copy()->startOfMonth()->toDateString();
+            $toDate = $now->copy()->endOfMonth()->toDateString();
+        }
+
+        $data['dashboardFromDate'] = $fromDate;
+        $data['dashboardToDate'] = $toDate;
+        $data['dashboardAllTime'] = ($fromDate === null && $toDate === null);
+        $orders = $this->applyDashboardDateRange(Order::forUser(), $fromDate, $toDate);
+
         $hasFullDataAccess = Auth::check() && Auth::user()->hasFullDataAccess();
         $data['hasFullDataAccess'] = $hasFullDataAccess;
 
@@ -34,16 +66,16 @@ class DashboardController extends Controller
 
         $data['totalCustomerPaidUsd'] = Schema::hasTable('customer_paid') ? CustomerPaid::sum('amount_usd') : 0;
         $data['totalCustomerPaidKhr'] = Schema::hasTable('customer_paid') ? CustomerPaid::sum('amount_kh') : 0;
-        $data['totalOrderRemainingAmount'] = (float) Order::forUser()
+        $data['totalOrderRemainingAmount'] = (float) (clone $orders)
             ->whereIn('payment_status', ['Pending', 'Partial'])
             ->sum(DB::raw('CASE WHEN (total_price - COALESCE(paid_amount, 0)) > 0 THEN (total_price - COALESCE(paid_amount, 0)) ELSE 0 END'));
-        $data['remainingOrderCount'] = (int) Order::forUser()
+        $data['remainingOrderCount'] = (int) (clone $orders)
             ->whereIn('payment_status', ['Pending', 'Partial'])
             ->whereRaw('(total_price - COALESCE(paid_amount, 0)) > 0')
             ->count();
         
-        $data['totalOrderPrice'] = (float) Order::forUser()->sum('total_price');
-        $data['pendingOrderCount'] = (int) Order::forUser()->where('payment_status', 'Pending')->count();
+        $data['totalOrderPrice'] = (float) (clone $orders)->sum('total_price');
+        $data['pendingOrderCount'] = (int) (clone $orders)->where('payment_status', 'Pending')->count();
 
         // Customer Count Dynamic Data
         $data['totalCustomerCount'] = (int) Customer::forUser()->count();
@@ -68,7 +100,7 @@ class DashboardController extends Controller
             $data['activeUserCount'] = (int) User::where('role', '!=', 'super_admin')->where('status', 1)->count();
             $data['activeUsersCount'] = $data['activeUserCount'];
 
-            $data['recentTransactions'] = Order::forUser()
+            $data['recentTransactions'] = (clone $orders)
                 ->with(['customer', 'shop'])
                 ->latest('id')
                 ->take(6)
@@ -76,7 +108,7 @@ class DashboardController extends Controller
 
             // Product Performance Dynamic Data
             $selectedMonth = $request->get('product_month', $request->get('month', 'all'));
-            $data['productPerformance'] = $this->getProductPerformanceData($selectedMonth);
+            $data['productPerformance'] = $this->getProductPerformanceData($selectedMonth, $fromDate, $toDate);
             $data['productPerformanceMonths'] = $this->getProductPerformanceMonths();
             $data['selectedProductMonth'] = $selectedMonth;
             $data['selectedPerformanceMonth'] = $selectedMonth;
@@ -135,7 +167,34 @@ class DashboardController extends Controller
         //     return response()->json($data['yearlySales']);
         // }
 
+        if ($request->get('ajax') === 'dashboard') {
+            return response()->json([
+                'html' => view('admin::pages.dashboard_content', $data)->render(),
+            ]);
+        }
+
         return view('admin::pages.dashboard', $data);
+    }
+
+    private function applyDashboardDateRange($query, ?string $fromDate, ?string $toDate)
+    {
+        if (!$fromDate || !$toDate) {
+            return $query;
+        }
+
+        // An exclusive next-day boundary includes the entire To Date, even fractional seconds.
+        $untilDate = Carbon::createFromFormat('!Y-m-d', $toDate)->addDay()->toDateString();
+
+        return $query->where(function ($range) use ($fromDate, $untilDate) {
+            $range->where(function ($dated) use ($fromDate, $untilDate) {
+                $dated->where('orders.order_date', '>=', $fromDate)
+                    ->where('orders.order_date', '<', $untilDate);
+            })->orWhere(function ($undated) use ($fromDate, $untilDate) {
+                $undated->whereNull('orders.order_date')
+                    ->where('orders.created_at', '>=', $fromDate)
+                    ->where('orders.created_at', '<', $untilDate);
+            });
+        });
     }
 
     private function getProductPerformanceMonths()
@@ -165,8 +224,9 @@ class DashboardController extends Controller
         return $months;
     }
 
-    private function getProductPerformanceData($selectedMonth = 'all')
+    private function getProductPerformanceData($selectedMonth = 'all', ?string $fromDate = null, ?string $toDate = null)
     {
+        $hasCustomRange = $fromDate && $toDate;
         $query = DB::table('order_details')
             ->join('orders', 'orders.id', '=', 'order_details.order_id')
             ->join('products', 'products.id', '=', 'order_details.product_id')
@@ -183,9 +243,11 @@ class DashboardController extends Controller
             $query->where('orders.created_by', Auth::id());
         }
 
+        $this->applyDashboardDateRange($query, $fromDate, $toDate);
+
         if ($selectedMonth && $selectedMonth !== 'all') {
             try {
-                $startDate = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
+                $startDate = Carbon::createFromFormat('!Y-m', $selectedMonth)->startOfMonth();
                 $endDate = (clone $startDate)->endOfMonth();
                 $query->where(function ($q) use ($startDate, $endDate) {
                     $q->whereBetween(DB::raw('DATE(orders.order_date)'), [$startDate->toDateString(), $endDate->toDateString()])
@@ -222,7 +284,7 @@ class DashboardController extends Controller
             ->get();
 
         // If 'all' is selected and we have fewer than 4 products from sales, supplement with catalog products
-        if ($selectedMonth === 'all' && $topProducts->count() < 4) {
+        if (!$hasCustomRange && $selectedMonth === 'all' && $topProducts->count() < 4) {
             $existingIds = $topProducts->pluck('product_id')->toArray();
             $needed = 4 - $topProducts->count();
 
@@ -284,7 +346,7 @@ class DashboardController extends Controller
             ],
         ];
 
-        return $topProducts->values()->map(function ($item, $index) use ($maxRevenue, $colors, $icons, $sparklines) {
+        return $topProducts->values()->map(function ($item, $index) use ($maxRevenue, $colors, $icons, $sparklines, $hasCustomRange) {
             $revenue = (float) $item->total_revenue;
             $price = (float) ($item->product_price ?? 0);
             $cost = (float) ($item->product_cost ?? 0);
@@ -320,7 +382,7 @@ class DashboardController extends Controller
             }
 
             // Budget / sales display
-            $displayAmount = $revenue > 0 ? $revenue : $price;
+            $displayAmount = $hasCustomRange || $revenue > 0 ? $revenue : $price;
             if ($displayAmount >= 1000) {
                 $budgetFormatted = '$' . number_format($displayAmount / 1000, 1) . 'k';
             } else {

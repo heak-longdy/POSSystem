@@ -380,13 +380,13 @@
 
         .btn-select-all-matching {
             font-weight: 700;
-            color: #2563eb;
-            text-decoration: underline;
+            color: #2563eb !important;
+            text-decoration: underline !important;
             background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            margin-left: 8px;
+            border: none !important;
+            cursor: pointer !important;
+            padding: 0 !important;
+            margin-left: 8px !important;
         }
 
         .btn-select-all-matching:hover {
@@ -446,11 +446,7 @@
         }
 
         .bulk-checkbox {
-            width: 18px;
-            height: 18px;
-            accent-color: #2563eb;
             cursor: pointer;
-            border-radius: 4px;
         }
 
         .invoice-pill {
@@ -650,7 +646,7 @@
         </div>
 
         <!-- Page All-Matching Banner -->
-        <div class="selection-matching-banner" x-show="showAllMatchingBanner()" x-cloak>
+        <!-- <div class="selection-matching-banner" x-show="showAllMatchingBanner()" x-cloak>
             <div>
                 <i class="bx bx-info-circle"></i>
                 <span x-text="'{{ __('order_bulk_print.selection.page_selected_notice', ['count' => $orders->count()]) }}'"></span>
@@ -661,7 +657,7 @@
                     </button>
                 </template>
             </div>
-        </div>
+        </div> -->
 
         <!-- Order Table Card -->
         <div class="bulk-table-card">
@@ -670,15 +666,20 @@
                     <thead>
                         <tr>
                             <th class="custom-checkbox-cell">
-                                <input type="checkbox" class="bulk-checkbox bulk-header-checkbox"
-                                       :checked="isCurrentPageAllSelected()"
-                                       @change="toggleSelectAllCurrentPage($event.target.checked)">
+                                <label class="evil-shrimp-checkbox" style="margin: 0; font-size: 12.5px;">
+                                    <input type="checkbox" class="bulk-checkbox bulk-header-checkbox"
+                                           :checked="isCurrentPageAllSelected()"
+                                           x-effect="$el.indeterminate = isCurrentPagePartiallySelected()"
+                                           @change="toggleSelectAllCurrentPage($event.target.checked)">
+                                    <div class="checkmark"></div>
+                                </label>
                             </th>
                             <th style="width: 60px;">{{ __('order_bulk_print.table.no') }}</th>
                             <th>{{ __('order_bulk_print.table.invoice_number') }}</th>
                             <th>{{ __('order_bulk_print.table.date') }}</th>
                             <th>{{ __('order_bulk_print.table.shop') }}</th>
                             <th>{{ __('order_bulk_print.table.customer') }}</th>
+                            <th>{{ __('order_bulk_print.table.created_by') }}</th>
                             <th style="text-align: right;">{{ __('order_bulk_print.table.total') }}</th>
                             <th style="text-align: center;">{{ __('order_bulk_print.table.payment_status') }}</th>
                         </tr>
@@ -687,10 +688,13 @@
                         @forelse ($orders as $order)
                             <tr :class="{ 'selected': isOrderSelected({{ $order->id }}) }">
                                 <td class="custom-checkbox-cell">
-                                    <input type="checkbox" class="bulk-checkbox"
-                                           data-order-id="{{ $order->id }}"
-                                           :checked="isOrderSelected({{ $order->id }})"
-                                           @change="toggleOrder({{ $order->id }})">
+                                    <label class="evil-shrimp-checkbox" style="margin: 0; font-size: 12.5px;">
+                                        <input type="checkbox" class="bulk-checkbox"
+                                               data-order-id="{{ $order->id }}"
+                                               :checked="isOrderSelected({{ $order->id }})"
+                                               @change="toggleOrder({{ $order->id }})">
+                                        <div class="checkmark"></div>
+                                    </label>
                                 </td>
                                 <td>{{ $orders->firstItem() + $loop->index }}</td>
                                 <td>
@@ -699,6 +703,7 @@
                                 <td>{{ $order->display_date }}</td>
                                 <td>{{ $order->display_shop_name }}</td>
                                 <td>{{ $order->display_customer_name }}</td>
+                                <td>{{ $order->display_created_by ?? ($order->createdBy?->name ?: '---') }}</td>
                                 <td style="text-align: right; font-weight: 700; color: #0f172a;">
                                     {{ $order->display_total_price }}
                                 </td>
@@ -713,7 +718,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8">
+                                <td colspan="9">
                                     <div class="empty-orders-state">
                                         <i class="bx bx-receipt"></i>
                                         <p>{{ __('order_bulk_print.table.no_records') }}</p>

@@ -231,8 +231,8 @@
                     <table class="report-data-table">
                         <thead><tr>
                             <th scope="col" class="text-center">{{ __('global.table.no') }}</th>
-                            @foreach (['product_code', 'product_name', 'category_name', 'uom_name', 'order_count', 'total_quantity', 'total_amount'] as $key)
-                                <th scope="col" class="{{ in_array($key, ['order_count', 'total_quantity', 'total_amount']) ? 'text-right' : '' }}">{{ __('consolidated_product_quantity.' . $key) }}</th>
+                            @foreach (['product_code', 'product_name', 'category_name', 'uom_name', 'order_count', 'total_quantity', 'total_amount', 'total_income_amount'] as $key)
+                                <th scope="col" class="{{ in_array($key, ['order_count', 'total_quantity', 'total_amount', 'total_income_amount']) ? 'text-right' : '' }}">{{ __('consolidated_product_quantity.' . $key) }}</th>
                             @endforeach
                             <th scope="col" class="text-center d-print-none">{{ __('consolidated_product_quantity.actions') }}</th>
                         </tr></thead>
@@ -247,6 +247,7 @@
                                     <td class="text-right">{{ number_format($row->order_count) }}</td>
                                     <td class="text-right font-weight-bold">{{ number_format($row->total_quantity) }}</td>
                                     <td class="text-right font-weight-bold">${{ number_format($row->total_amount, 2) }}</td>
+                                    <td class="text-right font-weight-bold">{{ $row->total_income_amount < 0 ? '-$' . number_format(abs($row->total_income_amount), 2) : '$' . number_format($row->total_income_amount, 2) }}</td>
                                     <td class="text-center d-print-none">
                                         <button type="button" class="btn-drilldown" @click="openDetailsModal({{ $row->product_id ?: 'null' }})">
                                             <i class="bx bx-detail"></i>
@@ -255,10 +256,10 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="9"><div class="empty-placeholder"><i class="bx bx-package"></i><p>{{ __('consolidated_product_quantity.empty') }}</p></div></td></tr>
+                                <tr><td colspan="10"><div class="empty-placeholder"><i class="bx bx-package"></i><p>{{ __('consolidated_product_quantity.empty') }}</p></div></td></tr>
                             @endforelse
                         </tbody>
-                        <tfoot><tr><td colspan="5">{{ __('consolidated_product_quantity.total') }}</td><td class="text-right">{{ number_format($summary->order_count) }}</td><td class="text-right">{{ number_format($summary->total_quantity) }}</td><td class="text-right">${{ number_format($summary->total_amount, 2) }}</td><td class="d-print-none"></td></tr></tfoot>
+                        <tfoot><tr><td colspan="5">{{ __('consolidated_product_quantity.total') }}</td><td class="text-right">{{ number_format($summary->order_count) }}</td><td class="text-right">{{ number_format($summary->total_quantity) }}</td><td class="text-right">${{ number_format($summary->total_amount, 2) }}</td><td class="text-right font-weight-bold">{{ $summary->total_income_amount < 0 ? '-$' . number_format(abs($summary->total_income_amount), 2) : '$' . number_format($summary->total_income_amount, 2) }}</td><td class="d-print-none"></td></tr></tfoot>
                     </table>
                 </div>
                 @include('admin::pages.report.customerRemaining.pagination', ['paginator' => $rows])
@@ -321,6 +322,7 @@
                                                 <th scope="col" class="text-right">{{ __('consolidated_product_quantity.quantity') }}</th>
                                                 <th scope="col" class="text-right">{{ __('consolidated_product_quantity.unit_price') }}</th>
                                                 <th scope="col" class="text-right">{{ __('consolidated_product_quantity.total_amount') }}</th>
+                                                <th scope="col" class="text-right">{{ __('consolidated_product_quantity.total_income_amount') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -343,10 +345,11 @@
                                                     <td class="text-right" x-text="Number(item.quantity || 0).toLocaleString()"></td>
                                                     <td class="text-right" x-text="'$' + Number(item.effective_unit_price || 0).toFixed(2)"></td>
                                                     <td class="text-right font-weight-bold" x-text="'$' + Number(item.total_amount || 0).toFixed(2)"></td>
+                                                    <td class="text-right font-weight-bold" x-text="(Number(item.total_income_amount || 0) < 0 ? '-$' + Math.abs(Number(item.total_income_amount || 0)).toFixed(2) : '$' + Number(item.total_income_amount || 0).toFixed(2))"></td>
                                                 </tr>
                                             </template>
                                             <template x-if="!detailsData.rows.data || detailsData.rows.data.length === 0">
-                                                <tr><td colspan="11"><div class="empty-placeholder"><i class="bx bx-detail"></i><p>{{ __('consolidated_product_quantity.no_order_items') }}</p></div></td></tr>
+                                                <tr><td colspan="12"><div class="empty-placeholder"><i class="bx bx-detail"></i><p>{{ __('consolidated_product_quantity.no_order_items') }}</p></div></td></tr>
                                             </template>
                                         </tbody>
                                     </table>
@@ -376,13 +379,6 @@
                 </div>
             </div>
         </template>
-                    </table>
-                </div>
-                @include('admin::pages.report.customerRemaining.pagination', ['paginator' => $rows])
-            </div>
-            <p class="report-note">{{ __('consolidated_product_quantity.order_count_note') }}</p>
-        </div>
-        <template x-if="exportLoading"><div class="loadingFullSizeLayout"><div class="loading loadingSubmit"><span id="spinner"></span><label>{{ __('order.export_excel') }}</label></div></div></template>
     </div>
 @stop
 @section('script')

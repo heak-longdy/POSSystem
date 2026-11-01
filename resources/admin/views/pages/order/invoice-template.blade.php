@@ -33,6 +33,18 @@
 .trHeight{
     height: 30px !important;
 }
+.inv-shop-phone {
+    font-size: 11.5px !important;
+}
+.inv-copy-notice {
+    font-size: 11.5px !important;
+}
+.inv-signature-col .sig-status-tag {
+    font-size: 11.5px !important;
+}
+.inv-signature-col .sig-action-label {
+    font-size: 11.5px !important;
+}
 </style>
 
 <div class="pos-invoice-sheet" id="{{ $printAreaId }}">
@@ -116,7 +128,6 @@
                 <th class="col-desc">{{ __('order.invoice.col_desc', [], $printLocale) }}</th>
                 <th class="col-qty">{{ __('order.invoice.col_qty', [], $printLocale) }}</th>
                 <th class="col-price">{{ __('order.invoice.col_price', [], $printLocale) }}</th>
-                <th class="col-discount">{{ __('order.invoice.col_discount', [], $printLocale) }}</th>
                 <th class="col-total">{{ __('order.invoice.col_total', [], $printLocale) }}</th>
             </tr>
         </thead>
@@ -142,7 +153,6 @@
                     </td>
                     <td class="cell-qty">{{ $qty }}</td>
                     <td class="cell-price">${{ number_format($unitPrice, 2) }}</td>
-                    <td class="cell-discount">${{ number_format($line['discount'], 2) }}</td>
                     <td class="cell-total">${{ number_format($line['total'], 2) }}</td>
                 </tr>
             @empty
@@ -153,7 +163,6 @@
                     </td>
                     <td class="cell-qty">50</td>
                     <td class="cell-price">$2.26</td>
-                    <td class="cell-discount">$0.00</td>
                     <td class="cell-total">$113.00</td>
                 </tr>
             @endforelse
@@ -165,15 +174,14 @@
                     <td class="cell-desc">&nbsp;</td>
                     <td class="cell-qty">&nbsp;</td>
                     <td class="cell-price">&nbsp;</td>
-                    <td class="cell-discount">&nbsp;</td>
                     <td class="cell-total">&nbsp;</td>
                 </tr>
             @endfor
         </tbody>
         <tfoot>
-            <!-- Dual Signatures (Cols 1-4) & Financial Summary (Cols 5-6) -->
+            <!-- Dual Signatures (Cols 1-3) & Financial Summary (Cols 4-5) -->
             <tr class="trHeight">
-                <td colspan="4" rowspan="4" class="inv-foot-signatures-cell">
+                <td colspan="3" rowspan="4" class="inv-foot-signatures-cell">
                     <div class="inv-signatures-wrap">
                         <div class="inv-signature-col buyer-sig">
                             <div class="sig-header">
