@@ -267,6 +267,13 @@ class SelectController extends Controller
     public function findShopProduct(Request $req)
     {
         $stockOnHand = StockOnHand::where('shop_id', $req->shop_id)->where('product_id', $req->product_id)->first();
+        if (!$stockOnHand) {
+            return response()->json([
+                'current_stock' => 0,
+                'shop_id' => $req->shop_id,
+                'product_id' => $req->product_id,
+            ]);
+        }
         return response()->json($stockOnHand);
     }
     public function SelectShop(Request $req)

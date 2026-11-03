@@ -14,6 +14,7 @@ return [
     'table' => [
         'no' => 'Nº',
         'image' => 'Image',
+        'code' => 'Code',
         'product' => 'Product',
         'category' => 'Category',
         'uom' => 'UOM',

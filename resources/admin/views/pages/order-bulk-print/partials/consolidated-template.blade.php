@@ -29,7 +29,7 @@
         border: 1px solid #cbd5e1 !important;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
         font-family: Arial, "Helvetica Neue", Helvetica, "Khmer OS Battambang", sans-serif !important;
-        font-size: 11.5px !important;
+        font-size: 13px !important;
         color: #000000 !important;
         line-height: 1.4 !important;
     }
@@ -41,7 +41,7 @@
         align-items: flex-end !important;
         width: 100% !important;
         margin-bottom: 14px !important;
-        font-size: 11.5px !important;
+        font-size: 13px !important;
         line-height: 1.45 !important;
     }
 
@@ -109,7 +109,7 @@
         width: 100% !important;
         border-collapse: collapse !important;
         border: 1px solid #000000 !important;
-        font-size: 11.5px !important;
+        font-size: 13px !important;
         background: #ffffff !important;
     }
 
@@ -125,7 +125,7 @@
         background-color: #ffffff !important;
         font-weight: 700 !important;
         text-align: center !important;
-        font-size: 11.5px !important;
+        font-size: 13px !important;
         padding: 5px 6px !important;
     }
 
@@ -166,7 +166,7 @@
         width: 100% !important;
         margin-top: 10px !important;
         margin-bottom: 35px !important;
-        font-size: 11.5px !important;
+        font-size: 13px !important;
         font-weight: 700 !important;
         color: #000000 !important;
     }
@@ -187,7 +187,7 @@
     /* Footer Checklist & Signatures */
     .load-footer-signatures {
         margin-top: 40px !important;
-        font-size: 11.5px !important;
+        font-size: 13px !important;
         color: #000000 !important;
     }
 

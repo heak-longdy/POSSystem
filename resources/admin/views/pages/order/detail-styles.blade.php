@@ -12,7 +12,7 @@
     }
 
     .order-details-refresh .booking-detail-page-wrapper {
-        width: 75%;
+        width: 85%;
         max-width: 1600px;
         padding: 26px 32px 48px;
         color: var(--detail-ink);

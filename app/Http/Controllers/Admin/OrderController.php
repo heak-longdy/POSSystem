@@ -1142,6 +1142,30 @@ class OrderController extends Controller
                 ->get();
         }
 
+        if ($order instanceof Order && $order->shop_id && $order->relationLoaded('orderDetails')) {
+            $productIds = $order->orderDetails
+                ->where('type', 'product')
+                ->pluck('product_id')
+                ->filter()
+                ->unique();
+
+            if ($productIds->isNotEmpty()) {
+                $stocks = StockOnHand::where('shop_id', $order->shop_id)
+                    ->whereIn('product_id', $productIds)
+                    ->pluck('current_stock', 'product_id');
+
+                foreach ($order->orderDetails as $detail) {
+                    if ($detail->type === 'product' && $detail->product_id) {
+                        $stock = (int) ($stocks[$detail->product_id] ?? 0);
+                        $detail->current_stock = $stock;
+                        if ($detail->product) {
+                            $detail->product->current_stock = $stock;
+                        }
+                    }
+                }
+            }
+        }
+
         return [
             'id' => $order->id ?? '',
             'data' => $order,

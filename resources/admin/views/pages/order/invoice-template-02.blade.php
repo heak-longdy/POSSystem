@@ -147,11 +147,13 @@
                     }
                     $itemCode = $detail->product?->code ?: ($detail->product?->barcode ?: ($detail->product_id ? sprintf('%04d', $detail->product_id) : '---'));
                     $uomName = $detail->product?->uom?->name ?: '---';
-                    $unitPrice = (float) ($detail->unit_price ?? ($detail->price ?? 0));
+                    $price = $detail->price;
+                    $unitPrice = (float) ($detail->unit_price ??  0);
+                    $productDisc = (float) ($detail->product_discount ?? 0);
                     $qty = (int) ($detail->qty ?: 1);
                     $line = app(\App\Services\OrderPricing::class)->line($detail);
                     $disc = $line['discount'] / max(1, $qty);
-                    $netUnitPrice = max(0, $unitPrice - $disc);
+                    $netUnitPrice = $unitPrice;
                     $lineTotal = $line['total'];
                 @endphp
                 <tr class="slip-row">
@@ -161,8 +163,8 @@
                     <td class="td-uom">{{ $uomName }}</td>
                     <td class="td-cases td-qty">{{ $qty }}</td>
                     <td class="td-cases td-deliv-qty">{{ $qty }}</td>
-                    <td class="td-price">${{ number_format($unitPrice, 2) }}</td>
-                    <td class="td-disc">${{ $disc > 0 ? number_format($disc, 2) : '0.00' }}</td>
+                    <td class="td-price">${{ number_format($price, 2) }}</td>
+                    <td class="td-disc">${{ $disc > 0 ? number_format($productDisc, 2) : '0.00' }}</td>
                     <td class="td-net">${{ number_format($netUnitPrice, 2) }}</td>
                     <td class="td-total">${{ number_format($lineTotal, 2) }}</td>
                 </tr>

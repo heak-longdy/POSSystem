@@ -254,9 +254,11 @@
                                         <tr>
                                             <th style="width: 50px;">#</th>
                                             <th>{{ __('order.table.item') }}</th>
+                                            <th class="text-right">{{ __('order.detail.price') }}</th>
                                             <th class="text-right">{{ __('order.detail.unit_price') }}</th>
                                             <th class="text-center">{{ __('order.detail.quantity') }}</th>
-                                            <th class="text-right">{{ __('order.detail.discount') }}</th>
+                                            <th class="text-right">{{ __('order.detail.unit_discount') }}</th>
+                                            <th class="text-right">{{ __('order.detail.total_discount') }}</th>
                                             <th class="text-right">{{ __('order.detail.line_total') }}</th>
                                         </tr>
                                     </thead>
@@ -267,10 +269,13 @@
                                                 $itemName = $isService
                                                     ? ($detail->service?->name ?? '---')
                                                     : ($detail->product?->name ?? '---');
-                                                $unitPrice = (float) ($detail->price ?? 0);
+                                                $price = (float) ($detail->price ?? 0);
+                                                $unitPrice = (float) (($detail->unit_price !== null && $detail->unit_price !== '') ? $detail->unit_price : ($detail->price ?? 0));
                                                 $qty = (int) ($detail->qty ?: 1);
-                                                $discount = (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0));
-                                                $lineSubtotal = max(0, ($unitPrice * $qty) - $discount);
+                                                $line = app(\App\Services\OrderPricing::class)->line($detail);
+                                                $totalDiscount = (float) ($line['discount'] ?? 0);
+                                                $unitDiscount = (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0));
+                                                $lineSubtotal = $line['total'];
                                             @endphp
                                             <tr>
                                                 <td>{{ $index + 1 }}</td>
@@ -279,11 +284,19 @@
                                                         <strong>{{ $itemName }}</strong>
                                                     </div>
                                                 </td>
+                                                <td class="text-right">${{ number_format($price, 2) }}</td>
                                                 <td class="text-right">${{ number_format($unitPrice, 2) }}</td>
                                                 <td class="text-center">{{ $qty }}</td>
                                                 <td class="text-right">
-                                                    @if ($discount > 0)
-                                                        <span class="text-danger">-${{ number_format($discount, 2) }}</span>
+                                                    @if ($unitDiscount > 0)
+                                                        <span class="text-danger">${{ number_format($unitDiscount, 2) }}</span>
+                                                    @else
+                                                        <span class="text-muted">$0.00</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-right">
+                                                    @if ($totalDiscount > 0)
+                                                        <span class="text-danger">${{ number_format($totalDiscount, 2) }}</span>
                                                     @else
                                                         <span class="text-muted">$0.00</span>
                                                     @endif
@@ -292,7 +305,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="text-center text-muted py-4">
+                                                <td colspan="8" class="text-center text-muted py-4">
                                                     {{ __('order.empty_cart.title') }}
                                                 </td>
                                             </tr>
@@ -567,7 +580,7 @@
                                 </div>
                                 <div class="billing-row">
                                     <span>{{ __('order.detail.discount') }}</span>
-                                    <span class="text-danger">- ${{ number_format($discount, 2) }}</span>
+                                    <span class="text-danger">${{ number_format($discount, 2) }}</span>
                                 </div>
                                 <div class="billing-divider"></div>
                                 <div class="billing-row">

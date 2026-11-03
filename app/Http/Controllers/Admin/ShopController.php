@@ -94,7 +94,10 @@ class ShopController extends Controller
             ->where(function ($query) {
                 if (request('search')) {
                     $query->whereHas('product', function ($product) {
-                        $product->where('name', 'LIKE', '%' . request('search') . '%');
+                        $product->where(function ($p) {
+                            $p->where('name', 'LIKE', '%' . request('search') . '%')
+                              ->orWhere('code', 'LIKE', '%' . request('search') . '%');
+                        });
                     });
                 }
             })

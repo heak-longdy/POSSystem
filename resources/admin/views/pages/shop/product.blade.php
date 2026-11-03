@@ -66,10 +66,11 @@
                         <div class="table-header">
                             <div class="row table-row-5"><span>{{ __('shop.table.no') }}</span></div>
                             <div class="row table-row-10 text left"><span>{{ __('shop.table.image') }}</span></div>
-                            <div class="row table-row-30 text left"><span>{{ __('shop.table.product') }}</span></div>
+                            <div class="row table-row-12 text left"><span>{{ __('shop.table.code') }}</span></div>
+                            <div class="row table-row-20 text left"><span>{{ __('shop.table.product') }}</span></div>
                             <div class="row table-row-15 text left"><span>{{ __('shop.table.category') }}</span></div>
                             <div class="row table-row-10 text left"><span>{{ __('shop.table.uom') }}</span></div>
-                            <div class="row table-row-15"><span>{{ __('shop.table.price') }}</span></div>
+                            <div class="row table-row-13"><span>{{ __('shop.table.price') }}</span></div>
                             <div class="row table-row-10"><span>{{ __('shop.table.status') }}</span></div>
                             <div class="row table-row-5"><span></span></div>
                         </div>
@@ -85,7 +86,10 @@
                                                 onerror="this.src='{{ asset('images/logo/default.png') }}'" alt="">
                                         </div>
                                     </div>
-                                    <div class="row table-row-30 text left">
+                                    <div class="row table-row-12 text left">
+                                        <span>{{ $item->product?->code ?? '---' }}</span>
+                                    </div>
+                                    <div class="row table-row-20 text left">
                                         <span>{{ $item->product?->name ?? '---' }}</span>
                                     </div>
                                     <div class="row table-row-15 text left">
@@ -94,7 +98,7 @@
                                     <div class="row table-row-10 text left">
                                         <span>{{ $item->product?->uom?->name ?? '---' }}</span>
                                     </div>
-                                    <div class="row table-row-15">
+                                    <div class="row table-row-13">
                                         <span>{{ $item->price !== null ? number_format($item->price, 2) . ' $' : '---' }}</span>
                                     </div>
                                     <div class="row table-row-10">

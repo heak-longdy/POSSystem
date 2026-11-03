@@ -2197,8 +2197,14 @@
                     if (!shopId || cartItem?.product_type !== 'product' || !cartItem?.product_id) return;
                     const url = `/admin/select/find-shop-product?shop_id=${shopId}&product_id=${cartItem.product_id}`;
                     this.fetchJson(url).then((res) => {
-                        if (res && res.current_stock !== undefined && res.current_stock !== null) {
-                            cartItem.current_stock = Number(res.current_stock);
+                        const stockVal = (res && res.current_stock !== undefined && res.current_stock !== null)
+                            ? Number(res.current_stock)
+                            : 0;
+                        cartItem.current_stock = stockVal;
+                        const key = this.catalogKey(cartItem);
+                        const reactiveItem = this.dataCart.find((val) => this.catalogKey(val) === key);
+                        if (reactiveItem) {
+                            reactiveItem.current_stock = stockVal;
                         }
                     }).catch(() => {});
                 },
