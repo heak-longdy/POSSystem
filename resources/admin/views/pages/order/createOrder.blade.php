@@ -1716,7 +1716,7 @@
                                             @input="if (isCustomerRestricted && Math.round(Number(formData.partial_payment_amount || 0) * 100) >= Math.round(Number(totalAmountDue() || 0) * 100)) { showRestrictionError = false; clearError('partial_payment_amount'); }"
                                             :max="totalAmountDue()" placeholder="0.00" autocomplete="off">
                                     </div>
-                                    <template x-for="item in (dataError?.partial_payment_amount || []).filter(msg => !showRestrictionError || msg !== @json(__('order.validation.full_payment_required')))">
+                                    <template x-for="item in (dataError?.partial_payment_amount || []).filter(msg => !showRestrictionError || msg !== msgFullPaymentRequired)">
                                         <span class="error" x-text="item"></span>
                                     </template>
                                 </div>
@@ -1886,6 +1886,7 @@
                 customerData: null,
                 isCustomerRestricted: false,
                 showRestrictionError: false,
+                msgFullPaymentRequired: @json(__('order.validation.full_payment_required')),
                 orderDeleteId: [],
                 initialOrder: null,
                 initialSelectedShop: null,
@@ -3916,7 +3917,7 @@
                     if (this.isCustomerRestricted && totalDueCents > 0) {
                         if (paymentCents < totalDueCents) {
                             this.showRestrictionError = true;
-                            errors.partial_payment_amount = [@json(__('order.validation.full_payment_required'))];
+                            errors.partial_payment_amount = [this.msgFullPaymentRequired];
                         } else {
                             this.showRestrictionError = false;
                             if (paymentCents > Math.round(maxAllowedPayment * 100)) {
