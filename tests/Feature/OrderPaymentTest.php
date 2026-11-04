@@ -46,6 +46,8 @@ class OrderPaymentTest extends TestCase
             $table->integer('total_point')->default(0);
             $table->string('payment_status')->default('Pending');
             $table->string('invoice_number')->nullable();
+            $table->string('creation_request_key')->nullable();
+            $table->string('creation_payload_hash')->nullable();
             $table->string('pay_way')->nullable();
             $table->dateTime('order_date')->nullable();
             $table->dateTime('delivery_date')->nullable();
@@ -853,15 +855,17 @@ class OrderPaymentTest extends TestCase
             'product_id' => 1, 'product_type' => 'service', 'product_qty' => 1,
             'itemData' => ['price' => 19.65, 'discount' => 100, 'discountType' => 'percent'],
         ]]);
-        $response = $this->postJson('/admin/order/save', $payload)->assertOk();
+        $response = $this->postJson('/admin/order/save', $payload)
+            ->assertOk()->assertJsonPath('payment_status', 'Paid');
         $order = Order::findOrFail($response->json('id'));
         $this->assertSame(0.0, $order->total_price);
         $this->assertSame(19.65, $order->total_discount);
+        $this->assertSame(0.0, $order->paid_amount);
         $data = app(OrderController::class)->show($order->id)->getData();
         $this->assertEquals(0, $data['paymentRemainingAmount']);
         $this->assertFalse($data['canAddPayment']);
         $this->postJson('/admin/order/add-payment/' . $order->id, ['amount' => 0.01])
-            ->assertUnprocessable()->assertJsonValidationErrors('amount');
+            ->assertUnprocessable()->assertJsonValidationErrors('payment_status');
         $this->assertSame(0, $order->payments()->count());
     }
 

@@ -1061,8 +1061,9 @@ class OrderController extends Controller
         if ($amountCents <= 0) {
             if ($existingPayment && $order->payments()->count() === 1 && $order->payment_status === 'Pending') {
                 $existingPayment->delete();
-                $this->syncOrderPaymentState($order);
             }
+            // A zero balance is settled even when no payment record is needed.
+            $this->syncOrderPaymentState($order);
             return;
         }
 

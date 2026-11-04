@@ -356,15 +356,75 @@ class CustomerFullPaymentRestrictionTest extends TestCase
         $this->assertSame('Paid', $prevOrder->fresh()->payment_status);
     }
 
-    public function test_restricted_customer_with_zero_dollar_total_succeeds(): void
+    /** @dataProvider zeroPayments */
+    public function test_restricted_customer_with_zero_dollar_total_is_paid_without_a_payment($payment): void
     {
-        $freshRestricted = Customer::create(['name' => 'Zero Due Customer', 'phone' => '000', 'user' => '1', 'status' => 1, 'payment_restriction' => 'Y']);
-        $response = $this->postJson('/admin/order/save', $this->createPayload($freshRestricted->id, 0, 0.0))
+        $response = $this->postJson('/admin/order/save', $this->createPayload($this->restrictedCustomer->id, $payment, 0.0))
             ->assertOk()
-            ->assertJsonPath('payment_status', 'Pending');
+            ->assertJsonPath('payment_status', 'Paid');
 
         $order = Order::findOrFail($response->json('id'));
         $this->assertSame(0.0, $order->total_price);
-        $this->assertSame('Pending', $order->payment_status);
+        $this->assertSame('Paid', $order->payment_status);
+        $this->assertSame(0.0, $order->paid_amount);
+        $this->assertSame(0.0, $order->remaining_amount);
+        $this->assertSame(0, $order->payments()->count());
+    }
+
+    public static function zeroPayments(): array
+    {
+        return [['0.00'], [null]];
+    }
+
+    public function test_fully_discounted_restricted_order_is_paid_on_create_and_edit(): void
+    {
+        $payload = $this->createPayload($this->restrictedCustomer->id, null, 9.30);
+        $items = json_decode($payload['dataCarts'], true);
+        $items[0]['itemData']['discount'] = 9.30;
+        $items[0]['itemData']['discountType'] = 'usd';
+        $payload['dataCarts'] = json_encode($items);
+
+        $response = $this->postJson('/admin/order/save', $payload)
+            ->assertOk()->assertJsonPath('payment_status', 'Paid');
+        $order = Order::findOrFail($response->json('id'));
+        $this->assertSame(0.0, $order->total_price);
+        $this->assertSame(9.30, $order->total_discount);
+        $this->assertSame(0.0, $order->paid_amount);
+        $this->assertSame(0, $order->payments()->count());
+
+        // Reproduce a previously saved zero-balance order left Pending, like order 305.
+        $order->update(['payment_status' => 'Pending', 'payment_date' => null]);
+        $payload['id'] = $order->id;
+        $this->postJson('/admin/order/save', $payload)
+            ->assertOk()->assertJsonPath('id', $order->id)->assertJsonPath('payment_status', 'Paid');
+        $this->assertSame('Paid', $order->fresh()->payment_status);
+        $this->assertSame(0.0, $order->fresh()->paid_amount);
+        $this->assertSame(0, $order->payments()->count());
+    }
+
+    public function test_restricted_zero_dollar_order_still_requires_payment_of_previous_balance(): void
+    {
+        $previousOrder = Order::create([
+            'customer_id' => $this->restrictedCustomer->id,
+            'shop_id' => $this->shop->id,
+            'total_price' => 30.0,
+            'paid_amount' => 0.0,
+            'payment_status' => 'Pending',
+            'order_date' => '2026-10-20',
+        ]);
+
+        $this->postJson('/admin/order/save', $this->createPayload($this->restrictedCustomer->id, 0, 0.0))
+            ->assertUnprocessable()->assertJsonValidationErrors('partial_payment_amount');
+        $this->assertSame(1, Order::count());
+        $this->assertSame('Pending', $previousOrder->fresh()->payment_status);
+        $this->assertSame(0, OrderPayment::count());
+
+        $response = $this->postJson('/admin/order/save', $this->createPayload($this->restrictedCustomer->id, 30.0, 0.0))
+            ->assertOk()->assertJsonPath('payment_status', 'Paid');
+        $order = Order::findOrFail($response->json('id'));
+        $this->assertSame(0.0, $order->total_price);
+        $this->assertSame(30.0, $order->previous_balance);
+        $this->assertSame(30.0, $order->paid_amount);
+        $this->assertSame(1, $order->payments()->count());
     }
 }
