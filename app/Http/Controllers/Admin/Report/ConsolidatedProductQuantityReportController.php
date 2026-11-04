@@ -91,8 +91,9 @@ class ConsolidatedProductQuantityReportController extends Controller
                 ? (float) $detail->unit_price : $pricing->legacyUnitPrice($detail);
             $row->total_amount = $this->lineAmountCents($detail, $pricing) / 100;
             $cost = (float) ($row->product_cost ?? 0);
+            $price = (float) ($detail->price ?? 0);
             $row->cost_price = $cost;
-            $row->total_income_amount = round($row->total_amount - ($cost * $row->quantity), 2);
+            $row->total_income_amount = round(($price - $cost) * $row->quantity, 2);
             $row->order_date_formatted = $row->order_date ? Carbon::parse($row->order_date)->format('Y-m-d H:i') : '—';
         });
 
@@ -197,8 +198,8 @@ class ConsolidatedProductQuantityReportController extends Controller
             $qty = (int) ($detail->qty ?? 1);
             $salesCents = $this->lineAmountCents($detail, $pricing);
             $cost = (float) ($line->product_cost ?? 0);
-            $costCents = (int) round($cost * $qty * 100);
-            $incomeCents = $salesCents - $costCents;
+            $price = (float) ($detail->price ?? 0);
+            $incomeCents = (int) round(($price - $cost) * $qty * 100);
 
             $productId = $detail->product_id;
             $sales[$productId] = ($sales[$productId] ?? 0) + $salesCents;
@@ -207,6 +208,7 @@ class ConsolidatedProductQuantityReportController extends Controller
 
         return [
             'sales' => $sales,
+            // Round after consolidating quantities so fractional cents are not rounded per order line.
             'income' => $income,
         ];
     }
@@ -225,7 +227,7 @@ class ConsolidatedProductQuantityReportController extends Controller
         // Preserve the report's quantity rules, including zero and legacy null qty.
         $qty = (int) ($detail->qty ?? 1);
         if ($detail->pricing_method === OrderPricing::AUTOMATIC) {
-            return $pricing->usdCents($detail->unit_price) * $qty;
+            return $pricing->usdCents($detail->price) * $qty;
         }
 
         // Use the same PHP rounding as OrderPricing::line for fractional-cent discounts.

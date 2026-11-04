@@ -31,6 +31,7 @@ class ConsolidatedProductQuantityReportTest extends TestCase
                 $table->id(); $table->string('name'); $table->string('code')->nullable();
                 $table->integer('category_id')->nullable(); $table->integer('uom_id')->nullable();
                 if ($name === 'products') {
+                    $table->double('price')->nullable();
                     $table->double('cost')->nullable();
                 }
                 $table->softDeletes();
@@ -40,6 +41,7 @@ class ConsolidatedProductQuantityReportTest extends TestCase
                 ['id' => 2, 'name' => 'Coffee', 'code' => 'P002', 'category_id' => 2, 'uom_id' => 2],
             ]);
         }
+        DB::table('products')->update(['price' => 2.25]);
         Schema::create('orders', function (Blueprint $table) {
             $table->id(); $table->integer('shop_id'); $table->integer('created_by');
             $table->string('invoice_number'); $table->string('payment_status')->nullable();
@@ -173,7 +175,7 @@ class ConsolidatedProductQuantityReportTest extends TestCase
     public function test_listing_export_and_summary_match_beyond_one_page(): void
     {
         for ($id = 3; $id <= 62; $id++) {
-            DB::table('products')->insert(['id' => $id, 'name' => 'Product ' . $id, 'code' => 'P' . $id, 'category_id' => 1, 'uom_id' => 1]);
+            DB::table('products')->insert(['id' => $id, 'name' => 'Product ' . $id, 'code' => 'P' . $id, 'category_id' => 1, 'uom_id' => 1, 'price' => 2.25]);
             $this->line(1, $id, 1);
         }
         $request = Request::create(self::URL, 'GET', $this->filters());
@@ -185,11 +187,40 @@ class ConsolidatedProductQuantityReportTest extends TestCase
         $this->assertEquals(76, $data['summary']['total_quantity']);
         $this->assertEquals(171, $data['summary']['total_amount']);
         $this->assertEquals($data['summary']['total_amount'], array_sum(array_column($data['rows'], 'total_amount')));
+        $this->assertEquals(171, $data['summary']['total_income_amount']);
+        $this->assertEquals($data['summary']['total_income_amount'], array_sum(array_column($data['rows'], 'total_income_amount')));
         foreach ($view['rows'] as $row) {
             $exported = collect($data['rows'])->firstWhere('product_id', $row->product_id);
             $this->assertEquals($row->total_amount, $exported['total_amount']);
+            $this->assertEquals($row->total_income_amount, $exported['total_income_amount']);
         }
         $this->assertEquals(2, $data['summary']['order_count']);
+    }
+
+    public function test_total_income_handles_zero_negative_and_fractional_product_margins(): void
+    {
+        foreach ([
+            [2.25, 0],
+            [2.75, -6],
+            [0.50, 21],
+            [null, 27],
+            [1.25, 12],
+        ] as [$cost, $expected]) {
+            DB::table('products')->where('id', 1)->update(['cost' => $cost]);
+            $data = $this->export(['product_id' => 1])->assertOk()->assertJsonCount(1, 'rows')->json();
+            $this->assertEquals(12, $data['summary']['total_quantity']);
+            $this->assertEquals(27, $data['rows'][0]['total_amount']);
+            $this->assertEquals(27, $data['summary']['total_amount']);
+            $this->assertEquals($expected, $data['rows'][0]['total_income_amount']);
+            $this->assertEquals($expected, $data['summary']['total_income_amount']);
+
+            $view = app(ConsolidatedProductQuantityReportController::class)
+                ->index(Request::create(self::URL, 'GET', $this->filters(['product_id' => 1])))->getData();
+            $this->assertEquals(27, $view['rows']->first()->total_amount);
+            $this->assertEquals(27, $view['summary']->total_amount);
+            $this->assertEquals($expected, $view['rows']->first()->total_income_amount);
+            $this->assertEquals($expected, $view['summary']->total_income_amount);
+        }
     }
 
     public function test_permissions_and_order_ownership_apply_to_export_and_listing(): void
@@ -260,10 +291,9 @@ class ConsolidatedProductQuantityReportTest extends TestCase
         DB::table('order_details')->delete();
         DB::table('orders')->whereNull('deleted_at')->delete();
 
-        // Product A (id 1): Cost Price $10.00
-        DB::table('products')->where('id', 1)->update(['cost' => 10.00]);
-        // Product B (id 2): Cost Price $20.00
-        DB::table('products')->where('id', 2)->update(['cost' => 20.00]);
+        // Product prices differ from historical order prices.
+        DB::table('products')->where('id', 1)->update(['price' => 16.00, 'cost' => 10.00]);
+        DB::table('products')->where('id', 2)->update(['price' => 35.00, 'cost' => 20.00]);
 
         // Order 1: Product A (qty 2, price 15.00)
         DB::table('orders')->insert([
@@ -280,33 +310,44 @@ class ConsolidatedProductQuantityReportTest extends TestCase
         $this->line(20, 1, 3, ['price' => 15.00]);
         $this->line(20, 2, 2, ['price' => 30.00]);
 
+        // Order 3: Product A with a different selling price (qty 4, price 12.00) to test multiple selling prices across orders
+        DB::table('orders')->insert([
+            'id' => 30, 'shop_id' => 1, 'created_by' => 1,
+            'invoice_number' => 'INV-030', 'payment_status' => 'Paid', 'order_date' => '2026-10-13 12:00:00',
+        ]);
+        $this->line(30, 1, 4, ['price' => 12.00]);
+
         // Total Product A across orders:
-        // Quantity Sold: 2 + 3 = 5
-        // Total Sales Amount: 15 * 5 = $75.00
-        // Total Income Amount: (15 - 10) * 5 = $25.00
+        // Quantity Sold: 2 + 3 + 4 = 9
+        // Order 1: (15.00 - 10.00) * 2 = $10.00
+        // Order 2: (15.00 - 10.00) * 3 = $15.00
+        // Order 3: (12.00 - 10.00) * 4 = $8.00
+        // Total Income Amount: 10.00 + 15.00 + 8.00 = $33.00
+        // Total Sales Amount: (15 * 2) + (15 * 3) + (12 * 4) = 30 + 45 + 48 = $123.00
 
         // Total Product B:
         // Quantity Sold: 2
+        // Order 2: (30.00 - 20.00) * 2 = $20.00
+        // Total Income Amount: $20.00
         // Total Sales Amount: 30 * 2 = $60.00
-        // Total Income Amount: (30 - 20) * 2 = $20.00
 
         $data = $this->export()->assertOk()->assertJsonCount(2, 'rows')->json();
 
         $productA = collect($data['rows'])->firstWhere('product_id', 1);
         $productB = collect($data['rows'])->firstWhere('product_id', 2);
 
-        $this->assertEquals(5, $productA['total_quantity']);
-        $this->assertEquals(75.00, $productA['total_amount']);
-        $this->assertEquals(25.00, $productA['total_income_amount']);
+        $this->assertEquals(9, $productA['total_quantity']);
+        $this->assertEquals(123.00, $productA['total_amount']);
+        $this->assertEquals(33.00, $productA['total_income_amount']);
 
         $this->assertEquals(2, $productB['total_quantity']);
         $this->assertEquals(60.00, $productB['total_amount']);
         $this->assertEquals(20.00, $productB['total_income_amount']);
 
         // Overall Summary:
-        $this->assertEquals(7, $data['summary']['total_quantity']);
-        $this->assertEquals(135.00, $data['summary']['total_amount']);
-        $this->assertEquals(45.00, $data['summary']['total_income_amount']);
+        $this->assertEquals(11, $data['summary']['total_quantity']);
+        $this->assertEquals(183.00, $data['summary']['total_amount']);
+        $this->assertEquals(53.00, $data['summary']['total_income_amount']);
 
         // Check index blade rendering with values
         $request = Request::create(self::URL, 'GET', $this->filters());
@@ -316,17 +357,21 @@ class ConsolidatedProductQuantityReportTest extends TestCase
         $source = preg_replace("/^\s*@include\('admin::shared.header'.*$/m", '', $source);
         $html = Blade::render($source, $viewData + ['errors' => new \Illuminate\Support\ViewErrorBag()]);
 
-        $this->assertStringContainsString('$75.00', $html);
-        $this->assertStringContainsString('$25.00', $html);
+        $this->assertStringContainsString('$123.00', $html);
+        $this->assertStringContainsString('$33.00', $html);
         $this->assertStringContainsString('$60.00', $html);
         $this->assertStringContainsString('$20.00', $html);
-        $this->assertStringContainsString('$45.00', $html);
+        $this->assertStringContainsString('$183.00', $html);
+        $this->assertStringContainsString('$53.00', $html);
 
         // Details route check
         $details = $this->getJson(self::URL . '/details?' . http_build_query($this->filters(['product_id' => 1])))->json();
-        $this->assertEquals(2, count($details['rows']['data']));
+        $this->assertEquals(3, count($details['rows']['data']));
         $incomeDetails = array_column($details['rows']['data'], 'total_income_amount');
         sort($incomeDetails);
-        $this->assertEquals([10.00, 15.00], $incomeDetails);
+        $this->assertEquals([8.00, 10.00, 15.00], $incomeDetails);
+        $amountDetails = array_column($details['rows']['data'], 'total_amount');
+        sort($amountDetails);
+        $this->assertEquals([30.00, 45.00, 48.00], $amountDetails);
     }
 }
