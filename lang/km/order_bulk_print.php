@@ -28,6 +28,8 @@ return [
         'partial' => 'មិនទាន់គ្រប់',
         'paid' => 'បានទូទាត់',
         'rejected' => 'បដិសេធ',
+        'cancel' => 'បដិសេធ',
+        'paid_through_transfer' => 'បានទូទាត់ (តាមការផ្ទេរ)',
     ],
 
     'payment_status_labels' => [
@@ -36,6 +38,8 @@ return [
         'partial' => 'មិនទាន់គ្រប់',
         'paid' => 'បានទូទាត់',
         'cancel' => 'បោះបង់',
+        'rejected' => 'បដិសេធ',
+        'paid_through_transfer' => 'បានទូទាត់ (តាមការផ្ទេរ)',
     ],
 
     'table' => [

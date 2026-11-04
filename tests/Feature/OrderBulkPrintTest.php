@@ -168,6 +168,38 @@ class OrderBulkPrintTest extends TestCase
         $response->assertSee(route('admin-order-bulk-print-preview'));
     }
 
+    public function test_bulk_print_translates_status_column_in_khmer_and_english(): void
+    {
+        $this->createOrder(['invoice_number' => 'INV-PENDING-01', 'payment_status' => 'Pending', 'created_by' => $this->permittedUser->id]);
+        $this->createOrder(['invoice_number' => 'INV-PARTIAL-01', 'payment_status' => 'Partial', 'created_by' => $this->permittedUser->id]);
+        $this->createOrder(['invoice_number' => 'INV-PAID-01', 'payment_status' => 'Paid', 'created_by' => $this->permittedUser->id]);
+
+        $this->actingAs($this->permittedUser);
+
+        // In English locale
+        $responseEn = $this->withSession(['locale' => 'en'])
+            ->get(route('admin-order-bulk-print-index', ['status' => 'all']))
+            ->assertOk();
+        $responseEn->assertSee('Pending');
+        $responseEn->assertSee('Partial');
+        $responseEn->assertSee('Paid');
+
+        // In Khmer locale
+        $responseKm = $this->withSession(['locale' => 'km'])
+            ->get(route('admin-order-bulk-print-index', ['status' => 'all']))
+            ->assertOk();
+        $responseKm->assertSee('រង់ចាំ');
+        $responseKm->assertSee('មិនទាន់គ្រប់');
+        $responseKm->assertSee('បានទូទាត់');
+
+        // Also test Rejected tab in Khmer
+        $this->createOrder(['invoice_number' => 'INV-REJECTED-01', 'payment_status' => 'Cancel', 'created_by' => $this->permittedUser->id]);
+        $responseRejectedKm = $this->withSession(['locale' => 'km'])
+            ->get(route('admin-order-bulk-print-index', ['status' => 'Rejected']))
+            ->assertOk();
+        $responseRejectedKm->assertSee('បដិសេធ');
+    }
+
     public function test_bulk_print_supports_searching_by_creator_name(): void
     {
         $creatorA = User::forceCreate(['name' => 'Alice Creator', 'status' => 1]);

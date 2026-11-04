@@ -28,6 +28,8 @@ return [
         'partial' => 'Partial',
         'paid' => 'Paid',
         'rejected' => 'Rejected',
+        'cancel' => 'Rejected',
+        'paid_through_transfer' => 'Paid (through transfer)',
     ],
 
     'payment_status_labels' => [
@@ -36,6 +38,8 @@ return [
         'partial' => 'Partial',
         'paid' => 'Paid',
         'cancel' => 'Cancel',
+        'rejected' => 'Rejected',
+        'paid_through_transfer' => 'Paid (through transfer)',
     ],
 
     'table' => [

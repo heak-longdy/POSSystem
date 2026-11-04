@@ -709,10 +709,19 @@
                                 </td>
                                 <td style="text-align: center;">
                                     @php
-                                        $pStatus = strtolower($order->display_payment_status);
+                                        $isTransferred = method_exists($order, 'isTransferred') && $order->isTransferred();
+                                        $pStatus = $isTransferred ? 'paid' : strtolower($order->display_payment_status ?? 'pending');
+                                        $statusLabel = $order->display_payment_status_label ?? ($isTransferred
+                                            ? __('order_bulk_print.status.paid_through_transfer')
+                                            : match ($pStatus) {
+                                                'paid' => __('order_bulk_print.status.paid'),
+                                                'partial' => __('order_bulk_print.status.partial'),
+                                                'cancel', 'rejected' => __('order_bulk_print.status.rejected'),
+                                                default => __('order_bulk_print.status.pending'),
+                                            });
                                     @endphp
-                                    <span class="status-badge {{ $pStatus }}">
-                                        {{ $order->display_payment_status }}
+                                    <span class="status-badge {{ $pStatus }}" @if($isTransferred) title="{{ __('order.balance_transferred_notice_desc') }}" @endif>
+                                        {{ $statusLabel }}
                                     </span>
                                 </td>
                             </tr>

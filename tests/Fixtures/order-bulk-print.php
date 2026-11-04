@@ -23,6 +23,7 @@ $orders = collect(range($total, 1))->slice(($page - 1) * 50, 50)->map(fn ($id) =
     'display_created_by' => 'User ' . $id,
     'display_total_price' => '$100.00',
     'display_payment_status' => $status === 'Paid' ? 'Paid' : 'Pending',
+    'display_payment_status_label' => $status === 'Paid' ? __('order_bulk_print.status.paid') : __('order_bulk_print.status.pending'),
 ]);
 $source = file_get_contents('resources/admin/views/pages/order-bulk-print/index.blade.php');
 $source = preg_replace('/^@(extends|section|endsection).*$/m', '', $source);

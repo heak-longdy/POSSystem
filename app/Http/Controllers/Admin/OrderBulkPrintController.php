@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admin\Traits\BuildsOrderListingQuery;
 use App\Http\Requests\Admin\OrderBulkPrintRequest;
+use App\Models\Order;
 use App\Models\Shop;
 use App\Services\OrderBulkPrintService;
 use Carbon\Carbon;
@@ -53,6 +54,7 @@ class OrderBulkPrintController extends Controller
             $order->display_created_by = $order->createdBy?->name ?: '---';
             $order->display_total_price = '$' . number_format((float) ($order->total_price ?? 0), 2);
             $order->display_payment_status = $order->payment_status ?: 'Pending';
+            $order->display_payment_status_label = $this->orderStatusLabel($order);
         }
 
         $shops = Shop::where('status', 1)->orderBy('name')->get();
@@ -129,5 +131,24 @@ class OrderBulkPrintController extends Controller
                 'totalDetailRows' => 0,
             ]);
         }
+    }
+
+    /**
+     * Localized status label for display in the order bulk printing list.
+     */
+    protected function orderStatusLabel(Order $order): string
+    {
+        if (method_exists($order, 'isTransferred') && $order->isTransferred()) {
+            return __('order_bulk_print.status.paid_through_transfer');
+        }
+
+        $rawStatus = strtolower((string) ($order->payment_status ?: 'pending'));
+
+        return match ($rawStatus) {
+            'paid' => __('order_bulk_print.status.paid'),
+            'partial' => __('order_bulk_print.status.partial'),
+            'cancel', 'rejected' => __('order_bulk_print.status.rejected'),
+            default => __('order_bulk_print.status.pending'),
+        };
     }
 }
