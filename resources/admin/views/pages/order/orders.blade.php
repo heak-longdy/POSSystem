@@ -299,6 +299,7 @@
         }
         .order-listing-wrapper .btn-popover-apply:hover {
             background: #1d4ed8;
+            color: #ffffff;
         }
 
         /* Datepicker stacking */
@@ -312,9 +313,9 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
+            width: 40px;
+            height: 39px;
+            border-radius: 7px;
             background: #fee2e2;
             color: #ef4444;
             text-decoration: none;

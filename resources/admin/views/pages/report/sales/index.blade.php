@@ -376,10 +376,6 @@
             transition: background 0.15s ease;
         }
 
-        .btn-excel-export:hover {
-            background: #047857;
-        }
-
         /* Sales Table Container */
         .report-table-card {
             background: #ffffff;

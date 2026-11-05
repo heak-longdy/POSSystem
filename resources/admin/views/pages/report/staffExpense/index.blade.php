@@ -380,10 +380,6 @@
             transition: background 0.15s ease;
         }
 
-        .btn-excel-export:hover {
-            background: #059669;
-        }
-
         /* View Grouping Toggle Controls */
         .view-grouping-toggle {
             display: inline-flex;

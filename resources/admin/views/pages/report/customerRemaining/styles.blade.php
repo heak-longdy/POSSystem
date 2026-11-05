@@ -544,11 +544,6 @@
         transition: background 0.15s ease;
     }
 
-    .customer-remaining-report .btn-excel-export:hover,
-    .btn-excel-export:hover {
-        background: #047857;
-    }
-
     .customer-remaining-report .btn-excel-export:disabled,
     .btn-excel-export:disabled {
         opacity: 0.65;

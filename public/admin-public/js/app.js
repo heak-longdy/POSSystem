@@ -22517,6 +22517,33 @@ window.addEventListener = function (type, listener, options) {
 
 var workspaceScriptLoads = new Map();
 var workspaceTabLoads = new Map();
+var workspaceStyleMedia = new WeakMap();
+
+function setWorkspacePaneStyles(pane, active) {
+  // Hiding a cached pane does not disable its CSS. Keep its styles with the
+  // pane, but only apply them while visible (including page stylesheet links).
+  pane.querySelectorAll('style, link[rel="stylesheet"]').forEach(function (style) {
+    if (!workspaceStyleMedia.has(style)) {
+      workspaceStyleMedia.set(style, style.getAttribute('media'));
+    }
+
+    var media = active ? workspaceStyleMedia.get(style) : 'not all';
+
+    if (media === null) {
+      style.removeAttribute('media');
+    } else {
+      style.setAttribute('media', media);
+    }
+  });
+}
+
+function appendWorkspacePageStyles(doc, content, pane) {
+  // Content styles are already copied by innerHTML. The admin shell emits
+  // @section('script') directly in body; leave shared shell/head styles alone.
+  doc.querySelectorAll('body > style, body > link[rel="stylesheet"]').forEach(function (style) {
+    if (!content.contains(style)) pane.appendChild(style.cloneNode(true));
+  });
+}
 
 function loadWorkspaceScript(scriptEl) {
   var src = new URL(scriptEl.getAttribute('src'), document.baseURI).href;
@@ -22957,7 +22984,12 @@ window.workspaceMdi = function () {
         initialPane.id = 'tab-pane-' + currentKey;
         initialPane.setAttribute('data-tab-key', currentKey);
         initialPane.classList.add('active');
-        initialPane.style.display = 'flex';
+        initialPane.style.display = 'flex'; // The layout emits @section('script') after the workspace.
+        // Associate its CSS with the initial tab as well as fetched tabs.
+
+        document.querySelectorAll('body > style, body > link[rel="stylesheet"]').forEach(function (style) {
+          initialPane.appendChild(style);
+        });
       } // 3. Load stored tabs from sessionStorage
 
 
@@ -23283,6 +23315,7 @@ window.workspaceMdi = function () {
       allPanes.forEach(function (pane) {
         pane.classList.remove('active');
         pane.style.setProperty('display', 'none', 'important');
+        setWorkspacePaneStyles(pane, false);
       });
       this.activeTabKey = tab.key;
       this.showOverflowDropdown = false;
@@ -23306,6 +23339,7 @@ window.workspaceMdi = function () {
       var targetPane = document.getElementById('tab-pane-' + tab.key);
 
       if (targetPane) {
+        setWorkspacePaneStyles(targetPane, true);
         targetPane.style.setProperty('display', 'flex', 'important');
         targetPane.classList.add('active');
         this.setTabLoading(tab.key, false); // Notify components that pane has become visible again
@@ -23574,10 +23608,11 @@ window.workspaceMdi = function () {
                     if (idx !== -1 && docTitle) {
                       _this13.tabs[idx].title = docTitle;
                     }
-                  } // Extract external stylesheet and font links (e.g., Google Fonts, ApexCharts)
+                  } // Shared head assets stay global. Page stylesheet links stay in
+                  // their pane so inactive modules cannot override the active one.
 
 
-                  doc.querySelectorAll('link[rel="stylesheet"], link[rel="preconnect"]').forEach(function (linkEl) {
+                  doc.querySelectorAll('head link[rel="stylesheet"], link[rel="preconnect"]').forEach(function (linkEl) {
                     var href = linkEl.getAttribute('href');
 
                     if (href && !document.querySelector("link[href=\"".concat(href, "\"]"))) {
@@ -23587,12 +23622,11 @@ window.workspaceMdi = function () {
 
                   contentHtml = '';
                   initialPane = doc.querySelector('#workspace-viewport .workspace-tab-pane');
+                  fetchedContent = initialPane || doc.querySelector('#content');
 
                   if (initialPane) {
                     contentHtml = initialPane.innerHTML;
                   } else {
-                    fetchedContent = doc.querySelector('#content');
-
                     if (fetchedContent) {
                       fetchedContent.querySelectorAll('.mdi-workspace-tabs-container, #jsScroll, .scroll').forEach(function (el) {
                         return el.remove();
@@ -23602,23 +23636,23 @@ window.workspaceMdi = function () {
                   }
 
                   if (!(!contentHtml || !contentHtml.trim())) {
-                    _context3.next = 12;
+                    _context3.next = 13;
                     break;
                   }
 
                   throw new Error('Could not parse tab content');
 
-                case 12:
+                case 13:
                   viewport = document.getElementById('workspace-viewport');
 
                   if (viewport) {
-                    _context3.next = 15;
+                    _context3.next = 16;
                     break;
                   }
 
                   return _context3.abrupt("return");
 
-                case 15:
+                case 16:
                   isActive = _this13.activeTabKey === tab.key; // Create new tab pane container
 
                   newPane = document.createElement('div');
@@ -23635,11 +23669,8 @@ window.workspaceMdi = function () {
                     var _el$closest;
 
                     ((_el$closest = el.closest('.dialog')) === null || _el$closest === void 0 ? void 0 : _el$closest.remove()) || el.remove();
-                  }); // Extract and attach all <style> tags (including page-specific styles in @section('script'))
-
-                  doc.querySelectorAll('style').forEach(function (styleEl) {
-                    newPane.appendChild(styleEl.cloneNode(true));
-                  }); // Remove any existing stale pane for this tab key
+                  });
+                  appendWorkspacePageStyles(doc, fetchedContent, newPane); // Remove any existing stale pane for this tab key
 
                   existingSamePane = document.getElementById('tab-pane-' + tab.key);
 
@@ -23653,7 +23684,7 @@ window.workspaceMdi = function () {
                   }); // Load dependencies, then mount and register components with Alpine's
                   // observer paused. Immediate page scripts can now find their own DOM.
 
-                  _context3.next = 32;
+                  _context3.next = 33;
                   return _this13.executeScriptsFromDoc(doc, newPane, function () {
                     if (!isCurrent()) return false; // The user may have switched tabs while dependencies were loading.
 
@@ -23661,26 +23692,28 @@ window.workspaceMdi = function () {
                     var active = _this13.activeTabKey === tab.key;
                     newPane.classList.toggle('active', active);
                     newPane.style.setProperty('display', active ? 'flex' : 'none', 'important');
+                    setWorkspacePaneStyles(newPane, active);
 
                     if (active) {
                       viewport.querySelectorAll('.workspace-tab-pane').forEach(function (pane) {
                         pane.classList.remove('active');
                         pane.style.setProperty('display', 'none', 'important');
+                        setWorkspacePaneStyles(pane, false);
                       });
                     }
 
                     viewport.appendChild(newPane);
                   });
 
-                case 32:
+                case 33:
                   if (newPane.isConnected) {
-                    _context3.next = 34;
+                    _context3.next = 35;
                     break;
                   }
 
                   return _context3.abrupt("return");
 
-                case 34:
+                case 35:
                   // Initialize s-event and s-mask on the newly mounted pane
                   if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
                     try {
@@ -23711,7 +23744,7 @@ window.workspaceMdi = function () {
 
                   _this13.saveSession();
 
-                case 39:
+                case 40:
                 case "end":
                   return _context3.stop();
               }
@@ -23738,6 +23771,7 @@ window.workspaceMdi = function () {
             allPanes.forEach(function (pane) {
               pane.classList.remove('active');
               pane.style.setProperty('display', 'none', 'important');
+              setWorkspacePaneStyles(pane, false);
             });
           }
 
@@ -24471,6 +24505,8 @@ window.workspaceMdi = function () {
                     _context7.next = 47;
                     return _this17.executeScriptsFromDoc(doc, currentPane, function () {
                       currentPane.innerHTML = newContent.innerHTML;
+                      appendWorkspacePageStyles(doc, newContent, currentPane);
+                      setWorkspacePaneStyles(currentPane, _this17.activeTabKey === currentTabKey);
                       currentPane.querySelectorAll('script').forEach(function (script) {
                         return script.remove();
                       });

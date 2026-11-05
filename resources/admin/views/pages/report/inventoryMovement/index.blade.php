@@ -437,10 +437,6 @@
             transition: background 0.15s ease;
         }
 
-        .btn-excel-export:hover {
-            background: #059669;
-        }
-
         /* Drilldown Modal */
         .modal-overlay {
             position: fixed;

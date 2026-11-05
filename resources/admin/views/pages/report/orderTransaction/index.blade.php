@@ -257,10 +257,6 @@
             transition: background 0.15s ease;
         }
 
-        .btn-excel-export:hover {
-            background: #047857;
-        }
-
         /* Table Card */
         .report-table-card {
             background: #ffffff;
