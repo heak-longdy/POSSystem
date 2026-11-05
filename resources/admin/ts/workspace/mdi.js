@@ -43,6 +43,7 @@ window.addEventListener = function (type, listener, options) {
 
 const workspaceScriptLoads = new Map();
 const workspaceTabLoads = new Map();
+const workspaceTitleLoads = new Map();
 const workspaceStyleMedia = new WeakMap();
 
 function setWorkspacePaneStyles(pane, active) {
@@ -95,6 +96,9 @@ window.workspaceMdi = function () {
         activeTabKey: '',
         permissionScope: '',
         canViewDashboard: false,
+        titleLocale: '',
+        dashboardTitle: '',
+        loadingTitle: '',
         showOverflowDropdown: false,
         showProfileDropdown: false,
         showNotificationDropdown: false,
@@ -318,15 +322,8 @@ window.workspaceMdi = function () {
             const currentPath = window.location.pathname;
             const currentFullUrl = this.normalizeUrl(window.location.href);
             
-            // Extract page title from header metadata, header, form header, or document title
-            let currentTitle = document.querySelector('.header-name-meta')?.getAttribute('data-header-name')?.trim()
-                || document.querySelector('.navHeaderRight')?.innerText?.trim() 
-                || document.querySelector('.form-header h3')?.innerText?.trim()
-                || document.title.replace('ADMIN |', '').replace('ADMIN', '').trim() 
-                || 'Workspace';
-            
-            currentTitle = currentTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
-            if (!currentTitle) currentTitle = 'Workspace';
+            this.readTitleLanguage(document);
+            const currentTitle = this.pageTitle(document) || this.loadingTitle;
 
             // Find active sidebar icon if available
             const activeSidebarItem = document.querySelector('#sidebar .side-menu a.active');
@@ -412,7 +409,8 @@ window.workspaceMdi = function () {
                 savedTabs.unshift({
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
                     key: dashboardKey,
-                    title: 'Dashboard',
+                    title: this.dashboardTitle,
+                    titleLocale: this.titleLocale,
                     url: dashboardUrl,
                     icon: 'bx bx-tachometer',
                     isPinned: true,
@@ -423,6 +421,8 @@ window.workspaceMdi = function () {
             } else {
                 const dash = savedTabs.find(t => t.key === dashboardKey);
                 if (dash) {
+                    dash.title = this.dashboardTitle;
+                    dash.titleLocale = this.titleLocale;
                     dash.isPinned = true;
                     dash.isLoading = false;
                 }
@@ -431,7 +431,8 @@ window.workspaceMdi = function () {
             // Register or update current page tab
             const existingCurrentIndex = savedTabs.findIndex(t => t.key === currentKey);
             if (currentPageAllowed && existingCurrentIndex >= 0) {
-                savedTabs[existingCurrentIndex].title = currentKey === dashboardKey ? 'Dashboard' : currentTitle;
+                savedTabs[existingCurrentIndex].title = currentKey === dashboardKey ? this.dashboardTitle : currentTitle;
+                savedTabs[existingCurrentIndex].titleLocale = this.titleLocale;
                 savedTabs[existingCurrentIndex].icon = currentIcon;
                 savedTabs[existingCurrentIndex].url = currentFullUrl;
                 savedTabs[existingCurrentIndex].isLoading = false;
@@ -440,6 +441,7 @@ window.workspaceMdi = function () {
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
                     key: currentKey,
                     title: currentTitle,
+                    titleLocale: this.titleLocale,
                     url: currentFullUrl,
                     icon: currentIcon,
                     isPinned: currentKey === dashboardKey,
@@ -451,6 +453,7 @@ window.workspaceMdi = function () {
 
             this.tabs = savedTabs;
             this.activeTabKey = currentPageAllowed ? currentKey : '';
+            this.syncTabTitles();
             this.saveSession();
 
             // 4. Initialize s-event and s-mask on the initial page
@@ -506,6 +509,81 @@ window.workspaceMdi = function () {
 
             // Make instance accessible globally
             window.MDI = this;
+        },
+
+        pageTitle(doc) {
+            const title = doc.querySelector('.header-name-meta')?.getAttribute('data-header-name')?.trim()
+                || doc.querySelector('.navHeaderRight')?.textContent?.trim()
+                || doc.querySelector('.form-header h3')?.textContent?.trim()
+                || doc.title.replace('ADMIN |', '').replace('ADMIN', '').trim();
+            return title.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
+        },
+
+        readTitleLanguage(doc) {
+            const bar = doc.getElementById('workspace-tab-bar');
+            this.titleLocale = bar?.getAttribute('data-locale') || this.titleLocale;
+            this.dashboardTitle = bar?.getAttribute('data-dashboard-title') || window.workspaceTranslations?.dashboard || this.dashboardTitle;
+            this.loadingTitle = bar?.getAttribute('data-loading-title') || this.loadingTitle;
+            if (window.workspaceTranslations) window.workspaceTranslations.dashboard = this.dashboardTitle;
+        },
+
+        syncTabTitles() {
+            this.tabs.forEach(tab => {
+                if (tab.key === 'admin-dashboard') {
+                    tab.title = this.dashboardTitle;
+                    tab.titleLocale = this.titleLocale;
+                } else if (this.titleLocale && tab.titleLocale !== this.titleLocale) {
+                    // Never display a saved label in the previous user's language.
+                    tab.title = this.loadingTitle;
+                    this.refreshTabTitle(tab);
+                }
+            });
+        },
+
+        updateTabTitleFromDoc(doc, key, requestLocale) {
+            const locale = doc.getElementById('workspace-tab-bar')?.getAttribute('data-locale');
+            // A slower response from before a language change must not revert labels.
+            if (requestLocale !== this.titleLocale && locale !== this.titleLocale) return;
+            this.readTitleLanguage(doc);
+            const tab = this.tabs.find(t => t.key === key);
+            const title = key === 'admin-dashboard' ? this.dashboardTitle : this.pageTitle(doc);
+            if (tab && title) {
+                tab.title = title;
+                tab.titleLocale = this.titleLocale;
+            }
+            this.syncTabTitles();
+            this.saveSession();
+        },
+
+        refreshTabTitle(tab) {
+            const locale = this.titleLocale;
+            const url = tab.url;
+            const pending = workspaceTitleLoads.get(tab.key);
+            if (pending?.locale === locale && pending.url === url) return pending.promise;
+
+            const request = { locale, url };
+            workspaceTitleLoads.set(tab.key, request);
+            // Read translated headers only: do not mount content, execute scripts,
+            // switch tabs, or touch unsaved form state during language synchronization.
+            request.promise = fetch(url, { headers: { 'X-MDI-Partial': '1' }, cache: 'no-store' })
+                .then(res => res.ok ? res.text() : null)
+                .then(html => {
+                    if (!html || this.titleLocale !== locale || tab.url !== url
+                        || workspaceTitleLoads.get(tab.key) !== request || !this.tabs.includes(tab)) return;
+                    const doc = new DOMParser().parseFromString(html, 'text/html');
+                    if (doc.getElementById('workspace-tab-bar')?.getAttribute('data-locale') !== locale) return;
+                    const title = this.pageTitle(doc);
+                    if (title) {
+                        tab.title = title;
+                        tab.titleLocale = locale;
+                        this.saveSession();
+                    }
+                })
+                .catch(() => {}) // Retry when this tab is next activated.
+                .finally(() => {
+                    if (workspaceTitleLoads.get(tab.key) === request) workspaceTitleLoads.delete(tab.key);
+                });
+            return request.promise;
         },
 
         normalizeUrl(url) {
@@ -578,28 +656,11 @@ window.workspaceMdi = function () {
                 }
             }
 
-            // Determine initial title if not provided
-            let initialTitle = title;
-            if (!initialTitle) {
-                const parts = lowerUrl.split('/');
-                const modIdx = parts.indexOf('admin') + 1;
-                const modName = modIdx > 0 && parts[modIdx] ? parts[modIdx].charAt(0).toUpperCase() + parts[modIdx].slice(1) : '';
-                if (lowerUrl.includes('/create')) {
-                    initialTitle = modName ? `Create ${modName}` : 'Create';
-                } else if (lowerUrl.includes('/edit')) {
-                    initialTitle = modName ? `Edit ${modName}` : 'Edit';
-                } else if (lowerUrl.includes('/detail') || lowerUrl.includes('/view')) {
-                    initialTitle = modName ? `${modName} Details` : 'Details';
-                } else if (lowerUrl.includes('/list')) {
-                    initialTitle = modName ? `${modName} List` : 'List';
-                } else {
-                    initialTitle = 'Loading...';
-                }
-            }
+            const initialTitle = targetKey === 'admin-dashboard' ? this.dashboardTitle : (title || this.loadingTitle);
 
             if (existingTab) {
-                if (title && (!existingTab.title || existingTab.title === 'Workspace' || existingTab.title === 'Loading...')) {
-                    existingTab.title = title;
+                if (title && (!existingTab.title || existingTab.title === 'Workspace' || existingTab.title === 'Loading...' || existingTab.title === this.loadingTitle)) {
+                    existingTab.title = initialTitle;
                 }
                 if (defaultIcon) {
                     existingTab.icon = defaultIcon;
@@ -621,6 +682,7 @@ window.workspaceMdi = function () {
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
                     key: targetKey,
                     title: initialTitle,
+                    titleLocale: '', // Confirm the label from the translated page header.
                     url: normalizedUrl,
                     icon: defaultIcon,
                     isPinned: false,
@@ -641,6 +703,9 @@ window.workspaceMdi = function () {
         switchTab(tab, updateHistory = true) {
             this.hideTooltip();
             const existingPaneCheck = document.getElementById('tab-pane-' + tab.key);
+            if (existingPaneCheck && this.titleLocale && tab.titleLocale !== this.titleLocale) {
+                this.refreshTabTitle(tab);
+            }
             if (tab.key === this.activeTabKey && existingPaneCheck && existingPaneCheck.style.display !== 'none') {
                 this.updateSidebarActive(tab.url);
                 return;
@@ -851,7 +916,7 @@ window.workspaceMdi = function () {
             const pending = workspaceTabLoads.get(tab.key);
             if (pending && pending.url === tab.url) return pending.promise;
 
-            const request = { url: tab.url };
+            const request = { url: tab.url, locale: this.titleLocale };
             workspaceTabLoads.set(tab.key, request);
             const isCurrent = () => workspaceTabLoads.get(tab.key) === request
                 && this.tabs.some(current => current.key === tab.key);
@@ -881,18 +946,7 @@ window.workspaceMdi = function () {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
 
-                // Extract title and clean any icon ligatures (e.g. "visibility View Details", "arrow-left Create Product")
-                let docTitle = doc.querySelector('.header-name-meta')?.getAttribute('data-header-name')?.trim()
-                    || doc.querySelector('.navHeaderRight')?.innerText?.trim() 
-                    || doc.querySelector('.form-header h3')?.innerText?.trim()
-                    || doc.title.replace('ADMIN |', '').replace('ADMIN', '').trim();
-                if (docTitle) {
-                    docTitle = docTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
-                    const idx = this.tabs.findIndex(t => t.key === tab.key);
-                    if (idx !== -1 && docTitle) {
-                        this.tabs[idx].title = docTitle;
-                    }
-                }
+                this.updateTabTitleFromDoc(doc, tab.key, request.locale);
 
                 // Shared head assets stay global. Page stylesheet links stay in
                 // their pane so inactive modules cannot override the active one.
@@ -1200,11 +1254,11 @@ window.workspaceMdi = function () {
             } else if (this.canViewDashboard) {
                 const dashboardUrl = '/admin/dashboard';
                 const dashboardKey = this.generateKey(dashboardUrl);
-                const dashTitle = (window.workspaceTranslations && window.workspaceTranslations.dashboard) || 'Dashboard';
                 const dashTab = {
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
                     key: dashboardKey,
-                    title: dashTitle,
+                    title: this.dashboardTitle,
+                    titleLocale: this.titleLocale,
                     url: dashboardUrl,
                     icon: 'bx bx-tachometer',
                     isPinned: true,
@@ -1437,6 +1491,7 @@ window.workspaceMdi = function () {
                 }
 
                 this.setTabLoading(currentTabKey, true);
+                const requestLocale = this.titleLocale;
 
                 fetch(action, {
                     method: form.method || 'POST',
@@ -1506,6 +1561,8 @@ window.workspaceMdi = function () {
                         window.location.href = finalUrl;
                         return;
                     }
+
+                    this.updateTabTitleFromDoc(doc, this.generateKey(finalUrl), requestLocale);
 
                     // Success indicators:
                     // 1. Flashed session success message in iziToast config or toastr

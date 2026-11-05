@@ -22517,6 +22517,7 @@ window.addEventListener = function (type, listener, options) {
 
 var workspaceScriptLoads = new Map();
 var workspaceTabLoads = new Map();
+var workspaceTitleLoads = new Map();
 var workspaceStyleMedia = new WeakMap();
 
 function setWorkspacePaneStyles(pane, active) {
@@ -22576,6 +22577,9 @@ window.workspaceMdi = function () {
     activeTabKey: '',
     permissionScope: '',
     canViewDashboard: false,
+    titleLocale: '',
+    dashboardTitle: '',
+    loadingTitle: '',
     showOverflowDropdown: false,
     showProfileDropdown: false,
     showNotificationDropdown: false,
@@ -22930,12 +22934,6 @@ window.workspaceMdi = function () {
       var _window$workspaceAcce,
           _window$workspaceAcce2,
           _window$workspaceAcce3,
-          _document$querySelect,
-          _document$querySelect2,
-          _document$querySelect3,
-          _document$querySelect4,
-          _document$querySelect5,
-          _document$querySelect6,
           _this5 = this;
 
       this.permissionScope = ((_window$workspaceAcce = window.workspaceAccess) === null || _window$workspaceAcce === void 0 ? void 0 : _window$workspaceAcce.scope) || '';
@@ -22943,11 +22941,9 @@ window.workspaceMdi = function () {
       var currentPageAllowed = ((_window$workspaceAcce3 = window.workspaceAccess) === null || _window$workspaceAcce3 === void 0 ? void 0 : _window$workspaceAcce3.currentPageAllowed) !== false; // 1. Detect current page information
 
       var currentPath = window.location.pathname;
-      var currentFullUrl = this.normalizeUrl(window.location.href); // Extract page title from header metadata, header, form header, or document title
-
-      var currentTitle = ((_document$querySelect = document.querySelector('.header-name-meta')) === null || _document$querySelect === void 0 ? void 0 : (_document$querySelect2 = _document$querySelect.getAttribute('data-header-name')) === null || _document$querySelect2 === void 0 ? void 0 : _document$querySelect2.trim()) || ((_document$querySelect3 = document.querySelector('.navHeaderRight')) === null || _document$querySelect3 === void 0 ? void 0 : (_document$querySelect4 = _document$querySelect3.innerText) === null || _document$querySelect4 === void 0 ? void 0 : _document$querySelect4.trim()) || ((_document$querySelect5 = document.querySelector('.form-header h3')) === null || _document$querySelect5 === void 0 ? void 0 : (_document$querySelect6 = _document$querySelect5.innerText) === null || _document$querySelect6 === void 0 ? void 0 : _document$querySelect6.trim()) || document.title.replace('ADMIN |', '').replace('ADMIN', '').trim() || 'Workspace';
-      currentTitle = currentTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
-      if (!currentTitle) currentTitle = 'Workspace'; // Find active sidebar icon if available
+      var currentFullUrl = this.normalizeUrl(window.location.href);
+      this.readTitleLanguage(document);
+      var currentTitle = this.pageTitle(document) || this.loadingTitle; // Find active sidebar icon if available
 
       var activeSidebarItem = document.querySelector('#sidebar .side-menu a.active');
       var currentIcon = 'bx bx-file';
@@ -23041,7 +23037,8 @@ window.workspaceMdi = function () {
         savedTabs.unshift({
           id: 'tab-' + Math.random().toString(36).substr(2, 9),
           key: dashboardKey,
-          title: 'Dashboard',
+          title: this.dashboardTitle,
+          titleLocale: this.titleLocale,
           url: dashboardUrl,
           icon: 'bx bx-tachometer',
           isPinned: true,
@@ -23055,6 +23052,8 @@ window.workspaceMdi = function () {
         });
 
         if (dash) {
+          dash.title = this.dashboardTitle;
+          dash.titleLocale = this.titleLocale;
           dash.isPinned = true;
           dash.isLoading = false;
         }
@@ -23066,7 +23065,8 @@ window.workspaceMdi = function () {
       });
 
       if (currentPageAllowed && existingCurrentIndex >= 0) {
-        savedTabs[existingCurrentIndex].title = currentKey === dashboardKey ? 'Dashboard' : currentTitle;
+        savedTabs[existingCurrentIndex].title = currentKey === dashboardKey ? this.dashboardTitle : currentTitle;
+        savedTabs[existingCurrentIndex].titleLocale = this.titleLocale;
         savedTabs[existingCurrentIndex].icon = currentIcon;
         savedTabs[existingCurrentIndex].url = currentFullUrl;
         savedTabs[existingCurrentIndex].isLoading = false;
@@ -23075,6 +23075,7 @@ window.workspaceMdi = function () {
           id: 'tab-' + Math.random().toString(36).substr(2, 9),
           key: currentKey,
           title: currentTitle,
+          titleLocale: this.titleLocale,
           url: currentFullUrl,
           icon: currentIcon,
           isPinned: currentKey === dashboardKey,
@@ -23086,6 +23087,7 @@ window.workspaceMdi = function () {
 
       this.tabs = savedTabs;
       this.activeTabKey = currentPageAllowed ? currentKey : '';
+      this.syncTabTitles();
       this.saveSession(); // 4. Initialize s-event and s-mask on the initial page
 
       if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
@@ -23144,6 +23146,98 @@ window.workspaceMdi = function () {
       this.setupFormInterceptor(); // Make instance accessible globally
 
       window.MDI = this;
+    },
+    pageTitle: function pageTitle(doc) {
+      var _doc$querySelector, _doc$querySelector$ge, _doc$querySelector2, _doc$querySelector2$t, _doc$querySelector3, _doc$querySelector3$t;
+
+      var title = ((_doc$querySelector = doc.querySelector('.header-name-meta')) === null || _doc$querySelector === void 0 ? void 0 : (_doc$querySelector$ge = _doc$querySelector.getAttribute('data-header-name')) === null || _doc$querySelector$ge === void 0 ? void 0 : _doc$querySelector$ge.trim()) || ((_doc$querySelector2 = doc.querySelector('.navHeaderRight')) === null || _doc$querySelector2 === void 0 ? void 0 : (_doc$querySelector2$t = _doc$querySelector2.textContent) === null || _doc$querySelector2$t === void 0 ? void 0 : _doc$querySelector2$t.trim()) || ((_doc$querySelector3 = doc.querySelector('.form-header h3')) === null || _doc$querySelector3 === void 0 ? void 0 : (_doc$querySelector3$t = _doc$querySelector3.textContent) === null || _doc$querySelector3$t === void 0 ? void 0 : _doc$querySelector3$t.trim()) || doc.title.replace('ADMIN |', '').replace('ADMIN', '').trim();
+      return title.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
+    },
+    readTitleLanguage: function readTitleLanguage(doc) {
+      var _window$workspaceTran;
+
+      var bar = doc.getElementById('workspace-tab-bar');
+      this.titleLocale = (bar === null || bar === void 0 ? void 0 : bar.getAttribute('data-locale')) || this.titleLocale;
+      this.dashboardTitle = (bar === null || bar === void 0 ? void 0 : bar.getAttribute('data-dashboard-title')) || ((_window$workspaceTran = window.workspaceTranslations) === null || _window$workspaceTran === void 0 ? void 0 : _window$workspaceTran.dashboard) || this.dashboardTitle;
+      this.loadingTitle = (bar === null || bar === void 0 ? void 0 : bar.getAttribute('data-loading-title')) || this.loadingTitle;
+      if (window.workspaceTranslations) window.workspaceTranslations.dashboard = this.dashboardTitle;
+    },
+    syncTabTitles: function syncTabTitles() {
+      var _this6 = this;
+
+      this.tabs.forEach(function (tab) {
+        if (tab.key === 'admin-dashboard') {
+          tab.title = _this6.dashboardTitle;
+          tab.titleLocale = _this6.titleLocale;
+        } else if (_this6.titleLocale && tab.titleLocale !== _this6.titleLocale) {
+          // Never display a saved label in the previous user's language.
+          tab.title = _this6.loadingTitle;
+
+          _this6.refreshTabTitle(tab);
+        }
+      });
+    },
+    updateTabTitleFromDoc: function updateTabTitleFromDoc(doc, key, requestLocale) {
+      var _doc$getElementById;
+
+      var locale = (_doc$getElementById = doc.getElementById('workspace-tab-bar')) === null || _doc$getElementById === void 0 ? void 0 : _doc$getElementById.getAttribute('data-locale'); // A slower response from before a language change must not revert labels.
+
+      if (requestLocale !== this.titleLocale && locale !== this.titleLocale) return;
+      this.readTitleLanguage(doc);
+      var tab = this.tabs.find(function (t) {
+        return t.key === key;
+      });
+      var title = key === 'admin-dashboard' ? this.dashboardTitle : this.pageTitle(doc);
+
+      if (tab && title) {
+        tab.title = title;
+        tab.titleLocale = this.titleLocale;
+      }
+
+      this.syncTabTitles();
+      this.saveSession();
+    },
+    refreshTabTitle: function refreshTabTitle(tab) {
+      var _this7 = this;
+
+      var locale = this.titleLocale;
+      var url = tab.url;
+      var pending = workspaceTitleLoads.get(tab.key);
+      if ((pending === null || pending === void 0 ? void 0 : pending.locale) === locale && pending.url === url) return pending.promise;
+      var request = {
+        locale: locale,
+        url: url
+      };
+      workspaceTitleLoads.set(tab.key, request); // Read translated headers only: do not mount content, execute scripts,
+      // switch tabs, or touch unsaved form state during language synchronization.
+
+      request.promise = fetch(url, {
+        headers: {
+          'X-MDI-Partial': '1'
+        },
+        cache: 'no-store'
+      }).then(function (res) {
+        return res.ok ? res.text() : null;
+      }).then(function (html) {
+        var _doc$getElementById2;
+
+        if (!html || _this7.titleLocale !== locale || tab.url !== url || workspaceTitleLoads.get(tab.key) !== request || !_this7.tabs.includes(tab)) return;
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        if (((_doc$getElementById2 = doc.getElementById('workspace-tab-bar')) === null || _doc$getElementById2 === void 0 ? void 0 : _doc$getElementById2.getAttribute('data-locale')) !== locale) return;
+
+        var title = _this7.pageTitle(doc);
+
+        if (title) {
+          tab.title = title;
+          tab.titleLocale = locale;
+
+          _this7.saveSession();
+        }
+      })["catch"](function () {}) // Retry when this tab is next activated.
+      ["finally"](function () {
+        if (workspaceTitleLoads.get(tab.key) === request) workspaceTitleLoads["delete"](tab.key);
+      });
+      return request.promise;
     },
     normalizeUrl: function normalizeUrl(url) {
       if (!url) return '';
@@ -23223,32 +23317,13 @@ window.workspaceMdi = function () {
         } else if (lowerUrl.includes('/list')) {
           defaultIcon = 'bx bx-list-ul';
         }
-      } // Determine initial title if not provided
-
-
-      var initialTitle = title;
-
-      if (!initialTitle) {
-        var parts = lowerUrl.split('/');
-        var modIdx = parts.indexOf('admin') + 1;
-        var modName = modIdx > 0 && parts[modIdx] ? parts[modIdx].charAt(0).toUpperCase() + parts[modIdx].slice(1) : '';
-
-        if (lowerUrl.includes('/create')) {
-          initialTitle = modName ? "Create ".concat(modName) : 'Create';
-        } else if (lowerUrl.includes('/edit')) {
-          initialTitle = modName ? "Edit ".concat(modName) : 'Edit';
-        } else if (lowerUrl.includes('/detail') || lowerUrl.includes('/view')) {
-          initialTitle = modName ? "".concat(modName, " Details") : 'Details';
-        } else if (lowerUrl.includes('/list')) {
-          initialTitle = modName ? "".concat(modName, " List") : 'List';
-        } else {
-          initialTitle = 'Loading...';
-        }
       }
 
+      var initialTitle = targetKey === 'admin-dashboard' ? this.dashboardTitle : title || this.loadingTitle;
+
       if (existingTab) {
-        if (title && (!existingTab.title || existingTab.title === 'Workspace' || existingTab.title === 'Loading...')) {
-          existingTab.title = title;
+        if (title && (!existingTab.title || existingTab.title === 'Workspace' || existingTab.title === 'Loading...' || existingTab.title === this.loadingTitle)) {
+          existingTab.title = initialTitle;
         }
 
         if (defaultIcon) {
@@ -23274,6 +23349,8 @@ window.workspaceMdi = function () {
           id: 'tab-' + Math.random().toString(36).substr(2, 9),
           key: targetKey,
           title: initialTitle,
+          titleLocale: '',
+          // Confirm the label from the translated page header.
           url: normalizedUrl,
           icon: defaultIcon,
           isPinned: false,
@@ -23294,6 +23371,10 @@ window.workspaceMdi = function () {
       var updateHistory = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       this.hideTooltip();
       var existingPaneCheck = document.getElementById('tab-pane-' + tab.key);
+
+      if (existingPaneCheck && this.titleLocale && tab.titleLocale !== this.titleLocale) {
+        this.refreshTabTitle(tab);
+      }
 
       if (tab.key === this.activeTabKey && existingPaneCheck && existingPaneCheck.style.display !== 'none') {
         this.updateSidebarActive(tab.url);
@@ -23373,11 +23454,11 @@ window.workspaceMdi = function () {
      * Smoothly scroll a tab into view within the tab bar
      */
     scrollToTab: function scrollToTab(tabKey) {
-      var _this6 = this;
+      var _this8 = this;
 
       var key = tabKey || this.activeTabKey;
       this.$nextTick(function () {
-        var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (_this6.$el && _this6.$el.querySelector ? _this6.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+        var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (_this8.$el && _this8.$el.querySelector ? _this8.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
         if (!scrollWrapper) return;
         var activeEl = scrollWrapper.querySelector(".mdi-tab-item[data-tab-key=\"".concat(key, "\"]")) || scrollWrapper.querySelector('.mdi-tab-item.active');
 
@@ -23398,10 +23479,10 @@ window.workspaceMdi = function () {
           }
 
           setTimeout(function () {
-            return _this6.checkScrollState();
+            return _this8.checkScrollState();
           }, 350);
         } else {
-          _this6.checkScrollState();
+          _this8.checkScrollState();
         }
       });
     },
@@ -23410,21 +23491,21 @@ window.workspaceMdi = function () {
      * Update horizontal scroll indicators (canScrollLeft, canScrollRight)
      */
     checkScrollState: function checkScrollState() {
-      var _this7 = this;
+      var _this9 = this;
 
       this.$nextTick(function () {
-        var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (_this7.$el && _this7.$el.querySelector ? _this7.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
+        var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (_this9.$el && _this9.$el.querySelector ? _this9.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
         if (!scrollWrapper) return;
         var scrollLeft = scrollWrapper.scrollLeft,
             scrollWidth = scrollWrapper.scrollWidth,
             clientWidth = scrollWrapper.clientWidth;
-        var wasLeft = _this7.canScrollLeft;
-        var wasRight = _this7.canScrollRight;
-        _this7.canScrollLeft = scrollLeft > 2;
-        _this7.canScrollRight = scrollLeft + clientWidth < scrollWidth - 2;
+        var wasLeft = _this9.canScrollLeft;
+        var wasRight = _this9.canScrollRight;
+        _this9.canScrollLeft = scrollLeft > 2;
+        _this9.canScrollRight = scrollLeft + clientWidth < scrollWidth - 2;
 
-        if (wasLeft && !_this7.canScrollLeft || wasRight && !_this7.canScrollRight) {
-          _this7.hideTooltip();
+        if (wasLeft && !_this9.canScrollLeft || wasRight && !_this9.canScrollRight) {
+          _this9.hideTooltip();
         }
       });
     },
@@ -23433,7 +23514,7 @@ window.workspaceMdi = function () {
      * Scroll tab strip horizontally by step (YouTube style)
      */
     scrollTabStrip: function scrollTabStrip(direction) {
-      var _this8 = this;
+      var _this10 = this;
 
       this.hideTooltip();
       var scrollWrapper = document.querySelector('#workspace-tab-bar .mdi-tabs-scroll-wrapper') || (this.$el && this.$el.querySelector ? this.$el.querySelector('.mdi-tabs-scroll-wrapper') : null);
@@ -23453,7 +23534,7 @@ window.workspaceMdi = function () {
       }
 
       setTimeout(function () {
-        return _this8.checkScrollState();
+        return _this10.checkScrollState();
       }, 350);
     },
 
@@ -23461,11 +23542,11 @@ window.workspaceMdi = function () {
      * Check if moving to previous tab is possible
      */
     canGoPrevious: function canGoPrevious() {
-      var _this9 = this;
+      var _this11 = this;
 
       if (!this.tabs || this.tabs.length <= 1) return false;
       var currentIndex = this.tabs.findIndex(function (t) {
-        return t.key === _this9.activeTabKey;
+        return t.key === _this11.activeTabKey;
       });
       return currentIndex > 0;
     },
@@ -23474,11 +23555,11 @@ window.workspaceMdi = function () {
      * Check if moving to next tab is possible
      */
     canGoNext: function canGoNext() {
-      var _this10 = this;
+      var _this12 = this;
 
       if (!this.tabs || this.tabs.length <= 1) return false;
       var currentIndex = this.tabs.findIndex(function (t) {
-        return t.key === _this10.activeTabKey;
+        return t.key === _this12.activeTabKey;
       });
       return currentIndex >= 0 && currentIndex < this.tabs.length - 1;
     },
@@ -23487,11 +23568,11 @@ window.workspaceMdi = function () {
      * Move to previous tab
      */
     goToPreviousTab: function goToPreviousTab() {
-      var _this11 = this;
+      var _this13 = this;
 
       if (!this.canGoPrevious()) return;
       var currentIndex = this.tabs.findIndex(function (t) {
-        return t.key === _this11.activeTabKey;
+        return t.key === _this13.activeTabKey;
       });
 
       if (currentIndex > 0) {
@@ -23504,11 +23585,11 @@ window.workspaceMdi = function () {
      * Move to next tab
      */
     goToNextTab: function goToNextTab() {
-      var _this12 = this;
+      var _this14 = this;
 
       if (!this.canGoNext()) return;
       var currentIndex = this.tabs.findIndex(function (t) {
-        return t.key === _this12.activeTabKey;
+        return t.key === _this14.activeTabKey;
       });
 
       if (currentIndex >= 0 && currentIndex < this.tabs.length - 1) {
@@ -23540,17 +23621,18 @@ window.workspaceMdi = function () {
      * Dynamically fetch page HTML and mount into #workspace-viewport
      */
     fetchAndMountTab: function fetchAndMountTab(tab) {
-      var _this13 = this;
+      var _this15 = this;
 
       var pending = workspaceTabLoads.get(tab.key);
       if (pending && pending.url === tab.url) return pending.promise;
       var request = {
-        url: tab.url
+        url: tab.url,
+        locale: this.titleLocale
       };
       workspaceTabLoads.set(tab.key, request);
 
       var isCurrent = function isCurrent() {
-        return workspaceTabLoads.get(tab.key) === request && _this13.tabs.some(function (current) {
+        return workspaceTabLoads.get(tab.key) === request && _this15.tabs.some(function (current) {
           return current.key === tab.key;
         });
       };
@@ -23564,7 +23646,7 @@ window.workspaceMdi = function () {
         if (res.status === 403) {
           tab.isPinned = false;
 
-          _this13.closeTab(tab);
+          _this15.closeTab(tab);
 
           return null;
         }
@@ -23579,9 +23661,7 @@ window.workspaceMdi = function () {
         return res.text();
       }).then( /*#__PURE__*/function () {
         var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3(html) {
-          var _doc$querySelector, _doc$querySelector$ge, _doc$querySelector2, _doc$querySelector2$i, _doc$querySelector3, _doc$querySelector3$i;
-
-          var parser, doc, docTitle, idx, contentHtml, initialPane, fetchedContent, viewport, isActive, newPane, existingSamePane;
+          var parser, doc, contentHtml, initialPane, fetchedContent, viewport, isActive, newPane, existingSamePane;
           return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
             while (1) {
               switch (_context3.prev = _context3.next) {
@@ -23595,20 +23675,9 @@ window.workspaceMdi = function () {
 
                 case 2:
                   parser = new DOMParser();
-                  doc = parser.parseFromString(html, 'text/html'); // Extract title and clean any icon ligatures (e.g. "visibility View Details", "arrow-left Create Product")
+                  doc = parser.parseFromString(html, 'text/html');
 
-                  docTitle = ((_doc$querySelector = doc.querySelector('.header-name-meta')) === null || _doc$querySelector === void 0 ? void 0 : (_doc$querySelector$ge = _doc$querySelector.getAttribute('data-header-name')) === null || _doc$querySelector$ge === void 0 ? void 0 : _doc$querySelector$ge.trim()) || ((_doc$querySelector2 = doc.querySelector('.navHeaderRight')) === null || _doc$querySelector2 === void 0 ? void 0 : (_doc$querySelector2$i = _doc$querySelector2.innerText) === null || _doc$querySelector2$i === void 0 ? void 0 : _doc$querySelector2$i.trim()) || ((_doc$querySelector3 = doc.querySelector('.form-header h3')) === null || _doc$querySelector3 === void 0 ? void 0 : (_doc$querySelector3$i = _doc$querySelector3.innerText) === null || _doc$querySelector3$i === void 0 ? void 0 : _doc$querySelector3$i.trim()) || doc.title.replace('ADMIN |', '').replace('ADMIN', '').trim();
-
-                  if (docTitle) {
-                    docTitle = docTitle.replace(/^(visibility|edit|delete|remove|add|more-vertical|view|arrow-left)\s+/i, '').trim();
-                    idx = _this13.tabs.findIndex(function (t) {
-                      return t.key === tab.key;
-                    });
-
-                    if (idx !== -1 && docTitle) {
-                      _this13.tabs[idx].title = docTitle;
-                    }
-                  } // Shared head assets stay global. Page stylesheet links stay in
+                  _this15.updateTabTitleFromDoc(doc, tab.key, request.locale); // Shared head assets stay global. Page stylesheet links stay in
                   // their pane so inactive modules cannot override the active one.
 
 
@@ -23636,24 +23705,24 @@ window.workspaceMdi = function () {
                   }
 
                   if (!(!contentHtml || !contentHtml.trim())) {
-                    _context3.next = 13;
+                    _context3.next = 12;
                     break;
                   }
 
                   throw new Error('Could not parse tab content');
 
-                case 13:
+                case 12:
                   viewport = document.getElementById('workspace-viewport');
 
                   if (viewport) {
-                    _context3.next = 16;
+                    _context3.next = 15;
                     break;
                   }
 
                   return _context3.abrupt("return");
 
-                case 16:
-                  isActive = _this13.activeTabKey === tab.key; // Create new tab pane container
+                case 15:
+                  isActive = _this15.activeTabKey === tab.key; // Create new tab pane container
 
                   newPane = document.createElement('div');
                   newPane.id = 'tab-pane-' + tab.key;
@@ -23684,12 +23753,12 @@ window.workspaceMdi = function () {
                   }); // Load dependencies, then mount and register components with Alpine's
                   // observer paused. Immediate page scripts can now find their own DOM.
 
-                  _context3.next = 33;
-                  return _this13.executeScriptsFromDoc(doc, newPane, function () {
+                  _context3.next = 32;
+                  return _this15.executeScriptsFromDoc(doc, newPane, function () {
                     if (!isCurrent()) return false; // The user may have switched tabs while dependencies were loading.
 
                     // The user may have switched tabs while dependencies were loading.
-                    var active = _this13.activeTabKey === tab.key;
+                    var active = _this15.activeTabKey === tab.key;
                     newPane.classList.toggle('active', active);
                     newPane.style.setProperty('display', active ? 'flex' : 'none', 'important');
                     setWorkspacePaneStyles(newPane, active);
@@ -23705,15 +23774,15 @@ window.workspaceMdi = function () {
                     viewport.appendChild(newPane);
                   });
 
-                case 33:
+                case 32:
                   if (newPane.isConnected) {
-                    _context3.next = 35;
+                    _context3.next = 34;
                     break;
                   }
 
                   return _context3.abrupt("return");
 
-                case 35:
+                case 34:
                   // Initialize s-event and s-mask on the newly mounted pane
                   if (typeof _s_events__WEBPACK_IMPORTED_MODULE_1__.initSEvents === 'function') {
                     try {
@@ -23742,9 +23811,9 @@ window.workspaceMdi = function () {
                     }
                   }
 
-                  _this13.saveSession();
+                  _this15.saveSession();
 
-                case 40:
+                case 39:
                 case "end":
                   return _context3.stop();
               }
@@ -23758,13 +23827,13 @@ window.workspaceMdi = function () {
       }())["catch"](function (err) {
         if (!isCurrent()) return;
 
-        _this13.setTabLoading(tab.key, false);
+        _this15.setTabLoading(tab.key, false);
 
         console.error('Error loading tab content:', err);
         var viewport = document.getElementById('workspace-viewport');
 
         if (viewport) {
-          var isActive = _this13.activeTabKey === tab.key;
+          var isActive = _this15.activeTabKey === tab.key;
 
           if (isActive) {
             var allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
@@ -23797,7 +23866,7 @@ window.workspaceMdi = function () {
         if (workspaceTabLoads.get(tab.key) === request) {
           workspaceTabLoads["delete"](tab.key);
 
-          _this13.setTabLoading(tab.key, false);
+          _this15.setTabLoading(tab.key, false);
         }
       });
       return request.promise;
@@ -23916,7 +23985,7 @@ window.workspaceMdi = function () {
     },
     closeTab: function closeTab(tab, event) {
       var _arguments2 = arguments,
-          _this14 = this;
+          _this16 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
         var shouldSwitch, template, title, safeTitle, message, confirmed, closingIndex, pane, wasActive, nextTab;
@@ -23926,7 +23995,7 @@ window.workspaceMdi = function () {
               case 0:
                 shouldSwitch = _arguments2.length > 2 && _arguments2[2] !== undefined ? _arguments2[2] : true;
 
-                _this14.hideTooltip();
+                _this16.hideTooltip();
 
                 if (event) {
                   event.stopPropagation();
@@ -23941,7 +24010,7 @@ window.workspaceMdi = function () {
                 return _context5.abrupt("return");
 
               case 5:
-                if (!(tab.isDirty && event && _this14.isFormTab(tab))) {
+                if (!(tab.isDirty && event && _this16.isFormTab(tab))) {
                   _context5.next = 15;
                   break;
                 }
@@ -23951,7 +24020,7 @@ window.workspaceMdi = function () {
                 safeTitle = (title + '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                 message = template.replace(':title', safeTitle).replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
                 _context5.next = 12;
-                return _this14.confirmAction(message, {
+                return _this16.confirmAction(message, {
                   confirmText: window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close tab',
                   cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
                 });
@@ -23967,7 +24036,7 @@ window.workspaceMdi = function () {
                 return _context5.abrupt("return");
 
               case 15:
-                closingIndex = _this14.tabs.findIndex(function (t) {
+                closingIndex = _this16.tabs.findIndex(function (t) {
                   return t.key === tab.key;
                 });
 
@@ -23986,27 +24055,27 @@ window.workspaceMdi = function () {
                   pane.remove();
                 }
 
-                wasActive = _this14.activeTabKey === tab.key;
+                wasActive = _this16.activeTabKey === tab.key;
 
-                _this14.tabs.splice(closingIndex, 1);
+                _this16.tabs.splice(closingIndex, 1);
 
                 if (wasActive && shouldSwitch) {
                   // Switch to adjacent tab or dashboard
-                  nextTab = _this14.tabs[Math.max(0, closingIndex - 1)] || _this14.tabs[0];
+                  nextTab = _this16.tabs[Math.max(0, closingIndex - 1)] || _this16.tabs[0];
 
                   if (nextTab) {
-                    _this14.switchTab(nextTab);
+                    _this16.switchTab(nextTab);
                   }
                 } else if (wasActive && !shouldSwitch) {
-                  _this14.activeTabKey = null;
+                  _this16.activeTabKey = null;
 
-                  _this14.saveSession();
+                  _this16.saveSession();
                 } else {
-                  _this14.saveSession();
+                  _this16.saveSession();
                 }
 
-                _this14.$nextTick(function () {
-                  return _this14.checkScrollState();
+                _this16.$nextTick(function () {
+                  return _this16.checkScrollState();
                 });
 
               case 24:
@@ -24018,15 +24087,15 @@ window.workspaceMdi = function () {
       }))();
     },
     closeAllTabs: function closeAllTabs() {
-      var _this15 = this;
+      var _this17 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
-        var closableTabs, hasDirty, rawMsg, message, confirmed, currentClosable, dashboardUrl, dashboardKey, dashTitle, dashTab;
+        var closableTabs, hasDirty, rawMsg, message, confirmed, currentClosable, dashboardUrl, dashboardKey, dashTab;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
-                closableTabs = _this15.tabs.filter(function (t) {
+                closableTabs = _this17.tabs.filter(function (t) {
                   return !t.isPinned;
                 });
 
@@ -24039,7 +24108,7 @@ window.workspaceMdi = function () {
 
               case 3:
                 hasDirty = closableTabs.some(function (t) {
-                  return t.isDirty && _this15.isFormTab(t);
+                  return t.isDirty && _this17.isFormTab(t);
                 });
 
                 if (!hasDirty) {
@@ -24050,7 +24119,7 @@ window.workspaceMdi = function () {
                 rawMsg = window.workspaceTranslations && window.workspaceTranslations.confirmCloseAll || 'You have unsaved changes in some tabs. Are you sure you want to close all open tabs?';
                 message = rawMsg.replace('". ', '".<br>').replace('. ', '.<br>').replace('។ ', '។<br>');
                 _context6.next = 9;
-                return _this15.confirmAction(message, {
+                return _this17.confirmAction(message, {
                   confirmText: window.workspaceTranslations && window.workspaceTranslations.closeAllTabs || window.workspaceTranslations && window.workspaceTranslations.closeTab || 'Close all tabs',
                   cancelText: window.workspaceTranslations && window.workspaceTranslations.cancel || 'Cancel'
                 });
@@ -24066,7 +24135,7 @@ window.workspaceMdi = function () {
                 return _context6.abrupt("return");
 
               case 12:
-                currentClosable = _this15.tabs.filter(function (t) {
+                currentClosable = _this17.tabs.filter(function (t) {
                   return !t.isPinned;
                 }); // Remove DOM panes of closable tabs
 
@@ -24078,24 +24147,24 @@ window.workspaceMdi = function () {
                   }
                 }); // Retain only pinned tabs
 
-                _this15.tabs = _this15.tabs.filter(function (t) {
+                _this17.tabs = _this17.tabs.filter(function (t) {
                   return t.isPinned;
                 }); // Close dropdowns
 
-                _this15.showOverflowDropdown = false;
-                _this15.showProfileDropdown = false;
-                _this15.showNotificationDropdown = false; // Switch to dashboard or first pinned tab
+                _this17.showOverflowDropdown = false;
+                _this17.showProfileDropdown = false;
+                _this17.showNotificationDropdown = false; // Switch to dashboard or first pinned tab
 
-                if (_this15.tabs.length > 0) {
-                  _this15.switchTab(_this15.tabs[0]);
-                } else if (_this15.canViewDashboard) {
+                if (_this17.tabs.length > 0) {
+                  _this17.switchTab(_this17.tabs[0]);
+                } else if (_this17.canViewDashboard) {
                   dashboardUrl = '/admin/dashboard';
-                  dashboardKey = _this15.generateKey(dashboardUrl);
-                  dashTitle = window.workspaceTranslations && window.workspaceTranslations.dashboard || 'Dashboard';
+                  dashboardKey = _this17.generateKey(dashboardUrl);
                   dashTab = {
                     id: 'tab-' + Math.random().toString(36).substr(2, 9),
                     key: dashboardKey,
-                    title: dashTitle,
+                    title: _this17.dashboardTitle,
+                    titleLocale: _this17.titleLocale,
                     url: dashboardUrl,
                     icon: 'bx bx-tachometer',
                     isPinned: true,
@@ -24103,14 +24172,14 @@ window.workspaceMdi = function () {
                     isLoading: false,
                     closable: false
                   };
-                  _this15.tabs = [dashTab];
+                  _this17.tabs = [dashTab];
 
-                  _this15.switchTab(dashTab);
+                  _this17.switchTab(dashTab);
                 } else {
-                  _this15.activeTabKey = '';
+                  _this17.activeTabKey = '';
                 }
 
-                _this15.saveSession();
+                _this17.saveSession();
 
               case 20:
               case "end":
@@ -24124,7 +24193,7 @@ window.workspaceMdi = function () {
       (0,_sidebar_active__WEBPACK_IMPORTED_MODULE_2__.updateSidebarActive)(url);
     },
     setupLinkInterceptor: function setupLinkInterceptor() {
-      var _this16 = this;
+      var _this18 = this;
 
       document.addEventListener('click', function (e) {
         // 1. Intercept elements with [s-click-link] (buttons, divs, icons, spans)
@@ -24152,13 +24221,13 @@ window.workspaceMdi = function () {
                   e.stopPropagation();
                   var targetPath = url.pathname + url.search;
 
-                  var currentTab = _this16.tabs.find(function (t) {
-                    return t.key === _this16.activeTabKey;
+                  var currentTab = _this18.tabs.find(function (t) {
+                    return t.key === _this18.activeTabKey;
                   }); // Check if reload button for current tab
 
 
                   if (currentTab && (url.href === window.location.href || currentTab.url === targetPath)) {
-                    _this16.refreshTab(_this16.activeTabKey);
+                    _this18.refreshTab(_this18.activeTabKey);
 
                     return;
                   }
@@ -24177,7 +24246,7 @@ window.workspaceMdi = function () {
                     icon = 'bx bx-list-ul';
                   }
 
-                  _this16.openUrlInTab(targetPath, title, icon);
+                  _this18.openUrlInTab(targetPath, title, icon);
 
                   return;
                 }
@@ -24235,13 +24304,13 @@ window.workspaceMdi = function () {
               _icon = 'bx bx-show';
             }
 
-            _this16.openUrlInTab(_url.pathname + _url.search, _title, _icon);
+            _this18.openUrlInTab(_url.pathname + _url.search, _title, _icon);
           }
         } catch (err) {}
       }, false); // Bubble phase ensures custom element click handlers fire first
     },
     setupFormInterceptor: function setupFormInterceptor() {
-      var _this17 = this;
+      var _this19 = this;
 
       document.addEventListener('submit', function (e) {
         // If form submission was already cancelled by client validation, do not intercept
@@ -24272,10 +24341,10 @@ window.workspaceMdi = function () {
           var params = new URLSearchParams(_formData);
           var targetUrl = _action.split('?')[0] + '?' + params.toString();
 
-          var normalizedTarget = _this17.normalizeUrl(targetUrl);
+          var normalizedTarget = _this19.normalizeUrl(targetUrl);
 
-          var _currentTab = _this17.tabs.find(function (t) {
-            return t.key === _this17.activeTabKey;
+          var _currentTab = _this19.tabs.find(function (t) {
+            return t.key === _this19.activeTabKey;
           });
 
           if (_currentTab) {
@@ -24283,11 +24352,11 @@ window.workspaceMdi = function () {
             var existingPane = document.getElementById('tab-pane-' + _currentTab.key);
             if (existingPane) existingPane.remove();
 
-            _this17.setTabLoading(_currentTab.key, true);
+            _this19.setTabLoading(_currentTab.key, true);
 
-            _this17.fetchAndMountTab(_currentTab);
+            _this19.fetchAndMountTab(_currentTab);
           } else {
-            _this17.openUrlInTab(normalizedTarget);
+            _this19.openUrlInTab(normalizedTarget);
           }
 
           return;
@@ -24314,9 +24383,9 @@ window.workspaceMdi = function () {
         }
 
         var formPane = form.closest('.workspace-tab-pane');
-        var currentTabKey = formPane ? formPane.getAttribute('data-tab-key') : _this17.activeTabKey;
+        var currentTabKey = formPane ? formPane.getAttribute('data-tab-key') : _this19.activeTabKey;
 
-        var currentTab = _this17.tabs.find(function (t) {
+        var currentTab = _this19.tabs.find(function (t) {
           return t.key === currentTabKey;
         }); // Capture submitter name/value (e.g. save_opt: 'save_new')
 
@@ -24334,8 +24403,9 @@ window.workspaceMdi = function () {
           submitter.innerHTML = "<span class=\"mdi-tab-loading-spinner\" style=\"width:13px;height:13px;border-width:2px;display:inline-block;vertical-align:middle;margin-right:6px;\"></span> Saving...";
         }
 
-        _this17.setTabLoading(currentTabKey, true);
+        _this19.setTabLoading(currentTabKey, true);
 
+        var requestLocale = _this19.titleLocale;
         fetch(action, {
           method: form.method || 'POST',
           body: formData,
@@ -24358,7 +24428,7 @@ window.workspaceMdi = function () {
                       }
                     }
 
-                    _this17.setTabLoading(currentTabKey, false);
+                    _this19.setTabLoading(currentTabKey, false);
 
                     finalUrl = response.url;
                     _context7.next = 5;
@@ -24396,11 +24466,11 @@ window.workspaceMdi = function () {
                     if (currentTab) {
                       currentTab.isDirty = false;
 
-                      _this17.closeTab(currentTab, null, false);
+                      _this19.closeTab(currentTab, null, false);
                     }
 
                     if (json.redirect || json.url) {
-                      _this17.openUrlInTab(json.redirect || json.url);
+                      _this19.openUrlInTab(json.redirect || json.url);
                     }
 
                     return _context7.abrupt("return");
@@ -24454,8 +24524,10 @@ window.workspaceMdi = function () {
                     return _context7.abrupt("return");
 
                   case 32:
-                    // Success indicators:
+                    _this19.updateTabTitleFromDoc(doc, _this19.generateKey(finalUrl), requestLocale); // Success indicators:
                     // 1. Flashed session success message in iziToast config or toastr
+
+
                     hasSuccessToast = /type:\s*['"]success['"][^}]+message:\s*["'][^"']+["']/i.test(responseText) || /toastr\.success\s*\(/i.test(responseText); // 2. Redirected to a listing URL
 
                     isRedirectedToList = finalUrl.includes('/list'); // Error indicators:
@@ -24472,7 +24544,7 @@ window.workspaceMdi = function () {
                     isValidationError = !response.ok || hasServerValidationErrors || hasErrorToast || isStillOnForm && !hasSuccessToast;
 
                     if (!isValidationError) {
-                      _context7.next = 55;
+                      _context7.next = 56;
                       break;
                     }
 
@@ -24480,14 +24552,14 @@ window.workspaceMdi = function () {
                     currentPane = document.getElementById('tab-pane-' + currentTabKey);
 
                     if (!currentPane) {
-                      _context7.next = 52;
+                      _context7.next = 53;
                       break;
                     }
 
                     newContent = doc.querySelector('#workspace-viewport .workspace-tab-pane') || doc.querySelector('#content');
 
                     if (!newContent) {
-                      _context7.next = 52;
+                      _context7.next = 53;
                       break;
                     }
 
@@ -24502,17 +24574,17 @@ window.workspaceMdi = function () {
                       currentPane.replaceChildren();
                     }
 
-                    _context7.next = 47;
-                    return _this17.executeScriptsFromDoc(doc, currentPane, function () {
+                    _context7.next = 48;
+                    return _this19.executeScriptsFromDoc(doc, currentPane, function () {
                       currentPane.innerHTML = newContent.innerHTML;
                       appendWorkspacePageStyles(doc, newContent, currentPane);
-                      setWorkspacePaneStyles(currentPane, _this17.activeTabKey === currentTabKey);
+                      setWorkspacePaneStyles(currentPane, _this19.activeTabKey === currentTabKey);
                       currentPane.querySelectorAll('script').forEach(function (script) {
                         return script.remove();
                       });
                     });
 
-                  case 47:
+                  case 48:
                     if (window.feather && typeof window.feather.replace === 'function') {
                       try {
                         window.feather.replace();
@@ -24555,7 +24627,7 @@ window.workspaceMdi = function () {
                       } catch (e) {}
                     }, 50);
 
-                  case 52:
+                  case 53:
                     if (window.iziToast) {
                       _title3 = window.workspaceTranslations && window.workspaceTranslations.warning || 'Warning';
                       firstErrorMsg = renderedFormErrors.length > 0 ? renderedFormErrors[0].textContent.trim() : null;
@@ -24566,10 +24638,10 @@ window.workspaceMdi = function () {
                       });
                     }
 
-                    _context7.next = 70;
+                    _context7.next = 71;
                     break;
 
-                  case 55:
+                  case 56:
                     // Success!
                     doc.querySelectorAll('script').forEach(function (sc) {
                       var text = sc.textContent || '';
@@ -24592,15 +24664,15 @@ window.workspaceMdi = function () {
 
 
                     if (!(submitter && submitter.value === 'save_new')) {
-                      _context7.next = 60;
+                      _context7.next = 61;
                       break;
                     }
 
-                    _this17.refreshTab(currentTabKey);
+                    _this19.refreshTab(currentTabKey);
 
                     return _context7.abrupt("return");
 
-                  case 60:
+                  case 61:
                     // Determine target list URL
                     _targetUrl = finalUrl;
                     modName = currentTabKey ? currentTabKey.replace(/^admin-/, '').replace(/-create$/, '').replace(/-edit.*$/, '') : '';
@@ -24609,7 +24681,7 @@ window.workspaceMdi = function () {
                       _targetUrl = "/admin/".concat(modName, "/list/1");
                     }
 
-                    targetPath = _this17.normalizeUrl(_targetUrl); // Broadcast resource saved so open tabs (like Order) can refresh select dropdowns
+                    targetPath = _this19.normalizeUrl(_targetUrl); // Broadcast resource saved so open tabs (like Order) can refresh select dropdowns
 
                     try {
                       window.dispatchEvent(new CustomEvent('workspace:resource-saved', {
@@ -24624,12 +24696,12 @@ window.workspaceMdi = function () {
                     if (currentTab) {
                       currentTab.isDirty = false;
 
-                      _this17.closeTab(currentTab, null, false);
+                      _this19.closeTab(currentTab, null, false);
                     } // Open or refresh the listing tab
 
 
-                    listKey = _this17.generateKey(targetPath);
-                    existingListTab = _this17.tabs.find(function (t) {
+                    listKey = _this19.generateKey(targetPath);
+                    existingListTab = _this19.tabs.find(function (t) {
                       return t.key === listKey;
                     });
 
@@ -24639,9 +24711,9 @@ window.workspaceMdi = function () {
                       if (listPane) listPane.remove();
                     }
 
-                    _this17.openUrlInTab(targetPath);
+                    _this19.openUrlInTab(targetPath);
 
-                  case 70:
+                  case 71:
                   case "end":
                     return _context7.stop();
                 }
@@ -24661,7 +24733,7 @@ window.workspaceMdi = function () {
             }
           }
 
-          _this17.setTabLoading(currentTabKey, false);
+          _this19.setTabLoading(currentTabKey, false);
 
           console.error('Form submission error:', err);
 
@@ -24717,11 +24789,11 @@ window.workspaceMdi = function () {
       return false;
     },
     markTabDirty: function markTabDirty() {
-      var _this18 = this;
+      var _this20 = this;
 
       var isDirty = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
       var current = this.tabs.find(function (t) {
-        return t.key === _this18.activeTabKey;
+        return t.key === _this20.activeTabKey;
       });
 
       if (current) {
@@ -24736,7 +24808,7 @@ window.workspaceMdi = function () {
       }
     },
     setupDirtyTracking: function setupDirtyTracking() {
-      var _this19 = this;
+      var _this21 = this;
 
       var contentArea = document.getElementById('content');
 
@@ -24763,18 +24835,18 @@ window.workspaceMdi = function () {
           } // 2. Active tab must be a form tab (listing pages are NEVER dirty)
 
 
-          var currentTab = _this19.tabs.find(function (t) {
-            return t.key === _this19.activeTabKey;
+          var currentTab = _this21.tabs.find(function (t) {
+            return t.key === _this21.activeTabKey;
           });
 
-          if (!currentTab || !_this19.isFormTab(currentTab)) {
+          if (!currentTab || !_this21.isFormTab(currentTab)) {
             return;
           } // 3. The input must belong to the active tab's pane
 
 
           var pane = target.closest('.workspace-tab-pane');
 
-          if (pane && pane.id !== 'tab-pane-' + _this19.activeTabKey) {
+          if (pane && pane.id !== 'tab-pane-' + _this21.activeTabKey) {
             return;
           } // 4. Must be inside a data form or booking-pos-workspace
 
@@ -24785,7 +24857,7 @@ window.workspaceMdi = function () {
             return;
           }
 
-          _this19.markTabDirty(true);
+          _this21.markTabDirty(true);
         };
 
         contentArea.addEventListener('input', handleDirtyInput, true);
@@ -24797,19 +24869,19 @@ window.workspaceMdi = function () {
             if (!target) return;
             if (target.closest('.InputContainer, .filter, #FilterForm, .filter-form')) return;
 
-            var currentTab = _this19.tabs.find(function (t) {
-              return t.key === _this19.activeTabKey;
+            var currentTab = _this21.tabs.find(function (t) {
+              return t.key === _this21.activeTabKey;
             });
 
-            if (currentTab && _this19.isFormTab(currentTab)) {
-              _this19.markTabDirty(true);
+            if (currentTab && _this21.isFormTab(currentTab)) {
+              _this21.markTabDirty(true);
             }
           });
         }
       }
     },
     setupKeyboardShortcuts: function setupKeyboardShortcuts() {
-      var _this20 = this;
+      var _this22 = this;
 
       document.addEventListener('keydown', /*#__PURE__*/function () {
         var _ref3 = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee8(e) {
@@ -24823,8 +24895,8 @@ window.workspaceMdi = function () {
                     break;
                   }
 
-                  activeTab = _this20.tabs.find(function (t) {
-                    return t.key === _this20.activeTabKey;
+                  activeTab = _this22.tabs.find(function (t) {
+                    return t.key === _this22.activeTabKey;
                   });
 
                   if (!(activeTab && !activeTab.isPinned)) {
@@ -24834,20 +24906,20 @@ window.workspaceMdi = function () {
 
                   e.preventDefault();
                   _context8.next = 6;
-                  return _this20.closeTab(activeTab, e);
+                  return _this22.closeTab(activeTab, e);
 
                 case 6:
                   // Ctrl+Tab to cycle tabs forward
                   if (e.ctrlKey && e.key === 'Tab') {
                     e.preventDefault();
-                    currentIndex = _this20.tabs.findIndex(function (t) {
-                      return t.key === _this20.activeTabKey;
+                    currentIndex = _this22.tabs.findIndex(function (t) {
+                      return t.key === _this22.activeTabKey;
                     });
 
                     if (currentIndex >= 0) {
-                      nextIndex = e.shiftKey ? (currentIndex - 1 + _this20.tabs.length) % _this20.tabs.length : (currentIndex + 1) % _this20.tabs.length;
+                      nextIndex = e.shiftKey ? (currentIndex - 1 + _this22.tabs.length) % _this22.tabs.length : (currentIndex + 1) % _this22.tabs.length;
 
-                      _this20.switchTab(_this20.tabs[nextIndex]);
+                      _this22.switchTab(_this22.tabs[nextIndex]);
                     }
                   } // Ctrl+PageUp / Ctrl+PageDown to navigate tabs
 
@@ -24856,9 +24928,9 @@ window.workspaceMdi = function () {
                     e.preventDefault();
 
                     if (e.key === 'PageUp') {
-                      _this20.goToPreviousTab();
+                      _this22.goToPreviousTab();
                     } else {
-                      _this20.goToNextTab();
+                      _this22.goToNextTab();
                     }
                   } // Ctrl+1 through Ctrl+9
 
@@ -24866,10 +24938,10 @@ window.workspaceMdi = function () {
                   if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key >= '1' && e.key <= '9') {
                     targetIndex = parseInt(e.key) - 1;
 
-                    if (targetIndex < _this20.tabs.length) {
+                    if (targetIndex < _this22.tabs.length) {
                       e.preventDefault();
 
-                      _this20.switchTab(_this20.tabs[targetIndex]);
+                      _this22.switchTab(_this22.tabs[targetIndex]);
                     }
                   }
 

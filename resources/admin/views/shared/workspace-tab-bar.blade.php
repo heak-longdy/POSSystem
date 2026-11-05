@@ -19,7 +19,7 @@
         reload: @json(__('global.workspace.reload') ?? 'Reload Tab'),
         closeOthers: @json(__('global.workspace.close_others') ?? 'Close Other Tabs'),
         closeToRight: @json(__('global.workspace.close_to_right') ?? 'Close Tabs to Right'),
-        dashboard: @json(__('dashboard.title') ?? __('dashboard.dashboard') ?? 'Dashboard'),
+        dashboard: @json(__('dashboard.title')),
         savedSuccessfully: @json(__('global.message.save_success') ?? __('global.workspace.saved_successfully') ?? 'Saved successfully!'),
         checkRequiredFields: @json(__('global.workspace.check_required_fields') ?? 'Please check the required fields.'),
         submitError: @json(__('global.workspace.submit_error') ?? 'Could not submit form. Please try again.'),
@@ -51,7 +51,10 @@
     };
 </script>
 
-<div id="workspace-tab-bar" class="mdi-workspace-tabs-container" x-data="workspaceMdi()" x-cloak>
+<div id="workspace-tab-bar" class="mdi-workspace-tabs-container" x-data="workspaceMdi()" x-cloak
+     data-locale="{{ app()->getLocale() }}"
+     data-dashboard-title="{{ __('dashboard.title') }}"
+     data-loading-title="{{ __('loading.loading') }}">
     <!-- Scrollable Tab List Wrapper with Left/Right Nav Buttons (YouTube Style) -->
     <div class="mdi-tabs-carousel-wrapper">
         <!-- Previous Button (<) on Left -->

@@ -48,10 +48,10 @@
                                         @php
                                             $imageUrl = data_get($item, $header['field']);
                                         @endphp
-                                        <div class="thumbnail {!! isset($header['rowClass']) ? $header['rowClass'] : '' !!}" data-fancybox data-src="{!! $imageUrl !!}">
+                                        <div class="product-image-wrapper thumbnail {!! isset($header['rowClass']) ? $header['rowClass'] : '' !!}" data-fancybox data-src="{!! $imageUrl !!}">
                                             <img src="{!! $imageUrl !!}"
                                                 onerror="(this).src='{{ asset('images/logo/default.png') }}'"
-                                                alt="">
+                                                alt="" class="product-image-background">
                                         </div>
                                     @elseif($header['field'] === 'order_items_title')
                                         <div class="order-items-column-wrapper">{!! data_get($item, $header['field']) ?? '---' !!}</div>
