@@ -12,6 +12,118 @@
         .consolidated-product-report .filter-date-input .bx-calendar { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 18px; color: #64748b; pointer-events: none; }
         #ui-datepicker-div.consolidated-product-datepicker { z-index: 9999 !important; }
 
+        .consolidated-product-report .filter-form-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .consolidated-product-report .filter-form-grid > .filter-field-wrap {
+            flex: 1 1 160px;
+            min-width: 0;
+        }
+
+        .consolidated-product-report .filter-actions-wrap {
+            display: flex;
+            flex: 0 1 auto;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            height: auto;
+            min-height: 43px;
+            max-width: 100%;
+        }
+
+        .consolidated-product-report .filter-actions-wrap > .btn-filter-search,
+        .consolidated-product-report .filter-actions-wrap > .btn-filter-reset {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .consolidated-product-report .btn-filter-search {
+            height: 43px !important;
+            padding: 0 16px !important;
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 7px !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            box-shadow: none !important;
+            transform: none !important;
+            transition: background 0.15s ease !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
+        }
+
+        .consolidated-product-report .btn-filter-search:hover {
+            background: #1d4ed8 !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .consolidated-product-report .btn-filter-search:active {
+            background: #1e40af !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .consolidated-product-report .btn-filter-search .bx {
+            font-size: 18px !important;
+            margin: 0 !important;
+            line-height: 1 !important;
+        }
+
+        .consolidated-product-report .btn-filter-reset {
+            height: 43px !important;
+            padding: 0 14px !important;
+            background: #f1f5f9 !important;
+            color: #475569 !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 7px !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            box-shadow: none !important;
+            transform: none !important;
+            transition: all 0.15s ease !important;
+            line-height: 1 !important;
+            white-space: nowrap !important;
+        }
+
+        .consolidated-product-report .btn-filter-reset:hover {
+            background: #e2e8f0 !important;
+            color: #0f172a !important;
+            border-color: #cbd5e1 !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .consolidated-product-report .btn-filter-reset:active {
+            background: #cbd5e1 !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .consolidated-product-report .btn-filter-reset .bx {
+            font-size: 18px !important;
+            margin: 0 !important;
+            line-height: 1 !important;
+        }
+
         /* Detail Modal */
         .report-modal-backdrop {
             position: fixed;
@@ -209,8 +321,8 @@
                             <input type="text" :id="$id('cpq-search')" class="filter-input" name="search" value="{{ $filters['search'] }}" placeholder="{{ __('consolidated_product_quantity.search_placeholder') }}">
                         </div>
                         <div class="filter-actions-wrap">
-                            <button class="btn btn-filter-search" type="submit"><i class="bx bx-search"></i><span>{{ __('sales_report.button.filter') }}</span></button>
-                            <a class="btn btn-filter-reset" href="{{ route('admin-' . $routeName . '-index') }}"><i class="bx bx-reset"></i><span>{{ __('customer_remaining_report.reset') }}</span></a>
+                            <button type="submit" class="btn-filter-search"><i class="bx bx-search"></i><span>{{ __('sales_report.button.filter') }}</span></button>
+                            <a href="{{ route('admin-' . $routeName . '-index') }}" class="btn-filter-reset"><i class="bx bx-reset"></i><span>{{ __('sales_report.button.reset') }}</span></a>
                         </div>
                     </div>
                 </form>

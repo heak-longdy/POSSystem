@@ -754,7 +754,7 @@
 
                         <div class="filter-actions-wrap">
                             <button type="submit" class="btn-filter-search">
-                                <i class='bx bx-filter-alt'></i>
+                                <i class='bx bx-search'></i>
                                 <span>{{ __('staff_expense_report.button.filter') }}</span>
                             </button>
                             <a href="{{ route($viewMode === 'daily' ? 'admin-report-staff-expense-daily' : 'admin-report-staff-expense-monthly', ['grouping' => $grouping]) }}"
