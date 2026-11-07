@@ -47,12 +47,27 @@
                                     @elseif($header['field'] === 'image_url')
                                         @php
                                             $imageUrl = data_get($item, $header['field']);
+                                            $defaultImg = asset('images/logo/default.png');
+                                            $displayImg = !empty($imageUrl) ? $imageUrl : $defaultImg;
+                                            $isThumbnailIcon = isset($header['rowClass']) && str_contains($header['rowClass'], 'thumbnailIcon');
+                                            $hasRealImage = !empty($imageUrl);
                                         @endphp
-                                        <div class="product-image-wrapper thumbnail {!! isset($header['rowClass']) ? $header['rowClass'] : '' !!}" data-fancybox data-src="{!! $imageUrl !!}">
-                                            <img src="{!! $imageUrl !!}"
-                                                onerror="(this).src='{{ asset('images/logo/default.png') }}'"
-                                                alt="" class="product-image-background">
-                                        </div>
+                                        @if ($isThumbnailIcon)
+                                            <div class="thumbnail {!! $header['rowClass'] !!}" data-fancybox data-src="{!! $imageUrl ?: $defaultImg !!}">
+                                                <img src="{!! $displayImg !!}"
+                                                    onerror="this.onerror=null;this.src='{{ $defaultImg }}';"
+                                                    alt="">
+                                            </div>
+                                        @else
+                                            <div class="thumbnail {!! isset($header['rowClass']) ? $header['rowClass'] : '' !!}" data-fancybox data-src="{!! $imageUrl ?: $defaultImg !!}">
+                                                <div class="product-image-wrapper" {!! $hasRealImage ? 'data-detect-bg="1"' : '' !!}>
+                                                    <img src="{!! $displayImg !!}"
+                                                        onerror="this.onerror=null;this.src='{{ $defaultImg }}';this.closest('.product-image-wrapper').removeAttribute('data-detect-bg');"
+                                                        alt="" class="product-image-main"
+                                                        {!! $hasRealImage ? 'crossorigin="anonymous"' : '' !!}>
+                                                </div>
+                                            </div>
+                                        @endif
                                     @elseif($header['field'] === 'order_items_title')
                                         <div class="order-items-column-wrapper">{!! data_get($item, $header['field']) ?? '---' !!}</div>
                                     @elseif($header['field'] != 'action')

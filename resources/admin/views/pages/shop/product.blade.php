@@ -81,9 +81,19 @@
                                         <span>{!! $products->currentPage() * $products->perPage() - $products->perPage() + ($index + 1) !!}</span>
                                     </div>
                                     <div class="row table-row-10 text left">
-                                        <div class="thumbnail" data-fancybox data-src="{!! $item->product?->image_url !!}">
-                                            <img src="{!! $item->product?->image_url !!}"
-                                                onerror="this.src='{{ asset('images/logo/default.png') }}'" alt="">
+                                        @php
+                                            $shopProductImg = $item->product?->image_url;
+                                            $defaultImg = asset('images/logo/default.png');
+                                            $shopProductDisplay = !empty($shopProductImg) ? $shopProductImg : $defaultImg;
+                                            $hasRealImage = !empty($shopProductImg);
+                                        @endphp
+                                        <div class="thumbnail" data-fancybox data-src="{!! $shopProductImg ?: $defaultImg !!}">
+                                            <div class="product-image-wrapper" {!! $hasRealImage ? 'data-detect-bg="1"' : '' !!}>
+                                                <img src="{!! $shopProductDisplay !!}"
+                                                    onerror="this.onerror=null;this.src='{{ $defaultImg }}';this.closest('.product-image-wrapper').removeAttribute('data-detect-bg');"
+                                                    alt="" class="product-image-main"
+                                                    {!! $hasRealImage ? 'crossorigin="anonymous"' : '' !!}>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row table-row-12 text left">

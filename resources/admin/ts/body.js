@@ -75,3 +75,4 @@ el?.addEventListener("click", function () {
 });
 
 require("./package/sliderBar");
+require("./package/product-image-bg");
