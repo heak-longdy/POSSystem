@@ -887,10 +887,15 @@
         </div>
 
         @if(!$metrics['is_local_machine'])
-            <div style="margin-top: 10px; padding: 8px 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; font-size: 11.5px; color: #64748b; display: flex; align-items: center; gap: 8px;">
-                <i class='bx bx-info-circle' style="font-size: 16px; color: #3b82f6; flex-shrink: 0;"></i>
-                <span>
-                    <strong>Host Infrastructure:</strong> Storage metrics reflect the physical RAID volume of server node <code>{{ $metrics['host_name'] }}</code>. Your hosting plan software limit (e.g. 50 GB) is managed in your Hostinger control panel.
+            <div style="margin-top: 10px; padding: 10px 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 12px; color: #166534; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class='bx bx-check-shield' style="font-size: 18px; color: #16a34a; flex-shrink: 0;"></i>
+                    <span>
+                        <strong>Hosting Plan Storage:</strong> Dynamically calibrated to your <strong>{{ $metrics['disk_total_formatted'] }}</strong> hosting plan limit on server <code>{{ $metrics['host_name'] }}</code>. Measuring actual storage consumed by your POS application files and database.
+                    </span>
+                </div>
+                <span style="font-weight: 600; color: #15803d; font-size: 11.5px;">
+                    {{ $metrics['disk_free_formatted'] }} Remaining
                 </span>
             </div>
         @endif
@@ -1279,6 +1284,13 @@
                             <small>{{ __('backup.settings.retention_hint') }}</small>
                         </div>
 
+                        {{-- Hosting Plan Storage Quota --}}
+                        <div class="form-field">
+                            <label>Hosting Plan Storage Quota (GB)</label>
+                            <input type="number" x-model.number="config.disk_quota_gb" min="1" max="50000" placeholder="50">
+                            <small>Storage limit of your hosting plan (e.g. 50 GB for Hostinger). Default: 50 GB.</small>
+                        </div>
+
                         {{-- Toggles --}}
                         <div class="form-group-full" style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
                             <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: #334155; cursor: pointer;">
@@ -1441,6 +1453,7 @@
                 s3_use_path_style: @json((bool)$setting->s3_use_path_style),
                 auto_upload_cloud: @json((bool)$setting->auto_upload_cloud),
                 max_local_backups: @json($setting->max_local_backups ?? 15),
+                disk_quota_gb: @json($setting->disk_quota_gb ?? 50),
             },
             showSecretKey: false,
             testingConnection: false,

@@ -390,39 +390,38 @@ class BackupManager
 
         // Dynamic Filesystem Storage Check on the current machine/server
         $diskPath = base_path();
-        $totalDiskBytes = @disk_total_space($diskPath);
-        $freeDiskBytes  = @disk_free_space($diskPath);
+        $physicalTotalBytes = (int) @disk_total_space($diskPath);
+        $physicalFreeBytes  = (int) @disk_free_space($diskPath);
 
-        // Auto-detect Linux user quota if available on shared hosting
-        if ($osFamily === 'Linux') {
-            try {
-                $quotaOutput = @shell_exec('quota -u $(whoami) -w 2>/dev/null');
-                if ($quotaOutput && preg_match('/^\s*\S+\s+(\d+)\s+(\d+)\s+(\d+)/m', $quotaOutput, $qm)) {
-                    $quotaLimitKb = (int) ($qm[2] ?: $qm[3]);
-                    $quotaUsedKb  = (int) $qm[1];
-                    if ($quotaLimitKb > 0) {
-                        $totalDiskBytes = $quotaLimitKb * 1024;
-                        $freeDiskBytes  = max(0, ($quotaLimitKb - $quotaUsedKb) * 1024);
-                    }
-                }
-            } catch (\Throwable $e) {}
+        if ($isLocal) {
+            // ==========================================
+            // 1. LOCAL MACHINE (Mac / Windows Dev PC)
+            // ==========================================
+            // Measure developer machine physical hard drive
+            $totalDiskBytes = $physicalTotalBytes ?: (500 * 1024 * 1024 * 1024);
+            $freeDiskBytes  = $physicalFreeBytes ?: 0;
+            $usedDiskBytes  = max(0, $totalDiskBytes - $freeDiskBytes);
+            $otherDiskBytes = max(0, $usedDiskBytes - ($dbSize + $uploadsSize + $totalBackupBytes));
+        } else {
+            // ==========================================
+            // 2. SERVER (Hostinger / VPS / Cloud)
+            // ==========================================
+            // Resolve hosting plan quota limit (e.g. 50 GB)
+            $totalDiskBytes = $this->resolveServerQuotaBytes($hostName, $physicalTotalBytes);
+
+            // Measure actual project files on the hosting account
+            $projectFilesBytes = $this->getProjectFilesSize();
+            $usedDiskBytes  = $projectFilesBytes + $dbSize;
+            $freeDiskBytes  = max(0, $totalDiskBytes - $usedDiskBytes);
+            $otherDiskBytes = max(0, $projectFilesBytes - ($uploadsSize + $totalBackupBytes));
         }
 
-        if ($totalDiskBytes === false || $totalDiskBytes <= 0) {
-            $totalDiskBytes = 0;
-        }
-        if ($freeDiskBytes === false || $freeDiskBytes <= 0) {
-            $freeDiskBytes = 0;
-        }
-
-        $usedDiskBytes  = max(0, $totalDiskBytes - $freeDiskBytes);
         $usedPercentage = $totalDiskBytes > 0 ? round(($usedDiskBytes / $totalDiskBytes) * 100, 1) : 0;
         $freePercentage = $totalDiskBytes > 0 ? round(($freeDiskBytes / $totalDiskBytes) * 100, 1) : 0;
 
         $dbPercent      = $totalDiskBytes > 0 ? round(($dbSize / $totalDiskBytes) * 100, 2) : 0;
         $uploadsPercent = $totalDiskBytes > 0 ? round(($uploadsSize / $totalDiskBytes) * 100, 2) : 0;
         $backupsPercent = $totalDiskBytes > 0 ? round(($totalBackupBytes / $totalDiskBytes) * 100, 2) : 0;
-        $otherDiskBytes = max(0, $usedDiskBytes - ($dbSize + $uploadsSize + $totalBackupBytes));
         $otherPercent   = $totalDiskBytes > 0 ? round(($otherDiskBytes / $totalDiskBytes) * 100, 2) : 0;
 
         $diskStatus = 'healthy';
@@ -465,6 +464,71 @@ class BackupManager
             'disk_other_percent'    => $otherPercent,
             'disk_status'           => $diskStatus,
         ];
+    }
+
+    /**
+     * Resolve the hosting plan storage quota in bytes.
+     */
+    protected function resolveServerQuotaBytes(string $hostName, int $physicalTotalBytes): int
+    {
+        // 1. Check environment variable HOSTING_DISK_QUOTA_GB or DISK_QUOTA_GB
+        $envQuota = env('HOSTING_DISK_QUOTA_GB') ?: env('DISK_QUOTA_GB');
+        if (!empty($envQuota) && is_numeric($envQuota) && (int)$envQuota > 0) {
+            return (int)$envQuota * 1024 * 1024 * 1024;
+        }
+
+        // 2. Check BackupSetting database configuration
+        try {
+            $setting = BackupSetting::getActive();
+            if (!empty($setting->disk_quota_gb) && (int)$setting->disk_quota_gb > 0) {
+                return (int)$setting->disk_quota_gb * 1024 * 1024 * 1024;
+            }
+        } catch (\Throwable $e) {}
+
+        // 3. If on Hostinger shared node (e.g. main-hosting.eu, web1415, server1415) or large multi-tenant RAID pool (> 1 TB)
+        // Standard Hostinger hosting plan quota is 50 GB
+        $isHostingerOrShared = str_contains(strtolower($hostName), 'hosting')
+            || str_contains(strtolower($hostName), 'hostinger')
+            || str_contains(strtolower($hostName), 'web')
+            || str_contains(strtolower($hostName), 'server')
+            || ($physicalTotalBytes > 1099511627776); // > 1 TB RAID partition
+
+        if ($isHostingerOrShared) {
+            return 50 * 1024 * 1024 * 1024; // 50 GB
+        }
+
+        // 4. If VPS with normal partition (e.g. 20GB, 40GB, 80GB), use actual server disk
+        return ($physicalTotalBytes > 0 && $physicalTotalBytes < 1099511627776)
+            ? $physicalTotalBytes
+            : (50 * 1024 * 1024 * 1024);
+    }
+
+    /**
+     * Calculate actual disk size of project files using pure PHP (no shell_exec).
+     */
+    protected function getProjectFilesSize(): int
+    {
+        return \Illuminate\Support\Facades\Cache::remember('backup_project_files_size', 600, function () {
+            $size = 0;
+            $dirs = ['vendor', 'app', 'public', 'resources', 'storage', 'config', 'database', 'routes', 'lang'];
+            foreach ($dirs as $dir) {
+                $path = base_path($dir);
+                if (is_dir($path)) {
+                    try {
+                        $it = new \RecursiveIteratorIterator(
+                            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+                            \RecursiveIteratorIterator::LEAVES_ONLY
+                        );
+                        foreach ($it as $file) {
+                            if ($file->isFile()) {
+                                $size += $file->getSize();
+                            }
+                        }
+                    } catch (\Throwable $e) {}
+                }
+            }
+            return $size ?: (200 * 1024 * 1024);
+        });
     }
 
     public function formatSize(int $bytes): string
