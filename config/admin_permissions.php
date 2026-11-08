@@ -26,8 +26,10 @@ return [
         'stock-out' => 'Stock Out',
         'stock-transfer' => 'Stock Transfer',
         'order' => 'Order',
+        'backup' => 'Backup & Restore',
     ],
     'extra_actions' => [
+        'backup' => ['restore', 'download'],
         'product' => ['excel'],
         'shop' => ['product'],
         'customer-paid' => ['excel'],

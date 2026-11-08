@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\InvoiceSettingController;
+use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\CustomerPaidController;
@@ -346,6 +347,24 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::post('/invoice/save', [InvoiceSettingController::class, 'save'])->name('invoice-save');
             Route::post('/invoice/preview', [InvoiceSettingController::class, 'preview'])->name('invoice-preview');
         });
+
+        // Backup & Restore
+        Route::prefix('backup')
+            ->name('backup-')
+            ->group(function () {
+                Route::get('/', [BackupController::class, 'index'])->name('index');
+                Route::post('/create', [BackupController::class, 'create'])->name('create');
+                Route::get('/download/{id}', [BackupController::class, 'download'])->name('download');
+                Route::get('/download-cloud', [BackupController::class, 'downloadCloud'])->name('download-cloud');
+                Route::post('/upload-cloud/{id}', [BackupController::class, 'uploadToCloud'])->name('upload-cloud');
+                Route::post('/restore-upload', [BackupController::class, 'restoreFromUpload'])->name('restore-upload');
+                Route::post('/restore-local/{id}', [BackupController::class, 'restoreFromLocal'])->name('restore-local');
+                Route::post('/restore-cloud', [BackupController::class, 'restoreFromCloud'])->name('restore-cloud');
+                Route::delete('/delete/{id}', [BackupController::class, 'delete'])->name('delete');
+                Route::delete('/delete-cloud', [BackupController::class, 'deleteCloud'])->name('delete-cloud');
+                Route::post('/settings', [BackupController::class, 'saveSettings'])->name('save-settings');
+                Route::post('/test-cloud', [BackupController::class, 'testCloudConnection'])->name('test-cloud');
+            });
 
         //File Manager
         Route::prefix('file-manager')

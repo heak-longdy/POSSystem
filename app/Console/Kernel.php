@@ -16,11 +16,23 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\ApplyJob::class,
         Commands\DeleteFormQueue::class,
+        Commands\RunSystemBackup::class,
     ];
     protected function schedule(Schedule $schedule)
     {
        $schedule->command('applyJob:add');
        $schedule->command('deleteFormQueue:add')->daily();
+
+       // Automated System Backup
+       $schedule->command('backup:run')
+           ->dailyAt('02:00')
+           ->when(function () {
+               try {
+                   return (bool) \App\Models\BackupSetting::getActive()->auto_backup_enabled;
+               } catch (\Throwable $e) {
+                   return false;
+               }
+           });
     }
 
     /**

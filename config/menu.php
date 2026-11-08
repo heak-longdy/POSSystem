@@ -303,8 +303,8 @@ return [
                 'dropDown' => 'disable',
             ],
             [
-                'active' => 'admin/about/privacy,admin/about/privacy/*,admin/aboutUs,admin/aboutUs/*,admin/uom/*,admin/category/*,admin/supplier/*,admin/setting/invoice,admin/setting/invoice/*,admin/position/*,admin/other-income-category,admin/other-income-category/*',
-                'permission' => ['about-view', 'uom-view'],
+                'active' => 'admin/about/privacy,admin/about/privacy/*,admin/aboutUs,admin/aboutUs/*,admin/uom/*,admin/category/*,admin/supplier/*,admin/setting/invoice,admin/setting/invoice/*,admin/backup,admin/backup/*,admin/position/*,admin/other-income-category,admin/other-income-category/*',
+                'permission' => ['about-view', 'uom-view', 'backup-view'],
                 'name' => [
                     'en' => 'Setting',
                     'km' => 'ការកំណត់',
@@ -370,6 +370,16 @@ return [
                             'km' => 'ការកំណត់វិក្កយបត្រ',
                         ],
                         'icon' => 'bx-receipt',
+                    ],
+                    [
+                        'active' => 'admin/backup,admin/backup/*',
+                        'path' => 'admin/backup',
+                        'permission' => 'backup-view',
+                        'name' => [
+                            'en' => 'Backup & Restore',
+                            'km' => 'បម្រុងទុក និងស្តារទិន្នន័យ',
+                        ],
+                        'icon' => 'bx-data',
                     ]
                 ],
             ],

@@ -76,6 +76,24 @@ class AdminPermissions
         if (in_array($name, ['admin-setting-invoice-save', 'admin-setting-invoice-preview', 'setting-invoice-save'])) {
             return ['setting-invoice-update'];
         }
+        if (str_starts_with($name ?? '', 'admin-backup-')) {
+            $action = substr($name, strlen('admin-backup-'));
+            $actions = [
+                'index' => 'view',
+                'create' => 'create',
+                'download' => 'download',
+                'download-cloud' => 'download',
+                'upload-cloud' => 'create',
+                'restore-upload' => 'restore',
+                'restore-local' => 'restore',
+                'restore-cloud' => 'restore',
+                'delete' => 'delete',
+                'delete-cloud' => 'delete',
+                'save-settings' => 'update',
+                'test-cloud' => 'view',
+            ];
+            return ['backup-' . ($actions[$action] ?? 'view')];
+        }
         if (str_starts_with($name ?? '', 'admin-select-')) {
             $modules = config('admin_permissions.lookups.' . substr($name, strlen('admin-select-')), []);
             return collect($modules)->flatMap(fn ($module) => [
