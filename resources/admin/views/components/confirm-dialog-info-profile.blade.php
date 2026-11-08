@@ -1838,7 +1838,7 @@
                         </g>
                     </g>
                 </svg> --}}
-                <img src="{{asset('admin-public/logo/emptyData.png')}}" />
+                <img src="{{asset('admin-public/logo/emptyData.webp')}}" />
             </div>
             <div class="bottom">
                 <div class="content">

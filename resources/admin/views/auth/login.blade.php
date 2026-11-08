@@ -187,7 +187,7 @@
     <div class="login-container">
         <div class="login-box">
             <div class="logo">
-                <img src="{{ asset('admin-public/logo/login-bg.svg') }}" alt="System Logo">
+                <img src="{{ asset('admin-public/logo/login-bg.svg') }}" alt="System Logo" width="750" height="750" fetchpriority="high">
             </div>
             <div class="login-left">
                 <h2>Welcome to sign in system</h2>

@@ -1,7 +1,7 @@
 <div class="data-empty-container" style="{{ isset($style) ? $style : '' }};">
     <div class="data-empty-wrapper">
         <div class="image">
-            <img src="{!! $image ?? asset('images/logo/emptyData.png') !!}" alt="">
+            <img src="{!! $image ?? asset('images/logo/emptyData.webp') !!}" alt="">
         </div>
         <div class="message">
             <span class="title">{!! $name !!}</span>
