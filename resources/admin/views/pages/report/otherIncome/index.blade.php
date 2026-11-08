@@ -637,7 +637,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 60px;">#</th>
-                                    <th>{{ __('other_income_report.table.income_number') }}</th>
                                     <th>{{ __('other_income_report.table.date') }}</th>
                                     <th>{{ __('other_income_report.table.title') }}</th>
                                     <th>{{ __('other_income_report.table.category') }}</th>
@@ -649,7 +648,6 @@
                                 @forelse ($ungroupedRows as $index => $item)
                                     <tr>
                                         <td>{{ $ungroupedRows->firstItem() + $index }}</td>
-                                        <td><code>{{ $item->income_number }}</code></td>
                                         <td>{{ $item->income_date_formatted }}</td>
                                         <td><strong>{{ $item->title }}</strong></td>
                                         <td>{{ $item->category_name }}</td>
@@ -704,7 +702,6 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th style="width: 50px;">#</th>
-                                            <th>{{ __('other_income_report.table.income_number') }}</th>
                                             <th>{{ __('other_income_report.table.title') }}</th>
                                             <th>{{ __('other_income_report.table.category') }}</th>
                                             <th>{{ __('other_income_report.table.supplier') }}</th>
@@ -715,7 +712,6 @@
                                         <template x-for="(row, idx) in detailsData.incomes" :key="row.id">
                                             <tr>
                                                 <td x-text="idx + 1"></td>
-                                                <td><code x-text="row.income_number"></code></td>
                                                 <td x-text="row.title"></td>
                                                 <td x-text="row.category_name"></td>
                                                 <td x-text="row.supplier_name"></td>
@@ -941,7 +937,6 @@
                         } else {
                             worksheet.columns = [
                                 { header: @json(__('other_income_report.table.no')), key: 'index', width: 8 },
-                                { header: @json(__('other_income_report.table.income_number')), key: 'income_number', width: 18 },
                                 { header: @json(__('other_income_report.table.date')), key: 'income_date', width: 14 },
                                 { header: @json(__('other_income_report.table.title')), key: 'title', width: 30 },
                                 { header: @json(__('other_income_report.table.category')), key: 'category_name', width: 22 },
@@ -953,7 +948,6 @@
                             rows.forEach((r, idx) => {
                                 worksheet.addRow({
                                     index: idx + 1,
-                                    income_number: r.income_number || '',
                                     income_date: r.income_date || '',
                                     title: r.title || '',
                                     category_name: r.category_name || '---',

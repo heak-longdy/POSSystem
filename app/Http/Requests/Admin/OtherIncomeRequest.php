@@ -18,7 +18,7 @@ class OtherIncomeRequest extends FormRequest
             'category_id'              => 'required|exists:other_income_categories,id',
             'supplier_id'              => 'nullable|exists:suppliers,id',
             'shop_id'                  => 'nullable|exists:shops,id',
-            'title'                    => 'required|string|max:255',
+            'title'                    => 'nullable|string|max:255',
             'income_date'              => 'required|date',
             'received_amount'          => 'required|numeric|min:' . ($this->route('id') ? '0' : '0.01'),
             'reference_no'             => 'nullable|string|max:100',
@@ -39,7 +39,6 @@ class OtherIncomeRequest extends FormRequest
         return [
             'category_id.required'     => __('other_income.validation.category_id_required'),
             'category_id.exists'       => __('other_income.validation.category_id_required'),
-            'title.required'           => __('other_income.validation.title_required'),
             'income_date.required'     => __('other_income.validation.income_date_required'),
             'received_amount.required' => __('other_income.validation.received_amount_required'),
             'received_amount.numeric'  => __('other_income.validation.received_amount_numeric'),

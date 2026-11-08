@@ -11,7 +11,6 @@ use App\Models\OtherIncomePayment;
 use App\Models\Shop;
 use App\Models\Supplier;
 use App\Services\OtherIncomeService;
-use App\Services\SupplierBonusCalculator;
 use App\Services\Tools;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,16 +23,13 @@ class OtherIncomeController extends Controller
     private $routeName = "other-income";
 
     protected $incomeService;
-    protected $bonusCalculator;
 
     public function __construct(
         Tools $tools,
-        OtherIncomeService $incomeService,
-        SupplierBonusCalculator $bonusCalculator
+        OtherIncomeService $incomeService
     ) {
         $this->tools = $tools;
         $this->incomeService = $incomeService;
-        $this->bonusCalculator = $bonusCalculator;
     }
 
     /**
@@ -95,7 +91,6 @@ class OtherIncomeController extends Controller
         $data['categories'] = OtherIncomeCategory::where('status', 1)->orderBy('ordering')->get();
         $data['suppliers']  = Supplier::where('status', 1)->orderBy('name')->get();
         $data['shops']      = Shop::where('status', 1)->orderBy('name')->get();
-        $data['quarters']   = $this->getAvailableQuarters();
         $data['selectedSupplier'] = $req->filled('supplier_id') ? Supplier::find($req->supplier_id) : null;
 
         return view($this->layout . 'store', $data);
@@ -117,7 +112,6 @@ class OtherIncomeController extends Controller
         $data['categories'] = OtherIncomeCategory::where('status', 1)->orderBy('ordering')->get();
         $data['suppliers']  = Supplier::where('status', 1)->orderBy('name')->get();
         $data['shops']      = Shop::where('status', 1)->orderBy('name')->get();
-        $data['quarters']   = $this->getAvailableQuarters();
         $data['selectedSupplier'] = $income->supplier;
 
         return view($this->layout . 'store', $data);
@@ -185,48 +179,6 @@ class OtherIncomeController extends Controller
     }
 
     /**
-     * AJAX Supplier Purchases Aggregator & Bonus Calculator
-     */
-    public function calculatePurchases(Request $req)
-    {
-        $supplierId = (int) $req->get('supplier_id');
-        if (!$supplierId) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Please select a supplier.',
-            ], 422);
-        }
-
-        $period = $this->bonusCalculator->resolvePeriod(
-            $req->get('quarter'),
-            $req->get('from_date'),
-            $req->get('to_date')
-        );
-
-        $shopId = $req->filled('shop_id') ? (int) $req->shop_id : null;
-        $purchases = $this->bonusCalculator->aggregatePurchases($supplierId, $period['start'], $period['end'], $shopId);
-
-        $calcModel    = $req->get('model', 'percentage');
-        $rateOrTarget = (float) $req->get('rate_or_target', 0);
-        $fixedBonus   = (float) $req->get('fixed_bonus', 0);
-
-        $bonusResult = $this->bonusCalculator->computeBonus(
-            $purchases['total_purchases'],
-            $purchases['total_qty'],
-            $calcModel,
-            $rateOrTarget,
-            $fixedBonus
-        );
-
-        return response()->json([
-            'status'    => 'success',
-            'period'    => $period,
-            'purchases' => $purchases,
-            'bonus'     => $bonusResult,
-        ]);
-    }
-
-    /**
      * Detailed Payment History Ledger Modal Content
      */
     public function details(Request $req, $id)
@@ -275,25 +227,5 @@ class OtherIncomeController extends Controller
     public function destroy($id = "")
     {
         return $this->tools->onDestroy($this->table, $id);
-    }
-
-    private function getAvailableQuarters(): array
-    {
-        $currentYear = (int) date('Y');
-        $quarters = [];
-        for ($y = $currentYear; $y >= $currentYear - 2; $y--) {
-            for ($q = 4; $q >= 1; $q--) {
-                $quarters[] = [
-                    'key'   => "{$y}-Q{$q}",
-                    'label' => "{$y} Q{$q} (" . match($q) {
-                        1 => 'Jan - Mar',
-                        2 => 'Apr - Jun',
-                        3 => 'Jul - Sep',
-                        4 => 'Oct - Dec',
-                    } . ")",
-                ];
-            }
-        }
-        return $quarters;
     }
 }

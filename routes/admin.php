@@ -409,7 +409,6 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         ], function () {
             Route::post('{id}/payment', [OtherIncomeController::class, 'storePayment'])->name('store-payment');
             Route::delete('payment/{paymentId}', [OtherIncomeController::class, 'deletePayment'])->name('delete-payment');
-            Route::get('calculate-purchases', [OtherIncomeController::class, 'calculatePurchases'])->name('calculate-purchases');
             Route::get('details/{id}', [OtherIncomeController::class, 'details'])->name('details');
             Route::get('supplier-history/{supplierId}', [OtherIncomeController::class, 'supplierHistory'])->name('supplier-history');
         });

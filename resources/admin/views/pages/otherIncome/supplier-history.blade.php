@@ -46,7 +46,6 @@
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th>{{ __('other_income.table.income_number') }}</th>
                                 <th>{{ __('other_income.table.income_date') }}</th>
                                 <th>{{ __('other_income.table.title') }}</th>
                                 <th>{{ __('other_income.table.category') }}</th>
@@ -58,7 +57,6 @@
                             @forelse ($incomes as $index => $item)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td><code>{{ $item->income_number }}</code></td>
                                     <td>{{ $item->formatted_date }}</td>
                                     <td><strong>{{ $item->title }}</strong></td>
                                     <td>{{ $item->category_name }}</td>
@@ -71,7 +69,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">No records found for this supplier.</td>
+                                    <td colspan="6" class="text-center py-4 text-muted">No records found for this supplier.</td>
                                 </tr>
                             @endforelse
                         </tbody>

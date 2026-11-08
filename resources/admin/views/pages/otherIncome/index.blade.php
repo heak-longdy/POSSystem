@@ -16,11 +16,10 @@
             'status'           => $status,
             'tbHeader'         => [
                 ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
-                ['field' => 'income_number', 'title' => __('other_income.table.income_number'), 'class' => 'text left', 'colVal' => 14],
-                ['field' => 'formatted_date', 'title' => __('other_income.table.income_date'), 'class' => 'text left', 'colVal' => 12],
-                ['field' => 'title', 'title' => __('other_income.table.title'), 'class' => 'text left', 'colVal' => 22],
-                ['field' => 'category_name', 'title' => __('other_income.table.category'), 'class' => 'text left', 'colVal' => 15],
-                ['field' => 'supplier_name', 'title' => __('other_income.table.supplier'), 'class' => 'text left', 'colVal' => 15],
+                ['field' => 'formatted_date', 'title' => __('other_income.table.income_date'), 'class' => 'text left', 'colVal' => 14],
+                ['field' => 'title', 'title' => __('other_income.table.title'), 'class' => 'text left', 'colVal' => 30],
+                ['field' => 'category_name', 'title' => __('other_income.table.category'), 'class' => 'text left', 'colVal' => 17],
+                ['field' => 'supplier_name', 'title' => __('other_income.table.supplier'), 'class' => 'text left', 'colVal' => 17],
                 ['field' => 'formatted_amount', 'title' => __('other_income.table.amount'), 'class' => 'text left', 'colVal' => 12],
                 [
                     'field' => 'action',
@@ -172,7 +171,6 @@
 
                         worksheet.columns = [
                             { header: @json(__('global.table.no')), key: 'index', width: 8 },
-                            { header: @json(__('other_income.table.income_number')), key: 'income_number', width: 16 },
                             { header: @json(__('other_income.table.income_date')), key: 'income_date', width: 14 },
                             { header: @json(__('other_income.table.title')), key: 'title', width: 28 },
                             { header: @json(__('other_income.table.category')), key: 'category_name', width: 20 },
@@ -187,7 +185,6 @@
                         rows.forEach((item, index) => {
                             worksheet.addRow({
                                 index: index + 1,
-                                income_number: item?.income_number || '',
                                 income_date: item?.income_date ? moment(item.income_date).format('YYYY-MM-DD') : '',
                                 title: item?.title || '',
                                 category_name: item?.category?.name || item?.category_name || '---',

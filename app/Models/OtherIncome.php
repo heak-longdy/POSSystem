@@ -17,7 +17,6 @@ class OtherIncome extends Model
     protected $table = 'other_incomes';
 
     protected $fillable = [
-        'income_number',
         'category_id',
         'supplier_id',
         'shop_id',
@@ -55,21 +54,6 @@ class OtherIncome extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            if (empty($model->income_number)) {
-                $datePrefix = date('ym');
-                $lastRecord = static::withTrashed()
-                    ->where('income_number', 'like', "INC-{$datePrefix}-%")
-                    ->orderBy('id', 'desc')
-                    ->first();
-
-                $sequence = 1;
-                if ($lastRecord && preg_match('/INC-\d{4}-(\d+)/', $lastRecord->income_number, $matches)) {
-                    $sequence = ((int) $matches[1]) + 1;
-                }
-
-                $model->income_number = sprintf('INC-%s-%04d', $datePrefix, $sequence);
-            }
-
             if (empty($model->created_by)) {
                 $model->created_by = auth()->check() ? auth()->id() : 1;
             }

@@ -225,7 +225,6 @@ class OtherIncomeReportController extends Controller
 
         return (object) [
             'id'                     => $item->id,
-            'income_number'          => $item->income_number,
             'income_date'            => $item->income_date ? Carbon::parse($item->income_date)->format('Y-m-d') : '---',
             'income_date_formatted'  => $item->income_date ? Carbon::parse($item->income_date)->format('d M Y') : '---',
             'title'                  => $item->title,
@@ -317,8 +316,7 @@ class OtherIncomeReportController extends Controller
         if ($req->filled('search')) {
             $search = trim($req->search);
             $query->where(function ($q) use ($search) {
-                $q->where('income_number', 'like', "%{$search}%")
-                  ->orWhere('title', 'like', "%{$search}%")
+                $q->where('title', 'like', "%{$search}%")
                   ->orWhere('reference_no', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
                   ->orWhereHas('supplier', fn($sq) => $sq->where('name', 'like', "%{$search}%"))

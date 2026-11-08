@@ -41,8 +41,7 @@ class OtherIncomeService
         if ($req->filled('search')) {
             $search = trim($req->search);
             $query->where(function ($q) use ($search) {
-                $q->where('income_number', 'LIKE', '%' . $search . '%')
-                  ->orWhere('title', 'LIKE', '%' . $search . '%')
+                $q->where('title', 'LIKE', '%' . $search . '%')
                   ->orWhere('reference_no', 'LIKE', '%' . $search . '%')
                   ->orWhere('description', 'LIKE', '%' . $search . '%')
                   ->orWhereHas('supplier', function ($sq) use ($search) {
@@ -154,6 +153,7 @@ class OtherIncomeService
             $income->save();
 
             // Record initial payment record if paid right away
+            $initialPayment = $receivedAmount;
             if (!$id && $initialPayment > 0) {
                 $paymentNumber = $this->generatePaymentNumber();
                 $payment = new OtherIncomePayment();
