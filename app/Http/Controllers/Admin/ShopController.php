@@ -301,11 +301,41 @@ class ShopController extends Controller
     }
     public function destroy($id = "")
     {
+        $id = $id ?: request('id') ?: request()->input('item.id');
+
+        if ($id && ShopProduct::where('shop_id', $id)->exists()) {
+            $message = __('shop.message.cannot_delete_has_products');
+            Session::flash('warning', $message);
+
+            return response()->json([
+                'message' => 'unsuccess',
+                'status' => 200,
+                'error' => $message,
+            ]);
+        }
+
+        if ($id) {
+            ShopProduct::withTrashed()->where('shop_id', $id)->forceDelete();
+        }
+
         return $this->tools->onDestroy($this->table, $id);
     }
 
     public function delete($id = "")
     {
+        $id = $id ?: request('id') ?: request()->input('item.id');
+
+        if ($id && ShopProduct::where('shop_id', $id)->exists()) {
+            $message = __('shop.message.cannot_delete_has_products');
+            Session::flash('warning', $message);
+
+            return response()->json([
+                'message' => 'unsuccess',
+                'status' => 200,
+                'error' => $message,
+            ]);
+        }
+
         return $this->tools->onDelete($this->table, $id);
     }
 

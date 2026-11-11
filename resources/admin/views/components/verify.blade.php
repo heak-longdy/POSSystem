@@ -93,6 +93,17 @@
             notifyError(message) {
                 if (typeof this.data?.onError === 'function') {
                     this.data.onError(message);
+                } else if (window.iziToast) {
+                    window.iziToast.warning({
+                        title: (window.workspaceTranslations && window.workspaceTranslations.warning) || 'Warning',
+                        message: message,
+                        position: 'topCenter',
+                        timeout: 3000,
+                        animateInside: true,
+                        transitionIn: 'fadeIn',
+                        progressBarEasing: 'linear',
+                        pauseOnHover: true
+                    });
                 } else {
                     alert(message);
                 }
@@ -124,10 +135,12 @@
                                 ...(this.data?.postData || {})
                             }
                         }).then((res) => {
-                            if (res.data.message == "success" || res.data.status == 200) {
+                            const isSuccess = (res.data?.message === "success" || res.data?.status == 200) && res.data?.message !== "unsuccess" && !res.data?.error;
+                            if (isSuccess) {
                                 this.$store?.confirmDialog?.close(true);
                             } else {
                                 const message = res.data?.error || res.data?.message || this.data?.requestFailed || this.labels.requestFailed;
+                                this.$store?.confirmDialog?.close(false);
                                 this.notifyError(message);
                                 this.disabled = false;
                                 this.loading = false;
@@ -137,6 +150,7 @@
                             const message = e.response?.data?.error ||
                                 Object.values(e.response?.data?.errors || {})?.[0]?.[0] ||
                                 this.data?.requestFailed || this.labels.requestFailed;
+                            this.$store?.confirmDialog?.close(false);
                             this.notifyError(message);
                             this.disabled = false;
                             this.loading = false;

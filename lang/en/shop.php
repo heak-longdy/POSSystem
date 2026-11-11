@@ -109,6 +109,7 @@ return [
         'restore_failed' => 'Move to restore unsuccess!',
         'destroy_success' => 'Delete success!',
         'destroy_failed' => 'Delete unsuccess!',
+        'cannot_delete_has_products' => 'This shop cannot be deleted because it has product items configured.',
     ],
 
     'validation' => [
