@@ -75,28 +75,28 @@ return new class extends Migration
         }
 
         // Register module permissions for Backup & Restore
-        try {
-            $module = ModulePermission::firstOrCreate(['name' => 'Backup & Restore']);
-            $actions = [
-                'view'     => 'View',
-                'create'   => 'Create Backup',
-                'restore'  => 'Restore Backup',
-                'download' => 'Download Backup',
-                'update'   => 'Settings',
-                'delete'   => 'Delete Backup',
-            ];
+        // try {
+        //     $module = ModulePermission::firstOrCreate(['name' => 'Backup & Restore']);
+        //     $actions = [
+        //         'view'     => 'View',
+        //         'create'   => 'Create Backup',
+        //         'restore'  => 'Restore Backup',
+        //         'download' => 'Download Backup',
+        //         'update'   => 'Settings',
+        //         'delete'   => 'Delete Backup',
+        //     ];
 
-            foreach ($actions as $action => $label) {
-                Permission::firstOrCreate(
-                    ['name' => 'backup-' . $action, 'guard_name' => 'web'],
-                    ['display_name' => $label, 'module_id' => $module->id]
-                );
-            }
+        //     foreach ($actions as $action => $label) {
+        //         Permission::firstOrCreate(
+        //             ['name' => 'backup-' . $action, 'guard_name' => 'web'],
+        //             ['display_name' => $label, 'module_id' => $module->id]
+        //         );
+        //     }
 
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
-        } catch (\Throwable $e) {
-            // Permission tables might not exist or cache issue during initial migration
-        }
+        //     app(PermissionRegistrar::class)->forgetCachedPermissions();
+        // } catch (\Throwable $e) {
+        //     // Permission tables might not exist or cache issue during initial migration
+        // }
     }
 
     /**

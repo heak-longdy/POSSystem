@@ -97,6 +97,15 @@ class FileBackupService
             }
 
             $hasDatabase = ($zip->locateName('database.sql') !== false);
+            if (!$hasDatabase) {
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $stat = $zip->statIndex($i);
+                    if (str_ends_with(strtolower($stat['name']), '.sql')) {
+                        $hasDatabase = true;
+                        break;
+                    }
+                }
+            }
             $hasManifest = ($zip->locateName('backup_manifest.json') !== false);
             $filesCount = 0;
             $manifestData = null;
@@ -167,12 +176,24 @@ class FileBackupService
         $filesRestored = 0;
 
         try {
-            // Restore database if database.sql is present
+            // Restore database if database.sql or any SQL dump is present
             $sqlFile = $tempExtractDir . '/database.sql';
+            if (!file_exists($sqlFile)) {
+                $candidates = glob($tempExtractDir . '/*.sql');
+                if (empty($candidates)) {
+                    $candidates = glob($tempExtractDir . '/*/*.sql');
+                }
+                if (!empty($candidates)) {
+                    $sqlFile = $candidates[0];
+                }
+            }
+
             if (file_exists($sqlFile)) {
                 $dbResult = $dbService->restore($sqlFile);
                 $databaseRestored = true;
                 $statementsCount = $dbResult['statements_executed'] ?? 0;
+            } else {
+                throw new Exception("No database SQL dump file (.sql) found inside the backup package.");
             }
 
             // Restore uploads files if uploads directory is present

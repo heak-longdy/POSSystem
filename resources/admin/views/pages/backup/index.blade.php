@@ -279,41 +279,41 @@
         padding: 10px 0;
     }
     .btn-action-primary {
-        background: #2563eb;
-        color: #ffffff;
-        border: none;
-        padding: 9px 16px;
-        border-radius: 7px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25);
-        transition: background 0.15s ease;
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 9px 16px !important;
+        border-radius: 7px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25) !important;
+        transition: background 0.15s ease !important;
     }
     .btn-action-primary:hover {
-        background: #1d4ed8;
+        background: #1d4ed8 !important;
     }
     .btn-action-outline {
-        background: #ffffff;
-        color: #475569;
-        border: 1px solid #cbd5e1;
-        padding: 8px 14px;
-        border-radius: 7px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.15s ease;
+        background: #ffffff !important;
+        color: #475569 !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 8px 14px !important;
+        border-radius: 7px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.15s ease !important;
     }
     .btn-action-outline:hover {
-        background: #f8fafc;
-        border-color: #94a3b8;
-        color: #1e293b;
+        background: #f8fafc !important;
+        border-color: #94a3b8 !important;
+        color: #1e293b !important;
     }
 
     /* Tab Panes */
@@ -619,13 +619,14 @@
         gap: 8px;
     }
     .modal-header .btn-close {
-        background: none;
-        border: none;
-        font-size: 20px;
-        color: #94a3b8;
-        cursor: pointer;
-        padding: 4px;
-        line-height: 1;
+        background: none !important;
+        border: none !important;
+        font-size: 20px !important;
+        color: #94a3b8 !important;
+        cursor: pointer !important;
+        padding: 4px !important;
+        line-height: 1 !important;
+        min-width: none !important;
     }
     .modal-body {
         padding: 20px;
@@ -1553,8 +1554,8 @@
             executeRestore() {
                 this.showRestoreModal = false;
                 this.loading = true;
-                this.loadingTitle = 'Restoring System Data...';
-                this.loadingSubtitle = 'Executing database transactions and restoring application files. Please do not refresh.';
+                this.loadingTitle = 'Processing Database Restore...';
+                this.loadingSubtitle = 'Overwriting database and restoring backup data. Please wait and do not refresh.';
 
                 let url = '';
                 let payload = { snapshot: this.createPreRestoreSnapshot };
@@ -1623,13 +1624,16 @@
             startUploadRestore() {
                 if (!this.selectedFile) return;
 
-                if (!confirm('Are you sure you want to restore system data from ' + this.selectedFile.name + '? Current database and files will be updated.')) {
+                const confirmMsg = 'Are you sure you want to restore data from "' + this.selectedFile.name + '"?\n\n'
+                    + 'WARNING: This will completely overwrite and replace all existing database data with data from this backup file. Existing records will NOT be merged or updated.';
+
+                if (!confirm(confirmMsg)) {
                     return;
                 }
 
                 this.loading = true;
-                this.loadingTitle = 'Uploading & Restoring System...';
-                this.loadingSubtitle = 'Transferring file from your computer and executing restore. Please wait.';
+                this.loadingTitle = 'Processing Database Restore...';
+                this.loadingSubtitle = 'Overwriting database and restoring backup data. Please wait and do not refresh.';
 
                 const formData = new FormData();
                 formData.append('backup_file', this.selectedFile);

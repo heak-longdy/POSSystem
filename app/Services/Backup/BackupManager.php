@@ -152,7 +152,9 @@ class BackupManager
         }
 
         $result = $this->restoreFromFile($filePath, $createSnapshot, $userId, $record->name);
-        $record->update(['last_restored_at' => now()]);
+        try {
+            BackupRecord::where('filename', $record->filename)->update(['last_restored_at' => now()]);
+        } catch (\Throwable $e) {}
 
         return $result;
     }
@@ -186,6 +188,24 @@ class BackupManager
         @set_time_limit(900);
         @ini_set('memory_limit', '512M');
 
+        // Capture current cloud storage settings (if configured) so they are preserved
+        // if restoring an older backup that had no cloud settings configured.
+        $savedCloudSettings = null;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('backup_settings')) {
+                $currentSettings = BackupSetting::first();
+                if ($currentSettings && $currentSettings->isCloudConfigured()) {
+                    $savedCloudSettings = $currentSettings->only([
+                        'cloud_driver', 's3_endpoint', 's3_region', 's3_bucket',
+                        's3_access_key', 's3_secret_key', 's3_path_prefix',
+                        's3_use_path_style', 'auto_backup_enabled',
+                        'auto_backup_frequency', 'auto_upload_cloud',
+                        'max_local_backups', 'disk_quota_gb'
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {}
+
         // Optional pre-restore snapshot
         $snapshotRecord = null;
         if ($createSnapshot) {
@@ -201,8 +221,55 @@ class BackupManager
             }
         }
 
-        // Perform restore of database and files
+        // Perform restore of database and files (replaces existing database data completely)
         $result = $this->fileService->restore($filePath, $this->dbService);
+
+        // Ensure essential backup settings table exists (if an older backup didn't include it)
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasTable('backup_settings')) {
+                \Illuminate\Support\Facades\Artisan::call('migrate', [
+                    '--path' => 'database/migrations/2026_11_08_000003_create_backup_tables.php',
+                    '--force' => true,
+                ]);
+            }
+        } catch (\Throwable $e) {}
+
+        // If cloud settings were saved and the restored database has no cloud configured, restore them
+        try {
+            if ($savedCloudSettings && \Illuminate\Support\Facades\Schema::hasTable('backup_settings')) {
+                $active = BackupSetting::first();
+                if ($active && !$active->isCloudConfigured()) {
+                    $active->update($savedCloudSettings);
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        // Preserve the pre-restore snapshot in backup_records so user can revert if needed
+        try {
+            if ($snapshotRecord && \Illuminate\Support\Facades\Schema::hasTable('backup_records')) {
+                if (!BackupRecord::where('filename', $snapshotRecord->filename)->exists()) {
+                    BackupRecord::create([
+                        'name'         => $snapshotRecord->name,
+                        'filename'     => $snapshotRecord->filename,
+                        'file_path'    => $snapshotRecord->file_path,
+                        'disk'         => $snapshotRecord->disk ?? 'local',
+                        'type'         => $snapshotRecord->type ?? 'full',
+                        'size_bytes'   => $snapshotRecord->size_bytes ?? 0,
+                        'tables_count' => $snapshotRecord->tables_count ?? 0,
+                        'files_count'  => $snapshotRecord->files_count ?? 0,
+                        'status'       => 'completed',
+                        'cloud_status' => 'none',
+                        'created_by'   => $snapshotRecord->created_by,
+                        'notes'        => $snapshotRecord->notes,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        // Sync physical local backup files from storage/app/backups into backup_records
+        try {
+            $this->syncLocalBackupsToRecords();
+        } catch (\Throwable $e) {}
 
         // Clear all Laravel caches
         try {
@@ -216,6 +283,43 @@ class BackupManager
             'statements'        => $result['statements'] ?? 0,
             'snapshot_created'  => $snapshotRecord ? $snapshotRecord->filename : null,
         ];
+    }
+
+    /**
+     * Index any physical backup files on disk that are not registered in the database.
+     */
+    public function syncLocalBackupsToRecords(): void
+    {
+        if (!\Illuminate\Support\Facades\Schema::hasTable('backup_records')) {
+            return;
+        }
+
+        if (!is_dir($this->backupDir)) {
+            return;
+        }
+
+        $files = glob($this->backupDir . '/*.zip');
+        if (!$files) {
+            return;
+        }
+
+        foreach ($files as $file) {
+            $filename = basename($file);
+            if (!BackupRecord::where('filename', $filename)->exists()) {
+                $isFull = str_starts_with($filename, 'backup_full_');
+                BackupRecord::create([
+                    'name'         => ($isFull ? 'Full System Backup' : 'Database Backup') . ' (' . date('Y-m-d H:i', filemtime($file)) . ')',
+                    'filename'     => $filename,
+                    'file_path'    => $file,
+                    'disk'         => 'local',
+                    'type'         => $isFull ? 'full' : 'database',
+                    'size_bytes'   => filesize($file),
+                    'status'       => 'completed',
+                    'cloud_status' => 'none',
+                    'notes'        => 'Auto-indexed backup file from server disk.',
+                ]);
+            }
+        }
     }
 
     /**

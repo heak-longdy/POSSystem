@@ -120,20 +120,20 @@ return [
     'restore_section' => [
         'title'             => 'Restore System Data',
         'subtitle'          => 'Restore your entire POS system or database from a backup file stored on your computer or cloud storage.',
-        'warning_title'     => 'Important Safety Notice',
-        'warning_text'      => 'Restoring system data will overwrite the current database and uploaded files with the contents of the chosen backup package. An automated safety snapshot can be created prior to restoring.',
+        'warning_title'     => 'Important Overwrite Notice',
+        'warning_text'      => 'Restoring system data will overwrite and replace the existing database data with the contents of the selected backup file. Existing records will NOT be merged or updated; the database will match the backup file exactly.',
         'upload_box_title'  => 'Upload Backup from Local Computer',
         'upload_box_desc'   => 'Drag & drop your backup package (.zip) or database dump (.sql) here, or browse from your computer.',
         'snapshot_option'   => 'Create an automatic safety backup of current system before restoring (Recommended)',
         'selected_file'     => 'Selected File',
-        'start_restore'     => 'Proceed with Restore',
+        'start_restore'     => 'Process Restore',
     ],
 
     // Confirm Restore Modal
     'confirm_modal' => [
         'title'         => 'Confirm System Restore',
         'message'       => 'Are you sure you want to restore system data from',
-        'consequence'   => 'Existing records will be updated or replaced according to the backup package. Do not refresh or close this browser window during the restoration process.',
+        'consequence'   => 'Existing database data will be completely overwritten and replaced with data from this backup file. Records will not be merged or updated. Do not refresh or close this browser window during the restoration process.',
     ],
 
     // Cloud Settings
