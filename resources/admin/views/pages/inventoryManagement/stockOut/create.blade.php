@@ -57,7 +57,7 @@
                     </div>
                     <div class="form-row iconInput">
                         <label>{{ __('stock_out.form.qty') }}<span>*</span></label>
-                        <input type="number" name="qty" min="1" value="{{ old('qty', $data->qty ?? '') }}" placeholder="{{ __('stock_out.form.placeholder_qty') }}" {!! $readonly ? 'readonly' : '' !!}>
+                        <input type="number" step="any" name="qty" min="0.01" value="{{ old('qty', isset($data->qty) ? \App\Models\OrderDetail::formatQuantity($data->qty) : '') }}" placeholder="{{ __('stock_out.form.placeholder_qty') }}" {!! $readonly ? 'readonly' : '' !!}>
                         <i class='bx bx-minus-circle'></i>
                         @error('qty')
                             <label class="error">{{ $message }}</label>

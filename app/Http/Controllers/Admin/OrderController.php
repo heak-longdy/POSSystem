@@ -268,7 +268,7 @@ class OrderController extends Controller
             $pricingSources = [];
             $usedDetailIds = [];
             foreach ($dataCarts as $index => $cart) {
-                if (($cart->product_type ?? null) !== 'product' || empty($cart->id)) {
+                if (!empty($cart->is_bonus) || ($cart->product_type ?? null) !== 'product' || empty($cart->id)) {
                     continue;
                 }
                 $source = $order->exists ? $order->orderDetails->firstWhere('id', $cart->id) : null;
@@ -284,8 +284,17 @@ class OrderController extends Controller
                 $pricingSources[$index] = $source;
             }
 
-            if ($order->exists) {
-                $this->reverseOrderEffects($order);
+            $isEditingOrder = $order->exists;
+            $oldBonusByProduct = [];
+            if ($isEditingOrder) {
+                foreach ($order->orderDetails as $detail) {
+                    if (!empty($detail->is_bonus) && $detail->type === 'product' && !empty($detail->product_id)) {
+                        $pId = (int) $detail->product_id;
+                        $oldBonusByProduct[$pId] = ($oldBonusByProduct[$pId] ?? 0.0) + (float) ($detail->qty ?? 0);
+                    }
+                }
+
+                $this->reverseOrderEffects($order, false);
                 OrderDetail::withTrashed()
                     ->where('order_id', $order->id)
                     ->forceDelete();
@@ -306,10 +315,24 @@ class OrderController extends Controller
             }
             $order->save();
 
+            if ($isEditingOrder) {
+                $newBonusByProduct = [];
+                foreach ($dataCarts as $cart) {
+                    if (!empty($cart->is_bonus) && ($cart->product_type ?? 'product') === 'product' && !empty($cart->product_id)) {
+                        $pId = (int) $cart->product_id;
+                        $qty = round((float) ($cart->product_qty ?? 0), 2);
+                        $newBonusByProduct[$pId] = ($newBonusByProduct[$pId] ?? 0.0) + $qty;
+                    }
+                }
+                $this->applyBonusStockDelta($order, $oldBonusByProduct, $newBonusByProduct);
+            }
+
             $totalPoint = 0;
             foreach ($dataCarts as $index => $cart) {
                 $detail = $this->createDetail($order, $cart, $pricingSources[$index] ?? null);
-                $this->applyDetailStock($order, $detail);
+                if (!$isEditingOrder || empty($detail->is_bonus)) {
+                    $this->applyDetailStock($order, $detail);
+                }
                 $totalPoint += (int) ($detail->point ?? 0);
             }
 
@@ -977,7 +1000,7 @@ class OrderController extends Controller
         if ($transferredOutCents > 0) {
             $paymentStatus = 'Paid';
             $paymentDate = $order->payment_date ?: Carbon::now()->format('Y-m-d H:i:s');
-        } elseif ($totalPaidCents <= 0 && $totalDueCents > 0) {
+        } elseif ($totalPaidCents <= 0) {
             $paymentStatus = 'Pending';
             $paymentDate = null;
         } elseif ($totalPaidCents >= $totalDueCents) {
@@ -1157,7 +1180,8 @@ class OrderController extends Controller
 
                 foreach ($order->orderDetails as $detail) {
                     if ($detail->type === 'product' && $detail->product_id) {
-                        $stock = (int) ($stocks[$detail->product_id] ?? 0);
+                        $stockVal = (float) ($stocks[$detail->product_id] ?? 0);
+                        $stock = ((float) $stockVal == (int) $stockVal) ? (int) $stockVal : (float) $stockVal;
                         $detail->current_stock = $stock;
                         if ($detail->product) {
                             $detail->product->current_stock = $stock;
@@ -1205,42 +1229,74 @@ class OrderController extends Controller
 
     protected function decodeCart(OrderRequest $req)
     {
-        $dataCarts = json_decode($req->dataCarts);
-        if (!is_array($dataCarts) || count($dataCarts) === 0) {
+        $regularCarts = !empty($req->dataCarts) ? json_decode($req->dataCarts) : [];
+        if (!is_array($regularCarts)) {
+            $regularCarts = [];
+        }
+        foreach ($regularCarts as $item) {
+            if (!isset($item->is_bonus)) {
+                $item->is_bonus = false;
+            }
+        }
+
+        $bonusCarts = !empty($req->dataBonusCarts) ? json_decode($req->dataBonusCarts) : [];
+        if (!is_array($bonusCarts)) {
+            $bonusCarts = [];
+        }
+        foreach ($bonusCarts as $item) {
+            $item->is_bonus = true;
+            $item->product_type = 'product';
+        }
+
+        $allCarts = array_merge($regularCarts, $bonusCarts);
+
+        if (count($allCarts) === 0) {
             throw ValidationException::withMessages([
                 'dataCarts' => 'Shopping cart is required',
             ]);
         }
 
-        foreach ($dataCarts as $cart) {
+        foreach ($allCarts as $cart) {
             if (($cart->product_type ?? null) !== 'product') {
                 continue;
             }
             $quantity = $cart->product_qty ?? null;
-            // Match the form's positive safe-integer check before any order or stock changes.
-            if (!is_numeric($quantity) || (float) $quantity < 1 || (float) $quantity > 9007199254740991
-                || floor((float) $quantity) !== (float) $quantity) {
-                throw ValidationException::withMessages([
-                    'dataCarts' => __('order.validation.quantity_invalid'),
-                ]);
+            $isBonus = !empty($cart->is_bonus);
+            if ($isBonus) {
+                if (!is_numeric($quantity) || (float) $quantity <= 0 || (float) $quantity > 9007199254740991) {
+                    throw ValidationException::withMessages([
+                        'dataBonusCarts' => __('order.validation.quantity_invalid'),
+                    ]);
+                }
+            } else {
+                // Match the form's positive safe-integer check before any order or stock changes.
+                if (!is_numeric($quantity) || (float) $quantity < 1 || (float) $quantity > 9007199254740991
+                    || floor((float) $quantity) !== (float) $quantity) {
+                    throw ValidationException::withMessages([
+                        'dataCarts' => __('order.validation.quantity_invalid'),
+                    ]);
+                }
             }
         }
 
-        return $dataCarts;
+        return $allCarts;
     }
 
     protected function createDetail(Order $order, $cart, ?OrderDetail $source = null)
     {
-        $type = $cart->product_type ?? null;
+        $isBonus = !empty($cart->is_bonus);
+        $type = $isBonus ? 'product' : ($cart->product_type ?? null);
         $productId = (int) ($cart->product_id ?? 0);
-        $qty = max(1, (int) ($cart->product_qty ?? 1));
+        $qty = $isBonus
+            ? round((float) ($cart->product_qty ?? 0), 2)
+            : max(1, (int) ($cart->product_qty ?? 1));
         $itemData = $cart->itemData ?? (object) [];
         $discount = $itemData->discount ?? 0;
         if ($discount === '') {
             $discount = 0;
         }
 
-        if ($type === 'service' && (!is_numeric($discount) || !is_finite((float) $discount) || (float) $discount < 0)) {
+        if (!$isBonus && $type === 'service' && (!is_numeric($discount) || !is_finite((float) $discount) || (float) $discount < 0)) {
             throw ValidationException::withMessages([
                 'dataCarts' => __('order.validation.discount_invalid'),
             ]);
@@ -1248,7 +1304,7 @@ class OrderController extends Controller
 
         if (!in_array($type, ['product', 'service']) || !$productId) {
             throw ValidationException::withMessages([
-                'dataCarts' => 'Shopping cart item is invalid.',
+                $isBonus ? 'dataBonusCarts' : 'dataCarts' => 'Shopping cart item is invalid.',
             ]);
         }
 
@@ -1258,7 +1314,31 @@ class OrderController extends Controller
 
         if (!$shopItem) {
             throw ValidationException::withMessages([
-                'dataCarts' => 'Selected item does not belong to this shop.',
+                $isBonus ? 'dataBonusCarts' : 'dataCarts' => 'Selected item does not belong to this shop.',
+            ]);
+        }
+
+        if ($isBonus) {
+            return OrderDetail::create([
+                'order_id' => $order->id,
+                'service_id' => null,
+                'product_id' => $productId,
+                'price' => 0,
+                'original_price' => 0,
+                'unit_price' => 0,
+                'pricing_method' => 'bonus',
+                'qty' => $qty,
+                'type' => 'product',
+                'is_bonus' => true,
+                'point' => 0,
+                'product_discount' => 0,
+                'product_discount_type' => null,
+                'service_discount' => 0,
+                'service_discount_type' => null,
+                'product_commission' => 0,
+                'product_commission_type' => null,
+                'service_commission' => 0,
+                'service_commission_type' => null,
             ]);
         }
 
@@ -1273,6 +1353,7 @@ class OrderController extends Controller
             'price' => $itemData->price ?? $shopItem->price ?? 0,
             'qty' => $type === 'service' ? 1 : $qty,
             'type' => $type,
+            'is_bonus' => false,
             'point' => $shopItem->point ?? 0,
             'product_discount' => $type === 'product' ? $discount : 0,
             'product_discount_type' => $type === 'product' ? ($itemData->discountType ?? null) : null,
@@ -1352,14 +1433,113 @@ class OrderController extends Controller
         $this->adjustCustomerPoint($order, 1);
     }
 
-    protected function reverseOrderEffects(Order $order)
+    protected function reverseOrderEffects(Order $order, bool $includeBonus = true)
     {
         $order->loadMissing('orderDetails');
         foreach ($order->orderDetails as $detail) {
+            if (!$includeBonus && !empty($detail->is_bonus)) {
+                continue;
+            }
             $this->reverseDetailStock($order, $detail);
         }
 
         $this->adjustCustomerPoint($order, -1);
+    }
+
+    protected function applyBonusStockDelta(Order $order, array $oldBonusByProduct, array $newBonusByProduct)
+    {
+        $allBonusProductIds = array_unique(array_merge(
+            array_keys($oldBonusByProduct),
+            array_keys($newBonusByProduct)
+        ));
+
+        foreach ($allBonusProductIds as $productId) {
+            $oldQty = (float) ($oldBonusByProduct[$productId] ?? 0.0);
+            $newQty = (float) ($newBonusByProduct[$productId] ?? 0.0);
+            $diff = round($newQty - $oldQty, 2);
+
+            if ($diff == 0.0) {
+                continue;
+            }
+
+            $stockOnHand = StockOnHand::where('shop_id', $order->shop_id)
+                ->where('product_id', $productId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($diff > 0.0) {
+                // Additional deduction for increased bonus quantity or newly added bonus item
+                if (!$stockOnHand || (float) $stockOnHand->current_stock < $diff) {
+                    throw ValidationException::withMessages([
+                        'dataBonusCarts' => 'Qty is limited or out of stock.',
+                    ]);
+                }
+
+                $stockOnHand->update([
+                    'current_stock' => (float) $stockOnHand->current_stock - $diff,
+                    'request_by' => Auth::id(),
+                    'request_by_type' => 'admin',
+                ]);
+
+                $stockOut = StockOut::create([
+                    'product_id' => $productId,
+                    'shop_id' => $order->shop_id,
+                    'to_id' => $order->customer_id,
+                    'qty' => $diff,
+                    'type' => 'customer',
+                    'status' => 1,
+                    'remark' => 'Bonus item adjustment (Free)',
+                    'request_by' => Auth::id(),
+                    'request_by_type' => 'admin',
+                ]);
+
+                StockHistory::create([
+                    'transfer_id' => $order->id,
+                    'stock_id' => $stockOut->id,
+                    'product_id' => $productId,
+                    'current_stock' => (float) $stockOnHand->current_stock,
+                    'stock_in' => 0,
+                    'stock_out' => $diff,
+                    'shop_id' => $order->shop_id,
+                    'to_id' => $order->customer_id,
+                    'qty' => $diff,
+                    'type' => 'customer',
+                    'transfer_type' => 'order',
+                    'status' => 'stock_out',
+                    'remark' => 'Bonus item adjustment (Free)',
+                    'request_by' => Auth::id(),
+                    'request_by_type' => 'admin',
+                ]);
+            } else {
+                // Quantity decreased or item removed/reset: restore stock difference
+                $restoreQty = abs($diff);
+                if ($stockOnHand) {
+                    $stockOnHand->update([
+                        'current_stock' => (float) $stockOnHand->current_stock + $restoreQty,
+                        'request_by' => Auth::id(),
+                        'request_by_type' => 'admin',
+                    ]);
+                }
+
+                StockHistory::create([
+                    'transfer_id' => $order->id,
+                    'stock_id' => null,
+                    'product_id' => $productId,
+                    'current_stock' => (float) ($stockOnHand ? $stockOnHand->current_stock : 0),
+                    'stock_in' => $restoreQty,
+                    'stock_out' => 0,
+                    'shop_id' => $order->shop_id,
+                    'to_id' => $order->customer_id,
+                    'qty' => $restoreQty,
+                    'type' => 'customer',
+                    'transfer_type' => 'order',
+                    'status' => 'stock_in',
+                    'remark' => 'Bonus item adjustment return (Free)',
+                    'request_by' => Auth::id(),
+                    'request_by_type' => 'admin',
+                ]);
+            }
+        }
     }
 
     protected function applyDetailStock(Order $order, OrderDetail $detail)
@@ -1368,23 +1548,25 @@ class OrderController extends Controller
             return;
         }
 
-        $qty = (int) ($detail->qty ?? 1);
+        $qty = $detail->is_bonus ? (float) ($detail->qty ?? 1) : (int) ($detail->qty ?? 1);
         $stockOnHand = StockOnHand::where('shop_id', $order->shop_id)
             ->where('product_id', $detail->product_id)
             ->lockForUpdate()
             ->first();
 
-        if (!$stockOnHand || (int) $stockOnHand->current_stock < $qty) {
+        if (!$stockOnHand || (float) $stockOnHand->current_stock < $qty) {
             throw ValidationException::withMessages([
-                'dataCarts' => 'Qty is limited or out of stock.',
+                $detail->is_bonus ? 'dataBonusCarts' : 'dataCarts' => 'Qty is limited or out of stock.',
             ]);
         }
 
         $stockOnHand->update([
-            'current_stock' => (int) $stockOnHand->current_stock - $qty,
+            'current_stock' => (float) $stockOnHand->current_stock - $qty,
             'request_by' => Auth::id(),
             'request_by_type' => 'admin',
         ]);
+
+        $stockRemark = $detail->is_bonus ? 'Bonus item (Free)' : null;
 
         $stockOut = StockOut::create([
             'product_id' => $detail->product_id,
@@ -1393,6 +1575,7 @@ class OrderController extends Controller
             'qty' => $qty,
             'type' => 'customer',
             'status' => 1,
+            'remark' => $stockRemark,
             'request_by' => Auth::id(),
             'request_by_type' => 'admin',
         ]);
@@ -1401,7 +1584,7 @@ class OrderController extends Controller
             'transfer_id' => $order->id,
             'stock_id' => $stockOut->id,
             'product_id' => $detail->product_id,
-            'current_stock' => (int) $stockOnHand->current_stock,
+            'current_stock' => (float) $stockOnHand->current_stock,
             'stock_in' => 0,
             'stock_out' => $qty,
             'shop_id' => $order->shop_id,
@@ -1410,6 +1593,7 @@ class OrderController extends Controller
             'type' => 'customer',
             'transfer_type' => 'order',
             'status' => 'stock_out',
+            'remark' => $stockRemark,
             'request_by' => Auth::id(),
             'request_by_type' => 'admin',
         ]);
@@ -1421,7 +1605,7 @@ class OrderController extends Controller
             return;
         }
 
-        $qty = (int) ($detail->qty ?? 1);
+        $qty = $detail->is_bonus ? (float) ($detail->qty ?? 1) : (int) ($detail->qty ?? 1);
         $stockOnHand = StockOnHand::where('shop_id', $order->shop_id)
             ->where('product_id', $detail->product_id)
             ->lockForUpdate()
@@ -1429,7 +1613,7 @@ class OrderController extends Controller
 
         if ($stockOnHand) {
             $stockOnHand->update([
-                'current_stock' => (int) $stockOnHand->current_stock + $qty,
+                'current_stock' => (float) $stockOnHand->current_stock + $qty,
                 'request_by' => Auth::id(),
                 'request_by_type' => 'admin',
             ]);
@@ -1614,20 +1798,28 @@ class OrderController extends Controller
 
         $renderSingleItem = function ($detail) use ($getLabel, $getTypeClass) {
             $name = e($detail->type === 'service' ? ($detail->service?->name ?: '---') : ($detail->product?->name ?: '---'));
-            $qty = (int) ($detail->qty ?: 1);
-            $typeBadge = $detail->type === 'service'
-                ? '<span class="order-item-type order-item-type--service">' . e($getLabel($detail)) . '</span>'
-                : '';
-            $itemIcon = $detail->type === 'service'
-                ? '<i class="bx bx-wrench order-item-icon order-item-icon--service"></i>'
-                : '<i class="bx bx-package order-item-icon"></i>';
+            $isBonus = !empty($detail->is_bonus);
+            $displayQty = OrderDetail::formatQuantity($detail->qty ?? 1);
+            if ($isBonus) {
+                $itemClass = 'order-table-item order-table-item--bonus';
+                $itemIcon = '<i class="bx bx-gift order-item-icon order-item-icon--bonus"></i>';
+                $typeBadge = '<span class="order-item-bonus-badge">' . e(__('order.bonus_item_label')) . '</span>';
+            } else {
+                $itemClass = 'order-table-item';
+                $typeBadge = $detail->type === 'service'
+                    ? '<span class="order-item-type order-item-type--service">' . e($getLabel($detail)) . '</span>'
+                    : '';
+                $itemIcon = $detail->type === 'service'
+                    ? '<i class="bx bx-wrench order-item-icon order-item-icon--service"></i>'
+                    : '<i class="bx bx-package order-item-icon"></i>';
+            }
 
             return "
-                <div class=\"order-table-item\">
+                <div class=\"{$itemClass}\">
                     {$itemIcon}
                     {$typeBadge}
                     <span class=\"order-item-name\" title=\"{$name}\">{$name}</span>
-                    <span class=\"order-item-qty\">×{$qty}</span>
+                    <span class=\"order-item-qty\">×{$displayQty}</span>
                 </div>
             ";
         };

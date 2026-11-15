@@ -77,4 +77,86 @@ class OrderPricingTest extends TestCase
         $this->assertEquals(['subtotal' => 27.90, 'discount' => 0.90, 'commission' => 2.79, 'total' => 27],
             (new OrderPricing())->line($detail));
     }
+
+    public function test_bonus_items_have_zero_subtotal_discount_commission_and_total(): void
+    {
+        $pricing = new OrderPricing();
+        $bonusDetail = new OrderDetail([
+            'type' => 'product',
+            'is_bonus' => true,
+            'qty' => 5,
+            'price' => 100,
+            'unit_price' => 100,
+            'product_discount' => 10,
+            'product_commission' => 5,
+        ]);
+
+        $line = $pricing->line($bonusDetail);
+        $this->assertSame(0.0, $line['subtotal']);
+        $this->assertSame(0.0, $line['discount']);
+        $this->assertSame(0.0, $line['commission']);
+        $this->assertSame(0.0, $line['total']);
+    }
+
+    public function test_order_totals_with_mixed_regular_and_bonus_items(): void
+    {
+        $pricing = new OrderPricing();
+
+        $regularDetail = new OrderDetail([
+            'type' => 'product',
+            'is_bonus' => false,
+            'qty' => 2,
+            'price' => 15.00,
+            'unit_price' => 15.00,
+            'product_discount' => 0,
+            'product_commission' => 0,
+        ]);
+
+        $bonusDetail1 = new OrderDetail([
+            'type' => 'product',
+            'is_bonus' => true,
+            'qty' => 3,
+            'price' => 0,
+            'unit_price' => 0,
+        ]);
+
+        $bonusDetail2 = new OrderDetail([
+            'type' => 'product',
+            'is_bonus' => true,
+            'qty' => 1,
+            'price' => 0,
+            'unit_price' => 0,
+        ]);
+
+        $totals = $pricing->totals([$regularDetail, $bonusDetail1, $bonusDetail2]);
+
+        $this->assertEquals([
+            'subtotal' => 30.00,
+            'total_discount' => 0.00,
+            'total_commission' => 0.00,
+            'total_price' => 30.00,
+        ], $totals);
+    }
+
+    public function test_order_totals_with_only_bonus_items(): void
+    {
+        $pricing = new OrderPricing();
+
+        $bonusDetail = new OrderDetail([
+            'type' => 'product',
+            'is_bonus' => true,
+            'qty' => 10,
+            'price' => 0,
+            'unit_price' => 0,
+        ]);
+
+        $totals = $pricing->totals([$bonusDetail]);
+
+        $this->assertEquals([
+            'subtotal' => 0.00,
+            'total_discount' => 0.00,
+            'total_commission' => 0.00,
+            'total_price' => 0.00,
+        ], $totals);
+    }
 }

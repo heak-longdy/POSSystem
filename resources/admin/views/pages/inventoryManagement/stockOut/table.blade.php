@@ -57,7 +57,7 @@
                             <span>{!! isset($item->product->uom->name) ? $item->product->uom->name : '--' !!}</span>
                         </div>
                         <div class="row table-row-5">
-                            <span>{!! isset($item->qty) ? $item->qty : 0 !!}</span>
+                            <span>{!! isset($item->qty) ? \App\Models\OrderDetail::formatQuantity($item->qty) : 0 !!}</span>
                         </div>
                         <div class="row table-row-10">
                             <span>{!! isset($item->created_date) ? $item->created_date : '--' !!}</span>

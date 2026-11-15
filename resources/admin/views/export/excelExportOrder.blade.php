@@ -36,11 +36,18 @@
       <td style="text-align:center">{{ $order?->shop?->name ?: 'Null' }}</td>
       <td style="text-align:center">{{ $order?->barber?->name ?: 'Null' }}</td>
       <td style="text-align:center">{{ $order?->customer?->name ?: ($order?->customer?->phone ?: 'Null') }}</td>
-      <td style="text-align:center">{{ $data->point ?? 'Null' }}</td>
-      <td style="text-align:center">{{ $data->product?->name ?: 'Null' }}</td>
-      <td style="text-align:center">{{ $data->product?->price ? '$' . number_format($data->product->price, 2) : 'Null' }}</td>
-      <td style="text-align:center">{{ $data->product_discount ? '$' . number_format($data->product_discount, 2) : 'Null' }}</td>
-      <td style="text-align:center">{{ $data->product_commission ? '$' . number_format($data->product_commission, 2) : 'Null' }}</td>
+      <td style="text-align:center">{{ !empty($data->is_bonus) ? '0' : ($data->point ?? 'Null') }}</td>
+      @if (!empty($data->is_bonus))
+          <td style="text-align:center">{{ ($data->product?->name ?: 'Product') . ' (Bonus)' }}</td>
+          <td style="text-align:center">$0.00</td>
+          <td style="text-align:center">$0.00</td>
+          <td style="text-align:center">$0.00</td>
+      @else
+          <td style="text-align:center">{{ $data->product?->name ?: 'Null' }}</td>
+          <td style="text-align:center">{{ $data->product?->price ? '$' . number_format($data->product->price, 2) : 'Null' }}</td>
+          <td style="text-align:center">{{ $data->product_discount ? '$' . number_format($data->product_discount, 2) : 'Null' }}</td>
+          <td style="text-align:center">{{ $data->product_commission ? '$' . number_format($data->product_commission, 2) : 'Null' }}</td>
+      @endif
       <td style="text-align:center">{{ $data->service?->name ?: 'Null' }}</td>
       <td style="text-align:center">{{ $data->service?->price ? '$' . number_format($data->service->price, 2) : '0$' }}</td>
       <td style="text-align:center">{{ $data->service_discount ? '$' . number_format($data->service_discount, 2) : '0$' }}</td>

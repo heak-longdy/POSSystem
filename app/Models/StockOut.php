@@ -22,6 +22,9 @@ class StockOut extends Model
         'request_by',
         'request_by_type'
     ];
+    protected $casts = [
+        'qty' => 'decimal:2',
+    ];
     protected $appends = [
         'created_date',
         'product_title',
@@ -31,7 +34,13 @@ class StockOut extends Model
         'uom_title',
         'request_by_title',
         'stock_status_title',
+        'formatted_qty',
     ];
+
+    public function getFormattedQtyAttribute(): string
+    {
+        return OrderDetail::formatQuantity($this->qty);
+    }
     public function product()
     {
         return $this->hasOne(Product::class, 'id', 'product_id');

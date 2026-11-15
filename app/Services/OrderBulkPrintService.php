@@ -83,7 +83,7 @@ class OrderBulkPrintService
         }
 
         // Calculate previous balances for invoice and delivery slip
-        $previousBalances = in_array($documentType, ['invoice', 'delivery_slip'])
+        $previousBalances = in_array($documentType, ['invoice', 'delivery_slip', 'delivery_slip_v1'])
             ? $this->invoiceService->previousBalanceForMany($orders)
             : [];
 
@@ -92,7 +92,7 @@ class OrderBulkPrintService
         if ($documentType !== 'consolidated') {
             foreach ($orders as $order) {
                 $cName = $order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $locale));
-                $cPhone = $order->customer?->phone ?: ($documentType === 'delivery_slip' ? '012399252' : '---');
+                $cPhone = $order->customer?->phone ?: (in_array($documentType, ['delivery_slip', 'delivery_slip_v1']) ? '012399252' : '---');
                 $cAddress = $order->customer?->address ?: ($order->shop?->address ?: ($locale === 'km' ? 'ផ្លូវជាតិលេខ៤ សង្កាត់ស្នោរ ក្រុងសំរោង ខេត្តតាកែវ' : 'National Road 4, Sangkat Sno, Samraong, Takeo'));
 
                 $items[] = [
@@ -125,7 +125,8 @@ class OrderBulkPrintService
                         continue;
                     }
 
-                    $qty = (int) ($detail->qty ?: 0);
+                    $isBonus = (bool) ($detail->is_bonus ?? false);
+                    $qty = $isBonus ? (float) ($detail->qty ?: 0) : (int) ($detail->qty ?: 0);
                     if ($qty <= 0) {
                         continue;
                     }

@@ -47,7 +47,7 @@
                             <span>{!! isset($item->product->uom->name) ? $item->product->uom->name : '--' !!}</span>
                         </div>
                         <div class="row table-row-9">
-                            <span>{!! isset($item->current_stock) ? $item->current_stock : 0 !!}</span>
+                            <span>{!! isset($item->current_stock) ? \App\Models\OrderDetail::formatQuantity($item->current_stock) : 0 !!}</span>
                         </div>
                         <div class="row table-row-12 text right">
                             <span>{!! $item->total_cost_title ?? '$0.00' !!}</span>

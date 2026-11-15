@@ -166,6 +166,8 @@ class OrderBulkPrintTest extends TestCase
         $response->assertSee(__('order_bulk_print.table.created_by'));
         $response->assertSee($this->permittedUser->name);
         $response->assertSee(route('admin-order-bulk-print-preview'));
+        $response->assertSee('btn-print-delivery-v1');
+        $response->assertSee(__('order_bulk_print.selection.print_delivery_slips_v1'));
     }
 
     public function test_bulk_print_translates_status_column_in_khmer_and_english(): void
@@ -361,6 +363,30 @@ class OrderBulkPrintTest extends TestCase
         $responseEn->assertSee('btn-view-order-detail');
         $responseEn->assertSee(route('admin-order-detail', $order1->id));
         $responseEn->assertSee(route('admin-order-detail', $order2->id));
+
+        // Test Delivery Slip V1 preview in English and Khmer
+        $responseV1En = $this->post(route('admin-order-bulk-print-preview'), [
+            'document_type' => 'delivery_slip_v1',
+            'print_locale' => 'en',
+            'order_ids' => [$order1->id, $order2->id],
+        ])->assertOk();
+
+        $responseV1En->assertSee('INV-001');
+        $responseV1En->assertSee('INV-002');
+        $responseV1En->assertSee('Bulk Delivery Slip V1 Preview');
+        $responseV1En->assertSee('Delivery Slip List');
+        $responseV1En->assertSee('bulk-invoice-sidebar');
+        $responseV1En->assertSee('btn-view-order-detail');
+        $responseV1En->assertSee('bulk_print_delivery_slip_v1_' . $order1->id . '_en');
+
+        $responseV1Km = $this->post(route('admin-order-bulk-print-preview'), [
+            'document_type' => 'delivery_slip_v1',
+            'print_locale' => 'km',
+            'order_ids' => [$order1->id, $order2->id],
+        ])->assertOk();
+
+        $responseV1Km->assertSee('វិក្ក័យបត្រ');
+        $responseV1Km->assertSee('bulk_print_delivery_slip_v1_' . $order1->id . '_km');
 
         // Test GET preview request as fetched by MDI tab manager
         $responseGet = $this->get(route('admin-order-bulk-print-preview', [

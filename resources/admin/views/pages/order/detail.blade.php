@@ -146,6 +146,11 @@
                                 <i data-feather="printer"></i>
                                 <span>{{ __('order.detail.print_slip') }}</span>
                             </button>
+
+                            <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2V1()">
+                                <i data-feather="printer"></i>
+                                <span>{{ __('order.detail.print_slip_v1') }}</span>
+                            </button>
                         </div>
 
                         <a href="{{ route('admin-' . ($routeName ?? 'order') . '-list', $order->payment_status ?: 'Pending') }}" class="btn btn-system btn-system-outline btn-system-neutral">
@@ -240,13 +245,18 @@
                 <div class="detail-columns-layout">
                     <!-- Left Main Column (70%) -->
                     <div class="detail-col-main">
+                        @php
+                            $regularDetails = $order->orderDetails ? $order->orderDetails->where('is_bonus', false) : collect();
+                            $bonusDetails = $order->orderDetails ? $order->orderDetails->where('is_bonus', true) : collect();
+                        @endphp
+
                         <!-- Ordered Products Table -->
                         <section class="detail-card">
                             <div class="detail-card-header">
                                 <div class="card-title-group">
                                     <i data-feather="package"></i>
                                     <h2>{{ __('order.detail.item_details') }}</h2>
-                                    <span class="count-badge">{{ $order->orderDetails ? $order->orderDetails->count() : 0 }}</span>
+                                    <span class="count-badge">{{ $regularDetails->count() }}</span>
                                 </div>
                             </div>
 
@@ -265,7 +275,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($order->orderDetails as $index => $detail)
+                                        @forelse ($regularDetails as $detail)
                                             @php
                                                 $isService = $detail->type === 'service';
                                                 $rawItemName = $isService
@@ -277,14 +287,14 @@
                                                     : $rawItemName;
                                                 $price = (float) ($detail->price ?? 0);
                                                 $unitPrice = (float) (($detail->unit_price !== null && $detail->unit_price !== '') ? $detail->unit_price : ($detail->price ?? 0));
-                                                $qty = (int) ($detail->qty ?: 1);
+                                                $qty = \App\Models\OrderDetail::formatQuantity($detail->qty);
                                                 $line = app(\App\Services\OrderPricing::class)->line($detail);
                                                 $totalDiscount = (float) ($line['discount'] ?? 0);
                                                 $unitDiscount = (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0));
                                                 $lineSubtotal = $line['total'];
                                             @endphp
                                             <tr>
-                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $loop->iteration }}</td>
                                                 <td>
                                                     <div class="item-name-cell">
                                                         <strong>{{ $itemName }}</strong>
@@ -320,6 +330,67 @@
                                 </table>
                             </div>
                         </section>
+
+                        @if ($bonusDetails->isNotEmpty())
+                            <!-- Bonus Items (Free) Section -->
+                            <section class="detail-card bonus-detail-card" style="margin-top: 1.5rem; border: 1px solid #a7f3d0; background: #ffffff;">
+                                <div class="detail-card-header" style="background: #f0fdf4; border-bottom: 1px solid #dcfce7; padding: 0.875rem 1.25rem;">
+                                    <div class="card-title-group" style="display: flex; align-items: center; gap: 8px;">
+                                        <i data-feather="gift" style="color: #059669; width: 18px; height: 18px;"></i>
+                                        <h2 style="color: #065f46; font-size: 15px; font-weight: 600; margin: 0;">{{ __('order.bonus_items_title') }}</h2>
+                                        <span class="count-badge" style="background: #10b981; color: #fff;">{{ $bonusDetails->count() }}</span>
+                                        <span class="badge" style="background-color: #d1fae5; color: #047857; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; border: 1px solid #a7f3d0;">{{ __('order.bonus_free_tag') }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="detail-data-table detail-products-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px;">#</th>
+                                                <th>{{ __('order.table.item') }}</th>
+                                                <th class="text-center">{{ __('product.uom') }}</th>
+                                                <th class="text-right">{{ __('order.detail.unit_price') }}</th>
+                                                <th class="text-center">{{ __('order.detail.quantity') }}</th>
+                                                <th class="text-right">{{ __('order.detail.line_total') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($bonusDetails as $bDetail)
+                                                @php
+                                                    $rawItemName = $bDetail->product?->name ?? '---';
+                                                    $itemCode = $bDetail->product?->code ?? null;
+                                                    $itemName = ($itemCode && ! str_starts_with($rawItemName, $itemCode . ' - '))
+                                                        ? ($itemCode . ' - ' . $rawItemName)
+                                                        : $rawItemName;
+                                                    $uomName = $bDetail->product?->uom?->name ?? '---';
+                                                    $qty = \App\Models\OrderDetail::formatQuantity($bDetail->qty);
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>
+                                                        <div class="item-name-cell" style="display: flex; align-items: flex-start; gap: 0px;">
+                                                            <strong>{{ $itemName }}</strong>
+                                                            <span class="badge" style="background-color: #ecfdf5; color: #059669; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; border: 1px solid #a7f3d0;">{{ __('order.bonus_free_tag') }}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <span class="item-uom-badge" style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #475569;">{{ $uomName }}</span>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <span class="badge" style="background-color: #ecfdf5; color: #059669; font-weight: 600; font-size: 11px; padding: 2px 6px; border-radius: 4px;">$0.00</span>
+                                                    </td>
+                                                    <td class="text-center font-weight-bold">{{ $qty }}</td>
+                                                    <td class="text-right font-weight-bold" style="color: #059669;">
+                                                        $0.00 <small style="font-weight: normal; color: #10b981;">({{ __('order.bonus_free_tag') }})</small>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        @endif
 
                         @if ($order->incomingBalanceTransfers->count() > 0)
                             <!-- Consolidated Previous Orders Table -->
@@ -840,6 +911,14 @@
                 </div>
                 <div class="print-only-invoice print-template-2 print-lang-en">
                     @include('admin::pages.order.invoice-template-02', ['printLocale' => 'en'])
+                </div>
+
+                <!-- Print Only Invoice View - Template 2 V1 (Matching design in invoice_02.png with Bonus items) -->
+                <div class="print-only-invoice print-template-2-v1 print-lang-km">
+                    @include('admin::pages.order.invoice-template-02-v1', ['printLocale' => 'km'])
+                </div>
+                <div class="print-only-invoice print-template-2-v1 print-lang-en">
+                    @include('admin::pages.order.invoice-template-02-v1', ['printLocale' => 'en'])
                 </div>
             </div>
         </div>
@@ -1934,15 +2013,27 @@
                 display: block !important;
             }
 
+            #bookingDetailApp.printing-template2-v1.print-lang-km .print-template-2-v1.print-lang-km {
+                display: block !important;
+            }
+            #bookingDetailApp.printing-template2-v1.print-lang-en .print-template-2-v1.print-lang-en {
+                display: block !important;
+            }
+
             /* Strict isolation: never allow the inactive template or language to show */
             #bookingDetailApp.printing-template1 .print-template-2,
+            #bookingDetailApp.printing-template1 .print-template-2-v1,
             #bookingDetailApp.printing-template2 .print-template-1,
+            #bookingDetailApp.printing-template2 .print-template-2-v1,
+            #bookingDetailApp.printing-template2-v1 .print-template-1,
+            #bookingDetailApp.printing-template2-v1 .print-template-2,
             #bookingDetailApp.print-lang-km .print-lang-en,
             #bookingDetailApp.print-lang-en .print-lang-km {
                 display: none !important;
             }
 
-            .print-template-2 .pos-slip-sheet {
+            .print-template-2 .pos-slip-sheet,
+            .print-template-2-v1 .pos-slip-sheet {
                 padding: 0 !important;
                 margin: 0 !important;
                 width: 100% !important;
@@ -2230,7 +2321,7 @@
                     this.activePrintTemplate = 'template1';
                     const appEl = document.getElementById('bookingDetailApp');
                     if (appEl) {
-                        appEl.classList.remove('printing-template2');
+                        appEl.classList.remove('printing-template2', 'printing-template2-v1');
                         appEl.classList.add('printing-template1');
                         appEl.classList.remove('print-lang-km', 'print-lang-en');
                         appEl.classList.add('print-lang-' + this.printLanguage);
@@ -2246,8 +2337,24 @@
                     this.activePrintTemplate = 'template2';
                     const appEl = document.getElementById('bookingDetailApp');
                     if (appEl) {
-                        appEl.classList.remove('printing-template1');
+                        appEl.classList.remove('printing-template1', 'printing-template2-v1');
                         appEl.classList.add('printing-template2');
+                        appEl.classList.remove('print-lang-km', 'print-lang-en');
+                        appEl.classList.add('print-lang-' + this.printLanguage);
+                    }
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            window.print();
+                        }, 60);
+                    });
+                },
+                printTemplate2V1(lang = null) {
+                    if (lang) this.printLanguage = lang;
+                    this.activePrintTemplate = 'template2-v1';
+                    const appEl = document.getElementById('bookingDetailApp');
+                    if (appEl) {
+                        appEl.classList.remove('printing-template1', 'printing-template2');
+                        appEl.classList.add('printing-template2-v1');
                         appEl.classList.remove('print-lang-km', 'print-lang-en');
                         appEl.classList.add('print-lang-' + this.printLanguage);
                     }

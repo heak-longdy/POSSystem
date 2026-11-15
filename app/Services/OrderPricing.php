@@ -80,6 +80,15 @@ class OrderPricing
 
     public function line(OrderDetail $detail): array
     {
+        if ($detail->is_bonus) {
+            return [
+                'subtotal' => 0.0,
+                'discount' => 0.0,
+                'commission' => 0.0,
+                'total' => 0.0,
+            ];
+        }
+
         $type = $detail->type === 'service' ? 'service' : 'product';
         $price = (float) ($detail->price ?? 0);
         $qty = max(1, (int) ($detail->qty ?? 1));

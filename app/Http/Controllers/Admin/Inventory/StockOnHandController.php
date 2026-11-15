@@ -106,7 +106,7 @@ class StockOnHandController extends Controller
                     $item->product_title ?? ($item->product->name ?? '---'),
                     $item->category_title ?? ($item->category->name ?? '---'),
                     $item->uom_title ?? ($item->uom->name ?? '---'),
-                    $item->current_stock ?? 0,
+                    $item->formatted_current_stock ?? \App\Models\OrderDetail::formatQuantity($item->current_stock ?? 0),
                     $item->total_cost_title ?? '$0.00',
                     $item->total_amount_title ?? '$0.00',
                     $item->created_date ?? '',

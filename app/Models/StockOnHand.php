@@ -19,6 +19,9 @@ class StockOnHand extends Model
         'request_by',
         'request_by_type'
     ];
+    protected $casts = [
+        'current_stock' => 'decimal:2',
+    ];
     protected $appends = [
         'created_date',
         'product_title',
@@ -34,7 +37,13 @@ class StockOnHand extends Model
         'unit_cost_title',
         'unit_price',
         'unit_price_title',
+        'formatted_current_stock',
     ];
+
+    public function getFormattedCurrentStockAttribute(): string
+    {
+        return OrderDetail::formatQuantity($this->current_stock);
+    }
     public function product()
     {
         return $this->hasOne(Product::class, 'id', 'product_id');

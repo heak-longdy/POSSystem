@@ -72,6 +72,16 @@ class Order extends Model
         return $this->hasMany(OrderDetail::class, 'order_id');
     }
 
+    public function bonusDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'order_id')->where('is_bonus', true);
+    }
+
+    public function regularDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'order_id')->where('is_bonus', false);
+    }
+
     public function payments()
     {
         return $this->hasMany(OrderPayment::class, 'order_id')

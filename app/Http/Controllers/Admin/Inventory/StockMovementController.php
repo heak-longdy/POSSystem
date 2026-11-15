@@ -100,7 +100,7 @@ class StockMovementController extends Controller
                     $item->product_title ?? ($item->product->name ?? '---'),
                     $item->category_title ?? ($item->category->name ?? '---'),
                     $item->uom_title ?? ($item->uom->name ?? '---'),
-                    $item->qty ?? 0,
+                    $item->formatted_qty ?? \App\Models\OrderDetail::formatQuantity($item->qty ?? 0),
                     $item->stock_status_title ?? '---',
                     $item->from_title ?? '---',
                     $item->to_title ?? '---',

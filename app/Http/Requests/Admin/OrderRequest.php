@@ -37,7 +37,8 @@ class OrderRequest extends FormRequest
             ],
             'order_date' => 'required|date',
             'delivery_date' => 'nullable|date',
-            'dataCarts' => 'required|json',
+            'dataCarts' => 'required_without:dataBonusCarts|nullable|json',
+            'dataBonusCarts' => 'nullable|json',
             'partial_payment_amount' => 'nullable|numeric|min:0|multiple_of:0.01',
             'partial_payment_note' => 'nullable|string|max:500',
             'creation_request_key' => 'nullable|string|max:36',
@@ -49,7 +50,9 @@ class OrderRequest extends FormRequest
     {
         return [
             'dataCarts.required'   => __('order.validation.cart_required'),
+            'dataCarts.required_without' => __('order.validation.cart_required'),
             'dataCarts.json'       => __('order.validation.cart_invalid'),
+            'dataBonusCarts.json'  => __('order.validation.cart_invalid'),
             'shop_id.required'     => __('order.validation.shop_required'),
             'shop_id.exists'       => __('order.validation.shop_invalid'),
             'customer_id.required' => __('order.validation.customer_required'),

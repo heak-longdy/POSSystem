@@ -273,8 +273,8 @@
                                                     <template x-if="item.product_type === 'product'">
                                                         <span class="item-stock-val"
                                                             :class="{
-                                                                'stock-out': Number(item.current_stock ?? 0) <= 0,
-                                                                'stock-warning': Number(item.current_stock ?? 0) > 0 && Number(item.current_stock ?? 0) < Number(item.product_qty)
+                                                                'stock-out': availableStock(item) <= 0,
+                                                                'stock-warning': availableStock(item) > 0 && availableStock(item) < Number(item.product_qty)
                                                             }"
                                                             x-text="item.current_stock !== undefined && item.current_stock !== null ? item.current_stock : '---'">
                                                         </span>
@@ -394,6 +394,198 @@
                         </template>
                     </div>
                 </section>
+
+                <!-- Bonus Items Section -->
+                <section class="booking-pos-items-section bonus-items-pos-section">
+                    <div class="booking-pos-items-header bonus-items-header">
+                        <div class="header-left">
+                            <div class="title-wrap">
+                                <span class="bonus-header-icon-box">
+                                    <i data-feather="gift"></i>
+                                </span>
+                                <h2>{{ __('order.bonus_items_title') }}</h2>
+                                <span class="bonus-tag-free">{{ __('order.bonus_free_tag') }}</span>
+                            </div>
+                            <span class="items-count-badge bonus-count-badge" x-text="(bonusCart?.length || 0) + ' ' + (lblItems || 'Items')"></span>
+                        </div>
+                        <div class="header-actions">
+                            <button type="button" class="btn-reset-order-items btn-reset-bonus-items" :disabled="!canEditOrderItems() || !bonusCart?.length"
+                                @click="resetBonusCart()" title="{{ __('order.button.reset_bonus') }}">
+                                <i data-feather="trash-2"></i>
+                                <span>{{ __('order.button.reset_bonus') }}</span>
+                            </button>
+                            <button type="button" class="booking-pos-add-btn order-add-bonus-product btn-main-add-bonus"
+                                x-show="bonusCart?.length > 0"
+                                @click="openProductPickerForBonus($event.currentTarget)"
+                                :disabled="!canEditOrderItems() || !formData.shop_id" aria-haspopup="dialog"
+                                style="display: none;">
+                                <i data-feather="plus"></i>
+                                <span>{{ __('order.product_picker.add_bonus_product') }}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="booking-pos-items-body">
+                        <!-- Validation Messages for Bonus Items Section -->
+                        <template x-if="bonusValidationMessages().length">
+                            <div class="booking-error-summary bonus-error-summary" role="alert"
+                                :id="$id('bonus-order-error')">
+                                <div class="booking-error-summary-list" style="display: flex; flex-direction: column; grid-gap: 5px;">
+                                    <template x-for="message in bonusValidationMessages()" :key="message">
+                                        <div style="display: flex; align-items: flex-start; gap: 6px;">
+                                            <span x-html="getValidationIcon(message)" style="display: inline-flex; align-items: center; line-height: 1; margin-top: 3px;"></span>
+                                            <span x-text="message"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Empty State for Bonus -->
+                        <template x-if="!bonusCart?.length">
+                            <div class="bonus-pos-items-empty">
+                                <div class="bonus-empty-icon-box">
+                                    <i data-feather="gift"></i>
+                                </div>
+                                <h3 class="bonus-empty-title">{{ __('order.empty_bonus_cart.title') }}</h3>
+                                <p class="bonus-empty-desc">{{ __('order.empty_bonus_cart.description') }}</p>
+                                <button type="button" class="booking-pos-add-btn order-add-bonus-product btn-empty-add-bonus"
+                                    @click="openProductPickerForBonus($event.currentTarget)"
+                                    :disabled="!canEditOrderItems() || !formData.shop_id" aria-haspopup="dialog">
+                                    <i data-feather="plus"></i>
+                                    <span>{{ __('order.product_picker.add_bonus_product') }}</span>
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- Selected Bonus Items Table -->
+                        <template x-if="bonusCart?.length > 0">
+                            <div class="order-items-table-wrap bonus-items-table-wrap">
+                                <table class="order-items-table bonus-items-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="col-product">{{ __('order.table.product') }}</th>
+                                            <th scope="col" class="col-stock">{{ __('order.current_stock') }}</th>
+                                            <th scope="col" class="col-price">{{ __('order.unit_price') }}</th>
+                                            <th scope="col" class="col-qty">{{ __('order.qty') }}</th>
+                                            <th scope="col" class="col-total">{{ __('order.total') }}</th>
+                                            <th scope="col" class="col-action"><span>{{ __('order.table.actions') }}</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(item, index) in bonusCart" :key="`bonus-${item.product_id}-${index}`">
+                                            <tr class="booking-pos-cart-item bonus-cart-item">
+                                                <td class="col-product">
+                                                    <div class="product-cell">
+                                                        <div class="product-thumb bonus-thumb">
+                                                            <img :src="item.image" :alt="item.name"
+                                                                onerror="this.src='{{ asset('images/logo/default.png') }}'">
+                                                        </div>
+                                                        <div class="product-details">
+                                                            <div class="bonus-name-row">
+                                                                <h4 class="product-name" x-text="item.name"></h4>
+                                                                <span class="bonus-tag-inline">{{ __('order.bonus_free_tag') }}</span>
+                                                            </div>
+                                                            <div class="product-meta">
+                                                                <template x-if="item.code">
+                                                                    <span class="item-type-badge item-type-badge--code">
+                                                                        <span class="item-meta-label">{{ __('order.product_picker.code') }}:</span>
+                                                                        <span x-text="item.code"></span>
+                                                                    </span>
+                                                                </template>
+                                                                <span class="item-type-badge item-type-badge--uom">
+                                                                    <span class="item-meta-label">{{ __('product.uom') }}:</span>
+                                                                    <span x-text="item.uom_title || '—'"></span>
+                                                                </span>
+                                                                <template x-if="item.category_title">
+                                                                    <span class="item-type-badge item-type-badge--category">
+                                                                        <span class="item-meta-label">{{ __('product.category') }}:</span>
+                                                                        <span x-text="item.category_title || '—'"></span>
+                                                                    </span>
+                                                                </template>
+                                                            </div>
+                                                            <template x-if="item?.error">
+                                                                <div class="item-stock-error">
+                                                                    <i data-feather="alert-triangle"></i>
+                                                                    <span>{{ __('order.limited_or_out_of_stock') }}</span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="col-stock">
+                                                    <div class="cell-label-mobile">{{ __('order.current_stock') }}</div>
+                                                    <span class="item-stock-val"
+                                                        :class="{
+                                                            'stock-out': availableStock(item) <= 0,
+                                                            'stock-warning': availableStock(item) > 0 && availableStock(item) < Number(item.product_qty)
+                                                        }"
+                                                        x-text="item.current_stock !== undefined && item.current_stock !== null ? item.current_stock : '---'">
+                                                    </span>
+                                                </td>
+                                                <td class="col-price">
+                                                    <div class="cell-label-mobile">{{ __('order.unit_price') }}</div>
+                                                    <span class="bonus-free-pill">$0.00 <span class="pill-label">({{ __('order.bonus_free_tag') }})</span></span>
+                                                </td>
+                                                <td class="col-qty">
+                                                    <div class="cell-label-mobile">{{ __('order.qty') }}</div>
+                                                    <div class="booking-pos-qty-pill"
+                                                        :class="{ 'has-quantity-error': hasBonusQuantityValidationError(item) }"
+                                                        aria-label="Quantity selector">
+                                                        <button type="button" class="qty-pill-btn qty-btn-minus"
+                                                            :disabled="!canEditOrderItems() || Number(item.product_qty) <= 0.01"
+                                                            @click="decreaseBonusQty(item)"
+                                                            aria-label="Decrease">&minus;</button>
+                                                        <input type="number" min="0.01" step="any" inputmode="decimal"
+                                                            x-model="item.product_qty" :disabled="!canEditOrderItems()"
+                                                            :aria-invalid="hasBonusQuantityValidationError(item)"
+                                                            :aria-describedby="hasBonusQuantityValidationError(item) ? $id('bonus-order-error') : null"
+                                                            @input="bonusQtyRealTimeAction(item)"
+                                                            @blur="normalizeBonusQty(item)"
+                                                            @change="normalizeBonusQty(item)"
+                                                            class="qty-pill-input">
+                                                        <button type="button" class="qty-pill-btn qty-btn-plus"
+                                                            :disabled="!canEditOrderItems()" @click="increaseBonusQty(item)"
+                                                            aria-label="Increase">+</button>
+                                                    </div>
+                                                </td>
+                                                <td class="col-total">
+                                                    <div class="cell-label-mobile">{{ __('order.total') }}</div>
+                                                    <strong class="item-line-total bonus-line-total">$0.00</strong>
+                                                </td>
+                                                <td class="col-action">
+                                                    <button type="button" class="btn-item-action btn-item-remove"
+                                                        @click="removeBonusCartItem(item, index)"
+                                                        title="{{ __('order.action.delete') }}"
+                                                        aria-label="{{ __('order.action.delete') }}"
+                                                        :disabled="!canEditOrderItems()">
+                                                        <i data-feather="trash-2"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                                <div class="order-items-footer-bar bonus-footer-bar">
+                                    <div class="footer-left">
+                                        <button type="button" class="booking-pos-add-btn order-add-bonus-product btn-table-add-more-bonus"
+                                            @click="openProductPickerForBonus($event.currentTarget)"
+                                            :disabled="!canEditOrderItems() || !formData.shop_id" aria-haspopup="dialog">
+                                            <i data-feather="plus"></i>
+                                            <span>{{ __('order.product_picker.add_bonus_product') }}</span>
+                                        </button>
+                                    </div>
+                                    <div class="footer-right">
+                                        <div class="footer-summary-badge bonus-summary-badge">
+                                            <span class="label">{{ __('order.bonus_items_title') }}:</span>
+                                            <strong class="value" x-text="(bonusCart?.length || 0) + ' ' + (lblItems || 'Items') + ' ($0.00)'"></strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </section>
             </div>
 
             <!-- Right Sidebar: Cart & Billing -->
@@ -407,10 +599,18 @@
                                 <span class="booking-ref-badge">{{ $orderReference }}</span>
                             @endif
                         </div>
-                        <span class="cart-items-counter">
-                            <i data-feather="shopping-bag"></i>
-                            <span x-text="(dataCart?.length || 0) + ' ' + (lblItems || 'Items')"></span>
-                        </span>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span class="cart-items-counter">
+                                <i data-feather="shopping-bag"></i>
+                                <span x-text="(dataCart?.length || 0) + ' ' + (lblItems || 'Items')"></span>
+                            </span>
+                            <template x-if="bonusCart?.length > 0">
+                                <span class="cart-items-counter" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;" title="{{ __('order.bonus_items_title') }}">
+                                    <i data-feather="gift" style="width: 14px; height: 14px;"></i>
+                                    <span x-text="bonusCart.length + ' ' + @js(__('order.bonus_item_label'))"></span>
+                                </span>
+                            </template>
+                        </div>
                     </div>
 
                     <template x-if="validationMessages('details').length">
@@ -731,11 +931,17 @@
                         line-height: 1.5 !important;
                     }
                     .booking-order-ui .booking-pos-items-section .booking-quantity-error,
+                    .booking-order-ui .booking-pos-items-section .booking-unit-price-error,
+                    .booking-order-ui .bonus-items-pos-section .bonus-error-summary {
+                        margin: 16px 20px;
+                    }
+                    .booking-order-ui .booking-pos-items-section .booking-quantity-error,
                     .booking-order-ui .booking-pos-items-section .booking-unit-price-error {
-                        display: flex; align-items: flex-start; gap: 6px; margin: 16px 20px;
+                        display: flex; align-items: flex-start; gap: 6px;
                     }
                     .booking-order-ui .booking-quantity-error > span:first-child,
-                    .booking-order-ui .booking-unit-price-error > span:first-child {
+                    .booking-order-ui .booking-unit-price-error > span:first-child,
+                    .booking-order-ui .bonus-items-pos-section .bonus-error-summary .booking-error-summary-list > div > span:first-child {
                         display: inline-flex; flex-shrink: 0; margin-top: 2px;
                     }
                     .booking-order-ui .booking-pos-items-empty {
@@ -933,6 +1139,318 @@
                     }
                     @media (prefers-reduced-motion: reduce) {
                         .booking-order-ui .booking-pos-items-section * { transition: none !important; }
+                    }
+
+                    /* ========================================================
+                       Bonus Items (Free) Section Styling
+                       ======================================================== */
+                    .booking-order-ui .bonus-items-pos-section {
+                        margin-top: 5px !important;
+                    }
+
+                    /* Header styling */
+                    .booking-order-ui .bonus-items-header {
+                        display: flex !important;
+                        align-items: center !important;
+                        justify-content: space-between !important;
+                        flex-wrap: wrap !important;
+                        gap: 16px !important;
+                        padding: 20px !important;
+                        background: #fff !important;
+                        border-bottom: 1px solid var(--order-border) !important;
+                    }
+                    .booking-order-ui .bonus-items-header :is(.header-left, .title-wrap, .header-actions) {
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 10px !important;
+                    }
+                    .booking-order-ui .bonus-items-header .header-left {
+                        flex-wrap: wrap !important;
+                    }
+                    .booking-order-ui .bonus-items-header .title-wrap .bonus-header-icon-box {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        width: 38px !important;
+                        height: 38px !important;
+                        padding: 9px !important;
+                        border-radius: 11px !important;
+                        background: #ecfdf5 !important;
+                        border: 1px solid #d1fae5 !important;
+                        color: #10b981 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    .booking-order-ui .bonus-items-header .title-wrap .bonus-header-icon-box svg {
+                        width: 20px !important;
+                        height: 20px !important;
+                        padding: 0 !important;
+                        border-radius: 0 !important;
+                        background: transparent !important;
+                        color: #10b981 !important;
+                    }
+                    .booking-order-ui .bonus-tag-free {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        padding: 2.5px 8px !important;
+                        border-radius: 9999px !important;
+                        background: #ecfdf5 !important;
+                        color: #059669 !important;
+                        border: 1px solid #a7f3d0 !important;
+                        font-size: 11px !important;
+                        font-weight: 700 !important;
+                        text-transform: uppercase !important;
+                        letter-spacing: 0.3px !important;
+                        line-height: 1.3 !important;
+                    }
+                    .booking-order-ui .bonus-count-badge {
+                        padding: 4px 9px !important;
+                        border: 1px solid var(--order-border) !important;
+                        border-radius: 7px !important;
+                        background: var(--order-soft) !important;
+                        color: #475569 !important;
+                        font-size: 11px !important;
+                        font-weight: 600 !important;
+                        white-space: nowrap !important;
+                    }
+
+                    /* Add Bonus Product Button */
+                    .booking-order-ui .bonus-items-pos-section .order-add-bonus-product,
+                    .booking-order-ui .order-add-bonus-product {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        gap: 7px !important;
+                        min-height: 42px !important;
+                        height: auto !important;
+                        min-width: 0 !important;
+                        padding: 9px 16px !important;
+                        border: 1px solid #059669 !important;
+                        border-radius: 9px !important;
+                        background: #10b981 !important;
+                        color: #ffffff !important;
+                        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.16) !important;
+                        font-size: 12.5px !important;
+                        font-weight: 600 !important;
+                        line-height: 1.5 !important;
+                        cursor: pointer !important;
+                        width: auto !important;
+                        flex-shrink: 0 !important;
+                        white-space: nowrap !important;
+                        transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease !important;
+                    }
+                    .booking-order-ui .order-add-bonus-product:hover:not(:disabled) {
+                        background: #059669 !important;
+                        border-color: #047857 !important;
+                        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25) !important;
+                        transform: translateY(-1px) !important;
+                    }
+                    .booking-order-ui .order-add-bonus-product:active:not(:disabled) {
+                        background: #047857 !important;
+                        border-color: #065f46 !important;
+                        transform: translateY(0) !important;
+                        box-shadow: 0 1px 2px rgba(16, 185, 129, 0.2) !important;
+                    }
+                    .booking-order-ui .order-add-bonus-product:focus-visible {
+                        outline: 2px solid #10b981 !important;
+                        outline-offset: 2px !important;
+                        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+                    }
+                    .booking-order-ui .order-add-bonus-product:disabled {
+                        opacity: 0.45 !important;
+                        cursor: not-allowed !important;
+                        box-shadow: none !important;
+                        transform: none !important;
+                    }
+                    .booking-order-ui .order-add-bonus-product svg {
+                        width: 16px !important;
+                        height: 16px !important;
+                        flex-shrink: 0 !important;
+                        color: inherit !important;
+                    }
+
+                    /* Empty State Container */
+                    .booking-order-ui .bonus-pos-items-empty {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        text-align: center !important;
+                        margin: 16px 20px !important;
+                        padding: 24px 20px !important;
+                        border: 1px dashed #cbd5e1 !important;
+                        border-radius: 12px !important;
+                        background: #fafcfb !important;
+                        transition: border-color 0.15s ease, background-color 0.15s ease !important;
+                    }
+                    .booking-order-ui .bonus-pos-items-empty:hover {
+                        border-color: #a7f3d0 !important;
+                        background: #f8fdfa !important;
+                    }
+                    .booking-order-ui .bonus-pos-items-empty .bonus-empty-icon-box {
+                        display: grid !important;
+                        place-items: center !important;
+                        width: 44px !important;
+                        height: 44px !important;
+                        margin-bottom: 10px !important;
+                        border: 1px solid #d1fae5 !important;
+                        border-radius: 12px !important;
+                        background: #ecfdf5 !important;
+                        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08) !important;
+                    }
+                    .booking-order-ui .bonus-pos-items-empty .bonus-empty-icon-box svg {
+                        width: 22px !important;
+                        height: 22px !important;
+                        color: #10b981 !important;
+                    }
+                    .booking-order-ui .bonus-pos-items-empty .bonus-empty-title {
+                        margin: 0 0 4px !important;
+                        font-size: 14.5px !important;
+                        font-weight: 700 !important;
+                        color: var(--order-ink, #0f172a) !important;
+                        letter-spacing: -0.2px !important;
+                    }
+                    .booking-order-ui .bonus-pos-items-empty .bonus-empty-desc {
+                        max-width: 380px !important;
+                        margin: 0 0 14px !important;
+                        font-size: 12px !important;
+                        line-height: 1.5 !important;
+                        color: #64748b !important;
+                    }
+                    .booking-order-ui .bonus-pos-items-empty .btn-empty-add-bonus {
+                        margin-top: 2px !important;
+                    }
+
+                    /* Table & Bonus Item List Layout */
+                    .booking-order-ui .bonus-items-table tbody tr.bonus-cart-item:is(:hover, :focus-within) {
+                        background: #f6fbf8 !important;
+                    }
+                    .booking-order-ui .bonus-thumb {
+                        border-color: #d1fae5 !important;
+                    }
+                    .booking-order-ui .bonus-name-row {
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 6px !important;
+                        flex-wrap: wrap !important;
+                    }
+                    .booking-order-ui .bonus-tag-inline {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        padding: 1.5px 6px !important;
+                        border-radius: 9999px !important;
+                        background: #ecfdf5 !important;
+                        color: #059669 !important;
+                        border: 1px solid #a7f3d0 !important;
+                        font-size: 10px !important;
+                        font-weight: 700 !important;
+                        text-transform: uppercase !important;
+                        letter-spacing: 0.3px !important;
+                        line-height: 1.4 !important;
+                    }
+                    .booking-order-ui .bonus-items-table .item-type-badge--code {
+                        background: #f1f5f9 !important;
+                        color: #475569 !important;
+                    }
+                    .booking-order-ui .bonus-free-pill {
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        gap: 4px !important;
+                        padding: 3px 8px !important;
+                        border-radius: 6px !important;
+                        background: #ecfdf5 !important;
+                        color: #059669 !important;
+                        border: 1px solid #d1fae5 !important;
+                        font-size: 12px !important;
+                        font-weight: 700 !important;
+                        font-variant-numeric: tabular-nums !important;
+                    }
+                    .booking-order-ui .bonus-free-pill .pill-label {
+                        font-size: 10px !important;
+                        font-weight: 600 !important;
+                        opacity: 0.85 !important;
+                    }
+                    .booking-order-ui .bonus-line-total {
+                        color: #059669 !important;
+                        font-size: 14px !important;
+                        font-weight: 700 !important;
+                        font-variant-numeric: tabular-nums !important;
+                    }
+
+                    /* Table Footer */
+                    .booking-order-ui .bonus-footer-bar .btn-table-add-more-bonus {
+                        background: #ffffff !important;
+                        color: #059669 !important;
+                        border-color: #a7f3d0 !important;
+                        box-shadow: none !important;
+                    }
+                    .booking-order-ui .bonus-footer-bar .btn-table-add-more-bonus:hover:not(:disabled) {
+                        background: #10b981 !important;
+                        color: #ffffff !important;
+                        border-color: #10b981 !important;
+                        box-shadow: 0 3px 8px rgba(16, 185, 129, 0.2) !important;
+                    }
+                    .booking-order-ui .bonus-summary-badge {
+                        display: flex !important;
+                        align-items: center !important;
+                        gap: 10px !important;
+                        padding: 6px 12px !important;
+                        border-radius: 8px !important;
+                        background: #ecfdf5 !important;
+                        border: 1px solid #a7f3d0 !important;
+                        color: #065f46 !important;
+                        font-size: 12px !important;
+                    }
+                    .booking-order-ui .bonus-summary-badge .label {
+                        color: #047857 !important;
+                        font-weight: 500 !important;
+                    }
+                    .booking-order-ui .bonus-summary-badge .value {
+                        color: #059669 !important;
+                        font-weight: 700 !important;
+                        font-size: 16px !important;
+                        letter-spacing: -0.3px !important;
+                        font-variant-numeric: tabular-nums !important;
+                    }
+
+                    /* Responsive Styles for Bonus Section */
+                    @container order-items (max-width: 780px) {
+                        .booking-order-ui .bonus-items-table thead { display: none !important; }
+                        .booking-order-ui .bonus-items-table tbody { display: grid !important; gap: 12px; padding: 16px; background: var(--order-soft); }
+                        .booking-order-ui .bonus-items-table tbody tr.bonus-cart-item {
+                            display: grid !important; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 12px !important;
+                            padding: 16px !important; border: 1px solid var(--order-border) !important; border-radius: 12px !important;
+                        }
+                        .booking-order-ui .bonus-items-table tbody tr.bonus-cart-item > td {
+                            display: block !important; width: auto !important; min-width: 0 !important; max-width: none !important;
+                            padding: 0 !important; border: 0 !important; text-align: left !important;
+                        }
+                        .booking-order-ui .bonus-items-table td.col-product { grid-column: 1 / 6; grid-row: 1; }
+                        .booking-order-ui .bonus-items-table td.col-action { grid-column: 6; grid-row: 1; justify-self: end; }
+                        .booking-order-ui .bonus-items-table td.col-stock { grid-column: 1 / 3; grid-row: 2; }
+                        .booking-order-ui .bonus-items-table td.col-price { grid-column: 3 / 5; grid-row: 2; }
+                        .booking-order-ui .bonus-items-table td.col-total { grid-column: 5 / 7; grid-row: 2; }
+                        .booking-order-ui .bonus-items-table td.col-qty { grid-column: 1 / 7; grid-row: 3; }
+                        .booking-order-ui .bonus-items-table .cell-label-mobile { display: block; margin-bottom: 6px; font-size: 10.5px; font-weight: 500; line-height: 1.5; color: var(--order-muted); }
+                        .booking-order-ui .bonus-items-table .booking-pos-qty-pill { width: 100%; }
+                        .booking-order-ui .bonus-items-table .booking-pos-qty-pill .qty-pill-input { flex: 1; }
+                        .booking-order-ui .bonus-items-table .booking-pos-qty-pill .qty-pill-btn { width: 38px !important; }
+                    }
+                    @container order-items (max-width: 480px) {
+                        .booking-order-ui .bonus-items-header { padding: 16px !important; gap: 14px !important; }
+                        .booking-order-ui .bonus-items-header .header-actions {
+                            width: 100% !important;
+                            display: flex !important;
+                            flex-direction: row !important;
+                            align-items: stretch !important;
+                            gap: 8px !important;
+                        }
+                        .booking-order-ui .bonus-items-header .header-actions button {
+                            flex: 1 1 0px !important;
+                            min-width: 0 !important;
+                            width: auto !important;
+                            white-space: normal !important;
+                        }
+                        .booking-order-ui .bonus-pos-items-empty { margin: 12px !important; padding: 22px 14px !important; }
                     }
 
                     /* Input Prefix Group */
@@ -1856,6 +2374,7 @@
                 searchTimer: null,
                 dataFilter: [],
                 dataCart: [],
+                bonusCart: [],
                 subTotal: 0,
                 commissionTotal: 0,
                 total: 0,
@@ -1954,10 +2473,16 @@
                         this.formData.partial_payment_amount = Number(initialPayment.amount || 0) || null;
                         this.formData.partial_payment_note = initialPayment.note || '';
                     }
+                    this.bonusCart = [];
                     if (details.length > 0) {
                         details.forEach((detail) => {
                             const cartItem = this.mapDetailToCart(detail);
-                            this.dataCart.push(cartItem);
+                            if (detail.is_bonus) {
+                                cartItem.is_bonus = true;
+                                this.bonusCart.push(cartItem);
+                            } else {
+                                this.dataCart.push(cartItem);
+                            }
                             if (cartItem.product_type === 'product' && (cartItem.current_stock === null || cartItem.current_stock === undefined)) {
                                 this.fetchCartItemStock(cartItem);
                             }
@@ -1980,6 +2505,10 @@
                     });
                     this.$watch('formData', () => this.saveDraft(), { deep: true });
                     this.$watch('dataCart', () => this.saveDraft(), { deep: true });
+                    this.$watch('bonusCart', () => {
+                        this.saveDraft();
+                        this.refreshIcons();
+                    }, { deep: true });
                     window.addEventListener('workspace:tab-change', () => this.saveDraft());
                     window.addEventListener('beforeunload', () => this.saveDraft());
                     window.addEventListener('workspace:tab-activated', (e) => {
@@ -2095,6 +2624,10 @@
                         this.$nextTick(requestUpdate);
                         this.refreshIcons();
                     });
+                    this.$watch('bonusCart', () => {
+                        this.$nextTick(requestUpdate);
+                        this.refreshIcons();
+                    });
                     this.$watch('dataFilter', () => this.$nextTick(requestUpdate));
                     this.$watch('loading', () => this.$nextTick(requestUpdate));
                 },
@@ -2203,17 +2736,19 @@
                             : 0;
                         cartItem.current_stock = stockVal;
                         const key = this.catalogKey(cartItem);
-                        const reactiveItem = this.dataCart.find((val) => this.catalogKey(val) === key);
+                        const reactiveItem = this.dataCart.find((val) => this.catalogKey(val) === key)
+                            || this.bonusCart.find((val) => this.catalogKey(val) === key);
                         if (reactiveItem) {
                             reactiveItem.current_stock = stockVal;
                         }
                     }).catch(() => {});
                 },
                 mapDetailToCart(detail) {
-                    const type = detail?.type || 'product';
+                    const isBonus = Boolean(detail?.is_bonus);
+                    const type = isBonus ? 'product' : (detail?.type || 'product');
                     const item = type === 'service' ? detail?.service : detail?.product;
                     const productId = item?.id || (type === 'service' ? detail?.service_id : detail?.product_id);
-                    const price = Number(detail?.price ?? item?.price ?? 0);
+                    const price = isBonus ? 0 : Number(detail?.price ?? item?.price ?? 0);
                     const commission = type === 'service' ? detail?.service_commission : detail?.product_commission;
                     const commissionType = type === 'service'
                         ? detail?.service_commission_type
@@ -2233,29 +2768,31 @@
                     return {
                         id: detail?.id,
                         product_id: productId,
+                        original_qty: Number(detail?.qty || 0),
                         code: item?.code || detail?.code || '',
                         name: item?.name || '---',
                         uom_title: type === 'product' ? (item?.uom_title || '') : '',
                         category_title: type === 'product' ? (item?.category_title || '') : '',
                         image: item?.image_url || '{{ asset('images/logo/default.png') }}',
                         current_stock: currentStock,
+                        is_bonus: isBonus,
                         itemData: {
                             price: price,
                             ...(type === 'product' ? {
-                                originalPrice: detail?.original_price ?? price,
-                                unitPrice: detail?.unit_price ?? String(this.totalDiscount(discountType, price, discount)),
-                                pricingMethod: detail?.pricing_method ?? null,
-                                legacyUnitPrice: this.totalDiscount(discountType, price, discount),
+                                originalPrice: isBonus ? 0 : (detail?.original_price ?? price),
+                                unitPrice: isBonus ? '0.00' : (detail?.unit_price ?? String(this.totalDiscount(discountType, price, discount))),
+                                pricingMethod: isBonus ? 'bonus' : (detail?.pricing_method ?? null),
+                                legacyUnitPrice: isBonus ? 0 : this.totalDiscount(discountType, price, discount),
                             } : {}),
-                            point: detail?.point || 0,
-                            discount: discount || 0,
-                            discountType: discountType,
-                            commission: commission || 0,
-                            commissionType: commissionType,
-                            totalCommission: this.getCommssion(commissionType, price, commission),
-                            total: this.totalDiscount(discountType, price, discount),
+                            point: isBonus ? 0 : (detail?.point || 0),
+                            discount: isBonus ? 0 : (discount || 0),
+                            discountType: isBonus ? null : discountType,
+                            commission: isBonus ? 0 : (commission || 0),
+                            commissionType: isBonus ? null : commissionType,
+                            totalCommission: isBonus ? 0 : this.getCommssion(commissionType, price, commission),
+                            total: isBonus ? 0 : this.totalDiscount(discountType, price, discount),
                         },
-                        product_qty: detail?.qty || 1,
+                        product_qty: detail?.qty !== undefined && detail?.qty !== null && detail?.qty !== '' ? Number(detail.qty) : 1,
                         product_type: type,
                         selectedQty: 1,
                     };
@@ -2302,6 +2839,7 @@
                             this.formData.shop_id = event.params.data.id;
                             delete this.dataError?.shop_id;
                             this.dataCart = [];
+                            this.bonusCart = [];
                             this.orderDeleteId = [];
                             this.syncCatalogSelection();
                             this.calculatorProductPrice();
@@ -2312,6 +2850,7 @@
                                 this.shopData = null;
                                 this.formData.shop_id = null;
                                 this.dataCart = [];
+                                this.bonusCart = [];
                                 this.orderDeleteId = [];
                                 this.syncCatalogSelection();
                                 this.calculatorProductPrice();
@@ -2322,6 +2861,7 @@
                             this.shopData = null;
                             this.formData.shop_id = null;
                             this.dataCart = [];
+                            this.bonusCart = [];
                             this.orderDeleteId = [];
                             this.syncCatalogSelection();
                             this.calculatorProductPrice();
@@ -2479,12 +3019,23 @@
                         data: {
                             typeAction: 'order-products',
                             class: 'order-product-picker-container',
-                            picker: this.createProductPicker(),
+                            picker: this.createProductPicker(false),
                         },
                         afterClosed: () => trigger?.isConnected && trigger.focus(),
                     });
                 },
-                createProductPicker() {
+                openProductPickerForBonus(trigger) {
+                    if (!this.canEditOrderItems() || this.$store.confirmDialog.show) return;
+                    this.$store.confirmDialog.open({
+                        data: {
+                            typeAction: 'order-products',
+                            class: 'order-product-picker-container',
+                            picker: this.createProductPicker(true),
+                        },
+                        afterClosed: () => trigger?.isConnected && trigger.focus(),
+                    });
+                },
+                createProductPicker(isBonus = false) {
                     const order = this;
                     let request = null;
                     let searchTimer = null;
@@ -2498,6 +3049,7 @@
                     const getCacheKey = (shopId, page, query = '') => `${shopId}::${(query || '').trim()}::${page}`;
 
                     return {
+                        isBonus: Boolean(isBonus),
                         shopId: order.formData.shop_id || order.shopData?.id,
                         shopName: order.shopData?.name || order.shopData?.phone || '',
                         products: [],
@@ -2607,7 +3159,12 @@
                         code(item) { return order.catalogCode(item); },
                         name(item) { return order.catalogName(item); },
                         image(item) { return order.catalogImage(item); },
-                        price(item) { return order.formatCurrency(order.catalogPrice(item)); },
+                        price(item) {
+                            if (this.isBonus) {
+                                return '$0.00';
+                            }
+                            return order.formatCurrency(order.catalogPrice(item));
+                        },
                         discount(item) { return order.catalogDiscountText(item); },
                         stock(item) { return Number(item?.current_stock ?? item?.product?.current_stock ?? 0); },
                         itemNo(index) {
@@ -2615,6 +3172,9 @@
                             return base + index;
                         },
                         inOrder(item) {
+                            if (this.isBonus) {
+                                return order.bonusCart.some(cart => this.key(cart) === this.key(item));
+                            }
                             return order.dataCart.some(cart => this.key(cart) === this.key(item));
                         },
                         isSelected(item) {
@@ -2838,7 +3398,11 @@
                         addItems() {
                             if (!this.canSelect || this.loading || this.failed || !this.selectedItems.length) return;
                             this.closing = true;
-                            this.selectedItems.forEach(item => order.addToCart(item, 1));
+                            if (this.isBonus) {
+                                this.selectedItems.forEach(item => order.addBonusToCart(item, 1));
+                            } else {
+                                this.selectedItems.forEach(item => order.addToCart(item, 1));
+                            }
                             order.$store.confirmDialog.close(true);
                         },
                         cancel() {
@@ -3137,6 +3701,7 @@
                     const payload = {
                         id: null,
                         product_id: productId,
+                        original_qty: 0,
                         code: this.catalogCode(item),
                         name: this.catalogName(item),
                         uom_title: type === 'product' ? (source?.uom_title || '') : '',
@@ -3340,6 +3905,14 @@
                     if (item?.product_type === 'service') {
                         item.product_qty = 1;
                     }
+                    if (this.dataError?.dataCarts && this.quantityValidationMessage()) {
+                        const hasOtherInvalidQty = this.dataCart.some(
+                            (i) => i.product_type === 'product' && (!Number.isSafeInteger(Number(i.product_qty)) || Number(i.product_qty) < 1)
+                        );
+                        if (!hasOtherInvalidQty) {
+                            this.clearRegularQuantityError();
+                        }
+                    }
                     this.calculatorProductPrice();
                 },
                 commissionRealTimeAction(item) {
@@ -3382,6 +3955,212 @@
                     this.refreshIcons();
                     this.clearDraft();
                 },
+                addBonusToCart(item, qty = 1) {
+                    if (!this.canEditOrderItems() || !this.formData.shop_id) {
+                        return;
+                    }
+                    const source = item?.product || item;
+                    const productId = item?.product_id || source?.id;
+                    const quantity = Math.max(1, Number(qty || 1));
+                    const currentStock = item?.current_stock !== undefined && item?.current_stock !== null
+                        ? Number(item.current_stock)
+                        : (source?.current_stock !== undefined && source?.current_stock !== null
+                            ? Number(source.current_stock)
+                            : null);
+
+                    const payload = {
+                        id: null,
+                        product_id: productId,
+                        original_qty: 0,
+                        code: this.catalogCode(item),
+                        name: this.catalogName(item),
+                        uom_title: source?.uom_title || '',
+                        category_title: source?.category_title || '',
+                        product_type: 'product',
+                        is_bonus: true,
+                        image: this.catalogImage(item),
+                        current_stock: currentStock,
+                        itemData: {
+                            price: 0,
+                            originalPrice: 0,
+                            unitPrice: '0.00',
+                            discount: 0,
+                            point: 0,
+                            discountType: null,
+                            commission: 0,
+                            commissionType: null,
+                            totalCommission: 0,
+                            total: 0,
+                        },
+                        product_qty: quantity,
+                    };
+
+                    const findIndex = this.bonusCart.findIndex((val) => val.product_id == payload.product_id);
+                    if (findIndex > -1) {
+                        this.bonusCart[findIndex].product_qty = Number(this.bonusCart[findIndex].product_qty || 1) + quantity;
+                        if (currentStock !== null) {
+                            this.bonusCart[findIndex].current_stock = currentStock;
+                        }
+                    } else {
+                        this.bonusCart.push(payload);
+                        if (currentStock === null) {
+                            this.fetchCartItemStock(payload);
+                        }
+                    }
+
+                    if (this.dataError?.dataCarts) {
+                        const cartReqMsg = @json(__('order.validation.cart_required'));
+                        const current = Array.isArray(this.dataError.dataCarts)
+                            ? this.dataError.dataCarts
+                            : [this.dataError.dataCarts];
+                        if (current.includes(cartReqMsg)) {
+                            const remaining = current.filter((m) => m !== cartReqMsg);
+                            if (remaining.length > 0) {
+                                this.dataError = { ...this.dataError, dataCarts: remaining };
+                            } else {
+                                this.clearError('dataCarts');
+                            }
+                        }
+                    }
+
+                    this.saveDraft();
+                    this.refreshIcons();
+                },
+                increaseBonusQty(item) {
+                    if (!this.canEditOrderItems()) return;
+                    const current = Number(item.product_qty || 0);
+                    const next = current < 1 && current > 0
+                        ? Math.round((current + 0.25) * 100) / 100
+                        : Math.round((current + 1) * 100) / 100;
+                    item.product_qty = next;
+                    if (this.dataError?.dataBonusCarts && this.bonusQuantityValidationMessage()) {
+                        const hasOtherInvalidBonusQty = this.bonusCart.some(
+                            (i) => !this.validBonusQty(i.product_qty)
+                        );
+                        if (!hasOtherInvalidBonusQty) {
+                            this.clearBonusQuantityError();
+                        }
+                    }
+                    this.saveDraft();
+                },
+                decreaseBonusQty(item) {
+                    if (!this.canEditOrderItems()) return;
+                    const current = Number(item.product_qty || 1);
+                    let next;
+                    if (current > 1) {
+                        next = Math.round((current - 1) * 100) / 100;
+                    } else if (current > 0.25) {
+                        next = Math.round((current - 0.25) * 100) / 100;
+                    } else {
+                        next = 0.01;
+                    }
+                    item.product_qty = next;
+                    if (this.dataError?.dataBonusCarts && this.bonusQuantityValidationMessage()) {
+                        const hasOtherInvalidBonusQty = this.bonusCart.some(
+                            (i) => !this.validBonusQty(i.product_qty)
+                        );
+                        if (!hasOtherInvalidBonusQty) {
+                            this.clearBonusQuantityError();
+                        }
+                    }
+                    this.saveDraft();
+                },
+                bonusQtyRealTimeAction(item) {
+                    if (typeof item.product_qty === 'string') {
+                        item.product_qty = item.product_qty.replace(',', '.');
+                    }
+                    if (this.dataError?.dataBonusCarts && this.bonusQuantityValidationMessage()) {
+                        const hasOtherInvalidBonusQty = this.bonusCart.some(
+                            (i) => !this.validBonusQty(i.product_qty)
+                        );
+                        if (!hasOtherInvalidBonusQty) {
+                            this.clearBonusQuantityError();
+                        }
+                    }
+                    this.saveDraft();
+                },
+                normalizeBonusQty(item) {
+                    if (item?.product_qty !== undefined && item?.product_qty !== null && item?.product_qty !== '') {
+                        const clean = String(item.product_qty).replace(',', '.');
+                        const n = Number(clean);
+                        if (Number.isFinite(n) && n > 0) {
+                            item.product_qty = Math.round(n * 10000) / 10000;
+                        }
+                    }
+                    this.saveDraft();
+                },
+                removeBonusCartItem(item, index) {
+                    if (!this.canEditOrderItems()) return;
+                    if (item?.id) {
+                        this.orderDeleteId.push(item.id);
+                    }
+                    const removedItemName = item?.name;
+                    this.bonusCart.splice(index, 1);
+                    if (this.dataError?.dataBonusCarts) {
+                        if (!this.bonusCart.length) {
+                            this.clearError('dataBonusCarts');
+                        } else {
+                            let messages = Array.isArray(this.dataError.dataBonusCarts)
+                                ? [...this.dataError.dataBonusCarts]
+                                : [this.dataError.dataBonusCarts];
+                            if (removedItemName) {
+                                messages = messages.filter((m) => !m.includes(removedItemName));
+                            }
+                            const hasInvalidBonusQty = this.bonusCart.some(
+                                (i) => !this.validBonusQty(i.product_qty)
+                            );
+                            if (!hasInvalidBonusQty) {
+                                const qtyMsg = @json(__('order.validation.quantity_invalid'));
+                                messages = messages.filter((m) => m !== qtyMsg);
+                            }
+                            if (messages.length > 0) {
+                                this.dataError = { ...this.dataError, dataBonusCarts: messages };
+                            } else {
+                                this.clearError('dataBonusCarts');
+                            }
+                        }
+                    }
+                    this.saveDraft();
+                    this.refreshIcons();
+                },
+                resetBonusCart() {
+                    if (!this.canEditOrderItems()) return;
+                    this.bonusCart.forEach((item) => {
+                        if (item?.id) {
+                            this.orderDeleteId.push(item.id);
+                        }
+                    });
+                    this.bonusCart = [];
+                    this.clearError('dataBonusCarts');
+                    this.saveDraft();
+                    this.refreshIcons();
+                },
+                clearBonusQuantityError() {
+                    if (!this.dataError?.dataBonusCarts) return;
+                    const messages = Array.isArray(this.dataError.dataBonusCarts)
+                        ? this.dataError.dataBonusCarts
+                        : [this.dataError.dataBonusCarts];
+                    const qtyMsg = @json(__('order.validation.quantity_invalid'));
+                    const filtered = messages.filter((m) => m !== qtyMsg);
+                    if (filtered.length > 0) {
+                        this.dataError = { ...this.dataError, dataBonusCarts: filtered };
+                    } else {
+                        this.clearError('dataBonusCarts');
+                    }
+                },
+                clearRegularQuantityError() {
+                    if (!this.dataError?.dataCarts) return;
+                    const messages = Array.isArray(this.dataError.dataCarts)
+                        ? this.dataError.dataCarts
+                        : [this.dataError.dataCarts];
+                    const qtyMsg = @json(__('order.validation.quantity_invalid'));
+                    const filtered = messages.filter((m) => m !== qtyMsg);
+                    if (filtered.length > 0) {
+                        this.dataError = { ...this.dataError, dataCarts: filtered };
+                    } else {
+                        this.clearError('dataCarts');
+                    }
+                },
                 saveDraft() {
                     if (this.orderId) return;
                     try {
@@ -3400,6 +4179,7 @@
                         const draft = {
                             formData: JSON.parse(JSON.stringify(this.formData)),
                             dataCart: JSON.parse(JSON.stringify(this.dataCart)),
+                            bonusCart: JSON.parse(JSON.stringify(this.bonusCart || [])),
                             shopData: this.shopData ? JSON.parse(JSON.stringify(this.shopData)) : null,
                             customerData: this.customerData ? JSON.parse(JSON.stringify(this.customerData)) : null,
                             customerText: customerText,
@@ -3410,7 +4190,7 @@
                             savedAt: Date.now()
                         };
                         sessionStorage.setItem('pos_order_create_draft', JSON.stringify(draft));
-                        if (window.MDI && (this.dataCart.length > 0 || this.formData.customer_id || this.formData.shop_id)) {
+                        if (window.MDI && (this.dataCart.length > 0 || this.bonusCart.length > 0 || this.formData.customer_id || this.formData.shop_id)) {
                             window.MDI.markTabDirty(true);
                         }
                     } catch (e) {}
@@ -3452,6 +4232,14 @@
                             this.dataCart.forEach((item) => {
                                 this.initializeProductPrice(item);
                                 if (item.product_type === 'product' && (item.current_stock === null || item.current_stock === undefined)) {
+                                    this.fetchCartItemStock(item);
+                                }
+                            });
+                        }
+                        if (Array.isArray(draft.bonusCart) && draft.bonusCart.length > 0) {
+                            this.bonusCart = draft.bonusCart;
+                            this.bonusCart.forEach((item) => {
+                                if (item.current_stock === null || item.current_stock === undefined) {
                                     this.fetchCartItemStock(item);
                                 }
                             });
@@ -3553,43 +4341,62 @@
                     this.saveDraft();
                 },
                 async productValidation($cb) {
-                    const errors = [];
+                    const regularErrors = [];
+                    const bonusErrors = [];
                     const orderPayload = @json($data);
                     const order = orderPayload?.data ?? orderPayload ?? null;
                     const details = this.orderDetails(order);
+                    const allItems = [...(this.dataCart || []), ...(this.bonusCart || [])];
 
-                    if (this.dataCart.length) {
+                    if (allItems.length) {
                         this.submitLoading = true;
-                        for (const val of this.dataCart) {
-                            val.error = false;
-                            let findOrderDetailQty = 0;
-                            if (details.length) {
-                                const findOrderDetail = details.find((bkItem) => {
-                                    const productId = bkItem.product?.id || bkItem.product_id;
-                                    return bkItem.type === 'product' && productId == val.product_id;
-                                });
-                                findOrderDetailQty = findOrderDetail?.qty ?? 0;
+                        const requestedTotals = new Map();
+                        for (const item of allItems) {
+                            if ((item.product_type === 'product' || item.is_bonus) && item.product_id) {
+                                const current = requestedTotals.get(item.product_id) || 0;
+                                const qty = Number(item.product_qty !== undefined && item.product_qty !== null ? item.product_qty : 1);
+                                requestedTotals.set(item.product_id, current + qty);
                             }
+                        }
 
-                            if (val.product_type === 'product') {
+                        for (const val of allItems) {
+                            val.error = false;
+                            if ((val.product_type === 'product' || val.is_bonus) && val.product_id) {
+                                let findOrderDetailQty = 0;
+                                if (details.length) {
+                                    findOrderDetailQty = details.filter((bkItem) => {
+                                        const productId = bkItem.product?.id || bkItem.product_id;
+                                        return (bkItem.type === 'product' || bkItem.is_bonus) && productId == val.product_id;
+                                    }).reduce((sum, bkItem) => sum + Number(bkItem.qty || 0), 0);
+                                }
+
                                 const url = `/admin/select/find-shop-product?shop_id=${this.formData.shop_id || this.shopData?.id}&product_id=${val.product_id}`;
                                 await this.fetchJson(url).then((res) => {
                                     if (res) {
                                         const currentStock = Number(res.current_stock || 0) + Number(findOrderDetailQty);
-                                        val.error = currentStock < Number(val.product_qty);
+                                        const totalReq = requestedTotals.get(val.product_id) || Number(val.product_qty || 1);
+                                        val.error = currentStock < totalReq;
                                     } else {
                                         val.error = true;
                                     }
                                 });
-                            }
 
-                            if (val.error) {
-                                errors.push(val.name);
+                                if (val.error) {
+                                    if (val.is_bonus) {
+                                        if (!bonusErrors.includes(val.name)) {
+                                            bonusErrors.push(val.name);
+                                        }
+                                    } else {
+                                        if (!regularErrors.includes(val.name)) {
+                                            regularErrors.push(val.name);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
 
-                    $cb(errors);
+                    $cb(regularErrors, bonusErrors);
                     this.submitLoading = false;
                 },
                 submitOrder() {
@@ -3616,12 +4423,17 @@
                         return;
                     }
 
-                    this.productValidation((valid) => {
-                        if (valid.length > 0) {
+                    this.productValidation((validRegular = [], validBonus = []) => {
+                        if (validRegular.length > 0 || validBonus.length > 0) {
                             const stockTemplate = @json(__('order.validation.out_of_stock_item'));
-                            this.setValidationErrors({
-                                dataCarts: valid.map((name) => stockTemplate.replace(':name', name))
-                            });
+                            const errors = {};
+                            if (validRegular.length > 0) {
+                                errors.dataCarts = validRegular.map((name) => stockTemplate.replace(':name', name));
+                            }
+                            if (validBonus.length > 0) {
+                                errors.dataBonusCarts = validBonus.map((name) => stockTemplate.replace(':name', name));
+                            }
+                            this.setValidationErrors(errors);
                             return true;
                         }
 
@@ -3808,6 +4620,7 @@
                         ...this.formData,
                         order_date: orderDateVal,
                         dataCarts: this.dataCart.length ? JSON.stringify(this.dataCart) : JSON.stringify([]),
+                        dataBonusCarts: this.bonusCart && this.bonusCart.length ? JSON.stringify(this.bonusCart) : JSON.stringify([]),
                         shop: this.shopData ? JSON.stringify(this.shopData) : null,
                         shop_id: this.formData.shop_id || this.shopData?.id,
                         commissionTotal: this.commissionTotal,
@@ -3889,22 +4702,31 @@
                         errors.order_date = [@json(__('order.validation.order_date_required'))];
                     }
 
-                    if (!this.dataCart?.length) {
+                    const hasRegular = Boolean(this.dataCart?.length);
+                    const hasBonus = Boolean(this.bonusCart?.length);
+
+                    if (!hasRegular && !hasBonus) {
                         errors.dataCarts = [@json(__('order.validation.cart_required'))];
-                    } else if (this.dataCart.some((item) => !item?.product_id || !item?.product_type)) {
+                    } else if (hasRegular && this.dataCart.some((item) => !item?.product_id || !item?.product_type)) {
                         errors.dataCarts = [@json(__('order.validation.cart_item_invalid'))];
-                    } else if (this.dataCart.some((item) => item.product_type === 'product'
+                    } else if (hasRegular && this.dataCart.some((item) => item.product_type === 'product'
                         && (!Number.isSafeInteger(Number(item.product_qty)) || Number(item.product_qty) < 1))) {
                         errors.dataCarts = [@json(__('order.validation.quantity_invalid'))];
-                    } else if (this.dataCart.some((item) => item.product_type === 'product' && !this.validProductPrice(item))) {
+                    } else if (hasRegular && this.dataCart.some((item) => item.product_type === 'product' && !this.validProductPrice(item))) {
                         errors.dataCarts = [@json(__('order.validation.unit_price_invalid'))];
-                    } else if (this.dataCart.some((item) => {
+                    } else if (hasRegular && (this.dataCart.some((item) => {
                         if (this.isAutomaticProduct(item)) return false;
                         const discount = Number(item?.itemData?.discount ?? 0);
                         return !Number.isFinite(discount) || discount < 0;
                     }) || Array.from(this.$el?.querySelectorAll('.booking-discount-group input:not([data-cart-price])') || [])
-                        .some((input) => !input.validity.valid)) {
+                        .some((input) => !input.validity.valid))) {
                         errors.dataCarts = [@json(__('order.validation.discount_invalid'))];
+                    }
+
+                    if (hasBonus && this.bonusCart.some((item) => !item?.product_id)) {
+                        errors.dataBonusCarts = [@json(__('order.validation.cart_item_invalid'))];
+                    } else if (hasBonus && this.bonusCart.some((item) => !this.validBonusQty(item.product_qty))) {
+                        errors.dataBonusCarts = [@json(__('order.validation.quantity_invalid'))];
                     }
 
                     const partialPayment = Number(this.formData.partial_payment_amount || 0);
@@ -3969,9 +4791,33 @@
                     return (Array.isArray(messages) ? messages : [messages])
                         .find((message) => message === @json(__('order.validation.quantity_invalid'))) || '';
                 },
+                availableStock(item) {
+                    const current = Number(item?.current_stock ?? 0);
+                    const orig = Number(item?.original_qty ?? 0);
+                    return Math.round((current + orig) * 100) / 100;
+                },
                 hasQuantityValidationError(item) {
-                    return Boolean(this.quantityValidationMessage()) && item?.product_type === 'product'
-                        && (!Number.isSafeInteger(Number(item.product_qty)) || Number(item.product_qty) < 1);
+                    return Boolean(this.quantityValidationMessage())
+                        && (!Number.isSafeInteger(Number(item?.product_qty)) || Number(item?.product_qty) < 1);
+                },
+                validBonusQty(qty) {
+                    if (qty === null || qty === undefined || String(qty).trim() === '') return false;
+                    const clean = String(qty).replace(',', '.');
+                    const n = Number(clean);
+                    return Number.isFinite(n) && n > 0 && n <= 9007199254740991;
+                },
+                bonusValidationMessages() {
+                    const messages = this.dataError?.dataBonusCarts;
+                    if (!messages) return [];
+                    return (Array.isArray(messages) ? messages : [messages]).filter(Boolean);
+                },
+                bonusQuantityValidationMessage() {
+                    return this.bonusValidationMessages()
+                        .find((message) => message === @json(__('order.validation.quantity_invalid'))) || '';
+                },
+                hasBonusQuantityValidationError(item) {
+                    return Boolean(this.bonusQuantityValidationMessage())
+                        && !this.validBonusQty(item?.product_qty);
                 },
                 unitPriceValidationMessage() {
                     const messages = this.dataError?.dataCarts;
@@ -3983,13 +4829,19 @@
                         && !this.validProductPrice(item);
                 },
                 validationMessages(section = null) {
+                    const bonusMessages = this.bonusValidationMessages();
                     return Object.values(this.dataError || {})
                         .flatMap((messages) => Array.isArray(messages) ? messages : [messages])
                         .filter((message) => message && (section !== 'details'
-                            || (message !== this.quantityValidationMessage() && message !== this.unitPriceValidationMessage())));
+                            || (message !== this.quantityValidationMessage()
+                                && message !== this.unitPriceValidationMessage()
+                                && !bonusMessages.includes(message))));
                 },
                 getValidationIcon(message = '') {
                     const text = String(message || '').toLowerCase();
+                    if (text.includes('bonus')) {
+                        return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>`;
+                    }
                     if (text.includes('customer')) {
                         return `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
                     }

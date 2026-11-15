@@ -9,10 +9,10 @@
                         <path d="m21 8-9-5-9 5v9l9 5 9-5V8Z M3 8l9 5 9-5 M12 13v9 M7.5 5.5l9 5"></path>
                     </svg>
                 </span>
-                <h2 :id="$id('product-picker-title')">{{ __('order.product_picker.add_product') }}</h2>
+                <h2 :id="$id('product-picker-title')" x-text="isBonus ? @js(__('order.product_picker.add_bonus_product')) : @js(__('order.product_picker.add_product'))">{{ __('order.product_picker.add_product') }}</h2>
                 <span class="order-product-picker__shop" x-show="shopName" x-text="shopName"></span>
             </div>
-            <p :id="$id('product-picker-help')">{{ __('order.product_picker.description') }}</p>
+            <p :id="$id('product-picker-help')" x-text="isBonus ? @js(__('order.product_picker.bonus_description')) : @js(__('order.product_picker.description'))">{{ __('order.product_picker.description') }}</p>
         </div>
         <button type="button" class="order-product-picker__close" @click="cancel()" :disabled="closing"
             aria-label="{{ __('order.button.close') }}">&times;</button>

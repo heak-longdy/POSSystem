@@ -89,7 +89,7 @@ class StockOutController extends Controller
                     $item->product_title ?? '---',
                     $item->category_title ?? '---',
                     $item->uom_title ?? '---',
-                    $item->qty ?? 0,
+                    \App\Models\OrderDetail::formatQuantity($item->qty ?? 0),
                     $item->created_date ?? '',
                     $item->remark ?? '',
                     $item->shop_title ?? '---',

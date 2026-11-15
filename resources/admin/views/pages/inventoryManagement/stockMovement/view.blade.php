@@ -38,24 +38,24 @@
                 <div class="row-2">
                     <div class="form-row iconInput">
                         <label>{{ __('stock_movement.form.qty') }}</label>
-                        <input type="text" value="{{ $data->qty ?? 0 }}" readonly>
+                        <input type="text" value="{{ \App\Models\OrderDetail::formatQuantity($data->qty ?? 0) }}" readonly>
                         <i class='bx bx-hash'></i>
                     </div>
                     <div class="form-row iconInput">
                         <label>{{ __('stock_movement.form.current_stock') }}</label>
-                        <input type="text" value="{{ $data->current_stock ?? 0 }}" readonly>
+                        <input type="text" value="{{ \App\Models\OrderDetail::formatQuantity($data->current_stock ?? 0) }}" readonly>
                         <i class='bx bx-layer'></i>
                     </div>
                 </div>
                 <div class="row-2">
                     <div class="form-row iconInput">
                         <label>{{ __('stock_movement.form.stock_in') }}</label>
-                        <input type="text" value="{{ $data->stock_in ?? 0 }}" readonly>
+                        <input type="text" value="{{ \App\Models\OrderDetail::formatQuantity($data->stock_in ?? 0) }}" readonly>
                         <i class='bx bx-plus-circle'></i>
                     </div>
                     <div class="form-row iconInput">
                         <label>{{ __('stock_movement.form.stock_out') }}</label>
-                        <input type="text" value="{{ $data->stock_out ?? 0 }}" readonly>
+                        <input type="text" value="{{ \App\Models\OrderDetail::formatQuantity($data->stock_out ?? 0) }}" readonly>
                         <i class='bx bx-minus-circle'></i>
                     </div>
                 </div>

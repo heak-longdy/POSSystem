@@ -145,14 +145,20 @@
                     } else {
                         $itemName = $rawItemName;
                     }
-                    $unitPrice = (float) ($detail->unit_price ?? ($detail->price ?? 0));
-                    $qty = (int) ($detail->qty ?: 1);
+                    $isBonus = (bool) ($detail->is_bonus ?? false);
+                    $qty = \App\Models\OrderDetail::formatQuantity($detail->qty);
+                    $unitPrice = $isBonus ? 0.00 : (float) ($detail->unit_price ?? ($detail->price ?? 0));
                     $line = app(\App\Services\OrderPricing::class)->line($detail);
                 @endphp
-                <tr class="inv-item-row">
+                <tr class="inv-item-row {{ $isBonus ? 'inv-item-row-bonus' : '' }}">
                     <td class="cell-num">{{ $index + 1 }}</td>
                     <td class="cell-desc">
                         <span class="item-name">{{ $itemName }}</span>
+                        @if ($isBonus)
+                            <span class="slip-bonus-badge" style="display: inline-block; font-weight: 700; color: #047857; margin-left: 4px; font-size: 10px;">
+                                ({{ __('order.bonus_free_tag', [], $printLocale) }})
+                            </span>
+                        @endif
                     </td>
                     <td class="cell-qty">{{ $qty }}</td>
                     <td class="cell-price">${{ number_format($unitPrice, 2) }}</td>

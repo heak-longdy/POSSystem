@@ -343,6 +343,16 @@
             transform: translateY(-1px);
         }
 
+        .btn-print-delivery-v1 {
+            background: #0d9488;
+            color: #ffffff;
+        }
+
+        .btn-print-delivery-v1:hover {
+            background: #0f766e;
+            transform: translateY(-1px);
+        }
+
         .btn-print-consolidated {
             background: #0284c7;
             color: #ffffff;
@@ -633,6 +643,10 @@
 
                 <button type="button" class="btn-bulk-action btn-print-delivery" @click="submitPrint('delivery_slip')">
                     <i class="bx bx-file"></i> {{ __('order_bulk_print.selection.print_delivery_slips') }}
+                </button>
+
+                <button type="button" class="btn-bulk-action btn-print-delivery-v1" @click="submitPrint('delivery_slip_v1')">
+                    <i class="bx bx-file"></i> {{ __('order_bulk_print.selection.print_delivery_slips_v1') }}
                 </button>
 
                 <button type="button" class="btn-bulk-action btn-print-consolidated" @click="submitPrint('consolidated')">
@@ -1024,6 +1038,9 @@
                         titlePrefix = '{{ __('order_bulk_print.preview.title_invoice') }}';
                     } else if (docType === 'delivery_slip') {
                         titlePrefix = '{{ __('order_bulk_print.preview.title_delivery_slip') }}';
+                    } else if (docType === 'delivery_slip_v1') {
+                        titlePrefix = '{{ __('order_bulk_print.preview.title_delivery_slip_v1') }}';
+                        iconClass = 'bx bx-file';
                     } else {
                         titlePrefix = '{{ __('order_bulk_print.preview.title_consolidated') }}';
                         iconClass = 'bx bx-layer';

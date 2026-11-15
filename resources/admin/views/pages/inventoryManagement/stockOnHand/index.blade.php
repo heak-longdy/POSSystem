@@ -194,7 +194,7 @@
                 ['field' => 'shop_title', 'title' => __('stock_on_hand.table.shop'), 'class' => 'text left', 'colVal' => 11],
                 ['field' => 'category_title', 'title' => __('stock_on_hand.table.category'), 'class' => 'text left', 'colVal' => 13],
                 ['field' => 'uom_title', 'title' => __('stock_on_hand.table.uom'), 'class' => '', 'colVal' => 6],
-                ['field' => 'current_stock', 'title' => __('stock_on_hand.table.current_stock'), 'class' => '', 'colVal' => 9],
+                ['field' => 'formatted_current_stock', 'title' => __('stock_on_hand.table.current_stock'), 'class' => '', 'colVal' => 9],
                 ['field' => 'total_cost_title', 'title' => __('stock_on_hand.table.total_cost'), 'class' => 'text right', 'colVal' => 12],
                 ['field' => 'total_amount_title', 'title' => __('stock_on_hand.table.total_amount'), 'class' => 'text right', 'colVal' => 12],
                 ['field' => 'created_date', 'title' => __('stock_on_hand.table.date'), 'class' => '', 'colVal' => 8],

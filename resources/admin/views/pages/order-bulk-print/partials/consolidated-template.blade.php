@@ -328,7 +328,7 @@
                         <tr>
                             <td class="col-art-no">{{ $prod['product_code'] }}</td>
                             <td class="col-art-name">{{ $prod['product_name'] }}</td>
-                            <td class="col-units">{{ number_format($prod['total_qty']) }}</td>
+                            <td class="col-units">{{ \App\Models\OrderDetail::formatQuantity($prod['total_qty']) }}</td>
                             <td class="col-subunits">0</td>
                         </tr>
                     @empty
@@ -345,7 +345,7 @@
         <!-- Summary Row: Total for Delivered Articles aligned with Units -->
         <div class="load-delivered-bar">
             <span class="load-delivered-lbl">Total for Delivered Articles :</span>
-            <span class="load-delivered-qty">{{ number_format($overallQuantity) }}</span>
+            <span class="load-delivered-qty">{{ \App\Models\OrderDetail::formatQuantity($overallQuantity) }}</span>
             <span class="load-delivered-spacer"></span>
         </div>
 

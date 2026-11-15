@@ -45,7 +45,7 @@
                 <div class="row-2">
                     <div class="form-row iconInput">
                         <label>{{ __('stock_on_hand.form.current_stock') }}</label>
-                        <input type="text" value="{{ $data->current_stock ?? 0 }}" readonly>
+                        <input type="text" value="{{ \App\Models\OrderDetail::formatQuantity($data->current_stock ?? 0) }}" readonly>
                         <i class='bx bx-layer'></i>
                     </div>
                     <div class="form-row iconInput">

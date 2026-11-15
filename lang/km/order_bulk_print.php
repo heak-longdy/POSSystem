@@ -66,6 +66,7 @@ return [
         'english' => 'អង់គ្លេស',
         'print_invoices' => 'បោះពុម្ពវិក្កយបត្រដែលបានជ្រើស',
         'print_delivery_slips' => 'បោះពុម្ពប័ណ្ណប្រគល់ទំនិញដែលបានជ្រើស',
+        'print_delivery_slips_v1' => 'បោះពុម្ពប័ណ្ណប្រគល់ទំនិញ V1 ដែលបានជ្រើស',
         'consolidated_product_quantity' => 'បរិមាណទំនិញសរុប',
         'loading_matching' => 'កំពុងទាញយកទិន្នន័យ...',
     ],
@@ -73,6 +74,7 @@ return [
     'preview' => [
         'title_invoice' => 'មើលគំរូវិក្កយបត្រជាក្រុម',
         'title_delivery_slip' => 'មើលគំរូប័ណ្ណប្រគល់ទំនិញជាក្រុម',
+        'title_delivery_slip_v1' => 'មើលគំរូប័ណ្ណប្រគល់ទំនិញ V1 ជាក្រុម',
         'title_consolidated' => 'បរិមាណទំនិញសរុប',
         'load_report_draft' => 'Load Report (Draft)',
         'meta_docs' => ':count ឯកសារ',

@@ -4,20 +4,23 @@
     $isConsolidated = ($documentType ?? '') === 'consolidated';
     $isInvoice = ($documentType ?? 'invoice') === 'invoice';
     $isDeliverySlip = ($documentType ?? '') === 'delivery_slip';
-    $hasSidebar = $isInvoice || $isDeliverySlip;
+    $isDeliverySlipV1 = ($documentType ?? '') === 'delivery_slip_v1';
+    $hasSidebar = $isInvoice || $isDeliverySlip || $isDeliverySlipV1;
 
     if ($isConsolidated) {
         $docTitle = __('order_bulk_print.preview.title_consolidated');
     } elseif ($isInvoice) {
         $docTitle = __('order_bulk_print.preview.title_invoice');
+    } elseif ($isDeliverySlipV1) {
+        $docTitle = __('order_bulk_print.preview.title_delivery_slip_v1');
     } else {
         $docTitle = __('order_bulk_print.preview.title_delivery_slip');
     }
     $headerTitle = $docTitle . ' (' . ($totalCount ?? 0) . ')';
-    $sidebarTitle = $isDeliverySlip
+    $sidebarTitle = ($isDeliverySlip || $isDeliverySlipV1)
         ? __('order_bulk_print.preview.delivery_slip_list')
         : __('order_bulk_print.preview.invoice_list');
-    $selectToPrintMsg = $isDeliverySlip
+    $selectToPrintMsg = ($isDeliverySlip || $isDeliverySlipV1)
         ? __('order_bulk_print.preview.select_to_print_slip')
         : __('order_bulk_print.preview.select_to_print');
 @endphp
@@ -1103,6 +1106,16 @@
                             <div class="paper-sheet-box">
                                 @if ($isInvoice)
                                     @include('admin::pages.order.invoice-template', [
+                                        'order' => $order,
+                                        'printLocale' => $item['printLocale'],
+                                        'invoicePreviousBalance' => $item['invoicePreviousBalance'],
+                                        'customerName' => $item['customerName'],
+                                        'customerPhone' => $item['customerPhone'],
+                                        'customerAddress' => $item['customerAddress'],
+                                        'printAreaId' => $item['printAreaId'],
+                                    ])
+                                @elseif ($isDeliverySlipV1)
+                                    @include('admin::pages.order.invoice-template-02-v1', [
                                         'order' => $order,
                                         'printLocale' => $item['printLocale'],
                                         'invoicePreviousBalance' => $item['invoicePreviousBalance'],

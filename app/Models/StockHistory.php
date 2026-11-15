@@ -27,6 +27,12 @@ class StockHistory extends Model
         'request_by',
         'request_by_type',
     ];
+    protected $casts = [
+        'current_stock' => 'decimal:2',
+        'stock_in' => 'decimal:2',
+        'stock_out' => 'decimal:2',
+        'qty' => 'decimal:2',
+    ];
     protected $appends = [
         'created_date',
         'product_title',
@@ -37,7 +43,31 @@ class StockHistory extends Model
         'from_title',
         'to_title',
         'request_by_title',
+        'formatted_qty',
+        'formatted_current_stock',
+        'formatted_stock_in',
+        'formatted_stock_out',
     ];
+
+    public function getFormattedQtyAttribute(): string
+    {
+        return OrderDetail::formatQuantity($this->qty);
+    }
+
+    public function getFormattedCurrentStockAttribute(): string
+    {
+        return OrderDetail::formatQuantity($this->current_stock);
+    }
+
+    public function getFormattedStockInAttribute(): string
+    {
+        return OrderDetail::formatQuantity($this->stock_in);
+    }
+
+    public function getFormattedStockOutAttribute(): string
+    {
+        return OrderDetail::formatQuantity($this->stock_out);
+    }
     public function product()
     {
         return $this->hasOne(Product::class, 'id', 'product_id');

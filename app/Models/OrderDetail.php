@@ -23,6 +23,7 @@ class OrderDetail extends Model
         'qty',
         'point',
         'type',
+        'is_bonus',
         'product_discount',
         'product_discount_type',
         'service_discount',
@@ -39,7 +40,40 @@ class OrderDetail extends Model
         'unit_price' => 'decimal:2',
         'product_discount' => 'double',
         'service_discount' => 'double',
+        'is_bonus' => 'boolean',
+        'qty' => 'decimal:2',
     ];
+
+    public function isBonus(): bool
+    {
+        return (bool) $this->is_bonus;
+    }
+
+    public static function formatQuantity($qty): string
+    {
+        if ($qty === null || $qty === '') {
+            return '0';
+        }
+        $raw = (float) str_replace(',', '.', (string) $qty);
+        return ((float) $raw == (int) $raw)
+            ? (string) (int) $raw
+            : rtrim(rtrim(number_format($raw, 4, '.', ''), '0'), '.');
+    }
+
+    public function getFormattedQtyAttribute(): string
+    {
+        return self::formatQuantity($this->qty);
+    }
+
+    public function scopeBonus($query)
+    {
+        return $query->where('is_bonus', true);
+    }
+
+    public function scopeRegular($query)
+    {
+        return $query->where('is_bonus', false);
+    }
 
     public function order()
     {

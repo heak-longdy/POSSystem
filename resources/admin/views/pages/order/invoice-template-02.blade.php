@@ -147,14 +147,26 @@
                     }
                     $itemCode = $detail->product?->code ?: ($detail->product?->barcode ?: ($detail->product_id ? sprintf('%04d', $detail->product_id) : '---'));
                     $uomName = $detail->product?->uom?->name ?: '---';
-                    $price = $detail->price;
-                    $unitPrice = (float) ($detail->unit_price ??  0);
-                    $productDisc = (float) ($detail->product_discount ?? 0);
-                    $qty = (int) ($detail->qty ?: 1);
-                    $line = app(\App\Services\OrderPricing::class)->line($detail);
-                    $disc = $line['discount'] / max(1, $qty);
-                    $netUnitPrice = $unitPrice;
-                    $lineTotal = $line['total'];
+                    $isBonus = (bool) ($detail->is_bonus ?? false);
+                    $qty = \App\Models\OrderDetail::formatQuantity($detail->qty);
+                    $numQty = (float) ($detail->qty ?: 1);
+
+                    if ($isBonus) {
+                        $price = 0.00;
+                        $unitPrice = 0.00;
+                        $productDisc = 0.00;
+                        $disc = 0.00;
+                        $netUnitPrice = 0.00;
+                        $lineTotal = 0.00;
+                    } else {
+                        $price = $detail->price;
+                        $unitPrice = (float) ($detail->unit_price ??  0);
+                        $productDisc = (float) ($detail->product_discount ?? 0);
+                        $line = app(\App\Services\OrderPricing::class)->line($detail);
+                        $disc = $line['discount'] / max(1, $numQty);
+                        $netUnitPrice = $unitPrice;
+                        $lineTotal = $line['total'];
+                    }
                 @endphp
                 <tr class="slip-row">
                     <td class="td-no">{{ $index + 1 }}</td>

@@ -86,9 +86,12 @@ class ConsolidatedProductQuantityReportController extends Controller
         $pricing = app(OrderPricing::class);
         $rows->getCollection()->each(function ($row) use ($pricing) {
             $detail = (new OrderDetail())->setRawAttributes((array) $row);
-            $row->quantity = (int) ($detail->qty ?? 1);
-            $row->effective_unit_price = $detail->pricing_method === OrderPricing::AUTOMATIC
-                ? (float) $detail->unit_price : $pricing->legacyUnitPrice($detail);
+            $row->is_bonus = (bool) ($row->is_bonus ?? false);
+            $row->quantity = $row->is_bonus ? (float) ($detail->qty ?? 0) : (int) ($detail->qty ?? 1);
+            $row->effective_unit_price = $row->is_bonus
+                ? 0.0
+                : ($detail->pricing_method === OrderPricing::AUTOMATIC
+                    ? (float) $detail->unit_price : $pricing->legacyUnitPrice($detail));
             $row->total_amount = $this->lineAmountCents($detail, $pricing) / 100;
             $cost = (float) ($row->product_cost ?? 0);
             $price = (float) ($detail->price ?? 0);
@@ -224,6 +227,10 @@ class ConsolidatedProductQuantityReportController extends Controller
 
     private function lineAmountCents(OrderDetail $detail, OrderPricing $pricing): int
     {
+        if (!empty($detail->is_bonus)) {
+            return 0;
+        }
+
         // Preserve the report's quantity rules, including zero and legacy null qty.
         $qty = (int) ($detail->qty ?? 1);
         if ($detail->pricing_method === OrderPricing::AUTOMATIC) {

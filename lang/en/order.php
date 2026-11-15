@@ -67,8 +67,10 @@ return [
 
     'product_picker' => [
         'add_product' => 'Add Product',
+        'add_bonus_product' => 'Add Bonus Product',
         'add_item' => 'Add Item',
         'description' => 'Choose products from the selected shop to add to this order.',
+        'bonus_description' => 'Choose products from the selected shop to add as free bonus items.',
         'code' => 'Code',
         'search' => 'Search products by name or code...',
         'selected' => 'selected',
@@ -208,6 +210,7 @@ return [
         'no_remarks' => 'No special notes recorded.',
         'print_invoice' => 'Print Invoice',
         'print_slip' => 'Print Delivery Slip',
+        'print_slip_v1' => 'Print Delivery Slip V1',
         'slip_title' => 'Delivery Slip',
         'slip_preview' => 'Delivery Slip Preview',
         'add_payment' => 'Add Payment',
@@ -279,6 +282,7 @@ return [
         'sample_coca' => 'Coca-Cola Bottle 380ml',
 
         'slip_title' => 'Invoice',
+        'slip_bonus_tag' => '[Bonus (Free)]',
         'slip_draft' => '(DRAFT) OEB',
         'slip_inv_no' => 'Inv. No.',
         'slip_issue_date' => 'Issue Date',
@@ -319,6 +323,7 @@ return [
         'in_cart' => 'in Cart',
         'add_more' => 'Add more',
         'reset_order' => 'Reset Order',
+        'reset_bonus' => 'Reset Bonus Items',
         'confirm_order' => 'Confirm Order',
         'update_order' => 'Update Order',
         'record_payment' => 'Record Payment',
@@ -425,9 +430,18 @@ return [
         'description' => 'You can create a new :name by clicking the button below.',
     ],
 
+    'bonus_items_title' => 'Bonus Items (Free)',
+    'bonus_free_tag' => 'Free',
+    'bonus_item_label' => 'Bonus',
+
     'empty_cart' => [
         'title' => 'No items added yet',
         'description' => 'Click "Add Product" to select and add items to this order.',
+    ],
+
+    'empty_bonus_cart' => [
+        'title' => 'No bonus items added yet',
+        'description' => 'Add complimentary products to reward your customer.',
     ],
 
     'confirm' => [

@@ -57,7 +57,7 @@
                         </div> --}}
                         <div class="row table-row-10">
                             {{-- <span>{!! isset($item->status) && $item->status == "stock_in" ? $item->stock_in : $item->stock_out !!}</span> --}}
-                            <span>{!! $item->qty !!}</span>
+                            <span>{!! \App\Models\OrderDetail::formatQuantity($item->qty) !!}</span>
                         </div>
                         <div class="row table-row-10">
                             <span>{!! $item->stock_status_title ?? $item->status !!}</span>

@@ -66,6 +66,7 @@ return [
         'english' => 'English',
         'print_invoices' => 'Print Selected Invoices',
         'print_delivery_slips' => 'Print Selected Delivery Slips',
+        'print_delivery_slips_v1' => 'Print Selected Delivery Slips V1',
         'consolidated_product_quantity' => 'Consolidated Product Quantity',
         'loading_matching' => 'Fetching matching order IDs...',
     ],
@@ -73,6 +74,7 @@ return [
     'preview' => [
         'title_invoice' => 'Bulk Invoice Preview',
         'title_delivery_slip' => 'Bulk Delivery Slip Preview',
+        'title_delivery_slip_v1' => 'Bulk Delivery Slip V1 Preview',
         'title_consolidated' => 'Consolidated Product Quantity',
         'load_report_draft' => 'Load Report (Draft)',
         'meta_docs' => ':count documents',

@@ -85,7 +85,8 @@ class SelectController extends Controller
                     : [];
 
                 foreach ($data as $val) {
-                    $val->current_stock = (int) ($stocks[$val->product_id] ?? 0);
+                    $stockVal = (float) ($stocks[$val->product_id] ?? 0);
+                    $val->current_stock = ((float) $stockVal == (int) $stockVal) ? (int) $stockVal : (float) $stockVal;
                 }
             }
 

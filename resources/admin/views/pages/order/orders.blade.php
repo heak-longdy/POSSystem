@@ -43,6 +43,67 @@
             white-space: nowrap;
         }
 
+        /* Bonus Product Display in Products Column */
+        .order-listing-wrapper .order-table-items .order-table-item--bonus {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
+            border-radius: 6px;
+            padding: 3px 7px;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .order-listing-wrapper .order-table-items .order-table-item--bonus:hover {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+        }
+        .order-listing-wrapper .order-table-items .order-table-item--bonus .order-item-icon--bonus {
+            width: 16px;
+            font-size: 15px;
+            color: #059669;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 3px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .order-listing-wrapper .order-table-items .order-table-item--bonus .order-item-bonus-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            padding: 1.5px 5.5px;
+            border-radius: 3px;
+            line-height: 1.2;
+            background: #10b981;
+            color: #ffffff;
+            flex-shrink: 0;
+            white-space: nowrap;
+            margin-top: 2px;
+        }
+        .order-listing-wrapper .order-table-items .order-table-item--bonus .order-item-name {
+            display: block;
+            flex: 1 1 0%;
+            min-width: 0;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #0f172a;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+        }
+        .order-listing-wrapper .order-table-items .order-table-item--bonus .order-item-qty {
+            margin-top: 0;
+            flex-shrink: 0;
+        }
+
         .order-listing-wrapper .header .header-action-button .filter {
             display: flex;
             align-items: center;
@@ -1223,18 +1284,21 @@
 
                     rows.forEach((item) => {
                         const order = item?.order || {};
+                        const isBonus = Boolean(item?.is_bonus);
+                        const rawItemName = item?.product?.name || item?.service?.name || '';
+                        const itemName = isBonus ? `${rawItemName} (Bonus)` : rawItemName;
                         worksheet.addRow({
                             order_id: order.invoice_number || item?.order_id || '',
                             order_date: this.dateFormat(order.order_date),
                             shop: order.shop?.name || '',
                             barber: order.barber?.name || '',
                             customer_phone: order.customer?.phone || '',
-                            item: item?.product?.name || item?.service?.name || '',
-                            type: item?.type || '',
+                            item: itemName,
+                            type: isBonus ? 'bonus' : (item?.type || ''),
                             qty: item?.qty || 1,
-                            price: item?.price || 0,
-                            discount: this.discountAmount(item),
-                            commission: this.commissionAmount(item),
+                            price: isBonus ? 0 : (item?.price || 0),
+                            discount: isBonus ? 0 : this.discountAmount(item),
+                            commission: isBonus ? 0 : this.commissionAmount(item),
                             payment_status: this.orderStatusLabel(order.payment_status, Boolean(order.is_transferred)),
                             paid_amount: order.paid_amount || 0,
                             remaining_amount: order.remaining_amount || 0,

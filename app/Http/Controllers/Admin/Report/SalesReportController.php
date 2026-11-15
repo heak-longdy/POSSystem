@@ -246,16 +246,21 @@ class SalesReportController extends Controller
     private function formatOrderRecord($order)
     {
         $items = $order->orderDetails->map(function ($detail) {
+            $isBonus = (bool) ($detail->is_bonus ?? false);
             $isService = $detail->type === 'service';
             $name = $isService ? ($detail->service?->name ?? __('sales_report.modal.unknown_service')) : ($detail->product?->name ?? __('sales_report.modal.unknown_product'));
+            if ($isBonus) {
+                $name .= ' (' . __('order.bonus_item_label') . ')';
+            }
             return [
                 'id' => $detail->id,
-                'type' => $detail->type ?: ($isService ? 'service' : 'product'),
+                'is_bonus' => $isBonus,
+                'type' => $isBonus ? 'bonus' : ($detail->type ?: ($isService ? 'service' : 'product')),
                 'name' => $name,
-                'qty' => (int) ($detail->qty ?: 1),
-                'price' => (float) ($detail->price ?? 0),
-                'discount' => (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0)),
-                'total' => (float) (($detail->price ?? 0) * ($detail->qty ?: 1)),
+                'qty' => $isBonus ? (((float) ($detail->qty ?? 0) == (int) ($detail->qty ?? 0)) ? (int) ($detail->qty ?? 0) : (float) ($detail->qty ?? 0)) : (int) ($detail->qty ?: 1),
+                'price' => $isBonus ? 0.0 : (float) ($detail->price ?? 0),
+                'discount' => $isBonus ? 0.0 : (float) ($isService ? ($detail->service_discount ?? 0) : ($detail->product_discount ?? 0)),
+                'total' => $isBonus ? 0.0 : (float) (($detail->price ?? 0) * ($detail->qty ?: 1)),
             ];
         });
 

@@ -7693,6 +7693,74 @@ span.error {
     line-height: 18px;
     white-space: nowrap !important;
 }
+
+/* Bonus Product UI in Order Management Products Column */
+.order-listing-wrapper .order-table-items .order-table-item--bonus,
+.order-table-items .order-table-item--bonus {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    background: #f0fdf4;
+    border: 1px solid #dcfce7;
+    border-radius: 6px;
+    padding: 3px 7px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+    }
+
+    .order-item-icon.order-item-icon--bonus,
+    .order-item-icon--bonus {
+        width: 16px;
+        font-size: 15px;
+        color: #059669;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 1px;
+        flex-shrink: 0;
+        line-height: 1;
+    }
+
+    .order-item-bonus-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        padding: 2px 5.5px !important;
+        border-radius: 3px;
+        line-height: 1.2;
+        background: #10b981;
+        color: #ffffff;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        margin-top: 2px !important;
+    }
+
+    .order-item-name {
+        display: block;
+        flex: 1 1 0%;
+        min-width: 0;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: #0f172a;
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+    }
+
+    .order-item-qty {
+        margin-top: 0;
+        flex-shrink: 0;
+    }
+}
 .order-listing-wrapper .order-table-items .order-table-more-wrapper {
     margin-top: 2px;
     margin-left: 26px;
