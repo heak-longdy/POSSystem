@@ -266,6 +266,9 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             //In
             Route::get('shop-in-product', [Admin\SelectController::class, 'productInShop'])->name('shop-in-product');
 
+            //Available Shop Products
+            Route::get('available-shop-products', [Admin\SelectController::class, 'selectAvailableShopProducts'])->name('available-shop-products');
+
             //Position
             Route::get('position', [Admin\SelectController::class, 'SelectPositionSearch'])->name('position');
             //Sector

@@ -85,7 +85,7 @@
                 <div class="row-2">
                     <div class="form-row iconInput">
                         <label>{{ __('product.form.cost.label') }} <span>*</span></label>
-                        <input type="number" step="0.01" name="cost" x-model="cost" placeholder="{{ __('product.form.cost.placeholder') }}" @input="delete clientErrors.cost">
+                        <input type="text" inputmode="decimal" name="cost" x-model="cost" placeholder="{{ __('product.form.cost.placeholder') }}" @input="handlePriceInput('cost')" @blur="handlePriceBlur('cost')">
                         <i class='bx bx-dollar'></i>
                         <template x-if="clientErrors?.cost">
                             <label class="error" x-text="clientErrors.cost"></label>
@@ -96,7 +96,7 @@
                     </div>
                     <div class="form-row iconInput">
                         <label>{{ __('product.form.price.label') }} <span>*</span></label>
-                        <input type="number" step="0.01" name="price" x-model="price" placeholder="{{ __('product.form.price.placeholder') }}" @input="delete clientErrors.price">
+                        <input type="text" inputmode="decimal" name="price" x-model="price" placeholder="{{ __('product.form.price.placeholder') }}" @input="handlePriceInput('price')" @blur="handlePriceBlur('price')">
                         <i class='bx bx-dollar'></i>
                         <template x-if="clientErrors?.price">
                             <label class="error" x-text="clientErrors.price"></label>
@@ -182,9 +182,225 @@
                         text: "{!! request('id') ? addslashes($data?->uom_title ?? '') : addslashes(old('uom_text') ?? '') !!}"
                     },
                     clientErrors: {},
+                    priceTranslations: {
+                        price_required: @json(__('product.validation.price_required')),
+                        price_numeric: @json(__('product.validation.price_numeric')),
+                        price_min: @json(__('product.validation.price_min')),
+                        cost_required: @json(__('product.validation.cost_required')),
+                        cost_numeric: @json(__('product.validation.cost_numeric')),
+                        cost_min: @json(__('product.validation.cost_min')),
+                    },
 
                     init() {
                         $(this.$root).find('#status').select2();
+                        if (this.price !== null && this.price !== undefined && String(this.price).trim() !== '') {
+                            const p = this.parseAndNormalizePrice(this.price);
+                            if (p.valid) this.price = p.formatted;
+                        }
+                        if (this.cost !== null && this.cost !== undefined && String(this.cost).trim() !== '') {
+                            const c = this.parseAndNormalizePrice(this.cost);
+                            if (c.valid) this.cost = c.formatted;
+                        }
+                    },
+
+                    parseAndNormalizePrice(input) {
+                        if (input === null || input === undefined || input === '') {
+                            return { valid: false, value: null, formatted: '', numeric_string: '', error: 'required' };
+                        }
+
+                        let str = String(input).trim();
+
+                        // Convert Khmer numerals (០-៩)
+                        const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+                        for (let i = 0; i < khmerDigits.length; i++) {
+                            str = str.split(khmerDigits[i]).join(String(i));
+                        }
+
+                        // Map Khmer khan (។) to period
+                        str = str.split('។').join('.');
+
+                        // Remove currency symbols & whitespace
+                        str = str.replace(/[\$៛\s]/g, '');
+
+                        if (str === '') {
+                            return { valid: false, value: null, formatted: '', numeric_string: '', error: 'required' };
+                        }
+
+                        if (str.startsWith('-')) {
+                            return { valid: false, value: null, formatted: '', numeric_string: '', error: 'min' };
+                        }
+
+                        // Allowed characters: only digits, dots, commas
+                        if (!/^[0-9.,]+$/.test(str)) {
+                            return { valid: false, value: null, formatted: '', numeric_string: '', error: 'invalid_chars' };
+                        }
+
+                        // Must contain at least one digit
+                        if (!/[0-9]/.test(str)) {
+                            return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                        }
+
+                        const hasDot = str.includes('.');
+                        const hasComma = str.includes(',');
+
+                        let clean = '';
+
+                        if (hasDot && hasComma) {
+                            const lastDot = str.lastIndexOf('.');
+                            const lastComma = str.lastIndexOf(',');
+
+                            if (lastDot > lastComma) {
+                                // Comma is thousands, dot is decimal (e.g. 1,500.50)
+                                if (str.split('.').length - 1 > 1) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                                const parts = str.split('.');
+                                const thousandPart = parts[0];
+                                const decimalPart = parts[1];
+
+                                const groups = thousandPart.split(',');
+                                if (groups[0].length < 1 || groups[0].length > 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                                for (let i = 1; i < groups.length; i++) {
+                                    if (groups[i].length !== 3) {
+                                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                    }
+                                }
+                                clean = groups.join('') + '.' + decimalPart;
+                            } else {
+                                // Dot is thousands, comma is decimal (e.g. 1.500,50)
+                                if (str.split(',').length - 1 > 1) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                                const parts = str.split(',');
+                                const thousandPart = parts[0];
+                                const decimalPart = parts[1];
+
+                                const groups = thousandPart.split('.');
+                                if (groups[0].length < 1 || groups[0].length > 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                                for (let i = 1; i < groups.length; i++) {
+                                    if (groups[i].length !== 3) {
+                                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                    }
+                                }
+                                clean = groups.join('') + '.' + decimalPart;
+                            }
+                        } else if (hasComma) {
+                            const commaCount = str.split(',').length - 1;
+                            if (commaCount > 1) {
+                                // Multiple commas -> thousands (e.g. 1,500,000)
+                                const groups = str.split(',');
+                                if (groups[0].length < 1 || groups[0].length > 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                                for (let i = 1; i < groups.length; i++) {
+                                    if (groups[i].length !== 3) {
+                                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                    }
+                                }
+                                clean = groups.join('');
+                            } else {
+                                // Exactly 1 comma
+                                const parts = str.split(',');
+                                let before = parts[0];
+                                const after = parts[1];
+
+                                if (before === '') before = '0';
+
+                                if (after.length === 3 && before.length >= 1 && before.length <= 3 && before !== '0') {
+                                    clean = before + after;
+                                } else {
+                                    clean = before + (after !== '' ? '.' + after : '');
+                                }
+                            }
+                        } else if (hasDot) {
+                            const dotCount = str.split('.').length - 1;
+                            if (dotCount > 1) {
+                                // Multiple dots -> thousands (e.g. 1.500.000)
+                                const groups = str.split('.');
+                                if (groups[0].length < 1 || groups[0].length > 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                                for (let i = 1; i < groups.length; i++) {
+                                    if (groups[i].length !== 3) {
+                                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                    }
+                                }
+                                clean = groups.join('');
+                            } else {
+                                // Exactly 1 dot e.g. 10.50
+                                const parts = str.split('.');
+                                let before = parts[0] === '' ? '0' : parts[0];
+                                const after = parts[1];
+                                clean = before + (after !== '' ? '.' + after : '');
+                            }
+                        } else {
+                            clean = str;
+                        }
+
+                        if (clean.endsWith('.')) {
+                            clean = clean.slice(0, -1);
+                        }
+
+                        if (clean === '' || isNaN(Number(clean))) {
+                            return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                        }
+
+                        const val = Number(clean);
+                        if (!Number.isFinite(val) || val < 0) {
+                            return { valid: false, value: null, formatted: '', numeric_string: '', error: 'min' };
+                        }
+
+                        let formatted = '';
+                        if (clean.includes('.')) {
+                            formatted = val.toFixed(2);
+                        } else {
+                            formatted = String(val);
+                        }
+
+                        return {
+                            valid: true,
+                            value: val,
+                            formatted: formatted,
+                            numeric_string: val.toFixed(2),
+                            clean: clean,
+                            error: null
+                        };
+                    },
+
+                    getPriceErrorMessage(field, errorCode) {
+                        if (errorCode === 'required') {
+                            return this.priceTranslations[field + '_required'] || (field === 'price' ? 'Price is required' : 'Cost is required');
+                        }
+                        if (errorCode === 'min') {
+                            return this.priceTranslations[field + '_min'] || (field === 'price' ? 'Price must be greater than or equal to 0.' : 'Cost must be greater than or equal to 0.');
+                        }
+                        return this.priceTranslations[field + '_numeric'] || (field === 'price' ? 'Price format invalid' : 'Cost format invalid');
+                    },
+
+                    handlePriceInput(field) {
+                        delete this.clientErrors[field];
+                    },
+
+                    handlePriceBlur(field) {
+                        const raw = (this[field] !== null && this[field] !== undefined) ? String(this[field]).trim() : '';
+                        if (raw === '') {
+                            return;
+                        }
+                        const res = this.parseAndNormalizePrice(raw);
+                        if (!res.valid) {
+                            this.clientErrors[field] = this.getPriceErrorMessage(field, res.error);
+                        } else {
+                            delete this.clientErrors[field];
+                            this[field] = res.formatted;
+                            const inputEl = $(this.$root).find(`input[name="${field}"]`)[0];
+                            if (inputEl) {
+                                inputEl.value = res.formatted;
+                            }
+                        }
                     },
 
                     fetchSelectCategory() {
@@ -314,24 +530,42 @@
 
                         const costVal = (this.cost !== null && this.cost !== undefined) ? String(this.cost).trim() : '';
                         if (costVal === '') {
-                            errors.cost = @json(__('product.validation.cost_required'));
+                            errors.cost = this.priceTranslations.cost_required;
                             isValid = false;
                             if (!firstErrorEl) firstErrorEl = $('input[name="cost"]');
-                        } else if (isNaN(Number(costVal))) {
-                            errors.cost = @json(__('product.validation.cost_numeric'));
-                            isValid = false;
-                            if (!firstErrorEl) firstErrorEl = $('input[name="cost"]');
+                        } else {
+                            const parsedCost = this.parseAndNormalizePrice(costVal);
+                            if (!parsedCost.valid) {
+                                errors.cost = this.getPriceErrorMessage('cost', parsedCost.error);
+                                isValid = false;
+                                if (!firstErrorEl) firstErrorEl = $('input[name="cost"]');
+                            } else {
+                                this.cost = parsedCost.numeric_string;
+                                const costInput = $(this.$root).find('input[name="cost"]')[0];
+                                if (costInput) {
+                                    costInput.value = parsedCost.numeric_string;
+                                }
+                            }
                         }
 
                         const priceVal = (this.price !== null && this.price !== undefined) ? String(this.price).trim() : '';
                         if (priceVal === '') {
-                            errors.price = @json(__('product.validation.price_required'));
+                            errors.price = this.priceTranslations.price_required;
                             isValid = false;
                             if (!firstErrorEl) firstErrorEl = $('input[name="price"]');
-                        } else if (isNaN(Number(priceVal))) {
-                            errors.price = @json(__('product.validation.price_numeric'));
-                            isValid = false;
-                            if (!firstErrorEl) firstErrorEl = $('input[name="price"]');
+                        } else {
+                            const parsedPrice = this.parseAndNormalizePrice(priceVal);
+                            if (!parsedPrice.valid) {
+                                errors.price = this.getPriceErrorMessage('price', parsedPrice.error);
+                                isValid = false;
+                                if (!firstErrorEl) firstErrorEl = $('input[name="price"]');
+                            } else {
+                                this.price = parsedPrice.numeric_string;
+                                const priceInput = $(this.$root).find('input[name="price"]')[0];
+                                if (priceInput) {
+                                    priceInput.value = parsedPrice.numeric_string;
+                                }
+                            }
                         }
 
                         this.clientErrors = errors;

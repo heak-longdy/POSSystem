@@ -41,6 +41,7 @@
                 <template x-for="(row,index) in productRows" :key="row.uid">
                     <div class="shop-product-row">
                             <input type="hidden" :name="`products[${index}][id]`" x-model="row.id">
+                            <input type="hidden" :name="`products[${index}][product_code]`" x-model="row.product_code">
                             <input type="hidden" :name="`products[${index}][product_name]`" x-model="row.product_name">
                             <input type="hidden" :name="`products[${index}][product_image]`" x-model="row.product_image">
                             <input type="hidden" :name="`products[${index}][product_uom]`" x-model="row.product_uom">
@@ -53,7 +54,7 @@
                             <div class="shop-product-row-header">
                                 <div>
                                     <span x-text="row.id ? '{{ __('shop.product.assigned_product') }}' : `{{ __('shop.product.product_label') }} ${index + 1}`"></span>
-                                    <h4 x-text="row.product_name || '{{ __('shop.product.select_product') }}'"></h4>
+                                    <h4 x-text="row.product_name ? (row.product_code ? `${row.product_code} - ${row.product_name}` : row.product_name) : '{{ __('shop.product.select_product') }}'"></h4>
                                 </div>
                                 <template x-if="!row.id">
                                     <button type="button" class="shop-product-remove" @click="removeRow(index)">
@@ -68,24 +69,33 @@
                                 </div>
                                 <div class="form-row">
                                     <label>{{ __('shop.product.product') }} <span>*</span></label>
-                                    <template x-if="row.id">
-                                        <div class="shop-product-readonly-wrap">
-                                            <input type="hidden" :name="`products[${index}][product_id]`"
-                                                x-model="row.product_id">
-                                            <input type="text" x-model="row.product_name" readonly>
-                                        </div>
-                                    </template>
-                                    <template x-if="!row.id">
-                                        <select :name="`products[${index}][product_id]`" x-model="row.product_id"
+                                    <div class="select2Group">
+                                        <select :name="`products[${index}][product_id]`"
+                                            :id="`product_id_${row.uid}`"
+                                            class="SelectProduct select2"
                                             :class="{ 'is-invalid': !!fieldError(index, 'product_id') }"
-                                            @change="syncProduct(row); clearFieldError(index, 'product_id')">
+                                            x-init="initSelect2Product(row, index, $el)">
                                             <option value="">{{ __('shop.product.select_product') }}</option>
-                                            <template x-for="product in availableProducts(row)" :key="product.id">
-                                                <option :value="product.id" x-text="product.name"></option>
-                                            </template>
+                                            @if (isset($availableProducts) && count($availableProducts))
+                                                @foreach ($availableProducts as $product)
+                                                    @php
+                                                        $pCode = trim((string) data_get($product, 'code', ''));
+                                                        $pName = data_get($product, 'name', '');
+                                                    @endphp
+                                                    <option value="{{ data_get($product, 'id') }}">
+                                                        {{ $pCode !== '' ? $pCode . ' - ' : '' }}{{ $pName }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
                                         </select>
-                                    </template>
+                                        <div class="select2Reset" x-show="row.product_id" @click.stop="resetProduct(row, index)" style="display: none;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                                <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
                                     <div class="shop-product-meta">
+                                        <span x-show="row.product_code" x-text="row.product_code" style="display: none;"></span>
                                         <span x-text="row.product_category || '---'"></span>
                                         <span x-text="row.product_uom || '---'"></span>
                                     </div>
@@ -98,10 +108,11 @@
                             <div class="shop-product-grid">
                                 <div class="form-row iconInput">
                                     <label>{{ __('shop.table.price') }} <span>*</span></label>
-                                    <input type="number" step="0.01" :name="`products[${index}][price]`"
+                                    <input type="text" inputmode="decimal" :name="`products[${index}][price]`"
                                         x-model="row.price"
                                         :class="{ 'is-invalid': !!fieldError(index, 'price') }"
                                         @input="clearFieldError(index, 'price')"
+                                        @blur="handlePriceBlur(index)"
                                         placeholder="{{ __('shop.placeholder.enter_price') }}">
                                     <i class='bx bx-dollar'></i>
                                     <template x-if="fieldError(index, 'price')">
@@ -136,7 +147,7 @@
                 </div>
 
                 <div class="form-button">
-                    <button type="submit" color="primary" :disabled="products.length === 0 && !isEditMode()">
+                    <button type="submit" color="primary" :disabled="!canSubmit()">
                         <i data-feather="save"></i>
                         <span>{{ __('global.button.submit') }}</span>
                     </button>
@@ -473,6 +484,7 @@
                         uid: `${Date.now()}-${Math.random()}`,
                         id: '',
                         product_id: '',
+                        product_code: '',
                         product_name: '',
                         product_image: '',
                         product_uom: '',
@@ -486,15 +498,29 @@
                     };
                 },
                 normalizeRow(row) {
+                    let initialPrice = row?.price ?? '';
+                    if (initialPrice !== null && initialPrice !== undefined && String(initialPrice).trim() !== '') {
+                        const p = this.parseAndNormalizePrice(initialPrice);
+                        if (p.valid) initialPrice = p.formatted;
+                    }
+                    let productCode = row?.product_code ?? '';
+                    if (!productCode && row?.product_id && Array.isArray(this.products)) {
+                        const matched = this.products.find((p) => Number(p.id) === Number(row.product_id));
+                        if (matched && matched.code) {
+                            productCode = matched.code;
+                        }
+                    }
                     return {
                         uid: `${Date.now()}-${Math.random()}`,
                         id: row?.id ?? '',
+                        initial_product_id: row?.product_id ? String(row.product_id) : '',
                         product_id: row?.product_id ? String(row.product_id) : '',
+                        product_code: productCode,
                         product_name: row?.product_name ?? '',
                         product_image: row?.product_image ?? '',
                         product_uom: row?.product_uom ?? '',
                         product_category: row?.product_category ?? '',
-                        price: row?.price ?? '',
+                        price: initialPrice,
                         point: row?.point ?? '',
                         max_qty: row?.max_qty ?? '',
                         commission: row?.commission ?? '',
@@ -517,9 +543,13 @@
                 isEditMode() {
                     return this.productRows.some((row) => row.id);
                 },
-                syncProduct(row) {
-                    const product = this.products.find((item) => Number(item.id) === Number(row.product_id));
+                syncProduct(row, productData = null) {
+                    let product = (productData && productData.price !== undefined) ? productData : null;
+                    if (!product && Array.isArray(this.products)) {
+                        product = this.products.find((item) => Number(item.id) === Number(row.product_id));
+                    }
                     if (!product) {
+                        row.product_code = '';
                         row.product_name = '';
                         row.product_image = '';
                         row.product_uom = '';
@@ -529,22 +559,305 @@
                         return;
                     }
 
+                    row.product_code = product.code ?? '';
                     row.product_name = product.name ?? '';
                     row.product_image = product.image ?? '';
                     row.product_uom = product.uom ?? '';
                     row.product_category = product.category ?? '';
-                    row.price = product.price ?? '';
+                    let pPrice = product.price ?? '';
+                    if (pPrice !== null && pPrice !== undefined && String(pPrice).trim() !== '') {
+                        const p = this.parseAndNormalizePrice(pPrice);
+                        if (p.valid) pPrice = p.formatted;
+                    }
+                    row.price = pPrice;
                     row.commission = product.commission ?? '';
                     row.commission_type = row.commission_type || 'usd';
                 },
+                parseAndNormalizePrice(input) {
+                    if (input === null || input === undefined || input === '') {
+                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'required' };
+                    }
+
+                    let str = String(input).trim();
+
+                    // Convert Khmer numerals (០-៩)
+                    const khmerDigits = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+                    for (let i = 0; i < khmerDigits.length; i++) {
+                        str = str.split(khmerDigits[i]).join(String(i));
+                    }
+
+                    // Map Khmer khan (។) to period
+                    str = str.split('។').join('.');
+
+                    // Remove currency symbols & whitespace
+                    str = str.replace(/[\$៛\s]/g, '');
+
+                    if (str === '') {
+                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'required' };
+                    }
+
+                    if (str.startsWith('-')) {
+                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'min' };
+                    }
+
+                    // Allowed characters: only digits, dots, commas
+                    if (!/^[0-9.,]+$/.test(str)) {
+                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'invalid_chars' };
+                    }
+
+                    // Must contain at least one digit
+                    if (!/[0-9]/.test(str)) {
+                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                    }
+
+                    const hasDot = str.includes('.');
+                    const hasComma = str.includes(',');
+
+                    let clean = '';
+
+                    if (hasDot && hasComma) {
+                        const lastDot = str.lastIndexOf('.');
+                        const lastComma = str.lastIndexOf(',');
+
+                        if (lastDot > lastComma) {
+                            // Comma is thousands, dot is decimal (e.g. 1,500.50)
+                            if (str.split('.').length - 1 > 1) {
+                                return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                            }
+                            const parts = str.split('.');
+                            const thousandPart = parts[0];
+                            const decimalPart = parts[1];
+
+                            const groups = thousandPart.split(',');
+                            if (groups[0].length < 1 || groups[0].length > 3) {
+                                return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                            }
+                            for (let i = 1; i < groups.length; i++) {
+                                if (groups[i].length !== 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                            }
+                            clean = groups.join('') + '.' + decimalPart;
+                        } else {
+                            // Dot is thousands, comma is decimal (e.g. 1.500,50)
+                            if (str.split(',').length - 1 > 1) {
+                                return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                            }
+                            const parts = str.split(',');
+                            const thousandPart = parts[0];
+                            const decimalPart = parts[1];
+
+                            const groups = thousandPart.split('.');
+                            if (groups[0].length < 1 || groups[0].length > 3) {
+                                return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                            }
+                            for (let i = 1; i < groups.length; i++) {
+                                if (groups[i].length !== 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                            }
+                            clean = groups.join('') + '.' + decimalPart;
+                        }
+                    } else if (hasComma) {
+                        const commaCount = str.split(',').length - 1;
+                        if (commaCount > 1) {
+                            // Multiple commas -> thousands (e.g. 1,500,000)
+                            const groups = str.split(',');
+                            if (groups[0].length < 1 || groups[0].length > 3) {
+                                return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                            }
+                            for (let i = 1; i < groups.length; i++) {
+                                if (groups[i].length !== 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                            }
+                            clean = groups.join('');
+                        } else {
+                            // Exactly 1 comma
+                            const parts = str.split(',');
+                            let before = parts[0];
+                            const after = parts[1];
+
+                            if (before === '') before = '0';
+
+                            if (after.length === 3 && before.length >= 1 && before.length <= 3 && before !== '0') {
+                                clean = before + after;
+                            } else {
+                                clean = before + (after !== '' ? '.' + after : '');
+                            }
+                        }
+                    } else if (hasDot) {
+                        const dotCount = str.split('.').length - 1;
+                        if (dotCount > 1) {
+                            // Multiple dots -> thousands (e.g. 1.500.000)
+                            const groups = str.split('.');
+                            if (groups[0].length < 1 || groups[0].length > 3) {
+                                return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                            }
+                            for (let i = 1; i < groups.length; i++) {
+                                if (groups[i].length !== 3) {
+                                    return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                                }
+                            }
+                            clean = groups.join('');
+                        } else {
+                            // Exactly 1 dot e.g. 10.50
+                            const parts = str.split('.');
+                            let before = parts[0] === '' ? '0' : parts[0];
+                            const after = parts[1];
+                            clean = before + (after !== '' ? '.' + after : '');
+                        }
+                    } else {
+                        clean = str;
+                    }
+
+                    if (clean.endsWith('.')) {
+                        clean = clean.slice(0, -1);
+                    }
+
+                    if (clean === '' || isNaN(Number(clean))) {
+                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'format' };
+                    }
+
+                    const val = Number(clean);
+                    if (!Number.isFinite(val) || val < 0) {
+                        return { valid: false, value: null, formatted: '', numeric_string: '', error: 'min' };
+                    }
+
+                    let formatted = '';
+                    if (clean.includes('.')) {
+                        formatted = val.toFixed(2);
+                    } else {
+                        formatted = String(val);
+                    }
+
+                    return {
+                        valid: true,
+                        value: val,
+                        formatted: formatted,
+                        numeric_string: val.toFixed(2),
+                        clean: clean,
+                        error: null
+                    };
+                },
+                getPriceErrorMessage(errorCode) {
+                    if (errorCode === 'required') {
+                        return '{{ __('shop.validation.price_required') }}';
+                    }
+                    if (errorCode === 'min') {
+                        return '{{ __('shop.validation.price_min') }}';
+                    }
+                    return '{{ __('shop.validation.price_numeric') }}';
+                },
+                handlePriceBlur(index) {
+                    const row = this.productRows[index];
+                    if (!row) return;
+                    const raw = row.price !== null && row.price !== undefined ? String(row.price).trim() : '';
+                    if (raw === '') return;
+                    const res = this.parseAndNormalizePrice(raw);
+                    if (!res.valid) {
+                        const key = `products.${index}.price`;
+                        this.errors = { ...this.errors, [key]: [this.getPriceErrorMessage(res.error)] };
+                    } else {
+                        this.clearFieldError(index, 'price');
+                        row.price = res.formatted;
+                        const inputEl = document.querySelector(`input[name="products[${index}][price]"]`);
+                        if (inputEl) {
+                            inputEl.value = res.formatted;
+                        }
+                    }
+                },
                 canAddRow() {
                     const hasBlankNewRow = this.productRows.some((row) => !row.id && !row.product_id);
-                    const selectedIds = this.selectedProductIds();
-                    const hasAvailableProduct = this.products.some((product) => {
-                        return !selectedIds.includes(Number(product.id));
-                    });
+                    return !hasBlankNewRow;
+                },
+                canSubmit() {
+                    if (this.isEditMode()) return true;
+                    return this.productRows.length > 0 && this.productRows.some((r) => r.product_id);
+                },
+                initSelect2Product(row, index, el = null) {
+                    this.$nextTick(() => {
+                        const selectEl = el || document.getElementById(`product_id_${row.uid}`);
+                        if (!selectEl) return;
+                        const $select = $(selectEl);
 
-                    return !hasBlankNewRow && hasAvailableProduct;
+                        if ($select.hasClass('select2-hidden-accessible')) {
+                            $select.select2('destroy');
+                        }
+
+                        $select.select2({
+                            placeholder: '{{ __('shop.product.select_product') }}',
+                            width: '100%',
+                            ajax: {
+                                url: '{{ route('admin-select-available-shop-products', [], false) }}',
+                                dataType: 'json',
+                                delay: 250,
+                                data: (params) => {
+                                    const excludeIds = this.selectedProductIds(row.uid);
+                                    return {
+                                        shop_id: '{{ $shop->id ?? ($id ?? '') }}',
+                                        search: params.term || '',
+                                        page: params.page || 1,
+                                        per_page: 100,
+                                        exclude_ids: JSON.stringify(excludeIds),
+                                        current_product_id: row.initial_product_id || ''
+                                    };
+                                },
+                                processResults: (data, params) => {
+                                    params.page = params.page || 1;
+                                    return {
+                                        results: data.results || [],
+                                        pagination: {
+                                            more: data.pagination ? data.pagination.more : false
+                                        }
+                                    };
+                                },
+                                cache: true
+                            }
+                        }).on('select2:open', function () {
+                            if (typeof window.$select2FocusInputSearch === 'function') {
+                                window.$select2FocusInputSearch();
+                            }
+                        }).on('select2:select', (event) => {
+                            const item = event.params.data;
+                            row.product_id = item.id;
+                            this.syncProduct(row, item);
+                            this.clearFieldError(index, 'product_id');
+                        }).on('change select2:clear select2:unselect', (event) => {
+                            const val = $(event.target).val();
+                            if (!val) {
+                                row.product_id = '';
+                                this.syncProduct(row, null);
+                            } else if (String(row.product_id) !== String(val)) {
+                                row.product_id = val;
+                                this.syncProduct(row);
+                            }
+                        });
+
+                        if (row.product_id) {
+                            const displayText = row.product_code
+                                ? `${row.product_code} - ${row.product_name}`
+                                : (row.product_name || `Product #${row.product_id}`);
+                            if ($select.find(`option[value="${row.product_id}"]`).length === 0) {
+                                const option = new Option(displayText, row.product_id, true, true);
+                                $select.append(option);
+                            }
+                            $select.val(String(row.product_id)).trigger('change.select2');
+                        }
+                    });
+                },
+                resetProduct(row, index) {
+                    row.product_id = '';
+                    row.product_code = '';
+                    this.syncProduct(row, null);
+                    this.clearFieldError(index, 'product_id');
+                    const selectEl = document.getElementById(`product_id_${row.uid}`);
+                    if (selectEl) {
+                        $(selectEl).val('').trigger('change').trigger('change.select2');
+                    }
+                },
+                updateDisabledOptions() {
+                    // Handled automatically via exclude_ids in Select2 AJAX queries
                 },
                 addRow() {
                     if (!this.canAddRow()) {
@@ -553,11 +866,20 @@
                     this.productRows.push(this.newRow());
                 },
                 removeRow(index) {
+                    const row = this.productRows[index];
+                    if (row) {
+                        const selectEl = document.getElementById(`product_id_${row.uid}`);
+                        if (selectEl && $(selectEl).data('select2')) {
+                            $(selectEl).select2('destroy');
+                        }
+                    }
                     if (this.productRows.length === 1) {
                         this.productRows.splice(index, 1, this.newRow());
+                        this.updateDisabledOptions();
                         return;
                     }
                     this.productRows.splice(index, 1);
+                    this.updateDisabledOptions();
                 },
                 productImage(row) {
                     return row.product_image ? this.baseImageUrl + row.product_image : this.defaultImage;
@@ -584,13 +906,13 @@
                             newErrors[`products.${index}.product_id`] = ['{{ __('shop.validation.product_id_required') }}'];
                             isValid = false;
                             if (!firstErrorElement) {
-                                firstErrorElement = document.querySelector(`select[name="products[${index}][product_id]"]`);
+                                firstErrorElement = document.getElementById(`product_id_${row.uid}`) || document.querySelector(`select[name="products[${index}][product_id]"]`);
                             }
                         } else if (seenProductIds.has(String(row.product_id))) {
                             newErrors[`products.${index}.product_id`] = ['{{ __('shop.validation.product_id_distinct') }}'];
                             isValid = false;
                             if (!firstErrorElement) {
-                                firstErrorElement = document.querySelector(`select[name="products[${index}][product_id]"]`);
+                                firstErrorElement = document.getElementById(`product_id_${row.uid}`) || document.querySelector(`select[name="products[${index}][product_id]"]`);
                             }
                         } else {
                             seenProductIds.add(String(row.product_id));
@@ -604,11 +926,20 @@
                             if (!firstErrorElement) {
                                 firstErrorElement = document.querySelector(`input[name="products[${index}][price]"]`);
                             }
-                        } else if (isNaN(Number(priceVal)) || Number(priceVal) < 0) {
-                            newErrors[`products.${index}.price`] = ['{{ __('shop.validation.price_min') }}'];
-                            isValid = false;
-                            if (!firstErrorElement) {
-                                firstErrorElement = document.querySelector(`input[name="products[${index}][price]"]`);
+                        } else {
+                            const parsedPrice = this.parseAndNormalizePrice(priceVal);
+                            if (!parsedPrice.valid) {
+                                newErrors[`products.${index}.price`] = [this.getPriceErrorMessage(parsedPrice.error)];
+                                isValid = false;
+                                if (!firstErrorElement) {
+                                    firstErrorElement = document.querySelector(`input[name="products[${index}][price]"]`);
+                                }
+                            } else {
+                                row.price = parsedPrice.numeric_string;
+                                const inputEl = document.querySelector(`input[name="products[${index}][price]"]`);
+                                if (inputEl) {
+                                    inputEl.value = parsedPrice.numeric_string;
+                                }
                             }
                         }
 
@@ -625,8 +956,12 @@
 
                     if (!isValid) {
                         if (firstErrorElement) {
-                            firstErrorElement.focus();
-                            firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            if ($(firstErrorElement).data('select2')) {
+                                $(firstErrorElement).select2('open');
+                            } else {
+                                firstErrorElement.focus();
+                                firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
                         }
                         if (window.iziToast) {
                             window.iziToast.warning({

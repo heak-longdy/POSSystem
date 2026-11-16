@@ -52,6 +52,7 @@ return [
         'product' => ['product', 'order', 'report-summary'],
         'service' => ['service', 'order', 'report-summary'],
         'shop-in-product' => ['stock-in', 'stock-out', 'stock-transfer'],
+        'available-shop-products' => ['shop', 'product'],
         'position' => ['position', 'staff', 'internships', 'category', 'customer-paid', 'sector', 'supplier', 'uom'],
         'sector' => ['sector', 'internships', 'category', 'customer-paid', 'supplier', 'uom'],
         'category' => ['category', 'product'],

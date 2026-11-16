@@ -449,4 +449,78 @@ class SelectController extends Controller
             ]);
         }
     }
+
+    public function selectAvailableShopProducts(Request $req)
+    {
+        $shopId = $req->input('shop_id');
+        $currentProductId = $req->input('current_product_id');
+        $attachedProductIds = collect();
+
+        if ($shopId) {
+            $attachedProductIds = ShopProduct::withTrashed()
+                ->where('shop_id', $shopId)
+                ->when($currentProductId, function ($q, $curId) {
+                    $q->where('product_id', '!=', $curId);
+                })
+                ->pluck('product_id')
+                ->filter()
+                ->values();
+        }
+
+        $excludeIds = $req->input('exclude_ids');
+        if (is_string($excludeIds)) {
+            $decoded = json_decode($excludeIds, true);
+            $excludeIds = is_array($decoded) ? $decoded : array_filter(explode(',', $excludeIds));
+        }
+        $excludeIds = collect($excludeIds)->filter()->map(fn($id) => (int) $id)->values();
+
+        $allExcluded = $attachedProductIds->merge($excludeIds)->unique()->values();
+
+        $query = Product::with(['category', 'uom'])
+            ->where('status', 1)
+            ->when($allExcluded->count() > 0, function ($q) use ($allExcluded) {
+                $q->whereNotIn('id', $allExcluded);
+            });
+
+        $search = trim((string) $req->input('search', ''));
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('code', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $perPage = (int) ($req->input('per_page') ?: 100);
+        $page = (int) ($req->input('page') ?: 1);
+
+        $paginator = $query->orderBy('name', 'asc')
+            ->orderBy('id', 'asc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        $results = $paginator->getCollection()->map(function ($product) {
+            $code = trim((string) ($product->code ?? ''));
+            $name = $product->name ?? '';
+            $displayText = $code !== '' ? $code . ' - ' . $name : $name;
+
+            return [
+                'id' => $product->id,
+                'text' => $displayText,
+                'code' => $product->code,
+                'name' => $product->name,
+                'price' => $product->price,
+                'commission' => $product->commission,
+                'image' => $product->image,
+                'uom' => $product->uom?->name,
+                'category' => $product->category?->name,
+            ];
+        })->values();
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => [
+                'more' => $paginator->hasMorePages()
+            ],
+            'total' => $paginator->total()
+        ]);
+    }
 }

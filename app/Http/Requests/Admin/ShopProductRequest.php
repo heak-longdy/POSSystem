@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin;
 
 use App\Models\ShopProduct;
+use App\Support\PriceNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,12 +14,29 @@ class ShopProductRequest extends FormRequest
         return Auth::check();
     }
 
+    protected function prepareForValidation()
+    {
+        $products = $this->input('products');
+        if (is_array($products)) {
+            foreach ($products as $key => $item) {
+                if (isset($item['price']) && $item['price'] !== '' && $item['price'] !== null) {
+                    $parsed = PriceNormalizer::parse($item['price']);
+                    if ($parsed['valid']) {
+                        $products[$key]['price'] = $parsed['numeric_string'];
+                    }
+                }
+            }
+            $this->merge(['products' => $products]);
+        }
+    }
+
     public function rules()
     {
         return [
             'products' => 'required|array|min:1',
             'products.*.id' => 'nullable|integer',
             'products.*.product_id' => 'required|integer|exists:products,id|distinct',
+            'products.*.product_code' => 'nullable|string',
             'products.*.product_name' => 'nullable|string',
             'products.*.price' => 'required|numeric|min:0',
             'products.*.point' => 'nullable|numeric|min:0',
@@ -57,8 +75,6 @@ class ShopProductRequest extends FormRequest
 
                     if (!$shopProduct) {
                         $validator->errors()->add("products.{$index}.product_id", __('shop.validation.shop_product_not_belong'));
-                    } elseif ((int) $shopProduct->product_id !== (int) $productId) {
-                        $validator->errors()->add("products.{$index}.product_id", __('shop.validation.cannot_change_product'));
                     }
                 }
 

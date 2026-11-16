@@ -134,10 +134,12 @@ class ShopController extends Controller
                 $query->whereNotIn('id', $attachedProductIds);
             })
             ->orderBy('name', 'asc')
+            ->take(100)
             ->get()
             ->map(function ($product) {
                 return [
                     'id' => $product->id,
+                    'code' => $product->code,
                     'name' => $product->name,
                     'price' => $product->price,
                     'commission' => $product->commission,
@@ -161,10 +163,25 @@ class ShopController extends Controller
         $data['shop'] = $shop;
         $data['routeName'] = $this->routeName;
         $data['availableProducts'] = collect();
+        if ($shopProduct->product) {
+            $data['availableProducts'] = collect([
+                [
+                    'id' => $shopProduct->product->id,
+                    'code' => $shopProduct->product->code,
+                    'name' => $shopProduct->product->name,
+                    'price' => $shopProduct->price,
+                    'commission' => $shopProduct->commission,
+                    'image' => $shopProduct->product->image,
+                    'uom' => $shopProduct->product->uom?->name,
+                    'category' => $shopProduct->product->category?->name,
+                ]
+            ]);
+        }
         $data['products'] = collect([
             [
                 'id' => $shopProduct->id,
                 'product_id' => $shopProduct->product_id,
+                'product_code' => $shopProduct->product?->code,
                 'product_name' => $shopProduct->product?->name,
                 'product_image' => $shopProduct->product?->image,
                 'product_uom' => $shopProduct->product?->uom?->name,
@@ -195,20 +212,34 @@ class ShopController extends Controller
         DB::beginTransaction();
         try {
             foreach ($validated['products'] as $product) {
-                ShopProduct::updateOrCreate(
-                    [
-                        'shop_id' => $shop->id,
+                $shopProductId = $product['id'] ?? null;
+                if ($shopProductId) {
+                    $shopProduct = ShopProduct::where('shop_id', $shop->id)->findOrFail($shopProductId);
+                    $shopProduct->update([
                         'product_id' => $product['product_id'],
-                    ],
-                    [
                         'price' => $product['price'],
                         'point' => $product['point'] ?? null,
                         'max_qty' => $product['max_qty'] ?? null,
                         'commission' => $product['commission'] ?? null,
                         'commission_type' => $product['commission_type'] ?? null,
                         'status' => $product['status'],
-                    ]
-                );
+                    ]);
+                } else {
+                    ShopProduct::updateOrCreate(
+                        [
+                            'shop_id' => $shop->id,
+                            'product_id' => $product['product_id'],
+                        ],
+                        [
+                            'price' => $product['price'],
+                            'point' => $product['point'] ?? null,
+                            'max_qty' => $product['max_qty'] ?? null,
+                            'commission' => $product['commission'] ?? null,
+                            'commission_type' => $product['commission_type'] ?? null,
+                            'status' => $product['status'],
+                        ]
+                    );
+                }
             }
 
             DB::commit();

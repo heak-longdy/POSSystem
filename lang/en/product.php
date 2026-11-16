@@ -52,6 +52,8 @@ return [
         'price_required' => 'Price is required',
         'cost_numeric' => 'Cost format invalid',
         'price_numeric' => 'Price format invalid',
+        'cost_min' => 'Cost must be greater than or equal to 0.',
+        'price_min' => 'Price must be greater than or equal to 0.',
         'status_required' => 'Status is required',
         'status_max' => 'Status must not exceed 1 characters.',
     ],
