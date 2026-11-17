@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\ShopProduct;
 use App\Models\StockHistory;
 use App\Models\StockIn;
@@ -215,5 +216,75 @@ class StockTransactionService
             'commission_type' => 'usd',
             'commission' => 0,
         ]);
+    }
+
+    public function applyPurchaseReceive(Purchase $purchase, array $receivedQuantities = []): void
+    {
+        foreach ($purchase->items as $item) {
+            $qty = isset($receivedQuantities[$item->id])
+                ? (float) $receivedQuantities[$item->id]
+                : (float) $item->ordered_qty;
+
+            if ($qty <= 0) {
+                continue;
+            }
+
+            $currentStock = $this->increaseStock(
+                $purchase->shop_id,
+                $item->product_id,
+                $qty,
+                "Purchase #{$purchase->purchase_number}"
+            );
+
+            $this->syncShopProduct($purchase->shop_id, $item->product_id);
+
+            StockHistory::create([
+                'transfer_id'     => $purchase->id,
+                'stock_id'        => null,
+                'product_id'      => $item->product_id,
+                'current_stock'   => $currentStock,
+                'stock_in'        => $qty,
+                'stock_out'       => 0,
+                'shop_id'         => $purchase->shop_id,
+                'to_id'           => $purchase->supplier_id,
+                'qty'             => $qty,
+                'remark'          => "Purchase #{$purchase->purchase_number}",
+                'type'            => 'supplier',
+                'transfer_type'   => 'purchase',
+                'status'          => 'stock_in',
+                'request_by'      => Auth::id(),
+                'request_by_type' => 'admin',
+            ]);
+
+            $item->update(['received_qty' => (float) $item->received_qty + $qty]);
+
+            if ($item->update_product_cost && (float) $item->unit_cost > 0) {
+                Product::where('id', $item->product_id)->update(['cost' => $item->unit_cost]);
+            }
+        }
+    }
+
+    public function reversePurchaseReceive(Purchase $purchase): void
+    {
+        foreach ($purchase->items as $item) {
+            $receivedQty = (float) $item->received_qty;
+            if ($receivedQty <= 0) {
+                continue;
+            }
+
+            $this->decreaseStock(
+                $purchase->shop_id,
+                $item->product_id,
+                $receivedQty,
+                "Cancel Purchase #{$purchase->purchase_number}"
+            );
+
+            StockHistory::where('transfer_id', $purchase->id)
+                ->where('transfer_type', 'purchase')
+                ->where('product_id', $item->product_id)
+                ->delete();
+
+            $item->update(['received_qty' => 0]);
+        }
     }
 }

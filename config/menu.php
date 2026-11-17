@@ -27,6 +27,17 @@ return [
     ],
     [
         'type'  => 'single',
+        'active' => 'admin/purchase,admin/purchase/*',
+        'path' => 'admin/purchase/list/all',
+        'permission' => ['purchase-view'],
+        'name' => [
+            'en' => 'Purchases',
+            'km' => 'ការបញ្ជាទិញទំនិញ',
+        ],
+        'icon' => 'bx-cart-download',
+    ],
+    [
+        'type'  => 'single',
         'active' => 'admin/order-bulk-print,admin/order-bulk-print/*',
         'path' => 'admin/order-bulk-print',
         'permission' => ['order-bulk-print-view'],
@@ -218,6 +229,18 @@ return [
                     'km' => 'របាយការណ៍ចំណូលផ្សេងៗ',
                 ],
                 'icon' => 'bx-trending-up',
+                'dropDown' => 'disable',
+            ],
+            [
+                'type'  => 'single',
+                'active' => 'admin/report/purchase,admin/report/purchase/*',
+                'path' => 'admin/report/purchase/daily',
+                'permission' => ['report-purchase-view'],
+                'name' => [
+                    'en' => 'Purchase Report',
+                    'km' => 'របាយការណ៍ការបញ្ជាទិញទំនិញ',
+                ],
+                'icon' => 'bx-file-find',
                 'dropDown' => 'disable',
             ],
         ]

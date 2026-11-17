@@ -48,6 +48,8 @@ use App\Http\Controllers\Admin\Report\CustomerRemainingAmountReportController;
 use App\Http\Controllers\Admin\Report\ConsolidatedProductQuantityReportController;
 use App\Http\Controllers\Admin\OtherIncomeController;
 use App\Http\Controllers\Admin\OtherIncomeCategoryController;
+use App\Http\Controllers\Admin\PurchaseController;
+use App\Http\Controllers\Admin\Report\PurchaseReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -435,6 +437,21 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::get('supplier-history/{supplierId}', [OtherIncomeController::class, 'supplierHistory'])->name('supplier-history');
         });
 
+        // Supplier Purchasing Management
+        CRUD(PurchaseController::class, 'purchase');
+        Route::get('purchase/report', [PurchaseController::class, 'report'])->name('purchase-report');
+        Route::group([
+            'prefix' => 'purchase',
+            'as'     => 'purchase-',
+        ], function () {
+            Route::get('view/{id}', [PurchaseController::class, 'onView'])->name('view');
+            Route::post('{id}/receive', [PurchaseController::class, 'receiveGoods'])->name('receive');
+            Route::post('{id}/cancel', [PurchaseController::class, 'cancel'])->name('cancel');
+            Route::post('{id}/payment', [PurchaseController::class, 'storePayment'])->name('store-payment');
+            Route::delete('payment/{id}', [PurchaseController::class, 'destroyPayment'])->name('destroy-payment');
+            Route::get('{id}/print', [PurchaseController::class, 'print'])->name('print');
+        });
+
         // Report Management - Consolidated Product Quantity
         Route::group([
             'prefix' => 'report/consolidated-product-quantity',
@@ -514,6 +531,17 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::get('monthly', [OtherIncomeReportController::class, 'monthly'])->name('monthly');
             Route::get('report', [OtherIncomeReportController::class, 'report'])->name('report');
             Route::get('details/{period}', [OtherIncomeReportController::class, 'details'])->name('details');
+        });
+
+        // Report Management - Purchase Report
+        Route::group([
+            'prefix' => 'report/purchase',
+            'as'     => 'report-purchase-',
+        ], function () {
+            Route::get('/', [PurchaseReportController::class, 'index'])->name('index');
+            Route::get('daily', [PurchaseReportController::class, 'daily'])->name('daily');
+            Route::get('monthly', [PurchaseReportController::class, 'monthly'])->name('monthly');
+            Route::get('report', [PurchaseReportController::class, 'report'])->name('report');
         });
     });
 

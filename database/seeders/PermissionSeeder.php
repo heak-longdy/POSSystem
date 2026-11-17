@@ -926,6 +926,7 @@ class PermissionSeeder extends Seeder
         (new RemainingAmountPermissionSeeder())->run();
         (new OtherIncomePermissionSeeder())->run();
         (new ConsolidatedProductQuantityPermissionSeeder())->run();
+        (new PurchasePermissionSeeder())->run();
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
     private function module(array $attributes)
