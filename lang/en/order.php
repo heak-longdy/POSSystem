@@ -282,7 +282,7 @@ return [
         'sample_coca' => 'Coca-Cola Bottle 380ml',
 
         'slip_title' => 'Invoice',
-        'slip_bonus_tag' => '[Bonus (Free)]',
+        'slip_bonus_tag' => 'Bonus (Free)',
         'slip_draft' => '(DRAFT) OEB',
         'slip_inv_no' => 'Inv. No.',
         'slip_issue_date' => 'Issue Date',

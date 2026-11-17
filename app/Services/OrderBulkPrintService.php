@@ -92,14 +92,14 @@ class OrderBulkPrintService
         if ($documentType !== 'consolidated') {
             foreach ($orders as $order) {
                 $cName = $order->customer?->name ?: ($order->customer?->phone ?: __('order.walk_in_customer', [], $locale));
-                $cPhone = $order->customer?->phone ?: (in_array($documentType, ['delivery_slip', 'delivery_slip_v1']) ? '012399252' : '---');
-                $cAddress = $order->customer?->address ?: ($order->shop?->address ?: ($locale === 'km' ? 'ផ្លូវជាតិលេខ៤ សង្កាត់ស្នោរ ក្រុងសំរោង ខេត្តតាកែវ' : 'National Road 4, Sangkat Sno, Samraong, Takeo'));
+                $cPhone = $order->customer?->phone ?: 'N/A';
+                $cAddress = $order->customer?->address ?: ($order->shop?->address ?: 'N/A');
 
                 $items[] = [
                     'order' => $order,
                     'printLocale' => $locale,
                     'invoicePreviousBalance' => (float) ($previousBalances[$order->id] ?? 0.0),
-                    'customerName' => $cName,
+                    'customerName' => $cName ?: 'N/A',
                     'customerPhone' => $cPhone,
                     'customerAddress' => $cAddress,
                     'printAreaId' => 'bulk_print_' . $documentType . '_' . $order->id . '_' . $locale,
@@ -136,29 +136,31 @@ class OrderBulkPrintService
                     if (!isset($productMap[$productId])) {
                         $product = $detail->product;
 
-                        $rawName = $product?->name ?? '---';
+                        $rawName = $product?->name ?? 'N/A';
                         if (is_string($rawName) && str_starts_with(trim($rawName), '{')) {
                             $decoded = json_decode($rawName, true);
                             $productName = $decoded[$locale] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawName));
                         } else {
                             $productName = $rawName;
                         }
+                        $productName = $productName ?: 'N/A';
 
-                        $rawUom = $product?->uom?->name ?? '---';
+                        $rawUom = $product?->uom?->name ?? 'N/A';
                         if (is_string($rawUom) && str_starts_with(trim($rawUom), '{')) {
                             $decodedUom = json_decode($rawUom, true);
                             $uomName = $decodedUom[$locale] ?? ($decodedUom['km'] ?? ($decodedUom['en'] ?? $rawUom));
                         } else {
                             $uomName = $rawUom;
                         }
+                        $uomName = $uomName ?: 'N/A';
 
-                        $productCode = $product?->code ?: ($product?->barcode ?: sprintf('%04d', $productId));
+                        $productCode = $product?->code ?: ($product?->barcode ?: ($productId ? sprintf('%04d', $productId) : 'N/A'));
 
                         $productMap[$productId] = [
                             'product_id' => $productId,
                             'product_code' => (string) $productCode,
                             'product_name' => (string) $productName,
-                            'uom_name' => (string) ($uomName ?: '---'),
+                            'uom_name' => (string) $uomName,
                             'total_qty' => 0,
                             'subunits' => 0,
                             'order_ids' => [],
@@ -189,7 +191,7 @@ class OrderBulkPrintService
         }
 
         $shopNames = $orders->pluck('shop.name')->filter()->unique()->values();
-        $delLocation = $shopNames->isNotEmpty() ? $shopNames->implode(', ') : 'ER-MLP1-TBK(PHE SUYHORTH)';
+        $delLocation = $shopNames->isNotEmpty() ? $shopNames->implode(', ') : 'N/A';
 
         $deliveryDates = $orders->pluck('delivery_date')->filter()->unique()->values();
         if ($deliveryDates->isNotEmpty()) {
@@ -198,11 +200,11 @@ class OrderBulkPrintService
             $orderDates = $orders->pluck('order_date')->filter()->unique()->values();
             $delDate = $orderDates->isNotEmpty()
                 ? \Carbon\Carbon::parse($orderDates->first())->addDays(2)->format('d/m/Y')
-                : now()->addDays(2)->format('d/m/Y');
+                : 'N/A';
         }
 
         $drivers = $orders->pluck('barber.name')->filter()->unique()->values();
-        $driverName = $drivers->isNotEmpty() ? $drivers->implode(', ') : ($locale === 'km' ? 'សាខាអ្នកដឹក' : 'Delivery Branch');
+        $driverName = $drivers->isNotEmpty() ? $drivers->implode(', ') : 'N/A';
         $documentNo = sprintf('LOD-%s-%03d', date('ymd'), $orders->count());
         $stopsCount = $orders->count();
 

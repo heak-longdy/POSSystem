@@ -2,10 +2,10 @@
     $consolidatedProducts = $consolidatedProducts ?? [];
     $overallQuantity = $overallQuantity ?? 0;
     $stopsCount = $stopsCount ?? 0;
-    $delLocation = $delLocation ?? 'ER-MLP1-TBK(PHE SUYHORTH)';
-    $delDate = $delDate ?? now()->format('d/m/Y');
-    $driverName = $driverName ?? '';
-    $documentNo = $documentNo ?? '';
+    $delLocation = (!empty($delLocation) && $delLocation !== 'ER-MLP1-TBK(PHE SUYHORTH)') ? $delLocation : 'N/A';
+    $delDate = $delDate ?: 'N/A';
+    $driverName = $driverName ?: 'N/A';
+    $documentNo = $documentNo ?: 'N/A';
     $reportDate = $reportDate ?? now()->format('n/j/y');
     $reportTime = $reportTime ?? now()->format('g:iA');
     $totalWeight = $totalWeight ?? 'N/A';
@@ -326,8 +326,8 @@
                 <tbody>
                     @forelse ($consolidatedProducts as $prod)
                         <tr>
-                            <td class="col-art-no">{{ $prod['product_code'] }}</td>
-                            <td class="col-art-name">{{ $prod['product_name'] }}</td>
+                            <td class="col-art-no">{{ $prod['product_code'] ?: 'N/A' }}</td>
+                            <td class="col-art-name">{{ $prod['product_name'] ?: 'N/A' }}</td>
                             <td class="col-units">{{ \App\Models\OrderDetail::formatQuantity($prod['total_qty']) }}</td>
                             <td class="col-subunits">0</td>
                         </tr>

@@ -1114,18 +1114,8 @@
                                         'customerAddress' => $item['customerAddress'],
                                         'printAreaId' => $item['printAreaId'],
                                     ])
-                                @elseif ($isDeliverySlipV1)
-                                    @include('admin::pages.order.invoice-template-02-v1', [
-                                        'order' => $order,
-                                        'printLocale' => $item['printLocale'],
-                                        'invoicePreviousBalance' => $item['invoicePreviousBalance'],
-                                        'customerName' => $item['customerName'],
-                                        'customerPhone' => $item['customerPhone'],
-                                        'customerAddress' => $item['customerAddress'],
-                                        'printAreaId' => $item['printAreaId'],
-                                    ])
                                 @else
-                                    @include('admin::pages.order.invoice-template-02', [
+                                    @include('admin::pages.order.invoice-template-02-v1', [
                                         'order' => $order,
                                         'printLocale' => $item['printLocale'],
                                         'invoicePreviousBalance' => $item['invoicePreviousBalance'],

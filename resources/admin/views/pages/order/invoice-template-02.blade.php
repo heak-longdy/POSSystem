@@ -3,22 +3,22 @@
     $isKm = $printLocale === 'km';
     $order = $order ?? null;
 
-    $shopName = $order?->shop?->name ?: '---';
-    $shopPhone = $order?->shop?->phone ?: '---';
-    $shopAddress = $order?->shop?->address ?: '---';
-    $shopCity = $order?->shop?->city ?: '---';
+    $shopName = $order?->shop?->name ?: 'N/A';
+    $shopPhone = $order?->shop?->phone ?: 'N/A';
+    $shopAddress = $order?->shop?->address ?: 'N/A';
+    $shopCity = $order?->shop?->city ?: 'N/A';
 
     $cName = $customerName ?? ($order?->customer?->name ?: ($order?->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
-    $cPhone = $customerPhone ?? ($order?->customer?->phone ?: '---');
-    $cAddress = $customerAddress ?? ($order?->customer?->address ?: '---');
+    $cPhone = $customerPhone ?? ($order?->customer?->phone ?: 'N/A');
+    $cAddress = $customerAddress ?? ($order?->customer?->address ?: 'N/A');
     $customerCode = trim((string) ($order?->customer?->code ?? ''));
 
-    $invoiceNo = $order?->invoice_number ?: ($order?->id ? sprintf('%05d', $order->id) : '---');
+    $invoiceNo = $order?->invoice_number ?: ($order?->id ? sprintf('%05d', $order->id) : 'N/A');
     $orderDate = $order?->order_date ? \Carbon\Carbon::parse($order->order_date) : now();
     $deliveryDate = $order?->delivery_date
         ? \Carbon\Carbon::parse($order->delivery_date)
         : null;
-    $creatorPhone = $creatorPhone ?? ($order?->createdBy?->phone ?: '---');
+    $creatorPhone = $creatorPhone ?? ($order?->createdBy?->phone ?: 'N/A');
 
     $details = $order?->orderDetails ?: collect();
     $invoicePreviousBalance = $invoicePreviousBalance ?? (float) ($order?->previous_balance ?? 0);
@@ -44,15 +44,15 @@
             <div class="slip-meta-text">{{ $orderDate->format('n/j/y') }} {{ $orderDate->format('g:iA') }} <span class="draft-tag">{{ __('order.invoice.slip_draft', [], $printLocale) }}</span></div>
             <div class="slip-meta-item">
                 <span class="lbl">{{ __('order.invoice.slip_inv_no', [], $printLocale) }}</span> 
-                <strong class="val">{{ $invoiceNo }}</strong>
+                <strong class="val">{{ $invoiceNo ?: 'N/A' }}</strong>
             </div>
             <div class="slip-meta-item">
                 <span class="lbl">{{ __('order.invoice.slip_issue_date', [], $printLocale) }}</span> 
-                <span class="val">{{ $orderDate->format('d/m/Y') }}</span>
+                <span class="val">{{ $orderDate ? $orderDate->format('d/m/Y') : 'N/A' }}</span>
             </div>
             <div class="slip-meta-item">
                 <span class="lbl">{{ __('order.invoice.slip_delivery_date', [], $printLocale) }}</span> 
-                <span class="val">{{ $deliveryDate ? $deliveryDate->format('d/m/Y') : '---' }}</span>
+                <span class="val">{{ $deliveryDate ? $deliveryDate->format('d/m/Y') : 'N/A' }}</span>
             </div>
         </div>
     </div>
@@ -63,15 +63,15 @@
         <div class="slip-info-col col-cust">
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_name', [], $printLocale) }}</span>
-                <span class="info-val"><span class="cust-code">{{ $cName }}@if ($customerCode !== '')&nbsp;({{ $customerCode }})@endif</span></span>
+                <span class="info-val"><span class="cust-code">{{ $cName ?: 'N/A' }}@if ($customerCode !== '')&nbsp;({{ $customerCode }})@endif</span></span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_cust_address', [], $printLocale) }}</span>
-                <span class="info-val">{{ $cAddress }}</span>
+                <span class="info-val">{{ $cAddress ?: 'N/A' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.tel', [], $printLocale) }}</span>
-                <span class="info-val">{{ $cPhone }}</span>
+                <span class="info-val">{{ $cPhone ?: 'N/A' }}</span>
             </div>
         </div>
 
@@ -79,15 +79,15 @@
         <div class="slip-info-col col-depot">
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_depot_name', [], $printLocale) }}</span>
-                <strong class="info-val">{{ $shopName }}</strong>
+                <strong class="info-val">{{ $shopName ?: 'N/A' }}</strong>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_depot_address', [], $printLocale) }}</span>
-                <span class="info-val">{{ $shopAddress }}</span>
+                <span class="info-val">{{ $shopAddress ?: 'N/A' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.tel', [], $printLocale) }}</span>
-                <span class="info-val">{{ $shopPhone }}</span>
+                <span class="info-val">{{ $shopPhone ?: 'N/A' }}</span>
             </div>
         </div>
 
@@ -95,15 +95,15 @@
         <div class="slip-info-col col-dist">
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.invoice.slip_district', [], $printLocale) }}</span>
-                <span class="info-val">{{ $shopCity }}</span>
+                <span class="info-val">{{ $shopCity ?: 'N/A' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.detail.created_by', [], $printLocale) }}:</span>
-                <span class="info-val">{{ $order?->createdBy?->name ?: '---' }}</span>
+                <span class="info-val">{{ $order?->createdBy?->name ?: 'N/A' }}</span>
             </div>
             <div class="info-row">
                 <span class="info-lbl">{{ __('order.detail.phone', [], $printLocale) }}:</span>
-                <span class="info-val">{{ $creatorPhone }}</span>
+                <span class="info-val">{{ $creatorPhone ?: 'N/A' }}</span>
             </div>
         </div>
     </div>
@@ -138,15 +138,16 @@
             @forelse ($details as $index => $detail)
                 @php
                     $isService = $detail->type === 'service';
-                    $rawItemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
+                    $rawItemName = $isService ? ($detail->service?->name ?? 'N/A') : ($detail->product?->name ?? 'N/A');
                     if (is_string($rawItemName) && str_starts_with(trim($rawItemName), '{')) {
                         $decoded = json_decode($rawItemName, true);
                         $itemName = $decoded[$printLocale] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
                     } else {
                         $itemName = $rawItemName;
                     }
-                    $itemCode = $detail->product?->code ?: ($detail->product?->barcode ?: ($detail->product_id ? sprintf('%04d', $detail->product_id) : '---'));
-                    $uomName = $detail->product?->uom?->name ?: '---';
+                    $itemName = $itemName ?: 'N/A';
+                    $itemCode = $detail->product?->code ?: ($detail->product?->barcode ?: ($detail->product_id ? sprintf('%04d', $detail->product_id) : 'N/A'));
+                    $uomName = $detail->product?->uom?->name ?: 'N/A';
                     $isBonus = (bool) ($detail->is_bonus ?? false);
                     $qty = \App\Models\OrderDetail::formatQuantity($detail->qty);
                     $numQty = (float) ($detail->qty ?: 1);
@@ -170,9 +171,9 @@
                 @endphp
                 <tr class="slip-row">
                     <td class="td-no">{{ $index + 1 }}</td>
-                    <td class="td-code">{{ $itemCode }}</td>
-                    <td class="td-desc">{{ $itemName }}</td>
-                    <td class="td-uom">{{ $uomName }}</td>
+                    <td class="td-code">{{ $itemCode ?: 'N/A' }}</td>
+                    <td class="td-desc">{{ $itemName ?: 'N/A' }}</td>
+                    <td class="td-uom">{{ $uomName ?: 'N/A' }}</td>
                     <td class="td-cases td-qty">{{ $qty }}</td>
                     <td class="td-cases td-deliv-qty">{{ $qty }}</td>
                     <td class="td-price">${{ number_format($price, 2) }}</td>

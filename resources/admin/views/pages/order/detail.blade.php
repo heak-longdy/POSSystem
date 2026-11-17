@@ -142,15 +142,15 @@
                                 <span>{{ __('order.detail.print_invoice') }}</span>
                             </button>
 
-                            <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2()">
+                            <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2V1()">
                                 <i data-feather="printer"></i>
                                 <span>{{ __('order.detail.print_slip') }}</span>
                             </button>
 
-                            <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2V1()">
+                            <!-- <button type="button" class="btn btn-system btn-system-outline" @click="printTemplate2V1()">
                                 <i data-feather="printer"></i>
                                 <span>{{ __('order.detail.print_slip_v1') }}</span>
-                            </button>
+                            </button> -->
                         </div>
 
                         <a href="{{ route('admin-' . ($routeName ?? 'order') . '-list', $order->payment_status ?: 'Pending') }}" class="btn btn-system btn-system-outline btn-system-neutral">

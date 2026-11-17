@@ -60,7 +60,7 @@ class DeliverySlipV1Test extends TestCase
         $this->assertStringContainsString('INV-TEST-001', $htmlEn);
         $this->assertStringContainsString('Widget A', $htmlEn);
         $this->assertStringContainsString('Free Gift B', $htmlEn);
-        $this->assertStringContainsString('[Bonus (Free)]', $htmlEn);
+        $this->assertStringContainsString('Bonus (Free)', $htmlEn);
 
         // Render Khmer V1
         $htmlKm = view('admin::pages.order.invoice-template-02-v1', [
@@ -69,7 +69,7 @@ class DeliverySlipV1Test extends TestCase
             'latestPaymentRecord' => $paymentRecord,
         ])->render();
 
-        $this->assertStringContainsString('[ថែមជូន (Free)]', $htmlKm);
+        $this->assertStringContainsString('ថែមជូន (Free)', $htmlKm);
 
         // Verify original template (invoice-template-02) does NOT have the bonus tag logic
         $htmlOriginal = view('admin::pages.order.invoice-template-02', [
@@ -78,7 +78,7 @@ class DeliverySlipV1Test extends TestCase
             'latestPaymentRecord' => $paymentRecord,
         ])->render();
 
-        $this->assertStringNotContainsString('[Bonus (Free)]', $htmlOriginal);
+        $this->assertStringNotContainsString('Bonus (Free)', $htmlOriginal);
     }
 
     public function test_v1_template_with_bonus_only_order(): void
@@ -115,7 +115,7 @@ class DeliverySlipV1Test extends TestCase
 
         $this->assertStringContainsString('INV-BONUS-ONLY', $html);
         $this->assertStringContainsString('Bonus Shampoo', $html);
-        $this->assertStringContainsString('[Bonus (Free)]', $html);
+        $this->assertStringContainsString('Bonus (Free)', $html);
         $this->assertStringContainsString('$0.00', $html);
     }
 
@@ -202,7 +202,7 @@ class DeliverySlipV1Test extends TestCase
         ])->render();
 
         $this->assertStringContainsString('0.5', $htmlV1);
-        $this->assertStringContainsString('[Bonus (Free)]', $htmlV1);
+        $this->assertStringContainsString('Bonus (Free)', $htmlV1);
 
         // Test invoice template
         $htmlInvoice = view('admin::pages.order.invoice-template', [

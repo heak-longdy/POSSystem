@@ -645,9 +645,9 @@
                     <i class="bx bx-file"></i> {{ __('order_bulk_print.selection.print_delivery_slips') }}
                 </button>
 
-                <button type="button" class="btn-bulk-action btn-print-delivery-v1" @click="submitPrint('delivery_slip_v1')">
+                <!-- <button type="button" class="btn-bulk-action btn-print-delivery-v1" @click="submitPrint('delivery_slip_v1')">
                     <i class="bx bx-file"></i> {{ __('order_bulk_print.selection.print_delivery_slips_v1') }}
-                </button>
+                </button> -->
 
                 <button type="button" class="btn-bulk-action btn-print-consolidated" @click="submitPrint('consolidated')">
                     <i class="bx bx-layer"></i> {{ __('order_bulk_print.selection.consolidated_product_quantity') }}
@@ -1038,6 +1038,7 @@
                         titlePrefix = '{{ __('order_bulk_print.preview.title_invoice') }}';
                     } else if (docType === 'delivery_slip') {
                         titlePrefix = '{{ __('order_bulk_print.preview.title_delivery_slip') }}';
+                        iconClass = 'bx bx-file';
                     } else if (docType === 'delivery_slip_v1') {
                         titlePrefix = '{{ __('order_bulk_print.preview.title_delivery_slip_v1') }}';
                         iconClass = 'bx bx-file';
