@@ -11,13 +11,31 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'customers';
-    protected $fillable = ['code', 'name', 'ordering', 'phone', 'address', 'profile', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
+    protected $fillable = ['code', 'name', 'ordering', 'phone', 'address', 'profile', 'image_1', 'image_2', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'image_1_url', 'image_2_url'];
     public function getImageUrlAttribute()
     {
         if ($this->profile != null) {
             $path = str_starts_with($this->profile, '/') ? $this->profile : '/' . $this->profile;
+            return url('file_manager' . $path);
+        }
+        return null;
+    }
+
+    public function getImage1UrlAttribute()
+    {
+        if ($this->image_1 != null) {
+            $path = str_starts_with($this->image_1, '/') ? $this->image_1 : '/' . $this->image_1;
+            return url('file_manager' . $path);
+        }
+        return null;
+    }
+
+    public function getImage2UrlAttribute()
+    {
+        if ($this->image_2 != null) {
+            $path = str_starts_with($this->image_2, '/') ? $this->image_2 : '/' . $this->image_2;
             return url('file_manager' . $path);
         }
         return null;

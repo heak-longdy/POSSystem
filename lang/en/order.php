@@ -145,7 +145,8 @@ return [
 
     'table' => [
         'no' => 'Nº',
-        'order_id' => 'Order ID',
+        'order_id' => 'Invoice #',
+        'invoice_number' => 'Invoice #',
         'shop' => 'Shop',
         'barber' => 'Barber',
         'customer' => 'Customer',

@@ -117,8 +117,9 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         Route::get('supplier/report', [SupplierController::class, 'report'])->name('supplier-report');
         Route::get('report/supplier/report', [SupplierController::class, 'report'])->name('report-supplier-report');
 
-        CRUD(PartnerController::class, 'partner');
-        CRUD(SectorController::class, 'sector');
+        // Obsolete non-POS modules disabled
+        // CRUD(PartnerController::class, 'partner');
+        // CRUD(SectorController::class, 'sector');
         CRUD(PositionController::class, 'position');
         Route::get('position/report', [PositionController::class, 'report'])->name('position-report');
         Route::get('report/position/report', [PositionController::class, 'report'])->name('report-position-report');
@@ -126,28 +127,28 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         Route::get('staff/report', [StaffController::class, 'report'])->name('staff-report');
         Route::get('report/staff/report', [StaffController::class, 'report'])->name('report-staff-report');
         CRUD(UserController::class, 'user');
+        Route::post('user/permission/sync', [UserController::class, 'syncPermissionsCatalog'])->name('user-permission-sync');
         Route::get('user/report', [UserController::class, 'report'])->name('user-report');
         Route::get('report/user/report', [UserController::class, 'report'])->name('report-user-report');
 
-        CRUD(JobController::class, 'internships');
-        CRUD(BlogController::class, 'blog');
-
-        CRUD(PlacementTypeController::class, 'placement-type');
-
-        CRUD(TestimonialController::class, 'testimonial');
+        // CRUD(JobController::class, 'internships');
+        // CRUD(BlogController::class, 'blog');
+        // CRUD(PlacementTypeController::class, 'placement-type');
+        // CRUD(TestimonialController::class, 'testimonial');
 
         CRUD(CustomerController::class, 'customer');
+        Route::get('customer/detail/{id}', [CustomerController::class, 'detail'])->name('customer-detail');
         Route::get('customer/report', [CustomerController::class, 'report'])->name('customer-report');
         Route::get('report/customer/report', [CustomerController::class, 'report'])->name('report-customer-report');
 
-        CRUD(CustomerPaidController::class, 'customer-paid');
-        Route::get('customer-paid/export', [CustomerPaidController::class, 'export'])->name('customer-paid-export');
+        // CRUD(CustomerPaidController::class, 'customer-paid');
+        // Route::get('customer-paid/export', [CustomerPaidController::class, 'export'])->name('customer-paid-export');
 
-        Route::get('/OurService', [SettingController::class, 'indexOurService'])->name('our-service-index');
-        Route::post('/OurService/Save', [SettingController::class, 'onStoreOurService'])->name('our-service-store');
+        // Route::get('/OurService', [SettingController::class, 'indexOurService'])->name('our-service-index');
+        // Route::post('/OurService/Save', [SettingController::class, 'onStoreOurService'])->name('our-service-store');
 
-        Route::get('/aboutUs', [SettingController::class, 'indexAboutUs'])->name('about-us-index');
-        Route::post('/aboutUs/Save', [SettingController::class, 'onStoreAboutUs'])->name('about-us-store');
+        // Route::get('/aboutUs', [SettingController::class, 'indexAboutUs'])->name('about-us-index');
+        // Route::post('/aboutUs/Save', [SettingController::class, 'onStoreAboutUs'])->name('about-us-store');
 
 
 
@@ -272,7 +273,7 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             //Position
             Route::get('position', [Admin\SelectController::class, 'SelectPositionSearch'])->name('position');
             //Sector
-            Route::get('sector', [Admin\SelectController::class, 'SelectSectorSearch'])->name('sector');
+            // Route::get('sector', [Admin\SelectController::class, 'SelectSectorSearch'])->name('sector');
 
             //Category
             Route::get('category', [Admin\SelectController::class, 'SelectCategorySearch'])->name('category');
@@ -281,7 +282,7 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::get('uom', [Admin\SelectController::class, 'SelectUOMSearch'])->name('uom');
 
             //placement type
-            Route::get('placement-type', [Admin\SelectController::class, 'SelectPlacementTypeSearch'])->name('placement-type');
+            // Route::get('placement-type', [Admin\SelectController::class, 'SelectPlacementTypeSearch'])->name('placement-type');
         });
 
 
@@ -392,22 +393,22 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             });
 
         // Page
-        Route::group([
-            'prefix' => 'page',
-            'as' => 'page-',
-        ], function () {
-            Route::get('/{type?}', [Admin\PageController::class, 'page'])->name('page');
-            Route::post('save/{id?}', [Admin\PageController::class, 'onSave'])->name('save');
-        });
+        // Route::group([
+        //     'prefix' => 'page',
+        //     'as' => 'page-',
+        // ], function () {
+        //     Route::get('/{type?}', [Admin\PageController::class, 'page'])->name('page');
+        //     Route::post('save/{id?}', [Admin\PageController::class, 'onSave'])->name('save');
+        // });
 
         // Contact
-        Route::group([
-            'prefix' => 'contact',
-            'as' => 'contact-',
-        ], function () {
-            Route::get('/{type?}', [Admin\ContactController::class, 'index'])->name('contact');
-            Route::post('save/{id?}', [Admin\ContactController::class, 'store'])->name('save');
-        });
+        // Route::group([
+        //     'prefix' => 'contact',
+        //     'as' => 'contact-',
+        // ], function () {
+        //     Route::get('/{type?}', [Admin\ContactController::class, 'index'])->name('contact');
+        //     Route::post('save/{id?}', [Admin\ContactController::class, 'store'])->name('save');
+        // });
 
         // Staff Expense Management
         CRUD(Admin\StaffExpenseController::class, 'staff-expense');
@@ -458,16 +459,16 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
         });
 
         // Report Management - Order Transaction Report
-        Route::group([
-            'prefix' => 'report/order-transaction',
-            'as'     => 'report-order-transaction-',
-        ], function () {
-            Route::get('/', [OrderTransactionReportController::class, 'index'])->name('index');
-            Route::get('daily', [OrderTransactionReportController::class, 'daily'])->name('daily');
-            Route::get('monthly', [OrderTransactionReportController::class, 'monthly'])->name('monthly');
-            Route::get('report', [OrderTransactionReportController::class, 'report'])->name('report');
-            Route::get('details/{period}', [OrderTransactionReportController::class, 'details'])->name('details');
-        });
+        // Route::group([
+        //     'prefix' => 'report/order-transaction',
+        //     'as'     => 'report-order-transaction-',
+        // ], function () {
+        //     Route::get('/', [OrderTransactionReportController::class, 'index'])->name('index');
+        //     Route::get('daily', [OrderTransactionReportController::class, 'daily'])->name('daily');
+        //     Route::get('monthly', [OrderTransactionReportController::class, 'monthly'])->name('monthly');
+        //     Route::get('report', [OrderTransactionReportController::class, 'report'])->name('report');
+        //     Route::get('details/{period}', [OrderTransactionReportController::class, 'details'])->name('details');
+        // });
 
         // Report Management - Inventory Movement Report
         Route::group([

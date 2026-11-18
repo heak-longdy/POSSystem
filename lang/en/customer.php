@@ -61,6 +61,14 @@ return [
             'label' => 'Profile',
             'placeholder' => 'Enter profile',
         ],
+        'image_1' => [
+            'label' => 'Image 1',
+            'placeholder' => 'Choose image 1',
+        ],
+        'image_2' => [
+            'label' => 'Image 2',
+            'placeholder' => 'Choose image 2',
+        ],
         'id_card' => [
             'label' => 'ID Card',
             'placeholder' => 'Enter id card',
@@ -87,5 +95,32 @@ return [
         'status_invalid' => 'The selected status is invalid.',
         'payment_restriction_required' => 'Payment restriction selection is required.',
         'payment_restriction_invalid' => 'The selected payment restriction is invalid.',
+    ],
+
+    'detail' => [
+        'title' => 'Customer Details',
+        'info_title' => 'Customer Information',
+        'system_info' => 'System & Audit Records',
+        'images_title' => 'Customer Documents & Photos',
+        'slots_count' => ':count Slots',
+        'no_image' => 'No image uploaded',
+        'no_photo' => 'No Photo',
+        'no_document' => 'No Document',
+        'uploaded' => 'Uploaded',
+        'profile_desc' => 'Account avatar photo',
+        'image_1_desc' => 'National ID / Document 1',
+        'image_2_desc' => 'Additional document / Document 2',
+        'created_by' => 'Created By',
+        'created_at' => 'Created Date',
+        'updated_at' => 'Last Updated',
+        'database_id' => 'Database ID',
+        'copied' => 'Copied!',
+        'copy' => 'Copy',
+        'click_to_zoom' => 'Click to view full photo',
+        'gallery_help' => 'Click on any image to inspect high-resolution documents in gallery view.',
+        'action' => [
+            'edit' => 'Edit Customer',
+            'back_to_list' => 'Back to List',
+        ],
     ],
 ];

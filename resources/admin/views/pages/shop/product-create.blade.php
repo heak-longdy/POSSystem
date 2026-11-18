@@ -803,6 +803,43 @@
                                         current_product_id: row.initial_product_id || ''
                                     };
                                 },
+                                transport: (params, success, failure) => {
+                                    const $request = $.ajax(params);
+                                    $request.then(success);
+                                    $request.fail((jqXHR, textStatus, errorThrown) => {
+                                        console.warn('Select2 AJAX unavailable (HTTP ' + jqXHR.status + '), falling back to preloaded products:', errorThrown);
+                                        if (Array.isArray(this.products) && this.products.length > 0) {
+                                            const term = (params.data && params.data.search ? String(params.data.search).toLowerCase() : '').trim();
+                                            const excludeIds = this.selectedProductIds(row.uid);
+                                            const filtered = this.products.filter(p => {
+                                                if (excludeIds.includes(Number(p.id)) && Number(p.id) !== Number(row.initial_product_id)) {
+                                                    return false;
+                                                }
+                                                if (!term) return true;
+                                                const name = (p.name || '').toLowerCase();
+                                                const code = (p.code || '').toLowerCase();
+                                                return name.includes(term) || code.includes(term);
+                                            });
+                                            success({
+                                                results: filtered.map(p => ({
+                                                    id: p.id,
+                                                    text: p.code ? `${p.code} - ${p.name}` : p.name,
+                                                    code: p.code,
+                                                    name: p.name,
+                                                    price: p.price,
+                                                    commission: p.commission,
+                                                    image: p.image,
+                                                    uom: p.uom,
+                                                    category: p.category
+                                                })),
+                                                pagination: { more: false }
+                                            });
+                                        } else {
+                                            failure();
+                                        }
+                                    });
+                                    return $request;
+                                },
                                 processResults: (data, params) => {
                                     params.page = params.page || 1;
                                     return {

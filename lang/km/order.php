@@ -111,7 +111,8 @@ return [
 
     'table' => [
         'no' => 'ល.រ',
-        'order_id' => 'លេខកូដ',
+        'order_id' => 'លេខវិក្កយបត្រ',
+        'invoice_number' => 'លេខវិក្កយបត្រ',
         'shop' => 'ហាង',
         'barber' => 'ជាងកាត់សក់',
         'customer' => 'អតិថិជន',

@@ -241,6 +241,39 @@ class UserController extends Controller
         }
     }
 
+    public function syncPermissionsCatalog(Request $request)
+    {
+        try {
+            DB::transaction(function () {
+                $seeder = new \Database\Seeders\PermissionSeeder();
+                $seeder->run();
+            });
+
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => __('permission.sync_success') ?? 'Permissions catalog synchronized successfully.',
+                ]);
+            }
+
+            Session::flash('success', __('permission.sync_success') ?? 'Permissions catalog synchronized successfully.');
+            return redirect()->back();
+        } catch (\Throwable $e) {
+            Log::error('Failed to sync permissions catalog: ' . $e->getMessage());
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to synchronize permissions: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            Session::flash('warning', 'Failed to synchronize permissions: ' . $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
     public function export(Request $req)
     {
         $fileName = 'users_export_' . date('Y-m-d_H-i-s') . '.csv';

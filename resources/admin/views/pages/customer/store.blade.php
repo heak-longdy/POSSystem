@@ -85,11 +85,12 @@
                     @enderror
                 </div>
 
-                {{-- Profile Image --}}
-                <div class="row-2">
+                {{-- Customer Images (Profile, Image 1, Image 2) --}}
+                <div class="row-3">
+                    {{-- Profile Image --}}
                     <div class="form-row">
                         <label>{{ __('customer.form.profile.label') }}</label>
-                        <div class="form-select-photo image" @click="selectImage(event)">
+                        <div class="form-select-photo image" @click="selectImage('profile')">
                             <div class="select-photo" :class='{ active: profile }'>
                                 <div class="icon">
                                     <i class='bx bx-cloud-upload'></i>
@@ -100,7 +101,7 @@
                             </div>
                             <template x-if="profile">
                                 <div class="image-view active" style="position: relative;">
-                                    <img :src="profileSrc()" alt="">
+                                    <img :src="getImageSrc(profile)" alt="">
                                     <button type="button" @click.stop="profile = ''" title="Remove" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; width: 26px; height: 26px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;min-width:26px;padding:0;">
                                         <i class='bx bx-x' style="font-size: 18px;"></i>
                                     </button>
@@ -109,6 +110,60 @@
                             <input type="hidden" x-model="profile" name="profile" autocomplete="off" role="presentation">
                         </div>
                         @error('profile')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
+
+                    {{-- Image 1 --}}
+                    <div class="form-row">
+                        <label>{{ __('customer.form.image_1.label') }}</label>
+                        <div class="form-select-photo image" @click="selectImage('image_1')">
+                            <div class="select-photo" :class='{ active: image1 }'>
+                                <div class="icon">
+                                    <i class='bx bx-cloud-upload'></i>
+                                </div>
+                                <div class="title">
+                                    <p>@lang('global.form.image.placeholder')</p>
+                                </div>
+                            </div>
+                            <template x-if="image1">
+                                <div class="image-view active" style="position: relative;">
+                                    <img :src="getImageSrc(image1)" alt="">
+                                    <button type="button" @click.stop="image1 = ''" title="Remove" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; width: 26px; height: 26px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;min-width:26px;padding:0;">
+                                        <i class='bx bx-x' style="font-size: 18px;"></i>
+                                    </button>
+                                </div>
+                            </template>
+                            <input type="hidden" x-model="image1" name="image_1" autocomplete="off" role="presentation">
+                        </div>
+                        @error('image_1')
+                            <label class="error">{{ $message }}</label>
+                        @enderror
+                    </div>
+
+                    {{-- Image 2 --}}
+                    <div class="form-row">
+                        <label>{{ __('customer.form.image_2.label') }}</label>
+                        <div class="form-select-photo image" @click="selectImage('image_2')">
+                            <div class="select-photo" :class='{ active: image2 }'>
+                                <div class="icon">
+                                    <i class='bx bx-cloud-upload'></i>
+                                </div>
+                                <div class="title">
+                                    <p>@lang('global.form.image.placeholder')</p>
+                                </div>
+                            </div>
+                            <template x-if="image2">
+                                <div class="image-view active" style="position: relative;">
+                                    <img :src="getImageSrc(image2)" alt="">
+                                    <button type="button" @click.stop="image2 = ''" title="Remove" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; width: 26px; height: 26px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;min-width:26px;padding:0;">
+                                        <i class='bx bx-x' style="font-size: 18px;"></i>
+                                    </button>
+                                </div>
+                            </template>
+                            <input type="hidden" x-model="image2" name="image_2" autocomplete="off" role="presentation">
+                        </div>
+                        @error('image_2')
                             <label class="error">{{ $message }}</label>
                         @enderror
                     </div>
@@ -141,28 +196,41 @@
             Alpine.data("xComponent", () => ({
                 baseImageUrl: "{{ asset('file_manager') }}",
                 profile: "",
+                image1: "",
+                image2: "",
                 init() {
                     const data = @json($data ?? '');
                     this.profile = data?.profile ?? `{{ old('profile') }}`;
+                    this.image1 = data?.image_1 ?? `{{ old('image_1') }}`;
+                    this.image2 = data?.image_2 ?? `{{ old('image_2') }}`;
                     if ($(this.$root).find('#status').length) {
                         $(this.$root).find('#status').select2();
                     }
                 },
-                profileSrc() {
-                    if (!this.profile) return '';
-                    if (this.profile.startsWith('http://') || this.profile.startsWith('https://')) {
-                        return this.profile;
+                getImageSrc(path) {
+                    if (!path) return '';
+                    if (path.startsWith('http://') || path.startsWith('https://')) {
+                        return path;
                     }
-                    return this.profile.startsWith('/') 
-                        ? this.baseImageUrl + this.profile 
-                        : this.baseImageUrl + '/' + this.profile;
+                    return path.startsWith('/') 
+                        ? this.baseImageUrl + path 
+                        : this.baseImageUrl + '/' + path;
                 },
-                selectImage() {
+                profileSrc() {
+                    return this.getImageSrc(this.profile);
+                },
+                selectImage(field = 'profile') {
                     fileManager({
                         multiple: false,
                         afterClose: (data, basePath) => {
                             if (data && data.length > 0) {
-                                this.profile = data[0].path;
+                                if (field === 'image_1') {
+                                    this.image1 = data[0].path;
+                                } else if (field === 'image_2') {
+                                    this.image2 = data[0].path;
+                                } else {
+                                    this.profile = data[0].path;
+                                }
                             }
                         }
                     });

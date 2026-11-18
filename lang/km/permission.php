@@ -20,6 +20,9 @@ return [
     'all' => 'ទាំងអស់',
     'search_modules' => 'ស្វែងរកម៉ូឌុល...',
     'no_actions' => 'មិនមានសកម្មភាពត្រូវបានកំណត់ទេ',
+    'sync_catalog' => 'ធ្វើសមកាលកម្មសិទ្ធិប្រព័ន្ធ',
+    'syncing' => 'កំពុងដំណើរការ...',
+    'sync_success' => 'សិទ្ធិប្រព័ន្ធត្រូវបានធ្វើសមកាលកម្មដោយជោគជ័យ។',
     'group' => [
         'general' => 'ទូទៅ',
         'inventory_management' => 'ការគ្រប់គ្រងស្តុក',
@@ -120,6 +123,7 @@ return [
         'customer-create' => 'បង្កើត',
         'customer-update' => 'កែប្រែ',
         'customer-delete' => 'លុប',
+        'customer-detail' => 'មើលលម្អិត',
         'order-view' => 'មើល',
         'order-create' => 'បង្កើត',
         'order-update' => 'កែប្រែ',

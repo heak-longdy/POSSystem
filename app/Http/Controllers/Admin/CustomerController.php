@@ -66,6 +66,24 @@ class CustomerController extends Controller
             'rows'   => $customers,
         ]);
     }
+    public function detail(Request $req, $id = null)
+    {
+        $id = $id ?: $req->id;
+        if (!$id) {
+            return redirect()->route('admin-' . $this->routeName . '-list', 1);
+        }
+
+        $customer = Customer::withTrashed()->with(['createdBy'])->findOrFail($id);
+        if (!$customer->isOwnedBy(auth()->user())) {
+            abort(403, 'Unauthorized access to customer.');
+        }
+
+        return view($this->layout . 'detail', [
+            'customer'  => $customer,
+            'routeName' => $this->routeName,
+        ]);
+    }
+
     public function onCreate()
     {
         $data['id'] = "";

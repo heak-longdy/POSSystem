@@ -61,6 +61,8 @@ class CustomerRequest extends FormRequest
             'phone'      => 'required|string|max:50',
             'address'    => 'nullable|string|max:500',
             'profile'    => 'nullable|string|max:255',
+            'image_1'    => 'nullable|string|max:255',
+            'image_2'    => 'nullable|string|max:255',
             'status'     => 'required|in:1,2',
             'payment_restriction' => 'nullable|in:N,Y',
         ];

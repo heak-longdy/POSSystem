@@ -27,6 +27,7 @@
                         [
                             'key' => 'active',
                             'action' => [
+                                ['url' => 'detail', 'title' => __('global.action.detail'), 'icon' => 'visibility', 'type' => 'link'],
                                 ['url' => 'edit', 'title' => __('global.action.edit'), 'icon' => 'edit', 'type' => 'link'],
                                 [
                                     'url' => 'delete',
