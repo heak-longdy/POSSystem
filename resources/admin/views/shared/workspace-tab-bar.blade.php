@@ -1,7 +1,7 @@
 <script>
     window.workspaceAccess = {
         scope: @json(\App\Support\AdminPermissions::workspaceScope()),
-        dashboard: @json(auth()->user()->can('dashboard-view')),
+        dashboard: @json(optional(auth()->user())->can('dashboard-view') ? true : false),
         currentPageAllowed: @json(!($workspaceAccessDenied ?? false))
     };
     window.workspaceTranslations = {
@@ -26,6 +26,14 @@
         success: @json(__('global.workspace.success') ?? 'Success'),
         warning: @json(__('global.workspace.warning') ?? 'Warning'),
         error: @json(__('global.workspace.error') ?? 'Error'),
+        retry: @json(__('global.workspace.retry') ?? 'Retry'),
+        retrying: @json(__('global.workspace.retrying') ?? 'Retrying...'),
+        loadErrorTitle: @json(__('global.workspace.load_error_title') ?? 'Could not load page'),
+        loadErrorDesc: @json(__('global.workspace.load_error_desc') ?? 'An error occurred while fetching the tab content.'),
+        developerDetails: @json(__('global.workspace.developer_details') ?? 'Developer Debugging Information'),
+        copyErrorDetails: @json(__('global.workspace.copy_error_details') ?? 'Copy Error Details'),
+        copied: @json(__('global.workspace.copied') ?? 'Copied!'),
+        errorReference: @json(__('global.workspace.error_reference') ?? 'Error Reference'),
         cancel: @json(__('action_button.cancel') ?? __('global.cancel') ?? 'Cancel'),
         confirm: @json(__('global.confirm') ?? __('dialog.button.confirm') ?? 'Confirm'),
         discardAndClose: @json(__('global.workspace.close_tab') ?? __('dialog.button.close') ?? 'Close Tab'),

@@ -359,47 +359,7 @@
                         $select2FocusInputSearch();
                     });
                 },
-                fetchSelectSector() {
-                    $(this.$root).find(`#sector_id`).select2({
-                        placeholder: `Select Sector`,
-                        ajax: {
-                            url: '{{ route('admin-select-sector') }}',
-                            dataType: 'json',
-                            type: "GET",
-                            quietMillis: 50,
-                            data: (param) => {
-                                return {
-                                    search: param.term,
-                                    position_id: this.position.id
-                                };
-                            },
-                            processResults: (data) => {
-                                return {
-                                    results: $.map(data.data, (item) => {
-                                        return {
-                                            text: item?.title || '',
-                                            id: item.id
-                                        }
-                                    })
-                                };
-                            },
-                            error: (xhr, status, error) => {
-                                console.error('Error fetching positions:', error);
-                            }
-                        }
-                    }).on('select2:select', (event) => {
-                        // Capture the ID and text when an option is selected
-                        const selectedId = event.params.data.id;
-                        const selectedText = event.params.data.text;
-                        const Obj = {
-                            "id": selectedId,
-                            "text": selectedText
-                        };
-                        this.sector = Obj
-                    }).on('select2:open', (e) => {
-                        $select2FocusInputSearch();
-                    });
-                },
+               
                 selectImage() {
                     fileManager({
                         multiple: false,

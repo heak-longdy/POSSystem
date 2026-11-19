@@ -453,7 +453,7 @@
                     $(this.$root).find(`#sector_id`).select2({
                         placeholder: `Select Sector`,
                         ajax: {
-                            url: '{{ route('admin-select-sector') }}',
+                            url: '{{ Route::has('admin-select-sector') ? route('admin-select-sector') : '' }}',
                             dataType: 'json',
                             type: "GET",
                             quietMillis: 50,

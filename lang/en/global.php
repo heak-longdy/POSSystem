@@ -240,6 +240,14 @@ return [
         'success'                => 'Success',
         'warning'                => 'Warning',
         'error'                  => 'Error',
+        'load_error_title'       => 'Could not load page',
+        'load_error_desc'        => 'An unexpected error occurred while loading this page. Please try again.',
+        'retry'                  => 'Retry',
+        'retrying'               => 'Retrying...',
+        'developer_details'      => 'Developer Debugging Information',
+        'copy_error_details'     => 'Copy Error Details',
+        'copied'                 => 'Copied!',
+        'error_reference'        => 'Error Reference',
     ],
 
     // Page
