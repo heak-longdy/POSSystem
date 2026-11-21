@@ -142,6 +142,11 @@ class StockInController extends Controller
             return redirect()->route('admin-' . $this->routeName . '-list', 'all');
         }
 
+        if (!$purchase->can_edit) {
+            Session::flash('warning', __('stock_in.message.cannot_edit_locked') ?? 'This purchase order cannot be modified because goods have been received or payments recorded.');
+            return redirect()->route('admin-' . $this->routeName . '-view', $purchase->id);
+        }
+
         return view($this->layout . 'create', $this->formData($purchase));
     }
 
@@ -177,6 +182,11 @@ class StockInController extends Controller
         try {
             if ($id) {
                 $purchase = Purchase::findOrFail($id);
+                if (!$purchase->can_edit) {
+                    throw ValidationException::withMessages([
+                        'order' => __('stock_in.message.cannot_edit_locked') ?? 'This purchase order cannot be modified because goods have been received or payments recorded.',
+                    ]);
+                }
                 $this->purchaseService->updatePurchase($purchase, $req->all());
                 $message = __('stock_in.message.update_success') ?? 'Purchase order updated successfully';
             } else {
@@ -306,7 +316,7 @@ class StockInController extends Controller
             }
 
             Session::flash('success', $message);
-            return redirect()->route('admin-' . $this->routeName . '-view', $purchaseId);
+            return redirect()->route('admin-' . $routeName . '-view', $purchaseId);
         } catch (\Exception $e) {
             if ($req->wantsJson()) {
                 return response()->json(['message' => $e->getMessage(), 'status' => 500], 500);
@@ -314,6 +324,125 @@ class StockInController extends Controller
             Session::flash('warning', $e->getMessage());
             return redirect()->back();
         }
+    }
+
+    public function fullReceive(Request $req, $id)
+    {
+        try {
+            $purchase = Purchase::findOrFail($id);
+            $receipt = $this->purchaseService->receiveAllRemaining($purchase, [
+                'received_date' => $req->input('received_date', date('Y-m-d')),
+                'reference_no'  => $req->input('reference_no'),
+                'remark'        => $req->input('remark', 'Full goods receipt via action button'),
+            ]);
+
+            $message = __('stock_in.message.full_receive_success') ?? "Purchase order marked as fully received ({$receipt->receipt_number}).";
+
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => 'success',
+                    'receipt' => $receipt,
+                ]);
+            }
+
+            Session::flash('success', $message);
+            return redirect()->route('admin-' . $this->routeName . '-list', 'received');
+        } catch (ValidationException $e) {
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 422,
+                    'message' => 'unsuccess',
+                    'error'   => collect($e->errors())->flatten()->first(),
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 500,
+                    'message' => 'unsuccess',
+                    'error'   => $e->getMessage(),
+                ], 500);
+            }
+            Session::flash('warning', $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
+    public function updatePaymentStatus(Request $req, $id)
+    {
+        try {
+            $purchase = Purchase::findOrFail($id);
+            $paymentStatus = strtolower($req->input('payment_status', 'paid'));
+
+            if ($paymentStatus === 'paid') {
+                $payment = $this->purchaseService->markAsPaid($purchase, [
+                    'payment_date'   => $req->input('payment_date', date('Y-m-d')),
+                    'payment_method' => $req->input('payment_method', 'cash'),
+                    'reference_no'   => $req->input('reference_no'),
+                    'note'           => $req->input('note', 'Marked as Paid via action button'),
+                ]);
+                $message = __('stock_in.message.paid_success') ?? 'Purchase marked as Paid successfully.';
+            } else {
+                return response()->json([
+                    'status'  => 422,
+                    'message' => 'unsuccess',
+                    'error'   => 'Unsupported payment status update.',
+                ], 422);
+            }
+
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => 'success',
+                    'payment' => $payment,
+                ]);
+            }
+
+            Session::flash('success', $message);
+            return redirect()->route('admin-' . $this->routeName . '-list', 'all');
+        } catch (ValidationException $e) {
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 422,
+                    'message' => 'unsuccess',
+                    'error'   => collect($e->errors())->flatten()->first(),
+                    'errors'  => $e->errors(),
+                ], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 500,
+                    'message' => 'unsuccess',
+                    'error'   => $e->getMessage(),
+                ], 500);
+            }
+            Session::flash('warning', $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
+    public function getPurchaseItems(Request $req, $id)
+    {
+        $purchase = Purchase::with(['items.product.uom', 'supplier', 'shop'])->findOrFail($id);
+        return response()->json([
+            'status'   => 200,
+            'purchase' => $purchase,
+            'items'    => $purchase->items->map(function ($it) {
+                return [
+                    'id'           => $it->id,
+                    'product_name' => $it->product_name,
+                    'uom_title'    => $it->uom_title,
+                    'qty'          => (float) $it->qty,
+                    'qty_received' => (float) $it->qty_received,
+                    'remaining'    => (float) $it->remaining_qty,
+                ];
+            }),
+        ]);
     }
 
     public function printInvoice(Request $req, $id)

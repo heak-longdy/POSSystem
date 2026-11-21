@@ -71,6 +71,13 @@ class AdminPermissions
         'send-payment-reminder' => 'update',
         'send-reminder' => 'update',
         'paid' => 'update',
+        'receive' => 'update',
+        'receive-all' => 'update',
+        'full-receive' => 'update',
+        'partial-receive' => 'update',
+        'payment' => 'update',
+        'items' => 'view',
+        'print' => 'view',
         'delete' => 'delete',
         'delete-payment' => 'delete',
     ];
@@ -252,6 +259,18 @@ class AdminPermissions
             if ($hasDedicatedDetail) {
                 return [$module . '-detail'];
             }
+        }
+
+        if (in_array($action, ['receive', 'partial-receive', 'full-receive', 'fully-received'], true)) {
+            return [$module . '-update', $module . '-create'];
+        }
+
+        if (in_array($action, ['paid', 'payment', 'update-payment-status', 'payment-status'], true)) {
+            return [$module . '-update', $module . '-create'];
+        }
+
+        if (in_array($action, ['print', 'items'], true)) {
+            return [$module . '-view'];
         }
 
         if (isset(static::BASE_ACTION_ABILITIES[$action])) {

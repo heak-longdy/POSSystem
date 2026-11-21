@@ -43,26 +43,34 @@
 
             <div class="po-detail-actions">
                 @if ($purchase->order_status !== 'received' && $purchase->order_status !== 'cancelled' && !$purchase->trashed())
-                    <button type="button" class="btn-po-action btn-receive" @click="openReceiveModal()">
+                    <button type="button" class="btn-po-action btn-receive" @click="openReceiveModal()" title="{{ __('stock_in.action.partial_received') ?? 'Partial Received' }}">
                         <i class='bx bx-package'></i>
-                        <span>{{ __('stock_in.button.receive_goods') }}</span>
+                        <span>{{ __('stock_in.action.partial_received') ?? 'Partial Received' }}</span>
+                    </button>
+                    <button type="button" class="btn-po-action btn-full-receive" @click="markAsFullyReceived({{ $purchase }})" title="{{ __('stock_in.action.fully_received') ?? 'Fully Received' }}">
+                        <i class='bx bx-check-double'></i>
+                        <span>{{ __('stock_in.action.fully_received') ?? 'Fully Received' }}</span>
                     </button>
                 @endif
 
                 @if ($purchase->payment_status !== 'paid' && $purchase->order_status !== 'cancelled' && !$purchase->trashed())
-                    <button type="button" class="btn-po-action btn-payment" @click="openPaymentModal()">
+                    <button type="button" class="btn-po-action btn-payment" @click="openPaymentModal()" title="{{ __('stock_in.button.add_payment') }}">
                         <i class='bx bx-credit-card-front'></i>
                         <span>{{ __('stock_in.button.add_payment') }}</span>
                     </button>
+                    <button type="button" class="btn-po-action btn-mark-paid" @click="markAsPaid({{ $purchase }})" title="{{ __('stock_in.action.mark_as_paid') ?? 'Payment Status (Paid)' }}">
+                        <i class='bx bx-check-circle'></i>
+                        <span>{{ __('stock_in.action.mark_as_paid') ?? 'Payment Status (Paid)' }}</span>
+                    </button>
                 @endif
 
-                <a href="{!! route('admin-' . $routeName . '-print', $purchase->id) !!}" target="_blank" class="btn-po-action btn-print">
+                <a href="{!! route('admin-' . $routeName . '-print', $purchase->id) !!}" target="_blank" class="btn-po-action btn-print" title="{{ __('stock_in.button.print') }}">
                     <i class='bx bx-printer'></i>
                     <span>{{ __('stock_in.button.print') }}</span>
                 </a>
 
-                @if (!$purchase->trashed())
-                    <a href="{!! route('admin-' . $routeName . '-edit', $purchase->id) !!}" class="btn-po-action btn-edit">
+                @if (!$purchase->trashed() && $purchase->can_edit)
+                    <a href="{!! route('admin-' . $routeName . '-edit', $purchase->id) !!}" class="btn-po-action btn-edit" title="{{ __('global.action.edit') }}">
                         <i class='bx bx-edit-alt'></i>
                         <span>{{ __('global.action.edit') }}</span>
                     </a>
@@ -541,76 +549,174 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 16px;
+            row-gap: 14px;
+            flex-wrap: wrap;
             margin-bottom: 24px;
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 20px 24px;
+            padding: 16px 20px;
             box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
         }
         .po-detail-title-group {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
+            flex-shrink: 0;
+            min-width: 0;
         }
         .btn-back-circle {
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: #f1f5f9;
             color: #475569;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 19px;
             text-decoration: none;
             transition: all 0.15s ease;
+            flex-shrink: 0;
         }
         .btn-back-circle:hover { background: #e2e8f0; color: #1e293b; }
         .po-number-title {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            flex-wrap: nowrap;
         }
         .po-number-title h2 {
             margin: 0;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
-            color: #1e293b;
+            color: #0f172a;
+            white-space: nowrap;
+            letter-spacing: -0.01em;
+            line-height: 1.2;
         }
         .po-meta-subtitle {
-            font-size: 12.5px;
+            font-size: 12px;
             color: #64748b;
-            margin-top: 4px;
+            margin-top: 3px;
             display: block;
+            white-space: nowrap;
         }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.3;
+            white-space: nowrap;
+            letter-spacing: 0.02em;
+        }
+        .badge-draft { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+        .badge-ordered { background-color: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .badge-partial { background-color: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .badge-received { background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-cancelled { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        
+        .badge-unpaid { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .badge-paid { background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-default { background-color: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
 
         .po-detail-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
         .btn-po-action {
-            display: inline-flex;
+            display: inline-flex !important;
             align-items: center;
-            gap: 6px;
-            padding: 9px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            border: none;
-            transition: all 0.15s ease;
+            gap: 6px !important;
+            height: 38px !important;
+            padding: 0 13px !important;
+            border-radius: 8px !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            border: 1px solid transparent !important;
+            transition: all 0.15s ease !important;
+            white-space: nowrap !important;
+            box-sizing: border-box !important;
         }
-        .btn-receive { background: #2563eb; color: #ffffff; }
-        .btn-receive:hover { background: #1d4ed8; }
-        .btn-payment { background: #059669; color: #ffffff; }
-        .btn-payment:hover { background: #047857; }
-        .btn-print { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; }
-        .btn-print:hover { background: #f1f5f9; }
-        .btn-edit { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; }
-        .btn-edit:hover { background: #f1f5f9; }
+        .btn-po-action i {
+            font-size: 16px !important;
+            line-height: 1 !important;
+        }
+        .btn-po-action span {
+            white-space: nowrap !important;
+            line-height: 1 !important;
+        }
+        .btn-receive {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #2563eb !important;
+        }
+        .btn-receive:hover {
+            background: #1d4ed8 !important;
+            border-color: #1d4ed8 !important;
+            color: #ffffff !important;
+        }
+        .btn-full-receive {
+            background: #ecfdf5 !important;
+            color: #059669 !important;
+            border-color: #a7f3d0 !important;
+        }
+        .btn-full-receive:hover {
+            background: #d1fae5 !important;
+            border-color: #6ee7b7 !important;
+            color: #047857 !important;
+        }
+        .btn-payment {
+            background: #059669 !important;
+            color: #ffffff !important;
+            border-color: #059669 !important;
+        }
+        .btn-payment:hover {
+            background: #047857 !important;
+            border-color: #047857 !important;
+            color: #ffffff !important;
+        }
+        .btn-mark-paid {
+            background: #f0fdf4 !important;
+            color: #16a34a !important;
+            border-color: #bbf7d0 !important;
+        }
+        .btn-mark-paid:hover {
+            background: #dcfce7 !important;
+            border-color: #86efac !important;
+            color: #15803d !important;
+        }
+        .btn-print {
+            background: #ffffff !important;
+            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+        }
+        .btn-print:hover {
+            background: #f8fafc !important;
+            border-color: #94a3b8 !important;
+            color: #1e293b !important;
+        }
+        .btn-edit {
+            background: #ffffff !important;
+            color: #334155 !important;
+            border-color: #cbd5e1 !important;
+        }
+        .btn-edit:hover {
+            background: #f8fafc !important;
+            border-color: #94a3b8 !important;
+            color: #1e293b !important;
+        }
 
         /* KPI Highlights */
         .po-kpi-grid {
@@ -1097,6 +1203,89 @@
                         }
                     })
                     .catch(() => alert('Network error while voiding payment'));
+                },
+
+                markAsFullyReceived(item) {
+                    const poDisplay = item.purchase_number || (item.reference_no || `#${item.id}`);
+                    const message = `Are you sure you want to mark Purchase Order "<b>${poDisplay}</b>" as Fully Received?<br><small style="color:#2563eb;font-weight:600;display:block;margin-top:6px;">All remaining ordered items will be added to warehouse stock.</small>`;
+                    if (this.$store && this.$store.confirmDialog) {
+                        this.$store.confirmDialog.open({
+                            data: {
+                                message: message,
+                                btnClose: `{{ __('global.cancel') }}`,
+                                btnSave: `{{ __('stock_in.action.fully_received') ?? 'Fully Received' }}`,
+                                item: item,
+                                url: `{{ url('admin/stock-in/full-receive') }}/${item.id}`,
+                                typeAction: 'full-receive',
+                                digPosition: "posTop",
+                                class: "deleteDialog",
+                                icon: 'bx bx-check-double',
+                                iconStyle: 'font-size: 55px; margin-bottom: 15px; border: 1px solid rgba(37, 99, 235, 0.8); color: rgb(37 99 235); border-radius: 50%; padding: 4px;',
+                                btnSaveClass: 'bg-primary',
+                                width: "22rem"
+                            },
+                            afterClosed: (result) => {
+                                if (result) {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    } else if (confirm(`Mark Purchase Order "${poDisplay}" as Fully Received? All remaining items will be received into stock.`)) {
+                        fetch(`{{ url('admin/stock-in/full-receive') }}/${item.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        }).then(r => r.json()).then(res => {
+                            if (res.status === 200) window.location.reload();
+                            else alert(res.error || res.message || 'Failed to complete goods receipt.');
+                        });
+                    }
+                },
+
+                markAsPaid(item) {
+                    const poDisplay = item.purchase_number || (item.reference_no || `#${item.id}`);
+                    const remainingText = item.formatted_remaining_amount || ('$' + Number(item.remaining_amount || 0).toFixed(2));
+                    const message = `Are you sure you want to mark Purchase Order "<b>${poDisplay}</b>" as Paid?<br><small style="color:#10b981;font-weight:600;display:block;margin-top:6px;">Remaining balance to pay: ${remainingText}</small>`;
+                    if (this.$store && this.$store.confirmDialog) {
+                        this.$store.confirmDialog.open({
+                            data: {
+                                message: message,
+                                btnClose: `{{ __('global.cancel') }}`,
+                                btnSave: `{{ __('stock_in.action.mark_as_paid') ?? 'Payment Status (Paid)' }}`,
+                                item: item,
+                                url: `{{ url('admin/stock-in/update-payment-status') }}/${item.id}`,
+                                postData: { payment_status: 'paid' },
+                                typeAction: 'paid',
+                                digPosition: "posTop",
+                                class: "deleteDialog",
+                                icon: 'bx bx-check-circle',
+                                iconStyle: 'font-size: 55px; margin-bottom: 15px; border: 1px solid rgba(16, 185, 129, 0.8); color: rgb(16 185 129); border-radius: 50%; padding: 4px;',
+                                btnSaveClass: 'bg-success',
+                                width: "22rem"
+                            },
+                            afterClosed: (result) => {
+                                if (result) {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    } else if (confirm(`Mark Purchase Order "${poDisplay}" as Paid? Remaining balance: ${remainingText}`)) {
+                        fetch(`{{ url('admin/stock-in/update-payment-status') }}/${item.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({ payment_status: 'paid' })
+                        }).then(r => r.json()).then(res => {
+                            if (res.status === 200) window.location.reload();
+                            else alert(res.error || res.message || 'Failed to update payment status.');
+                        });
+                    }
                 }
             }));
         });

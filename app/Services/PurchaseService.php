@@ -276,6 +276,12 @@ class PurchaseService
     public function updatePurchase(Purchase $purchase, array $data): Purchase
     {
         return DB::transaction(function () use ($purchase, $data) {
+            if (!$purchase->can_edit) {
+                throw ValidationException::withMessages([
+                    'order' => __('stock_in.message.cannot_edit_locked') ?? 'This purchase order cannot be modified because goods have been received or payments recorded.',
+                ]);
+            }
+
             $orderDate = !empty($data['order_date']) ? Carbon::parse($data['order_date'])->format('Y-m-d') : $purchase->order_date;
             $expectedDate = !empty($data['expected_delivery_date']) ? Carbon::parse($data['expected_delivery_date'])->format('Y-m-d') : null;
 
@@ -476,6 +482,33 @@ class PurchaseService
     }
 
     /**
+     * Receive all remaining quantities across all items for a Purchase Order (Fully Received)
+     */
+    public function receiveAllRemaining(Purchase $purchase, array $meta = []): PurchaseReceipt
+    {
+        $purchase->loadMissing(['items.product']);
+        $itemsReceiving = [];
+
+        foreach ($purchase->items as $item) {
+            $remaining = (float) $item->qty - (float) $item->qty_received;
+            if ($remaining > 0.0001) {
+                $itemsReceiving[] = [
+                    'purchase_item_id' => $item->id,
+                    'qty_to_receive'   => $remaining,
+                ];
+            }
+        }
+
+        if (empty($itemsReceiving)) {
+            throw ValidationException::withMessages([
+                'receiving' => 'All items in this purchase order have already been received.',
+            ]);
+        }
+
+        return $this->receiveGoods($purchase, $itemsReceiving, $meta);
+    }
+
+    /**
      * Record a payment for a Purchase Order
      */
     public function recordPayment(Purchase $purchase, array $data, $receiptFile = null): PurchasePayment
@@ -507,6 +540,40 @@ class PurchaseService
                 $payment->receipt_name = $uploadedReceipt['original_name'];
             }
 
+            $payment->save();
+
+            $purchase->recalculateTotals();
+
+            return $payment;
+        });
+    }
+
+    /**
+     * Mark a Purchase Order as fully paid (Payment Status: Paid)
+     */
+    public function markAsPaid(Purchase $purchase, array $data = []): PurchasePayment
+    {
+        return DB::transaction(function () use ($purchase, $data) {
+            $purchase->refresh();
+            $remaining = (float) $purchase->remaining_amount;
+
+            if ($remaining <= 0.0001) {
+                throw ValidationException::withMessages([
+                    'payment' => 'This purchase order has already been paid in full.',
+                ]);
+            }
+
+            $paymentDate = !empty($data['payment_date']) ? Carbon::parse($data['payment_date'])->format('Y-m-d') : date('Y-m-d');
+
+            $payment = new PurchasePayment();
+            $payment->purchase_id    = $purchase->id;
+            $payment->payment_number = PurchasePayment::generatePaymentNumber($paymentDate);
+            $payment->amount         = $remaining;
+            $payment->payment_date   = $paymentDate;
+            $payment->payment_method = $data['payment_method'] ?? 'cash';
+            $payment->reference_no   = $data['reference_no'] ?? null;
+            $payment->note           = $data['note'] ?? 'Full payment recorded from action button';
+            $payment->created_by     = Auth::id() ?? 1;
             $payment->save();
 
             $purchase->recalculateTotals();

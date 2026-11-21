@@ -91,9 +91,27 @@
                                     <i class='bx bx-show'></i>
                                 </a>
                                 @if (!$item->trashed())
-                                    <a href="{!! route('admin-' . $routeName . '-edit', $item->id) !!}" class="btn-action-icon" title="{{ __('global.action.edit') }}">
-                                        <i class='bx bx-edit-alt'></i>
-                                    </a>
+                                    @if ($item->can_edit)
+                                        <a href="{!! route('admin-' . $routeName . '-edit', $item->id) !!}" class="btn-action-icon" title="{{ __('global.action.edit') }}">
+                                            <i class='bx bx-edit-alt'></i>
+                                        </a>
+                                    @endif
+                                    @if ($item->can_receive)
+                                        <button type="button" class="btn-action-icon text-primary" title="{{ __('stock_in.action.partial_received') ?? 'Partial Received' }}"
+                                            @click="openPartialReceiveModal({{ $item }})">
+                                            <i class='bx bx-package'></i>
+                                        </button>
+                                        <button type="button" class="btn-action-icon text-success" title="{{ __('stock_in.action.fully_received') ?? 'Fully Received' }}"
+                                            @click="markAsFullyReceived({{ $item }})">
+                                            <i class='bx bx-check-double'></i>
+                                        </button>
+                                    @endif
+                                    @if ($item->can_pay)
+                                        <button type="button" class="btn-action-icon text-success" title="{{ __('stock_in.action.mark_as_paid') ?? 'Payment Status (Paid)' }}"
+                                            @click="markAsPaid({{ $item }})">
+                                            <i class='bx bx-credit-card-front'></i>
+                                        </button>
+                                    @endif
                                     <a href="{!! route('admin-' . $routeName . '-print', $item->id) !!}" target="_blank" class="btn-action-icon" title="{{ __('stock_in.button.print') }}">
                                         <i class='bx bx-printer'></i>
                                     </a>

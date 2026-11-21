@@ -198,13 +198,22 @@ return [
         'item_duplicate'    => 'This product has already been added to another row',
     ],
 
+    'action' => [
+        'partial_received' => 'Partial Received',
+        'fully_received'   => 'Fully Received',
+        'mark_as_paid'     => 'Payment Status (Paid)',
+    ],
+
     'message' => [
         'create_success'         => 'Purchase order created successfully.',
         'create_failed'          => 'Failed to create purchase order!',
         'update_success'         => 'Purchase order updated successfully.',
         'update_failed'          => 'Failed to update purchase order!',
+        'cannot_edit_locked'     => 'This purchase order cannot be modified because goods have been received or payments recorded.',
         'receive_success'        => 'Goods receipt recorded and stock updated successfully.',
+        'full_receive_success'   => 'Purchase order marked as fully received and inventory updated successfully.',
         'payment_success'        => 'Payment recorded successfully.',
+        'paid_success'           => 'Purchase order marked as paid successfully.',
         'payment_delete_success' => 'Payment voided successfully.',
         'enable_success'         => 'Order enabled successfully!',
         'disable_success'        => 'Order disabled successfully!',

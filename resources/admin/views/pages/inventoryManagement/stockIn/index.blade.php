@@ -451,7 +451,80 @@
         /* Scoped UI Datepicker Popup Elevation */
         div#ui-datepicker-div,
         #ui-datepicker-div.stock-in-datepicker-popup {
-            z-index: 9999 !important;
+            z-index: 100001 !important;
+        }
+
+        /* Partial Received Modal Styles */
+        .modal-backdrop-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-dialog-custom {
+            background: #ffffff;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            animation: modalFadeInCustom 0.2s ease-out;
+        }
+        .modal-dialog-custom.modal-dialog-lg {
+            max-width: 680px;
+        }
+        @keyframes modalFadeInCustom {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-header-custom {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-title-wrap h4 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .modal-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 2px;
+            display: block;
+        }
+        .btn-close-modal {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            line-height: 1;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .btn-close-modal:hover { color: #1e293b; }
+        .modal-body-custom {
+            padding: 20px;
+        }
+        .modal-footer-custom {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 14px 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
         }
     </style>
 
@@ -541,10 +614,58 @@
                         [
                             'key' => 'active',
                             'action' => [
-                                ['url' => 'view', 'title' => __('global.action.view'), 'icon' => 'visibility', 'type' => 'link'],
-                                ['url' => 'edit', 'title' => __('global.action.edit'), 'icon' => 'edit', 'type' => 'link'],
-                                ['url' => 'print', 'title' => __('stock_in.button.print') ?? 'Print PO', 'icon' => 'print', 'type' => 'link'],
-                                ['url' => 'delete', 'title' => __('global.action.delete'), 'icon' => 'delete', 'class' => 'text-danger'],
+                                [
+                                    'url' => 'view',
+                                    'title' => __('global.action.view'),
+                                    'icon' => 'visibility',
+                                    'type' => 'link',
+                                ],
+                                [
+                                    'url' => 'edit',
+                                    'title' => __('global.action.edit'),
+                                    'icon' => 'edit',
+                                    'type' => 'link',
+                                    'visible' => ['can_edit' => true],
+                                ],
+                                [
+                                    'url' => 'partial-receive',
+                                    'title' => __('stock_in.action.partial_received') ?? 'Partial Received',
+                                    'icon' => 'inventory_2',
+                                    'type' => 'click',
+                                    'handler' => 'openPartialReceiveModal',
+                                    'class' => 'text-primary',
+                                    'visible' => ['can_receive' => true],
+                                ],
+                                [
+                                    'url' => 'full-receive',
+                                    'title' => __('stock_in.action.fully_received') ?? 'Fully Received',
+                                    'icon' => 'done_all',
+                                    'type' => 'click',
+                                    'handler' => 'markAsFullyReceived',
+                                    'class' => 'text-success',
+                                    'visible' => ['can_receive' => true],
+                                ],
+                                [
+                                    'url' => 'paid',
+                                    'title' => __('stock_in.action.mark_as_paid') ?? 'Payment Status (Paid)',
+                                    'icon' => 'check_circle',
+                                    'type' => 'click',
+                                    'handler' => 'markAsPaid',
+                                    'class' => 'text-success',
+                                    'visible' => ['can_pay' => true],
+                                ],
+                                [
+                                    'url' => 'print',
+                                    'title' => __('stock_in.button.print') ?? 'Print PO',
+                                    'icon' => 'print',
+                                    'type' => 'link',
+                                ],
+                                [
+                                    'url' => 'delete',
+                                    'title' => __('global.action.delete'),
+                                    'icon' => 'delete',
+                                    'class' => 'text-danger',
+                                ],
                             ],
                         ],
                         [
@@ -559,6 +680,105 @@
             ],
         ])
         @endcomponent
+
+        {{-- Partial Received Modal --}}
+        <div class="modal-backdrop-custom" x-show="showPartialReceiveModal" x-transition.opacity style="display: none;" x-cloak>
+            <div class="modal-dialog-custom modal-dialog-lg" @click.outside="if (!submittingPartialReceive) closePartialReceiveModal()">
+                <form @submit.prevent="submitPartialReceive()">
+                    <div class="modal-header-custom">
+                        <div class="modal-title-wrap">
+                            <h4 x-text="`{{ __('stock_in.action.partial_received') ?? 'Partial Received' }} - ${selectedPurchase?.purchase_number || (selectedPurchase?.reference_no || '#' + selectedPurchase?.id)}`"></h4>
+                            <span class="modal-subtitle">{{ __('stock_in.receiving.subtitle') }}</span>
+                        </div>
+                        <button type="button" class="btn-close-modal" @click="closePartialReceiveModal()" :disabled="submittingPartialReceive">&times;</button>
+                    </div>
+
+                    <div class="modal-body-custom">
+                        <div class="modal-meta-bar" style="display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 180px;">
+                                <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">{{ __('stock_in.receiving.received_date') }} <span style="color:#ef4444;">*</span></label>
+                                <input type="text" id="partial_received_date" x-model="partialReceiveForm.received_date" class="form-control-custom datepicker-input" style="height: 38px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; width: 100%; font-size: 12.5px;" required>
+                            </div>
+                            <div style="flex: 1; min-width: 180px;">
+                                <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">{{ __('stock_in.receiving.bill_of_lading') }}</label>
+                                <input type="text" x-model="partialReceiveForm.reference_no" placeholder="e.g. Delivery Slip #" class="form-control-custom" style="height: 38px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; width: 100%; font-size: 12.5px;">
+                            </div>
+                        </div>
+
+                        <div class="modal-table-wrap" style="max-height: 320px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px;">
+                            <table class="modal-table" style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                                <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 1;">
+                                    <tr style="border-bottom: 1px solid #e2e8f0; height: 38px;">
+                                        <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #475569;">{{ __('stock_in.table.product') }}</th>
+                                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #475569; width: 90px;">{{ __('stock_in.receiving.qty_ordered') }}</th>
+                                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #475569; width: 90px;">{{ __('stock_in.receiving.qty_already') }}</th>
+                                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #dc2626; width: 90px;">{{ __('stock_in.receiving.qty_balance') }}</th>
+                                        <th style="padding: 8px 12px; text-align: center; font-weight: 600; color: #2563eb; width: 140px;">{{ __('stock_in.receiving.qty_to_receive') }} <span style="color:#ef4444;">*</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-if="partialReceiveLoading">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">
+                                                <i class='bx bx-loader-alt bx-spin' style="font-size: 20px;"></i> Loading items...
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-if="!partialReceiveLoading && partialReceiveRows.length === 0">
+                                        <tr>
+                                            <td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">
+                                                All items for this order have already been received.
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <template x-for="(row, idx) in partialReceiveRows" :key="row.id">
+                                        <tr style="border-bottom: 1px solid #f1f5f9; height: 46px;">
+                                            <td style="padding: 8px 12px;">
+                                                <strong style="color: #1e293b;" x-text="row.name"></strong>
+                                                <div style="font-size: 11.5px; color: #94a3b8;" x-text="row.uom"></div>
+                                            </td>
+                                            <td style="padding: 8px 12px; text-align: center; color: #64748b;" x-text="row.qty"></td>
+                                            <td style="padding: 8px 12px; text-align: center; color: #10b981; font-weight: 600;" x-text="row.qty_received"></td>
+                                            <td style="padding: 8px 12px; text-align: center; font-weight: 700; color: #dc2626;" x-text="row.remaining"></td>
+                                            <td style="padding: 8px 12px; text-align: center;">
+                                                <input type="number" step="any" min="0" :max="row.remaining"
+                                                    x-model.number="row.qty_to_receive"
+                                                    style="width: 100px; height: 34px; text-align: center; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; font-size: 13px; color: #1e293b; outline: none;"
+                                                    @focus="$event.target.select()">
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                            <button type="button" @click="fillAllPartialRemaining()" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                                <i class='bx bx-check-double'></i> {{ __('stock_in.button.receive_all') ?? 'Receive All' }}
+                            </button>
+                            <button type="button" @click="clearAllPartialReceive()" style="background: #ffffff; border: 1px solid #cbd5e1; color: #64748b; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                Clear All
+                            </button>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 12px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">{{ __('stock_in.receiving.notes') }}</label>
+                            <input type="text" x-model="partialReceiveForm.remark" placeholder="Partial delivery notes or batch remarks..." class="form-control-custom" style="height: 38px; border-radius: 8px; border: 1px solid #cbd5e1; padding: 0 12px; width: 100%; font-size: 12.5px;">
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-custom">
+                        <button type="button" class="btn-cancel-custom" @click="closePartialReceiveModal()" :disabled="submittingPartialReceive" style="padding: 8px 16px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 7px; font-size: 12.5px; font-weight: 600; color: #475569; cursor: pointer;">
+                            {{ __('global.button.cancel') }}
+                        </button>
+                        <button type="submit" class="btn-submit-custom" :disabled="submittingPartialReceive || partialReceiveRows.length === 0" style="padding: 8px 18px; border: none; background: #2563eb; color: #ffffff; border-radius: 7px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class='bx bx-check'></i>
+                            <span x-text="submittingPartialReceive ? 'Receiving...' : @json(__('stock_in.receiving.confirm_receive'))"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
         {{-- Full Size Loading Spinner Overlay --}}
         <template x-if="exportLoading">
@@ -581,6 +801,16 @@
                 shopId: @json(request('shop_id') ?? ($shop?->id ?? '')),
                 supplierId: @json(request('supplier_id') ?? ($supplier?->id ?? '')),
                 exportLoading: false,
+                selectedPurchase: null,
+                showPartialReceiveModal: false,
+                partialReceiveLoading: false,
+                submittingPartialReceive: false,
+                partialReceiveRows: [],
+                partialReceiveForm: {
+                    received_date: moment().format('YYYY-MM-DD'),
+                    reference_no: '',
+                    remark: ''
+                },
 
                 init() {
                     this.$nextTick(() => {
@@ -776,6 +1006,196 @@
                     if (hasAppliedAdvanced) {
                         const form = this.$el ? this.$el.closest('form.filter') : $(this.$root).find('form.filter')[0];
                         if (form) form.submit();
+                    }
+                },
+
+                markAsFullyReceived(item) {
+                    const poDisplay = item.purchase_number || (item.reference_no || `#${item.id}`);
+                    const message = `Are you sure you want to mark Purchase Order "<b>${poDisplay}</b>" as Fully Received?<br><small style="color:#2563eb;font-weight:600;display:block;margin-top:6px;">All remaining ordered items will be added to warehouse stock.</small>`;
+                    this.$store.confirmDialog.open({
+                        data: {
+                            message: message,
+                            btnClose: `{{ __('global.cancel') }}`,
+                            btnSave: `{{ __('stock_in.action.fully_received') ?? 'Fully Received' }}`,
+                            item: item,
+                            url: `{{ url('admin/stock-in/full-receive') }}/${item.id}`,
+                            typeAction: 'full-receive',
+                            digPosition: "posTop",
+                            class: "deleteDialog",
+                            icon: 'bx bx-check-double',
+                            iconStyle: 'font-size: 55px; margin-bottom: 15px; border: 1px solid rgba(37, 99, 235, 0.8); color: rgb(37 99 235); border-radius: 50%; padding: 4px;',
+                            btnSaveClass: 'bg-primary',
+                            width: "22rem"
+                        },
+                        afterClosed: (result) => {
+                            if (result) {
+                                reloadData(`{{ url()->full() }}`);
+                            }
+                        }
+                    });
+                },
+
+                markAsPaid(item) {
+                    const poDisplay = item.purchase_number || (item.reference_no || `#${item.id}`);
+                    const remainingText = item.formatted_remaining_amount || ('$' + Number(item.remaining_amount || 0).toFixed(2));
+                    const message = `Are you sure you want to mark Purchase Order "<b>${poDisplay}</b>" as Paid?<br><small style="color:#10b981;font-weight:600;display:block;margin-top:6px;">Remaining balance to pay: ${remainingText}</small>`;
+                    this.$store.confirmDialog.open({
+                        data: {
+                            message: message,
+                            btnClose: `{{ __('global.cancel') }}`,
+                            btnSave: `{{ __('stock_in.action.mark_as_paid') ?? 'Payment Status (Paid)' }}`,
+                            item: item,
+                            url: `{{ url('admin/stock-in/update-payment-status') }}/${item.id}`,
+                            postData: {
+                                payment_status: 'paid',
+                            },
+                            typeAction: 'paid',
+                            digPosition: "posTop",
+                            class: "deleteDialog",
+                            icon: 'bx bx-check-circle',
+                            iconStyle: 'font-size: 55px; margin-bottom: 15px; border: 1px solid rgba(16, 185, 129, 0.8); color: rgb(16 185 129); border-radius: 50%; padding: 4px;',
+                            btnSaveClass: 'bg-success',
+                            width: "22rem"
+                        },
+                        afterClosed: (result) => {
+                            if (result) {
+                                reloadData(`{{ url()->full() }}`);
+                            }
+                        }
+                    });
+                },
+
+                openPartialReceiveModal(item) {
+                    this.selectedPurchase = item;
+                    this.partialReceiveForm.received_date = moment().format('YYYY-MM-DD');
+                    this.partialReceiveForm.reference_no = '';
+                    this.partialReceiveForm.remark = '';
+                    this.partialReceiveRows = [];
+                    this.showPartialReceiveModal = true;
+                    this.partialReceiveLoading = true;
+
+                    if (item.items && Array.isArray(item.items) && item.items.length > 0) {
+                        this.populatePartialReceiveRows(item.items);
+                        this.partialReceiveLoading = false;
+                    } else {
+                        fetch(`{{ url('admin/stock-in/items') }}/${item.id}`)
+                            .then(res => res.json())
+                            .then(res => {
+                                if (res.status === 200 && res.items) {
+                                    this.populatePartialReceiveRows(res.items);
+                                }
+                            })
+                            .catch(err => {
+                                console.error(err);
+                            })
+                            .finally(() => {
+                                this.partialReceiveLoading = false;
+                            });
+                    }
+
+                    this.$nextTick(() => {
+                        const $input = $(this.$root).find('#partial_received_date');
+                        if ($input.length && typeof $.fn.datepicker === 'function') {
+                            $input.datepicker({
+                                dateFormat: 'yy-mm-dd',
+                                changeMonth: true,
+                                changeYear: true,
+                                gotoCurrent: true,
+                                yearRange: '-50:+10',
+                                beforeShow: function() {
+                                    setTimeout(() => { $('#ui-datepicker-div').addClass('stock-in-datepicker-popup'); }, 0);
+                                },
+                                onClose: function() {
+                                    $('#ui-datepicker-div').removeClass('stock-in-datepicker-popup');
+                                }
+                            });
+                        }
+                    });
+                },
+
+                populatePartialReceiveRows(items) {
+                    this.partialReceiveRows = items
+                        .filter(it => {
+                            const rem = Number(it.remaining !== undefined ? it.remaining : (it.remaining_qty !== undefined ? it.remaining_qty : (Number(it.qty) - Number(it.qty_received))));
+                            return rem > 0.0001;
+                        })
+                        .map(it => {
+                            const rem = Number(it.remaining !== undefined ? it.remaining : (it.remaining_qty !== undefined ? it.remaining_qty : (Number(it.qty) - Number(it.qty_received))));
+                            return {
+                                id: it.id,
+                                name: it.product_name || (it.product ? it.product.name : '---'),
+                                uom: it.uom_title || (it.product && it.product.uom ? it.product.uom.name : ''),
+                                qty: Number(it.qty || 0),
+                                qty_received: Number(it.qty_received || 0),
+                                remaining: rem,
+                                qty_to_receive: rem,
+                            };
+                        });
+                },
+
+                fillAllPartialRemaining() {
+                    this.partialReceiveRows.forEach(r => {
+                        r.qty_to_receive = r.remaining;
+                    });
+                },
+
+                clearAllPartialReceive() {
+                    this.partialReceiveRows.forEach(r => {
+                        r.qty_to_receive = 0;
+                    });
+                },
+
+                closePartialReceiveModal() {
+                    this.showPartialReceiveModal = false;
+                    this.selectedPurchase = null;
+                    this.partialReceiveRows = [];
+                },
+
+                async submitPartialReceive() {
+                    if (!this.selectedPurchase) return;
+                    const itemsToSubmit = this.partialReceiveRows
+                        .filter(r => Number(r.qty_to_receive) > 0)
+                        .map(r => ({
+                            purchase_item_id: r.id,
+                            qty_to_receive: Number(r.qty_to_receive)
+                        }));
+
+                    if (itemsToSubmit.length === 0) {
+                        alert('Please enter at least one quantity greater than 0 to receive.');
+                        return;
+                    }
+
+                    this.submittingPartialReceive = true;
+
+                    try {
+                        const response = await fetch(`{{ url('admin/stock-in/receive') }}/${this.selectedPurchase.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                received_date: this.partialReceiveForm.received_date,
+                                reference_no: this.partialReceiveForm.reference_no,
+                                remark: this.partialReceiveForm.remark,
+                                items: itemsToSubmit
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok && (data.status === 200 || data.message === 'success')) {
+                            this.closePartialReceiveModal();
+                            reloadData(`{{ url()->full() }}`);
+                        } else {
+                            alert(data.error || data.message || 'Failed to record goods receipt.');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('An unexpected error occurred.');
+                    } finally {
+                        this.submittingPartialReceive = false;
                     }
                 },
 

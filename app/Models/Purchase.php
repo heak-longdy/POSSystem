@@ -64,6 +64,9 @@ class Purchase extends Model
         'purchase_number_link',
         'order_status_badge',
         'payment_status_badge',
+        'can_receive',
+        'can_pay',
+        'can_edit',
     ];
 
     protected static function boot()
@@ -131,6 +134,51 @@ class Purchase extends Model
     {
         $remaining = (float) $this->total_amount - (float) $this->paid_amount;
         return max(0.00, round($remaining, 2));
+    }
+
+    public function getCanReceiveAttribute(): bool
+    {
+        if ($this->trashed() || in_array($this->order_status, ['received', 'cancelled'])) {
+            return false;
+        }
+        return true;
+    }
+
+    public function getCanPayAttribute(): bool
+    {
+        if ($this->trashed() || $this->order_status === 'cancelled' || $this->payment_status === 'paid') {
+            return false;
+        }
+        return $this->remaining_amount > 0.0001;
+    }
+
+    public function getCanEditAttribute(): bool
+    {
+        if ($this->trashed()) {
+            return false;
+        }
+
+        // Cannot edit if cancelled, received, or partial_received
+        if (in_array($this->order_status, ['received', 'partial_received', 'cancelled'])) {
+            return false;
+        }
+
+        // Cannot edit if payments exist or payment_status is not unpaid
+        if ($this->payment_status !== 'unpaid' || (float) $this->paid_amount > 0.0001) {
+            return false;
+        }
+
+        // Cannot edit if any items have already been received
+        if ($this->relationLoaded('items')) {
+            $hasReceived = $this->items->contains(fn ($it) => (float) $it->qty_received > 0.0001);
+            if ($hasReceived) {
+                return false;
+            }
+        } elseif ($this->items()->where('qty_received', '>', 0.0001)->exists()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function getSupplierTitleAttribute(): ?string
