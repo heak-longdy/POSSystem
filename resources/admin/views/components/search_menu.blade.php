@@ -4,7 +4,7 @@
     $allAdminMenuItems = [];
 
     // 1. Dashboard
-    if (auth()->user()->can('dashboard-view')) {
+    if (optional(auth()->user())->can('dashboard-view')) {
     $allAdminMenuItems[] = [
         'id' => 'menu-dashboard',
         'title' => \App\Support\Language::translatedValue(['en' => 'Dashboard', 'km' => 'ផ្ទាំងគ្រប់គ្រង']),

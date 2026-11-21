@@ -103,6 +103,7 @@ class OrderBulkPrintTest extends TestCase
             $table->string('service_discount_type')->nullable();
             $table->double('service_commission')->default(0);
             $table->string('service_commission_type')->nullable();
+            $table->boolean('is_bonus')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -331,6 +332,15 @@ class OrderBulkPrintTest extends TestCase
         $order1 = $this->createOrder(['invoice_number' => 'INV-001', 'total_price' => 50.00]);
         $order2 = $this->createOrder(['invoice_number' => 'INV-002', 'total_price' => 75.00]);
 
+        \App\Models\OrderDetail::create([
+            'order_id' => $order1->id,
+            'product_id' => 1,
+            'type' => 'product',
+            'is_bonus' => true,
+            'price' => 0.00,
+            'qty' => 2,
+        ]);
+
         $this->actingAs($this->permittedUser);
 
         // Test Invoice preview in Khmer
@@ -348,7 +358,7 @@ class OrderBulkPrintTest extends TestCase
         $responseKm->assertSee(route('admin-order-detail', $order2->id));
         $responseKm->assertSee('btn-view-order-detail');
 
-        // Test Delivery Slip preview in English
+        // Test Delivery Slip preview in English (ensuring Template V1 is used with bonus item badge)
         $responseEn = $this->post(route('admin-order-bulk-print-preview'), [
             'document_type' => 'delivery_slip',
             'print_locale' => 'en',
@@ -361,8 +371,20 @@ class OrderBulkPrintTest extends TestCase
         $responseEn->assertSee('Delivery Slip List');
         $responseEn->assertSee('bulk-invoice-sidebar');
         $responseEn->assertSee('btn-view-order-detail');
+        $responseEn->assertSee('Bonus (Free)');
+        $responseEn->assertSee('slip-row-bonus');
         $responseEn->assertSee(route('admin-order-detail', $order1->id));
         $responseEn->assertSee(route('admin-order-detail', $order2->id));
+
+        // Test Delivery Slip preview in Khmer (ensuring Template V1 is used with Khmer bonus item badge)
+        $responseKmSlip = $this->post(route('admin-order-bulk-print-preview'), [
+            'document_type' => 'delivery_slip',
+            'print_locale' => 'km',
+            'order_ids' => [$order1->id, $order2->id],
+        ])->assertOk();
+
+        $responseKmSlip->assertSee('ថែមជូន (Free)');
+        $responseKmSlip->assertSee('វិក្ក័យបត្រ');
 
         // Test Delivery Slip V1 preview in English and Khmer
         $responseV1En = $this->post(route('admin-order-bulk-print-preview'), [
@@ -444,5 +466,52 @@ class OrderBulkPrintTest extends TestCase
         // Missing order ID in selection
         $this->expectException(\Illuminate\Validation\ValidationException::class);
         $service->prepareForPreview([$order->id, 99999], 'invoice', 'en');
+    }
+
+    public function test_invoice_and_slip_templates_render_na_when_fields_are_missing(): void
+    {
+        $order = Order::create([
+            'shop_id' => null,
+            'customer_id' => null,
+            'total_price' => 20.00,
+            'paid_amount' => 0.00,
+            'payment_status' => 'Pending',
+            'order_date' => null,
+            'delivery_date' => null,
+            'invoice_number' => null,
+            'created_by' => null,
+        ]);
+
+        $this->actingAs($this->permittedUser);
+
+        // Test Invoice Template 1
+        $htmlInvoice = view('admin::pages.order.invoice-template', [
+            'order' => $order,
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringContainsString('N/A', $htmlInvoice);
+        $this->assertStringNotContainsString('undefined', $htmlInvoice);
+        $this->assertStringNotContainsString('---', $htmlInvoice);
+
+        // Test Delivery Slip Template 2 V1
+        $htmlSlipV1 = view('admin::pages.order.invoice-template-02-v1', [
+            'order' => $order,
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringContainsString('N/A', $htmlSlipV1);
+        $this->assertStringNotContainsString('undefined', $htmlSlipV1);
+        $this->assertStringNotContainsString('---', $htmlSlipV1);
+
+        // Test Delivery Slip Template 2
+        $htmlSlip = view('admin::pages.order.invoice-template-02', [
+            'order' => $order,
+            'printLocale' => 'en',
+        ])->render();
+
+        $this->assertStringContainsString('N/A', $htmlSlip);
+        $this->assertStringNotContainsString('undefined', $htmlSlip);
+        $this->assertStringNotContainsString('---', $htmlSlip);
     }
 }

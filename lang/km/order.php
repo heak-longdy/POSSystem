@@ -111,7 +111,8 @@ return [
 
     'table' => [
         'no' => 'ល.រ',
-        'order_id' => 'លេខកូដ',
+        'order_id' => 'លេខវិក្កយបត្រ',
+        'invoice_number' => 'លេខវិក្កយបត្រ',
         'shop' => 'ហាង',
         'barber' => 'ជាងកាត់សក់',
         'customer' => 'អតិថិជន',
@@ -248,7 +249,7 @@ return [
         'sample_coca' => 'កូកា ដប 380ml',
 
         'slip_title' => 'វិក្ក័យបត្រ',
-        'slip_bonus_tag' => '[ថែមជូន (Free)]',
+        'slip_bonus_tag' => 'ថែមជូន (Free)',
         'slip_draft' => '(DRAFT) OEB',
         'slip_inv_no' => 'Inv. No.',
         'slip_issue_date' => 'ថ្ងៃចេញ',

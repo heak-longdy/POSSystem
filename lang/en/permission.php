@@ -20,6 +20,9 @@ return [
     'all' => 'All',
     'search_modules' => 'Search modules...',
     'no_actions' => 'No actions defined',
+    'sync_catalog' => 'Sync System Permissions',
+    'syncing' => 'Syncing permissions...',
+    'sync_success' => 'System permissions synchronized successfully.',
     'group' => [
         'general' => 'General',
         'inventory_management' => 'Inventory Management',
@@ -203,6 +206,7 @@ return [
         'customer-create' => 'Create',
         'customer-update' => 'Update',
         'customer-delete' => 'Delete',
+        'customer-detail' => 'View Detail',
         // order
         'order-view' => 'View',
         'order-create' => 'Create',

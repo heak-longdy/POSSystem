@@ -7,79 +7,98 @@ use Illuminate\Support\Facades\Gate;
 
 class AdminPermissions
 {
-    public static function forAction(string $module, string $action, bool $editing = false): array
-    {
-        if (!array_key_exists($module, config('admin_permissions.modules', []))
-            && !in_array($module, ['remaining-amount', 'stock-on-hand', 'stock-movement'], true)) {
-            return [];
-        }
+    /**
+     * Standalone modules outside config('admin_permissions.modules') that participate in permission checks.
+     */
+    protected const STANDALONE_MODULES = [
+        'remaining-amount',
+        'stock-on-hand',
+        'stock-movement',
+    ];
 
-        // Shop product links and routes share the same assignment permissions.
-        if ($module === 'shop' && in_array($action, [
-            'product', 'product-create', 'product-edit', 'product-save',
-            'product-delete', 'product-restore', 'product-destroy',
-        ], true)) {
-            return ['shop-product'];
-        }
+    /**
+     * Modules that use dedicated restore and force-delete permissions instead of update/delete.
+     */
+    protected const RESTORABLE_MODULES = [
+        'staff',
+        'staff-expense',
+        'other-income',
+    ];
 
-        $actions = [
-            'list' => 'view', 'view' => 'view', 'detail' => 'view', 'list-product' => 'view',
-            'staff-history' => 'view', 'payment-details' => 'view', 'report' => 'view',
-            'create' => 'create', 'preview-previous-balance' => 'create', 'edit' => 'update', 'update' => 'update', 'status' => 'update',
-            'save' => $editing ? 'update' : 'create',
-            'permission' => 'update', 'save-permission' => 'update',
-            'change-password' => 'update', 'save-password' => 'update',
-            'add-payment' => 'update', 'update-payment' => 'update', 'cancel' => 'update',
-            'update-payment-status' => 'update', 'send-payment-reminder' => 'update',
-            'send-reminder' => 'update',
-            'paid' => 'update',
-            'print' => 'view',
-            'delete' => 'delete', 'delete-payment' => 'delete',
-            'restore' => in_array($module, ['staff', 'staff-expense', 'other-income']) ? 'restore' : 'update',
-            'destroy' => in_array($module, ['staff', 'staff-expense', 'other-income']) ? 'force-delete' : 'delete',
-            'export' => in_array($module, ['stock-on-hand', 'stock-movement'], true)
-                || in_array('excel', config('admin_permissions.extra_actions.' . $module, [])) ? 'excel' : 'view',
-        ];
+    /**
+     * Actions specific to shop product assignments that map to 'shop-product'.
+     */
+    protected const SHOP_PRODUCT_ACTIONS = [
+        'product',
+        'product-create',
+        'product-edit',
+        'product-save',
+        'product-delete',
+        'product-restore',
+        'product-destroy',
+    ];
 
-        // This legacy URL opens the remaining-amount listing, not a creation form.
-        if ($module === 'remaining-amount' && $action === 'create') {
-            return ['remaining-amount-view'];
-        }
+    /**
+     * Standard action-to-ability mapping across modules.
+     */
+    protected const BASE_ACTION_ABILITIES = [
+        'list' => 'view',
+        'view' => 'view',
+        'detail' => 'view',
+        'details' => 'view',
+        'list-product' => 'view',
+        'staff-history' => 'view',
+        'supplier-history' => 'view',
+        'payment-details' => 'view',
+        'report' => 'view',
+        'create' => 'create',
+        'preview-previous-balance' => 'create',
+        'edit' => 'update',
+        'update' => 'update',
+        'status' => 'update',
+        'permission' => 'update',
+        'save-permission' => 'update',
+        'permission-sync' => 'update',
+        'permission-store-custom' => 'update',
+        'permission-get-user' => 'view',
+        'change-password' => 'update',
+        'save-password' => 'update',
+        'add-payment' => 'update',
+        'update-payment' => 'update',
+        'store-payment' => 'update',
+        'cancel' => 'update',
+        'update-payment-status' => 'update',
+        'send-payment-reminder' => 'update',
+        'send-reminder' => 'update',
+        'paid' => 'update',
+        'delete' => 'delete',
+        'delete-payment' => 'delete',
+    ];
 
-        return isset($actions[$action]) ? [$module . '-' . $actions[$action]] : [];
-    }
-
-    public static function forRequest(Request $request): array
-    {
-        $name = $request->route()->getName();
-        if ($name === 'admin-dashboard') {
-            return ['dashboard-view'];
-        }
-        if (str_starts_with($name ?? '', 'admin-order-bulk-print-')) {
-            return ['order-bulk-print-view'];
-        }
-        if (str_starts_with($name ?? '', 'admin-file-manager-')) {
-            $action = substr($name, strlen('admin-file-manager-'));
-            $actions = [
-                'index' => 'view', 'first' => 'view', 'files' => 'view', 'folders' => 'view',
-                'upload' => 'create', 'create-folder' => 'create',
-                'rename-file' => 'update', 'rename-folder' => 'update', 'restore-all' => 'update',
-                'delete-file' => 'delete', 'delete-folder' => 'delete', 'delete-all' => 'delete',
-            ];
-            return ['file-manager-' . ($actions[$action] ?? 'view')];
-        }
-        if (in_array($name, ['admin-setting-setting', 'admin-setting-save', 'admin-our-service-index', 'admin-our-service-store'])) {
-            return [$request->isMethod('GET') ? 'service-view' : 'service-update'];
-        }
-        if (in_array($name, ['admin-setting-invoice-index', 'setting-invoice-index'])) {
-            return ['setting-invoice-view'];
-        }
-        if (in_array($name, ['admin-setting-invoice-save', 'admin-setting-invoice-preview', 'setting-invoice-save'])) {
-            return ['setting-invoice-update'];
-        }
-        if (str_starts_with($name ?? '', 'admin-backup-')) {
-            $action = substr($name, strlen('admin-backup-'));
-            $actions = [
+    /**
+     * Sub-module prefix action mappings (e.g. file-manager, backup).
+     */
+    protected const SUBMODULE_PREFIX_ACTIONS = [
+        'admin-file-manager-' => [
+            'module' => 'file-manager',
+            'actions' => [
+                'index' => 'view',
+                'first' => 'view',
+                'files' => 'view',
+                'folders' => 'view',
+                'upload' => 'create',
+                'create-folder' => 'create',
+                'rename-file' => 'update',
+                'rename-folder' => 'update',
+                'restore-all' => 'update',
+                'delete-file' => 'delete',
+                'delete-folder' => 'delete',
+                'delete-all' => 'delete',
+            ],
+        ],
+        'admin-backup-' => [
+            'module' => 'backup',
+            'actions' => [
                 'index' => 'view',
                 'create' => 'create',
                 'download' => 'download',
@@ -92,101 +111,212 @@ class AdminPermissions
                 'delete-cloud' => 'delete',
                 'save-settings' => 'update',
                 'test-cloud' => 'view',
-            ];
-            return ['backup-' . ($actions[$action] ?? 'view')];
-        }
-        if (str_starts_with($name ?? '', 'admin-select-')) {
-            $modules = config('admin_permissions.lookups.' . substr($name, strlen('admin-select-')), []);
-            return collect($modules)->flatMap(fn ($module) => [
-                $module . '-view', $module . '-create', $module . '-update',
-            ])->all();
-        }
-        if ($name === 'admin-stock-in-products') {
-            return ['stock-in-view', 'stock-in-create', 'stock-in-update'];
-        }
-        if ($name === 'admin-stock-in-receive' || $name === 'admin-stock-in-payment') {
-            return ['stock-in-update', 'stock-in-create'];
-        }
-        if ($name === 'admin-stock-in-payment-delete') {
-            return ['stock-in-delete', 'stock-in-update'];
-        }
-        if ($name === 'admin-stock-in-print') {
-            return ['stock-in-view'];
-        }
-        if (in_array($name, ['admin-stock-on-hand-report', 'admin-stock-movement-report', 'admin-product-report', 'admin-staff-expense-report', 'admin-other-income-report'])) {
-            return [str_replace(['admin-', '-report'], ['', '-excel'], $name)];
-        }
-        if ($name === 'admin-stock-on-hand-onFind') {
-            return ['stock-on-hand-view', 'stock-out-create', 'stock-out-update', 'stock-transfer-create', 'stock-transfer-update'];
+            ],
+        ],
+    ];
+
+    /**
+     * Static route name to permission mapping for single standalone endpoints.
+     */
+    protected const STATIC_ROUTE_PERMISSIONS = [
+        'admin-dashboard' => ['dashboard-view'],
+        'admin-stock-in-products' => ['stock-in-view', 'stock-in-create', 'stock-in-update'],
+        'admin-stock-on-hand-onFind' => [
+            'stock-on-hand-view',
+            'stock-out-create',
+            'stock-out-update',
+            'stock-transfer-create',
+            'stock-transfer-update',
+        ],
+        'admin-setting-invoice-index' => ['setting-invoice-view'],
+        'setting-invoice-index' => ['setting-invoice-view'],
+        'admin-setting-invoice-save' => ['setting-invoice-update'],
+        'admin-setting-invoice-preview' => ['setting-invoice-update'],
+        'setting-invoice-save' => ['setting-invoice-update'],
+    ];
+
+    /**
+     * Route pairs that toggle between view and update permissions based on method or route name.
+     */
+    protected const VIEW_UPDATE_TOGGLE_ROUTES = [
+        'service' => [
+            'admin-setting-setting',
+            'admin-setting-save',
+            'admin-our-service-index',
+            'admin-our-service-store',
+        ],
+        'about' => [
+            'view' => 'admin-about-us-index',
+            'update' => 'admin-about-us-store',
+        ],
+        'contact' => [
+            'view' => 'admin-contact-contact',
+            'update' => 'admin-contact-save',
+        ],
+    ];
+
+    /**
+     * Explicit report export route mappings.
+     */
+    protected const EXPORT_ROUTE_PERMISSIONS = [
+        'admin-report-consolidated-product-quantity-report' => 'report-consolidated-product-quantity-excel',
+        'admin-report-sales-report' => 'report-sales-excel',
+        'admin-report-order-transaction-report' => 'report-transaction-excel',
+        'admin-report-inventory-movement-report' => 'report-inventory-excel',
+        'admin-report-staff-expense-report' => 'report-staff-expense-excel',
+        'admin-report-other-income-report' => 'report-other-income-excel',
+        'admin-report-customer-remaining-amount-report' => 'report-sales-excel',
+        'admin-report-product-report' => 'product-excel',
+        'admin-report-shop-report' => 'shop-view',
+        'admin-report-customer-report' => 'customer-view',
+        'admin-report-position-report' => 'position-view',
+        'admin-report-staff-report' => 'staff-view',
+        'admin-report-user-report' => 'user-view',
+        'admin-report-supplier-report' => 'supplier-view',
+        'admin-report-uom-report' => 'uom-view',
+        'admin-stock-on-hand-report' => 'stock-on-hand-excel',
+        'admin-stock-movement-report' => 'stock-movement-excel',
+        'admin-product-report' => 'product-excel',
+        'admin-staff-expense-report' => 'staff-expense-excel',
+        'admin-other-income-report' => 'other-income-excel',
+    ];
+
+    /**
+     * Report modules that provide standard index/daily/monthly/details views.
+     */
+    protected const REPORT_MODULE_VIEWS = [
+        'report-sales' => 'report-sales',
+        'report-consolidated-product-quantity' => 'report-consolidated-product-quantity',
+        'report-order-transaction' => 'report-transaction',
+        'report-inventory-movement' => 'report-inventory',
+        'report-staff-expense' => 'report-staff-expense',
+        'report-other-income' => 'report-other-income',
+        'report-customer-remaining-amount' => 'report-sales',
+    ];
+
+    /**
+     * Standard sub-actions supported across report modules.
+     */
+    protected const REPORT_VIEW_ACTIONS = ['index', 'daily', 'monthly', 'details'];
+
+    /**
+     * Cached sorted module list for longest-prefix matching.
+     *
+     * @var array<string>|null
+     */
+    protected static ?array $sortedModules = null;
+
+    /**
+     * Map a module and action to the corresponding permission strings.
+     */
+    public static function forAction(string $module, string $action, bool $editing = false): array
+    {
+        $allModules = static::getSortedModules();
+        if (!in_array($module, $allModules, true)) {
+            return [];
         }
 
-        // Each report requires its own module permission. Export actions also
-        // require the Excel permission already offered by the permission screen.
-        $exports = [
-            'admin-report-consolidated-product-quantity-report' => 'report-consolidated-product-quantity-excel',
-            'admin-report-sales-report' => 'report-sales-excel',
-            'admin-report-order-transaction-report' => 'report-transaction-excel',
-            'admin-report-inventory-movement-report' => 'report-inventory-excel',
-            'admin-report-staff-expense-report' => 'report-staff-expense-excel',
-            'admin-report-other-income-report' => 'report-other-income-excel',
-            'admin-report-customer-remaining-amount-report' => 'report-sales-excel',
-            'admin-report-product-report' => 'product-excel',
-            'admin-report-shop-report' => 'shop-view',
-            'admin-report-customer-report' => 'customer-view',
-            'admin-report-position-report' => 'position-view',
-            'admin-report-staff-report' => 'staff-view',
-            'admin-report-user-report' => 'user-view',
-            'admin-report-supplier-report' => 'supplier-view',
-            'admin-report-uom-report' => 'uom-view',
-        ];
-        if (isset($exports[$name])) {
-            return [$exports[$name]];
+        // Shop product links and routes share the same assignment permissions.
+        if ($module === 'shop' && in_array($action, static::SHOP_PRODUCT_ACTIONS, true)) {
+            return ['shop-product'];
         }
-        foreach ([
-            'report-sales' => 'report-sales',
-            'report-consolidated-product-quantity' => 'report-consolidated-product-quantity',
-            'report-order-transaction' => 'report-transaction',
-            'report-inventory-movement' => 'report-inventory',
-            'report-staff-expense' => 'report-staff-expense',
-            'report-other-income' => 'report-other-income',
-            'report-customer-remaining-amount' => 'report-sales',
-        ] as $prefix => $module) {
-            if (in_array($name, array_map(fn ($action) => 'admin-' . $prefix . '-' . $action,
-                ['index', 'daily', 'monthly', 'details']), true)) {
-                return [$module . '-view'];
+
+        // Legacy URL opens the remaining-amount listing, not a creation form.
+        if ($module === 'remaining-amount' && $action === 'create') {
+            return ['remaining-amount-view'];
+        }
+
+        // Dynamic permission rules based on state/action
+        if ($action === 'save') {
+            return [$module . '-' . ($editing ? 'update' : 'create')];
+        }
+
+        if ($action === 'restore') {
+            $ability = in_array($module, static::RESTORABLE_MODULES, true) ? 'restore' : 'update';
+            return [$module . '-' . $ability];
+        }
+
+        if ($action === 'destroy') {
+            $ability = in_array($module, static::RESTORABLE_MODULES, true) ? 'force-delete' : 'delete';
+            return [$module . '-' . $ability];
+        }
+
+        if ($action === 'export') {
+            $hasDedicatedExcel = in_array($module, ['stock-on-hand', 'stock-movement'], true)
+                || in_array('excel', config('admin_permissions.extra_actions.' . $module, []));
+            return [$module . '-' . ($hasDedicatedExcel ? 'excel' : 'view')];
+        }
+
+        if ($action === 'detail') {
+            $hasDedicatedDetail = in_array('detail', config('admin_permissions.extra_actions.' . $module, []));
+            if ($hasDedicatedDetail) {
+                return [$module . '-detail'];
             }
         }
-        if (in_array($name, ['admin-about-us-index', 'admin-about-us-store'])) {
-            return [$name === 'admin-about-us-index' ? 'about-view' : 'about-update'];
-        }
-        if (in_array($name, ['admin-contact-contact', 'admin-contact-save'])) {
-            return [$name === 'admin-contact-contact' ? 'contact-view' : 'contact-update'];
-        }
-        if (in_array($name, ['admin-page-page', 'admin-page-save'])) {
-            $type = str_replace('_', '-', (string) ($request->route('type') ?? $request->input('type')));
-            return [$type . ($name === 'admin-page-save' ? '-update' : '-view')];
+
+        if (isset(static::BASE_ACTION_ABILITIES[$action])) {
+            return [$module . '-' . static::BASE_ACTION_ABILITIES[$action]];
         }
 
-        // Longest prefix first: customer-paid must not be treated as customer.
-        $modules = array_merge(array_keys(config('admin_permissions.modules', [])),
-            ['remaining-amount', 'stock-on-hand', 'stock-movement']);
-        usort($modules, fn ($a, $b) => strlen($b) <=> strlen($a));
-        foreach ($modules as $module) {
-            $prefix = 'admin-' . $module . '-';
-            if (str_starts_with($name ?? '', $prefix)) {
-                return static::forAction($module, substr($name, strlen($prefix)), (bool) $request->route('id'));
-            }
-        }
-
-        return [];
+        return [$module . '-' . $action];
     }
 
+    /**
+     * Inspect an incoming request and determine all acceptable permissions.
+     */
+    public static function forRequest(Request $request): array
+    {
+        $name = $request->route()?->getName();
+        if (!$name) {
+            return [];
+        }
+
+        // 1. Static single-route mappings
+        if (isset(static::STATIC_ROUTE_PERMISSIONS[$name])) {
+            return static::STATIC_ROUTE_PERMISSIONS[$name];
+        }
+
+        // 2. Order bulk print prefix
+        if (str_starts_with($name, 'admin-order-bulk-print-')) {
+            return ['order-bulk-print-view'];
+        }
+
+        // 3. Sub-module prefix action mappings (file-manager, backup)
+        if ($permissions = static::resolveSubmodulePrefixRoute($name)) {
+            return $permissions;
+        }
+
+        // 4. View / update toggled routes (service, about, contact, page)
+        if ($permissions = static::resolveToggledRoute($name, $request)) {
+            return $permissions;
+        }
+
+        // 5. Lookup select routes (admin-select-*)
+        if ($permissions = static::resolveLookupRoute($name)) {
+            return $permissions;
+        }
+
+        // 6. Report routes (views and exports)
+        if ($permissions = static::resolveReportRoute($name)) {
+            return $permissions;
+        }
+
+        // 7. General CRUD module routes (longest-prefix matched)
+        return static::resolveCrudRoute($name, $request);
+    }
+
+    /**
+     * Check whether the authenticated user has permission for a specific module action.
+     */
     public static function allowsAction(string $module, string $action): bool
     {
         $permissions = static::forAction($module, $action);
         return $permissions && Gate::any($permissions);
     }
 
+    /**
+     * Filter navigation menu items based on the user's permissions.
+     */
     public static function visibleMenu(array $items): array
     {
         return array_values(array_filter(array_map(function ($item) {
@@ -202,16 +332,169 @@ class AdminPermissions
         }, $items)));
     }
 
+    /**
+     * Generate a cryptographic fingerprint of the current user's role and permission scope.
+     */
     public static function workspaceScope(): string
     {
         $user = auth()->user();
+        if (!$user) {
+            return '';
+        }
 
         // Invalidate saved tabs after a user switch or permission change. Include
         // a version so tabs saved under the former permissive rules are discarded.
         return hash('sha256', json_encode([
-            1, $user->getAuthIdentifier(), $user->role,
+            1,
+            $user->getAuthIdentifier(),
+            $user->role,
             $user->role === 'super_admin' ? ['*']
                 : $user->getAllPermissions()->pluck('name')->sort()->values()->all(),
         ]));
+    }
+
+    /**
+     * Resolve submodule actions (e.g., file-manager, backup).
+     */
+    protected static function resolveSubmodulePrefixRoute(string $name): ?array
+    {
+        foreach (static::SUBMODULE_PREFIX_ACTIONS as $prefix => $config) {
+            if (str_starts_with($name, $prefix)) {
+                $action = substr($name, strlen($prefix));
+                $ability = $config['actions'][$action] ?? 'view';
+                return [$config['module'] . '-' . $ability];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve routes that toggle between view and update based on request method or route name.
+     */
+    protected static function resolveToggledRoute(string $name, Request $request): ?array
+    {
+        // Service routes
+        if (in_array($name, static::VIEW_UPDATE_TOGGLE_ROUTES['service'], true)) {
+            return [$request->isMethod('GET') ? 'service-view' : 'service-update'];
+        }
+
+        // About Us routes
+        $about = static::VIEW_UPDATE_TOGGLE_ROUTES['about'];
+        if ($name === $about['view'] || $name === $about['update']) {
+            return [$name === $about['view'] ? 'about-view' : 'about-update'];
+        }
+
+        // Contact routes
+        $contact = static::VIEW_UPDATE_TOGGLE_ROUTES['contact'];
+        if ($name === $contact['view'] || $name === $contact['update']) {
+            return [$name === $contact['view'] ? 'contact-view' : 'contact-update'];
+        }
+
+        // Custom CMS page routes
+        if (in_array($name, ['admin-page-page', 'admin-page-save'], true)) {
+            $type = str_replace('_', '-', (string) ($request->route('type') ?? $request->input('type')));
+            return [$type . ($name === 'admin-page-save' ? '-update' : '-view')];
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve select/lookup routes (admin-select-*).
+     */
+    protected static function resolveLookupRoute(string $name): ?array
+    {
+        if (!str_starts_with($name, 'admin-select-')) {
+            return null;
+        }
+
+        $lookup = substr($name, strlen('admin-select-'));
+        $modules = config('admin_permissions.lookups.' . $lookup, []);
+
+        // Safety fallback if config cache on server is stale
+        if (empty($modules) && $lookup === 'available-shop-products') {
+            $modules = ['shop', 'product'];
+        }
+
+        $perms = collect($modules)->flatMap(fn ($module) => [
+            $module . '-view',
+            $module . '-create',
+            $module . '-update',
+        ]);
+
+        if ($lookup === 'available-shop-products' || in_array('shop', (array) $modules, true)) {
+            $perms->push('shop-product');
+        }
+
+        return $perms->unique()->values()->all();
+    }
+
+    /**
+     * Resolve report view and export routes.
+     */
+    protected static function resolveReportRoute(string $name): ?array
+    {
+        if (isset(static::EXPORT_ROUTE_PERMISSIONS[$name])) {
+            return [static::EXPORT_ROUTE_PERMISSIONS[$name]];
+        }
+
+        foreach (static::REPORT_MODULE_VIEWS as $prefix => $module) {
+            foreach (static::REPORT_VIEW_ACTIONS as $action) {
+                if ($name === 'admin-' . $prefix . '-' . $action) {
+                    return [$module . '-view'];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Match standard CRUD module routes using longest-prefix first.
+     */
+    protected static function resolveCrudRoute(string $name, Request $request): array
+    {
+        $modules = static::getSortedModules();
+
+        foreach ($modules as $module) {
+            $prefix = 'admin-' . $module . '-';
+            if (str_starts_with($name, $prefix)) {
+                $action = substr($name, strlen($prefix));
+                $isEditing = (bool) $request->route('id');
+                return static::forAction($module, $action, $isEditing);
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Get the cached list of module names sorted longest-first.
+     *
+     * @return array<string>
+     */
+    public static function getSortedModules(): array
+    {
+        if (static::$sortedModules === null) {
+            $configured = array_keys(config('admin_permissions.modules', []));
+            $dbModules = [];
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasTable('module_permissions')) {
+                    $dbModules = \App\Models\ModulePermission::pluck('name')
+                        ->map(fn ($name) => \Illuminate\Support\Str::slug($name))
+                        ->filter()
+                        ->all();
+                }
+            } catch (\Throwable) {
+                // Fallback to static config if DB is temporarily unreachable
+            }
+
+            $all = array_unique(array_merge($configured, static::STANDALONE_MODULES, $dbModules));
+            usort($all, fn ($a, $b) => strlen($b) <=> strlen($a));
+            static::$sortedModules = $all;
+        }
+
+        return static::$sortedModules;
     }
 }

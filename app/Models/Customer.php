@@ -11,13 +11,52 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'customers';
-    protected $fillable = ['code', 'name', 'ordering', 'phone', 'address', 'profile', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
+    protected $fillable = ['code', 'name', 'ordering', 'phone', 'address', 'latitude', 'longitude', 'profile', 'image_1', 'image_2', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
 
-    protected $appends = ['image_url'];
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
+    ];
+
+    protected $appends = ['image_url', 'image_1_url', 'image_2_url', 'google_maps_url'];
+    public function getGoogleMapsUrlAttribute(): ?string
+    {
+        $lat = $this->attributes['latitude'] ?? null;
+        $lng = $this->attributes['longitude'] ?? null;
+        if ($lat !== null && $lng !== null && $lat !== '' && $lng !== '') {
+            return "https://www.google.com/maps?q={$lat},{$lng}";
+        }
+        return null;
+    }
+
+    public function hasLocation(): bool
+    {
+        $lat = $this->attributes['latitude'] ?? null;
+        $lng = $this->attributes['longitude'] ?? null;
+        return $lat !== null && $lng !== null && $lat !== '' && $lng !== '';
+    }
     public function getImageUrlAttribute()
     {
         if ($this->profile != null) {
             $path = str_starts_with($this->profile, '/') ? $this->profile : '/' . $this->profile;
+            return url('file_manager' . $path);
+        }
+        return null;
+    }
+
+    public function getImage1UrlAttribute()
+    {
+        if ($this->image_1 != null) {
+            $path = str_starts_with($this->image_1, '/') ? $this->image_1 : '/' . $this->image_1;
+            return url('file_manager' . $path);
+        }
+        return null;
+    }
+
+    public function getImage2UrlAttribute()
+    {
+        if ($this->image_2 != null) {
+            $path = str_starts_with($this->image_2, '/') ? $this->image_2 : '/' . $this->image_2;
             return url('file_manager' . $path);
         }
         return null;

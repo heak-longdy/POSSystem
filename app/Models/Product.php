@@ -68,7 +68,7 @@ class Product extends Model
     }
     public function getCostUsdForAttribute()
     {
-        return $this->cost ? number_format($this->cost ?? 0, 2) . ' $' : '';
+        return is_numeric($this->cost) ? number_format((float) $this->cost, 2) . ' $' : '';
     }
     public function setCostAttribute($value=null)
     {
@@ -80,7 +80,7 @@ class Product extends Model
     }
     public function getPriceUsdForAttribute()
     {
-        return $this->price ? number_format($this->price ?? 0, 2) . ' $' : '';
+        return is_numeric($this->price) ? number_format((float) $this->price, 2) . ' $' : '';
     }
     public function setPriceAttribute($value=null)
     {

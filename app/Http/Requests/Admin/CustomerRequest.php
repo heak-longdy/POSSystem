@@ -39,6 +39,18 @@ class CustomerRequest extends FormRequest
                 'phone' => trim((string) $this->input('phone')),
             ]);
         }
+        if ($this->has('latitude')) {
+            $lat = trim((string) $this->input('latitude'));
+            $this->merge([
+                'latitude' => $lat === '' ? null : (is_numeric($lat) ? (float) $lat : $lat),
+            ]);
+        }
+        if ($this->has('longitude')) {
+            $lng = trim((string) $this->input('longitude'));
+            $this->merge([
+                'longitude' => $lng === '' ? null : (is_numeric($lng) ? (float) $lng : $lng),
+            ]);
+        }
     }
 
     /**
@@ -60,7 +72,11 @@ class CustomerRequest extends FormRequest
             'name'       => 'required|string|max:255',
             'phone'      => 'required|string|max:50',
             'address'    => 'nullable|string|max:500',
+            'latitude'   => 'nullable|numeric|between:-90,90',
+            'longitude'  => 'nullable|numeric|between:-180,180',
             'profile'    => 'nullable|string|max:255',
+            'image_1'    => 'nullable|string|max:255',
+            'image_2'    => 'nullable|string|max:255',
             'status'     => 'required|in:1,2',
             'payment_restriction' => 'nullable|in:N,Y',
         ];
@@ -68,15 +84,19 @@ class CustomerRequest extends FormRequest
     public function messages()
     {
         return [
-            'code.max'             => __('customer.validation.code_max'),
-            'code.unique'          => __('customer.validation.code_unique'),
-            'name.required'        => __('customer.validation.name_required'),
-            'name.max'             => __('customer.validation.name_max'),
-            'phone.required'       => __('customer.validation.phone_required'),
-            'phone.max'            => __('customer.validation.phone_max'),
-            'status.required'      => __('customer.validation.status_required'),
-            'status.in'            => __('customer.validation.status_invalid'),
-            'payment_restriction.in' => __('customer.validation.payment_restriction_invalid'),
+            'code.max'                 => __('customer.validation.code_max'),
+            'code.unique'              => __('customer.validation.code_unique'),
+            'name.required'            => __('customer.validation.name_required'),
+            'name.max'                 => __('customer.validation.name_max'),
+            'phone.required'           => __('customer.validation.phone_required'),
+            'phone.max'                => __('customer.validation.phone_max'),
+            'latitude.numeric'         => __('customer.validation.latitude_numeric'),
+            'latitude.between'         => __('customer.validation.latitude_between'),
+            'longitude.numeric'        => __('customer.validation.longitude_numeric'),
+            'longitude.between'        => __('customer.validation.longitude_between'),
+            'status.required'          => __('customer.validation.status_required'),
+            'status.in'                => __('customer.validation.status_invalid'),
+            'payment_restriction.in'   => __('customer.validation.payment_restriction_invalid'),
         ];
     }
 }

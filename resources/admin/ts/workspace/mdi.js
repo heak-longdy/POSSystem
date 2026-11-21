@@ -41,6 +41,30 @@ window.addEventListener = function (type, listener, options) {
     return originalWindowAddEventListener(type, listener, options);
 };
 
+window.copyPosErrorDetails = function(button) {
+    if (!button) return;
+    const raw = button.getAttribute('data-error-json');
+    let textToCopy = raw;
+    try {
+        const obj = JSON.parse(raw);
+        textToCopy = JSON.stringify(obj, null, 2);
+    } catch (e) {}
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const original = button.innerText;
+            button.innerText = (window.workspaceTranslations && window.workspaceTranslations.copied) || 'Copied!';
+            button.style.background = '#22c55e';
+            button.style.color = '#fff';
+            setTimeout(() => {
+                button.innerText = original;
+                button.style.background = '';
+                button.style.color = '';
+            }, 2000);
+        });
+    }
+};
+
 const workspaceScriptLoads = new Map();
 const workspaceTabLoads = new Map();
 const workspaceTitleLoads = new Map();
@@ -910,6 +934,47 @@ window.workspaceMdi = function () {
         },
 
         /**
+         * Retry loading a tab that encountered an error with smooth UI feedback
+         */
+        retryTab(key, triggerBtn = null) {
+            const targetKey = key || this.activeTabKey;
+            const tab = this.tabs.find(t => t.key === targetKey);
+            if (!tab) {
+                window.location.reload();
+                return;
+            }
+
+            const targetPane = document.getElementById('tab-pane-' + targetKey);
+            const retryBtn = triggerBtn || (targetPane ? targetPane.querySelector('.mdi-retry-btn') : null);
+
+            // Guard: prevent multiple clicks while already loading
+            if (retryBtn && (retryBtn.classList.contains('is-loading') || retryBtn.disabled)) {
+                return;
+            }
+
+            // Apply loading state smoothly
+            if (retryBtn) {
+                retryBtn.disabled = true;
+                retryBtn.classList.remove('has-error', 'is-success');
+                retryBtn.classList.add('is-loading');
+                const textSpan = retryBtn.querySelector('.mdi-retry-text');
+                if (textSpan) {
+                    textSpan.textContent = window.workspaceTranslations?.retrying || 'Retrying...';
+                }
+            }
+
+            if (targetPane) {
+                targetPane.classList.add('is-retrying');
+            }
+
+            // Clear cached load promise to force network request
+            workspaceTabLoads.delete(tab.key);
+            this.setTabLoading(tab.key, true);
+
+            return this.fetchAndMountTab(tab);
+        },
+
+        /**
          * Dynamically fetch page HTML and mount into #workspace-viewport
          */
         fetchAndMountTab(tab) {
@@ -927,19 +992,31 @@ window.workspaceMdi = function () {
                     'X-MDI-Partial': '1'
                 }
             })
-            .then(res => {
+            .then(async res => {
                 if (res.status === 403) {
                     tab.isPinned = false;
                     this.closeTab(tab);
                     return null;
                 }
-                if (!res.ok) throw new Error('HTTP error ' + res.status);
                 // Check if redirected to login/auth
                 if (res.url && (res.url.includes('/login') || res.url.includes('/auth'))) {
                     window.location.href = res.url;
                     return null;
                 }
-                return res.text();
+
+                const responseText = await res.text();
+
+                if (!res.ok) {
+                    const errorId = res.headers.get('X-POS-Error-ID') || '';
+                    const errorMsg = res.headers.get('X-POS-Error-Message') || ('HTTP error ' + res.status);
+                    const error = new Error(errorMsg);
+                    error.status = res.status;
+                    error.errorId = errorId;
+                    error.responseHtml = responseText;
+                    throw error;
+                }
+
+                return responseText;
             })
             .then(async html => {
                 if (html === null || !isCurrent()) return;
@@ -976,6 +1053,22 @@ window.workspaceMdi = function () {
 
                 const viewport = document.getElementById('workspace-viewport');
                 if (!viewport) return;
+
+                // If previous pane was an error pane with retry button, briefly show success state
+                const currentErrorPane = document.getElementById('tab-pane-' + tab.key);
+                if (currentErrorPane && currentErrorPane.classList.contains('workspace-tab-error-pane')) {
+                    const retryBtn = currentErrorPane.querySelector('.mdi-retry-btn');
+                    if (retryBtn) {
+                        retryBtn.classList.remove('is-loading');
+                        retryBtn.classList.add('is-success');
+                        const textSpan = retryBtn.querySelector('.mdi-retry-text');
+                        if (textSpan) textSpan.textContent = window.workspaceTranslations?.success || 'Success!';
+                        const iconBox = retryBtn.querySelector('.mdi-retry-icon-box');
+                        if (iconBox) {
+                            iconBox.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+                        }
+                    }
+                }
 
                 const isActive = this.activeTabKey === tab.key;
 
@@ -1057,37 +1150,169 @@ window.workspaceMdi = function () {
             .catch(err => {
                 if (!isCurrent()) return;
                 this.setTabLoading(tab.key, false);
-                console.error('Error loading tab content:', err);
-                const viewport = document.getElementById('workspace-viewport');
-                if (viewport) {
-                    const isActive = this.activeTabKey === tab.key;
-                    if (isActive) {
-                        const allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
-                        allPanes.forEach(pane => {
-                            pane.classList.remove('active');
-                            pane.style.setProperty('display', 'none', 'important');
-                            setWorkspacePaneStyles(pane, false);
-                        });
+
+                // Structured Developer Console Logging
+                try {
+                    console.groupCollapsed(`%c❌ [POS Error] Failed to load tab "${tab.title}" (${err.status || 'Network Error'})`, 'color: #ef4444; font-weight: bold;');
+                    console.error('Target URL:', tab.url);
+                    console.error('HTTP Status:', err.status || 'N/A');
+                    if (err.errorId) console.error('Error Reference ID:', err.errorId);
+                    console.error('Error Details:', err.message || err);
+                    if (err.responseHtml) {
+                        console.log('Server Response HTML/Data:', err.responseHtml);
                     }
+                    console.groupEnd();
+                } catch (logEx) {
+                    console.error('Error loading tab content:', err);
+                }
+
+                const viewport = document.getElementById('workspace-viewport');
+                if (!viewport) return;
+
+                const isActive = this.activeTabKey === tab.key;
+                const existingPane = document.getElementById('tab-pane-' + tab.key);
+
+                // SMOOTH IN-PLACE UPDATE (Prevents flickering, white screen, or layout jumps!)
+                if (existingPane && existingPane.classList.contains('workspace-tab-error-pane')) {
+                    existingPane.classList.remove('is-retrying');
+
+                    // 1. Update Error Reference ID if changed
+                    if (err.errorId) {
+                        const codeEl = existingPane.querySelector('.error-reference-badge code, .workspace-error-card code');
+                        if (codeEl) codeEl.textContent = err.errorId;
+                    }
+
+                    // 2. Animate the Retry button with error feedback
+                    const retryBtn = existingPane.querySelector('.mdi-retry-btn');
+                    if (retryBtn) {
+                        retryBtn.classList.remove('is-loading');
+                        retryBtn.classList.add('has-error');
+                        const textSpan = retryBtn.querySelector('.mdi-retry-text');
+                        if (textSpan) {
+                            textSpan.textContent = 'Failed';
+                        }
+                        const iconBox = retryBtn.querySelector('.mdi-retry-icon-box');
+                        if (iconBox) {
+                            iconBox.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+                        }
+
+                        // Gracefully reset back to normal "Retry" after 1.2s
+                        setTimeout(() => {
+                            if (retryBtn.isConnected) {
+                                retryBtn.disabled = false;
+                                retryBtn.classList.remove('has-error');
+                                if (textSpan) {
+                                    textSpan.textContent = window.workspaceTranslations?.retry || 'Retry';
+                                }
+                                if (iconBox) {
+                                    iconBox.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>`;
+                                }
+                            }
+                        }, 1200);
+                    }
+
+                    // 3. Update developer details if server returned fresh partial
+                    if (err.responseHtml && err.responseHtml.includes('pos-dev-debug-wrapper')) {
+                        try {
+                            const doc = new DOMParser().parseFromString(err.responseHtml, 'text/html');
+                            const newDebugWrapper = doc.querySelector('.pos-dev-debug-wrapper');
+                            const oldDebugWrapper = existingPane.querySelector('.pos-dev-debug-wrapper');
+                            if (newDebugWrapper && oldDebugWrapper) {
+                                oldDebugWrapper.replaceWith(newDebugWrapper);
+                                if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                                    try { window.Alpine.initTree(newDebugWrapper); } catch (e) {}
+                                }
+                            }
+                        } catch (e) {}
+                    }
+                    return;
+                }
+
+                if (isActive) {
+                    const allPanes = viewport.querySelectorAll('.workspace-tab-pane, [id^="tab-pane-"]');
+                    allPanes.forEach(pane => {
+                        pane.classList.remove('active');
+                        pane.style.setProperty('display', 'none', 'important');
+                        setWorkspacePaneStyles(pane, false);
+                    });
+                }
+
+                // Remove existing pane for this tab key
+                if (existingPane) {
+                    existingPane.remove();
+                }
+
+                // Check if server returned a structured error pane
+                let mounted = false;
+                if (err.responseHtml && (err.responseHtml.includes('workspace-error-card') || err.responseHtml.includes('workspace-tab-error-pane'))) {
+                    try {
+                        const doc = new DOMParser().parseFromString(err.responseHtml, 'text/html');
+                        const serverPane = doc.querySelector('.workspace-tab-error-pane, .workspace-tab-pane') || doc.body.firstElementChild;
+                        if (serverPane) {
+                            serverPane.id = 'tab-pane-' + tab.key;
+                            serverPane.setAttribute('data-tab-key', tab.key);
+                            serverPane.classList.toggle('active', isActive);
+                            serverPane.style.width = '100%';
+                            serverPane.style.flex = '1';
+                            serverPane.style.flexDirection = 'column';
+                            serverPane.style.setProperty('display', isActive ? 'flex' : 'none', 'important');
+                            viewport.appendChild(serverPane);
+
+                            if (window.Alpine && typeof window.Alpine.initTree === 'function') {
+                                try { window.Alpine.initTree(serverPane); } catch (e) {}
+                            }
+                            mounted = true;
+                        }
+                    } catch (parseEx) {}
+                }
+
+                // Fallback client-rendered error card if server didn't provide HTML
+                if (!mounted) {
                     const errorPane = document.createElement('div');
                     errorPane.id = 'tab-pane-' + tab.key;
-                    errorPane.className = 'workspace-tab-pane' + (isActive ? ' active' : '');
+                    errorPane.className = 'workspace-tab-pane workspace-tab-error-pane' + (isActive ? ' active' : '');
+                    errorPane.setAttribute('data-tab-key', tab.key);
                     errorPane.style.width = '100%';
                     errorPane.style.flex = '1';
                     errorPane.style.flexDirection = 'column';
-                    errorPane.style.setProperty('display', isActive ? 'flex' : 'none', 'important');
-                    errorPane.style.padding = '40px';
+                    errorPane.style.alignItems = 'center';
+                    errorPane.style.justifyContent = 'center';
+                    errorPane.style.padding = '40px 20px';
                     errorPane.style.textAlign = 'center';
+                    errorPane.style.background = '#fff';
+                    errorPane.style.minHeight = '450px';
+                    errorPane.style.setProperty('display', isActive ? 'flex' : 'none', 'important');
+
+                    const errorTitle = tab.title && tab.title !== 'Workspace' && tab.title !== 'Loading...'
+                        ? `Could not load ${tab.title}`
+                        : (window.workspaceTranslations?.loadErrorTitle || 'Could not load page');
+                    const errorDesc = window.workspaceTranslations?.loadErrorDesc || 'An error occurred while fetching the tab content. Please try again.';
+                    const retryText = window.workspaceTranslations?.retry || 'Retry';
+                    const closeText = window.workspaceTranslations?.closeTab || 'Close Tab';
+                    const errIdHtml = err.errorId ? `<div class="error-reference-badge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:#f1f5f9;border-radius:20px;font-size:12px;color:#475569;font-weight:500;margin-bottom:24px;border:1px solid #e2e8f0;"><span>${window.workspaceTranslations?.errorReference || 'Error Reference'}:</span><code style="color:#2563eb;font-weight:600;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">${err.errorId}</code></div>` : '';
+
                     errorPane.innerHTML = `
-                        <div style="font-size: 40px; margin-bottom: 12px;">⚠️</div>
-                        <h4 style="color: #1e293b;">Could not load ${tab.title}</h4>
-                        <p style="color: #64748b; font-size: 14px;">An error occurred while fetching the tab content.</p>
-                        <button type="button" class="btn btn-primary" onclick="window.MDI.fetchAndMountTab(window.MDI.tabs.find(t => t.key === '${tab.key}'))" style="margin-top: 15px; border-radius: 20px;">Retry</button>
+                        <div class="workspace-error-card" style="max-width: 650px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; align-items: center;">
+                            <div style="width: 72px; height: 72px; border-radius: 50%; background: #fef3c7; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <h3 style="color: #0f172a; font-size: 20px; font-weight: 600; margin: 0 0 8px 0; line-height: 1.4;">${errorTitle}</h3>
+                            <p style="color: #64748b; font-size: 14px; margin: 0 0 16px 0; max-width: 480px; line-height: 1.5;">${errorDesc}</p>
+                            ${errIdHtml}
+                            <div style="display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 24px;">
+                                <button type="button" class="btn btn-primary mdi-retry-btn" data-tab-key="${tab.key}" onclick="window.MDI.retryTab('${tab.key}', this)" aria-label="${retryText}">
+                                    <span class="mdi-retry-icon-box">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                    </span>
+                                    <span class="mdi-retry-text">${retryText}</span>
+                                </button>
+                                ${tab.key !== 'admin-dashboard' ? `
+                                <button type="button" class="btn btn-secondary" onclick="window.MDI.closeTab(window.MDI.tabs.find(t => t.key === '${tab.key}') || window.MDI.activeTabKey)" style="min-width: 100px; height: 38px; padding: 0 16px; font-size: 13px; font-weight: 500; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 0.2s; background: #f8fafc; border: 1px solid #cbd5e1; color: #475569;">
+                                    <span>${closeText}</span>
+                                </button>` : ''}
+                            </div>
+                        </div>
                     `;
-                    const existingSameErrorPane = document.getElementById('tab-pane-' + tab.key);
-                    if (existingSameErrorPane) {
-                        existingSameErrorPane.remove();
-                    }
                     viewport.appendChild(errorPane);
                 }
             })
@@ -1710,7 +1935,14 @@ window.workspaceMdi = function () {
                         }
                     }
                     this.setTabLoading(currentTabKey, false);
-                    console.error('Form submission error:', err);
+                    try {
+                        console.groupCollapsed('%c❌ [POS Form Error] Failed to submit form', 'color: #ef4444; font-weight: bold;');
+                        console.error('Action:', action);
+                        console.error('Error Details:', err);
+                        console.groupEnd();
+                    } catch (e) {
+                        console.error('Form submission error:', err);
+                    }
                     if (window.iziToast) {
                         const title = (window.workspaceTranslations && window.workspaceTranslations.error) || 'Error';
                         const msg = (window.workspaceTranslations && window.workspaceTranslations.submitError) || 'Could not submit form. Please try again.';

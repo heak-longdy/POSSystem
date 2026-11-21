@@ -66,6 +66,24 @@ class CustomerController extends Controller
             'rows'   => $customers,
         ]);
     }
+    public function detail(Request $req, $id = null)
+    {
+        $id = $id ?: $req->id;
+        if (!$id) {
+            return redirect()->route('admin-' . $this->routeName . '-list', 1);
+        }
+
+        $customer = Customer::withTrashed()->with(['createdBy'])->findOrFail($id);
+        if (!$customer->isOwnedBy(auth()->user())) {
+            abort(403, 'Unauthorized access to customer.');
+        }
+
+        return view($this->layout . 'detail', [
+            'customer'  => $customer,
+            'routeName' => $this->routeName,
+        ]);
+    }
+
     public function onCreate()
     {
         $data['id'] = "";
@@ -171,6 +189,9 @@ class CustomerController extends Controller
             __('global.table.name'),
             __('customer.form.phone.label'),
             __('customer.form.address.label'),
+            __('customer.form.location.latitude'),
+            __('customer.form.location.longitude'),
+            __('customer.form.location.map_link'),
             __('global.table.created_at'),
         );
 
@@ -186,6 +207,9 @@ class CustomerController extends Controller
                     $customer->name ?? '',
                     $customer->phone ?? '',
                     $customer->address ?? '',
+                    $customer->latitude ?? '',
+                    $customer->longitude ?? '',
+                    $customer->google_maps_url ?? '',
                     $customer->created_at ? $customer->created_at->format('Y-m-d H:i:s') : '',
                 ));
             }

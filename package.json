@@ -42,6 +42,7 @@
         "firebase": "^9.8.2",
         "gsap": "^3.10.4",
         "izitoast": "^1.4.0",
+        "leaflet": "^1.9.4",
         "moment": "^2.29.3",
         "s-event.js": "^1.0.5",
         "s-mask.js": "^1.0.2",

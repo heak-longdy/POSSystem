@@ -375,3 +375,7 @@ Replace `example.com`, `u12345678`, database credentials, and paths with your ac
     Close all existing Inventory Management workspace tabs, refresh the website with **Cmd + Shift + R**, and reopen Stock In, Stock Out, Stock Transfer, Stock On Hand, and Stock Movement. Test Export on each page with the current filters and open the downloaded spreadsheet. Already-open tabs can retain the missing-route value rendered before the cache was cleared.
 
     Perform this cache repair once after deploying route changes. Keep generated local caches out of future uploads and rebuild the route cache on Hostinger as described in [Laravel's route caching guidance](https://laravel.com/docs/9.x/routing#route-caching). Use SSH or File Manager for this repair; do not configure recurring cache-clear cron jobs or use public cache-clearing URLs.
+
+
+
+     php artisan optimize:clear

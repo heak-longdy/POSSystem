@@ -214,6 +214,16 @@ class ProductRequestValidationTest extends TestCase
         $this->assertStringContainsString('/admin/select/available-shop-products', $url);
     }
 
+    public function test_available_shop_products_permission_mapping_includes_shop_product(): void
+    {
+        $request = \Illuminate\Http\Request::create(route('admin-select-available-shop-products'), 'GET');
+        $route = \Illuminate\Support\Facades\Route::getRoutes()->match($request);
+        $request->setRouteResolver(fn () => $route);
+
+        $permissions = \App\Support\AdminPermissions::forRequest($request);
+        $this->assertContains('shop-product', $permissions);
+    }
+
     public function test_select_controller_has_available_shop_products_method(): void
     {
         $this->assertTrue(

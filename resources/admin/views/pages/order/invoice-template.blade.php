@@ -3,18 +3,18 @@
     $isKm = $printLocale === 'km';
     $order = $order ?? null;
 
-    $shopName = $order?->shop?->name ?: '---';
+    $shopName = $order?->shop?->name ?: 'N/A';
     $shopSub = $order?->shop?->nick_name ?: '';
-    $shopPhone = $order?->shop?->phone ?: '';
-    $shopAddress = $order?->shop?->address ?: '---';
+    $shopPhone = $order?->shop?->phone ?: 'N/A';
+    $shopAddress = $order?->shop?->address ?: 'N/A';
 
     $cName = $customerName ?? ($order?->customer?->name ?: ($order?->customer?->phone ?: __('order.walk_in_customer', [], $printLocale)));
-    $cPhone = $customerPhone ?? ($order?->customer?->phone ?: '---');
-    $cAddress = $customerAddress ?? ($order?->customer?->address ?: '---');
+    $cPhone = $customerPhone ?? ($order?->customer?->phone ?: 'N/A');
+    $cAddress = $customerAddress ?? ($order?->customer?->address ?: 'N/A');
 
-    $invoiceNo = $order?->invoice_number ?: ($order?->id ? sprintf('%05d', $order->id) : '---');
+    $invoiceNo = $order?->invoice_number ?: ($order?->id ? sprintf('%05d', $order->id) : 'N/A');
     $orderDate = $order?->order_date ? \Carbon\Carbon::parse($order->order_date) : now();
-    $cashierName = $order?->createdBy?->name ?: ($order?->payments?->first()?->createdBy?->name ?: ($order?->barber?->name ?: '---'));
+    $cashierName = $order?->createdBy?->name ?: ($order?->payments?->first()?->createdBy?->name ?: ($order?->barber?->name ?: 'N/A'));
 
     $paymentStatus = $order?->payment_status ?: 'Pending';
     $buyerStatusNote = match ($paymentStatus) {
@@ -63,9 +63,13 @@
                 @if ($shopSub)
                     <div class="inv-shop-subtitle-en">{{ $shopSub }}</div>
                 @endif
-                @if ($shopPhone)
+                @if ($shopPhone && $shopPhone !== 'N/A')
                     <div class="inv-shop-phone">
                         <span class="phone-label">{{ __('order.invoice.tel', [], $printLocale) }}</span> {{ $shopPhone }}
+                    </div>
+                @else
+                    <div class="inv-shop-phone">
+                        <span class="phone-label">{{ __('order.invoice.tel', [], $printLocale) }}</span> N/A
                     </div>
                 @endif
             </div>
@@ -90,14 +94,16 @@
         <div class="inv-meta-left">
             <div class="inv-meta-item">
                 <span class="meta-label">{{ __('order.invoice.customer', [], $printLocale) }}</span>
-                <strong class="meta-value">{{ $cName }}</strong>
-                @if ($cPhone && $cPhone !== '---')
+                <strong class="meta-value">{{ $cName ?: 'N/A' }}</strong>
+                @if ($cPhone && $cPhone !== '---' && $cPhone !== 'N/A')
                     <span class="meta-phone">({{ $cPhone }})</span>
+                @else
+                    <span class="meta-phone">(N/A)</span>
                 @endif
             </div>
             <div class="inv-meta-item meta-address-line">
                 <span class="meta-label">{{ __('order.invoice.address', [], $printLocale) }}</span>
-                <span class="meta-value">{{ $cAddress }}</span>
+                <span class="meta-value">{{ $cAddress ?: 'N/A' }}</span>
             </div>
         </div>
 
@@ -138,13 +144,14 @@
             @forelse ($details as $index => $detail)
                 @php
                     $isService = $detail->type === 'service';
-                    $rawItemName = $isService ? ($detail->service?->name ?? '---') : ($detail->product?->name ?? '---');
+                    $rawItemName = $isService ? ($detail->service?->name ?? 'N/A') : ($detail->product?->name ?? 'N/A');
                     if (is_string($rawItemName) && str_starts_with(trim($rawItemName), '{')) {
                         $decoded = json_decode($rawItemName, true);
                         $itemName = $decoded[$printLocale] ?? ($decoded['km'] ?? ($decoded['en'] ?? $rawItemName));
                     } else {
                         $itemName = $rawItemName;
                     }
+                    $itemName = $itemName ?: 'N/A';
                     $isBonus = (bool) ($detail->is_bonus ?? false);
                     $qty = \App\Models\OrderDetail::formatQuantity($detail->qty);
                     $unitPrice = $isBonus ? 0.00 : (float) ($detail->unit_price ?? ($detail->price ?? 0));
