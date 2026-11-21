@@ -2,67 +2,76 @@
 
 @section('layout')
     <style>
-        .select2-filter-wrap {
-            min-width: 200px !important;
-            max-width: 240px !important;
-            width: 220px !important;
-            margin-left: 10px !important;
-            display: flex !important;
-            align-items: center !important;
-            position: relative !important;
+        /* Unified 13px font-size across page index listing */
+        .stock-in-listing-wrapper,
+        .stock-in-listing-wrapper .content-body,
+        .stock-in-listing-wrapper .table,
+        .stock-in-listing-wrapper .table-wrapper {
+            font-size: 13px !important;
         }
 
-        .filter-select {
-            height: 40px;
-            border: 1px solid #cbd5e1;
-            border-radius: 20px;
-            padding: 0 14px;
-            font-size: 12.5px;
-            font-weight: 500;
-            color: #334155;
-            background: #ffffff;
-            outline: none;
-            cursor: pointer;
+        /* Tabs font size */
+        .stock-in-listing-wrapper .header-tab .tabs a,
+        .stock-in-listing-wrapper .header-tab .tabs a span {
+            font-size: 13px !important;
         }
 
-        .filter-date-input {
-            position: relative;
-            display: flex;
-            align-items: center;
-            margin-left: 10px;
+        /* Header action buttons */
+        .stock-in-listing-wrapper .header-action-button button,
+        .stock-in-listing-wrapper .header-action-button button span,
+        .stock-in-listing-wrapper .header-action-button a,
+        .stock-in-listing-wrapper .header-action-button a span {
+            font-size: 13px !important;
         }
 
-        .filter-date-input input {
-            height: 40px;
-            border: 1px solid #cbd5e1;
-            border-radius: 20px;
-            padding: 0 32px 0 14px;
-            font-size: 12.5px;
-            font-weight: 500;
-            color: #334155;
-            background: #ffffff;
-            outline: none;
-            width: 100%;
+        /* Table header row & text */
+        .stock-in-listing-wrapper .table-header .row,
+        .stock-in-listing-wrapper .table-header .row span {
+            font-size: 13px !important;
         }
 
-        .filter-date-input i {
-            position: absolute;
-            right: 12px;
-            font-size: 16px;
+        /* Table body row & text */
+        .stock-in-listing-wrapper .table-body .column,
+        .stock-in-listing-wrapper .table-body .column .row,
+        .stock-in-listing-wrapper .table-body .column .row span,
+        .stock-in-listing-wrapper .table-body .column .row strong,
+        .stock-in-listing-wrapper .table-body .column .row a,
+        .stock-in-listing-wrapper .table-body .column .row div {
+            font-size: 13px !important;
+        }
+
+        /* PO number link */
+        .stock-in-listing-wrapper .po-number-link,
+        .stock-in-listing-wrapper .po-number-link strong {
+            font-size: 13px !important;
+            color: #2563eb;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        .stock-in-listing-wrapper .po-number-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* Table subtext (Reference No) */
+        .stock-in-listing-wrapper .table-subtext {
+            font-size: 13px !important;
             color: #94a3b8;
-            pointer-events: none;
+            margin-top: 2px;
         }
 
         /* Status Badges */
-        .status-badge {
+        .stock-in-listing-wrapper .status-badge {
             display: inline-flex;
             align-items: center;
-            padding: 4px 10px;
+            justify-content: center;
+            padding: 4px 5px !important;
             border-radius: 9999px;
-            font-size: 11.5px;
+            font-size: 13px !important;
             font-weight: 600;
-            line-height: 1;
+            line-height: 1.2;
             white-space: nowrap;
+            margin: 0 auto;
         }
 
         .badge-draft { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
@@ -74,22 +83,6 @@
         .badge-unpaid { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
         .badge-paid { background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
         .badge-default { background-color: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
-
-        .po-number-link {
-            color: #2563eb;
-            text-decoration: none;
-            transition: color 0.15s ease;
-        }
-        .po-number-link:hover {
-            color: #1d4ed8;
-            text-decoration: underline;
-        }
-
-        .table-subtext {
-            font-size: 11px;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
 
         .action-buttons-wrap {
             display: flex;
@@ -129,57 +122,398 @@
             border-color: #a7f3d0;
         }
 
+        /* Action dropdown menu */
+        .stock-in-listing-wrapper .dropdown-menu .dropdown-item,
+        .stock-in-listing-wrapper .dropdown-menu .dropdown-item span {
+            font-size: 13px !important;
+        }
+
+        /* Pagination font size */
+        .stock-in-listing-wrapper .paginationLayout2,
+        .stock-in-listing-wrapper .paginationLayout2 span,
+        .stock-in-listing-wrapper .paginationLayout2 a,
+        .stock-in-listing-wrapper .paginationLayout2 label,
+        .stock-in-listing-wrapper .paginationLayout2 select,
+        .stock-in-listing-wrapper .pagination,
+        .stock-in-listing-wrapper .pagination li,
+        .stock-in-listing-wrapper .pagination li a,
+        .stock-in-listing-wrapper .pagination li span {
+            font-size: 13px !important;
+        }
+
+        /* Header & Toolbar Layout */
+        .stock-in-listing-wrapper .header .header-action-button .filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+        }
+        .stock-in-listing-wrapper .header {
+            z-index: 100 !important;
+            overflow: visible !important;
+        }
+        .stock-in-listing-wrapper .header-tab {
+            min-width: 0;
+            max-width: 100%;
+        }
+        .stock-in-listing-wrapper .header-tab > *,
+        .stock-in-listing-wrapper .header-action-button > * {
+            flex-shrink: 0;
+        }
+        .stock-in-listing-wrapper .header-action-button,
+        .stock-in-listing-wrapper .header-action-button .filter {
+            overflow: visible !important;
+        }
+
+        /* Advanced Filter Button */
+        .stock-in-listing-wrapper .advanced-filter-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            z-index: 50;
+        }
+        .stock-in-listing-wrapper .btn-advanced-filter {
+            height: 38px;
+            border-radius: 20px;
+            border: 1px solid rgba(152, 152, 152, 0.35);
+            background: #ffffff;
+            color: #475569;
+            font-size: 13px !important;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 12px 0 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .stock-in-listing-wrapper .btn-advanced-filter span {
+            font-size: 13px !important;
+        }
+        .stock-in-listing-wrapper .btn-advanced-filter:hover {
+            background: #f8fafc;
+            border-color: #3b82f6;
+            color: #2563eb;
+        }
+        .stock-in-listing-wrapper .btn-advanced-filter.active,
+        .stock-in-listing-wrapper .btn-advanced-filter.open {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #2563eb;
+        }
+        .stock-in-listing-wrapper .btn-advanced-filter .advanced-filter-badge {
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 1px 6px;
+            line-height: 1.2;
+        }
+
+        /* Advanced Filter Popover */
+        .stock-in-listing-wrapper .advanced-filter-popover {
+            position: fixed;
+            width: 370px;
+            max-width: calc(100vw - 16px);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            z-index: 1050;
+            padding: 16px;
+            box-sizing: border-box;
+            text-align: left;
+            font-size: 13px !important;
+        }
+        .stock-in-listing-wrapper .filter-popover-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .stock-in-listing-wrapper .filter-popover-title,
+        .stock-in-listing-wrapper .filter-popover-title span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px !important;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .stock-in-listing-wrapper .filter-popover-title i {
+            font-size: 16px;
+            color: #2563eb;
+        }
+        .stock-in-listing-wrapper .filter-popover-count {
+            font-size: 11px;
+            font-weight: 600;
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+        .stock-in-listing-wrapper .filter-popover-close {
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.15s ease;
+            min-width: auto !important;
+            width: 37px !important;
+            height: 35px !important;
+        }
+        .stock-in-listing-wrapper .filter-popover-close i.bx {
+            margin-right: 0 !important;
+        }
+        .stock-in-listing-wrapper .filter-popover-close:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .stock-in-listing-wrapper .filter-field-group {
+            margin-bottom: 14px;
+        }
+        .stock-in-listing-wrapper .filter-field-group label {
+            display: block;
+            font-size: 13px !important;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .stock-in-listing-wrapper .filter-dates-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stock-in-listing-wrapper .filter-search-input {
+            height: 43px;
+            width: 100%;
+            border-radius: 7px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            padding: 0 12px;
+            box-sizing: border-box;
+            font-size: 13px !important;
+            font-weight: 500;
+            color: #0f172a;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .stock-in-listing-wrapper .filter-search-input:focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+        }
+        .stock-in-listing-wrapper .filter-search-input::placeholder {
+            color: #8892a0 !important;
+            font-size: 13px !important;
+        }
+
+        /* Filter Popover Date Input */
+        .stock-in-listing-wrapper .filter-date-input {
+            position: relative !important;
+            cursor: pointer;
+            width: 100%;
+        }
+        .stock-in-listing-wrapper .filter-date-input input.filter-input {
+            width: 100% !important;
+            height: 43px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 7px !important;
+            padding: 0 34px 0 12px !important;
+            font-size: 13px !important;
+            font-weight: 500;
+            color: #0f172a !important;
+            background: #ffffff !important;
+            box-sizing: border-box !important;
+            outline: none !important;
+            cursor: pointer;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .stock-in-listing-wrapper .filter-date-input input.filter-input:focus {
+            border-color: #2563eb !important;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+        }
+        .stock-in-listing-wrapper .filter-date-input input.filter-input::placeholder {
+            font-size: 13px !important;
+        }
+        .stock-in-listing-wrapper .filter-date-input i.bx-calendar {
+            position: absolute !important;
+            right: 12px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-size: 18px !important;
+            color: #64748b !important;
+            pointer-events: none !important;
+            line-height: 1 !important;
+        }
+
+        /* Filter Popover Footer */
+        .stock-in-listing-wrapper .filter-popover-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .stock-in-listing-wrapper .btn-popover-reset {
+            height: 38px;
+            padding: 0 14px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 13px !important;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .stock-in-listing-wrapper .btn-popover-reset span {
+            font-size: 13px !important;
+        }
+        .stock-in-listing-wrapper .btn-popover-reset:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .stock-in-listing-wrapper .btn-popover-apply {
+            height: 38px;
+            padding: 0 16px;
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            border-radius: 7px;
+            font-size: 13px !important;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .stock-in-listing-wrapper .btn-popover-apply span {
+            font-size: 13px !important;
+        }
+        .stock-in-listing-wrapper .btn-popover-apply:hover {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        /* Select2 inside popover */
+        .stock-in-listing-wrapper .select2Group .select2-container .select2-selection--single,
+        .stock-in-listing-wrapper .select2Group .select2-container .select2-selection__rendered {
+            font-size: 13px !important;
+        }
+        .stock-in-listing-wrapper .select2-dropdown,
+        .stock-in-listing-wrapper .select2-results__option {
+            font-size: 13px !important;
+        }
+
+        /* Reset / Clear button */
+        .btn-clear-filter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 39px;
+            border-radius: 7px;
+            background: #fee2e2;
+            color: #ef4444;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            margin-left: 2px;
+            border: 1px solid #fca5a5;
+            align-self: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .btn-clear-filter:hover {
+            background: #fecaca;
+            color: #b91c1c;
+            transform: scale(1.05);
+        }
+
         /* Scoped UI Datepicker Popup Elevation */
-        .ui-datepicker.stock-in-datepicker-popup {
+        div#ui-datepicker-div,
+        #ui-datepicker-div.stock-in-datepicker-popup {
             z-index: 9999 !important;
         }
     </style>
 
     @include('admin::shared.header', ['header_name' => __('stock_in.title')])
-    <div class="content-wrapper" id="app" x-data="xStockInIndex">
+    <div class="content-wrapper stock-in-listing-wrapper" id="app" x-data="xStockInIndex">
+        @php
+            $stockInTabQuery = request()->except(['page']);
+            $stockInTabUrl = function ($tabStatus) use ($routeName, $stockInTabQuery) {
+                $url = route('admin-' . $routeName . '-list', $tabStatus);
+                return empty($stockInTabQuery) ? $url : $url . '?' . http_build_query($stockInTabQuery);
+            };
+        @endphp
         @component('admin::components.listingData', [
             'routeName'        => $routeName,
             'createName'       => __('stock_in.button.create'),
             'createPermission' => 'stock-in-create',
             'filterStatus'     => false,
             'filterView'       => 'admin::pages.inventoryManagement.stockIn.filter',
-            'filterData'       => ['shop' => $shop, 'supplier' => $supplier],
+            'filterData'       => [
+                'shop'      => $shop,
+                'supplier'  => $supplier,
+                'status'    => $status,
+                'routeName' => $routeName,
+            ],
+            'showSearch'       => true,
+            'showSearchButton' => false,
             'showTabs'         => true,
             'tabs'             => [
                 [
-                    'label'  => __('stock_in.tab.all') . ' (' . ($counts['all'] ?? 0) . ')',
+                    'label'  => __('stock_in.tab.all'),
                     'icon'   => 'bx bx-layer',
-                    'url'    => route('admin-' . $routeName . '-list', 'all'),
+                    'url'    => $stockInTabUrl('all'),
                     'active' => $status === 'all' || $status === '1',
                 ],
                 [
-                    'label'  => __('stock_in.tab.ordered') . ' (' . ($counts['ordered'] ?? 0) . ')',
+                    'label'  => __('stock_in.tab.ordered'),
                     'icon'   => 'bx bx-time-five',
-                    'url'    => route('admin-' . $routeName . '-list', 'ordered'),
+                    'url'    => $stockInTabUrl('ordered'),
                     'active' => $status === 'ordered',
                 ],
                 [
-                    'label'  => __('stock_in.tab.partial_received') . ' (' . ($counts['partial_received'] ?? 0) . ')',
+                    'label'  => __('stock_in.tab.partial_received'),
                     'icon'   => 'bx bx-pie-chart-alt-2',
-                    'url'    => route('admin-' . $routeName . '-list', 'partial_received'),
+                    'url'    => $stockInTabUrl('partial_received'),
                     'active' => $status === 'partial_received',
                 ],
                 [
-                    'label'  => __('stock_in.tab.received') . ' (' . ($counts['received'] ?? 0) . ')',
+                    'label'  => __('stock_in.tab.received'),
                     'icon'   => 'bx bx-check-circle',
-                    'url'    => route('admin-' . $routeName . '-list', 'received'),
+                    'url'    => $stockInTabUrl('received'),
                     'active' => $status === 'received',
                 ],
                 [
-                    'label'  => __('stock_in.tab.draft') . ' (' . ($counts['draft'] ?? 0) . ')',
+                    'label'  => __('stock_in.tab.draft'),
                     'icon'   => 'bx bx-file-blank',
-                    'url'    => route('admin-' . $routeName . '-list', 'draft'),
+                    'url'    => $stockInTabUrl('draft'),
                     'active' => $status === 'draft',
                 ],
                 [
-                    'label'  => __('stock_in.tab.trash') . ' (' . ($counts['trash'] ?? 0) . ')',
+                    'label'  => __('stock_in.tab.trash'),
                     'icon'   => 'bx bx-trash',
-                    'url'    => route('admin-' . $routeName . '-list', 'trash'),
+                    'url'    => $stockInTabUrl('trash'),
                     'active' => $status === 'trash',
                 ],
             ],
@@ -190,15 +524,14 @@
             'status'           => $status,
             'tbHeader'         => [
                 ['field' => 'index', 'title' => __('global.table.no'), 'class' => '', 'colVal' => 5],
-                ['field' => 'purchase_number_link', 'title' => __('stock_in.table.po_number'), 'class' => 'text left', 'colVal' => 12],
-                ['field' => 'supplier_title', 'title' => __('stock_in.table.supplier'), 'class' => 'text left', 'colVal' => 13],
-                ['field' => 'shop_title', 'title' => __('stock_in.table.shop'), 'class' => 'text left', 'colVal' => 12],
-                ['field' => 'created_date', 'title' => __('stock_in.table.date'), 'class' => 'text left', 'colVal' => 9],
-                ['field' => 'formatted_total_amount', 'title' => __('stock_in.table.total_amount'), 'class' => 'text right font-bold', 'colVal' => 9],
-                ['field' => 'formatted_paid_amount', 'title' => __('stock_in.table.paid_amount'), 'class' => 'text right font-semibold text-emerald-600', 'colVal' => 9],
-                ['field' => 'formatted_remaining_amount_styled', 'title' => __('stock_in.table.remaining_amount'), 'class' => 'text right', 'colVal' => 9],
-                ['field' => 'order_status_badge', 'title' => __('stock_in.table.order_status'), 'class' => 'text center', 'colVal' => 9],
-                ['field' => 'payment_status_badge', 'title' => __('stock_in.table.payment_status'), 'class' => 'text center', 'colVal' => 8],
+                ['field' => 'supplier_title', 'title' => __('stock_in.table.supplier'), 'class' => 'text left', 'colVal' => 17],
+                ['field' => 'shop_title', 'title' => __('stock_in.table.shop'), 'class' => 'text left', 'colVal' => 11],
+                ['field' => 'created_date', 'title' => __('stock_in.table.date'), 'class' => 'text left', 'colVal' => 10],
+                ['field' => 'formatted_total_amount', 'title' => __('stock_in.table.total_amount'), 'class' => 'text right font-bold', 'colVal' => 10],
+                ['field' => 'formatted_paid_amount', 'title' => __('stock_in.table.paid_amount'), 'class' => 'text right font-semibold text-emerald-600', 'colVal' => 10],
+                ['field' => 'formatted_remaining_amount_styled', 'title' => __('stock_in.table.remaining_amount'), 'class' => 'text right', 'colVal' => 10],
+                ['field' => 'order_status_badge', 'title' => __('stock_in.table.order_status'), 'class' => 'text center', 'colVal' => 11],
+                ['field' => 'payment_status_badge', 'title' => __('stock_in.table.payment_status'), 'class' => 'text center', 'colVal' => 11],
                 [
                     'field' => 'action',
                     'title' => '',
@@ -287,14 +620,19 @@
                     }).on('select2:open', function() {
                         if (typeof window.$select2FocusInputSearch === 'function') {
                             window.$select2FocusInputSearch();
+                        } else {
+                            const searchField = document.querySelector('.select2-search__field');
+                            if (searchField) searchField.focus();
                         }
                     }).on('change select2:select select2:clear select2:unselect', function() {
                         self.shopId = $(this).val();
-                        $(this).closest('form').submit();
                     });
 
                     const selectedShop = @json($shop);
                     if (selectedShop?.id) {
+                        if (typeof window.$select2Data === 'function') {
+                            window.$select2Data($select, selectedShop.id, selectedShop.name || selectedShop.phone);
+                        }
                         this.shopId = selectedShop.id;
                     }
                 },
@@ -335,14 +673,19 @@
                     }).on('select2:open', function() {
                         if (typeof window.$select2FocusInputSearch === 'function') {
                             window.$select2FocusInputSearch();
+                        } else {
+                            const searchField = document.querySelector('.select2-search__field');
+                            if (searchField) searchField.focus();
                         }
                     }).on('change select2:select select2:clear select2:unselect', function() {
                         self.supplierId = $(this).val();
-                        $(this).closest('form').submit();
                     });
 
                     const selectedSupplier = @json($supplier);
                     if (selectedSupplier?.id) {
+                        if (typeof window.$select2Data === 'function') {
+                            window.$select2Data($select, selectedSupplier.id, selectedSupplier.name);
+                        }
                         this.supplierId = selectedSupplier.id;
                     }
                 },
@@ -360,7 +703,7 @@
 
                     if (!$from.length || !$to.length || typeof $.fn.datepicker !== 'function') return;
 
-                    $from.datepicker({
+                    const options = {
                         dateFormat: 'yy-mm-dd',
                         changeMonth: true,
                         changeYear: true,
@@ -371,44 +714,68 @@
                                 $('#ui-datepicker-div').addClass('stock-in-datepicker-popup');
                             }, 0);
                         },
-                        onClose: function(selectedDate) {
+                        onClose: function() {
                             $('#ui-datepicker-div').removeClass('stock-in-datepicker-popup');
-                            if (selectedDate) {
-                                $to.datepicker('option', 'minDate', selectedDate);
-                            }
-                        },
-                        onSelect: function() {
-                            $(this).closest('form').submit();
                         }
+                    };
+
+                    if ($from.hasClass('hasDatepicker')) {
+                        $from.datepicker('destroy');
+                    }
+                    if ($to.hasClass('hasDatepicker')) {
+                        $to.datepicker('destroy');
+                    }
+
+                    $from.datepicker({
+                        ...options,
+                        onSelect: function(selected) {
+                            $to.datepicker('option', 'minDate', selected);
+                        }
+                    }).on('change', function() {
+                        $to.datepicker('option', 'minDate', $from.datepicker('getDate') || null);
                     });
 
                     $to.datepicker({
-                        dateFormat: 'yy-mm-dd',
-                        changeMonth: true,
-                        changeYear: true,
-                        gotoCurrent: true,
-                        yearRange: '-50:+10',
-                        beforeShow: function(input, inst) {
-                            setTimeout(() => {
-                                $('#ui-datepicker-div').addClass('stock-in-datepicker-popup');
-                            }, 0);
-                        },
-                        onClose: function(selectedDate) {
-                            $('#ui-datepicker-div').removeClass('stock-in-datepicker-popup');
-                            if (selectedDate) {
-                                $from.datepicker('option', 'maxDate', selectedDate);
-                            }
-                        },
-                        onSelect: function() {
-                            $(this).closest('form').submit();
+                        ...options,
+                        onSelect: function(selected) {
+                            $from.datepicker('option', 'maxDate', selected);
                         }
+                    }).on('change', function() {
+                        $from.datepicker('option', 'maxDate', $to.datepicker('getDate') || null);
                     });
 
                     if ($from.val()) {
-                        $to.datepicker('option', 'minDate', $from.val());
+                        $to.datepicker('option', 'minDate', $from.datepicker('getDate') || $from.val());
                     }
                     if ($to.val()) {
-                        $from.datepicker('option', 'maxDate', $to.val());
+                        $from.datepicker('option', 'maxDate', $to.datepicker('getDate') || $to.val());
+                    }
+                },
+
+                resetAdvancedFilters() {
+                    $(this.$root).find('input[name="search"]').val('');
+                    this.resetSupplierFilter();
+                    this.resetShopFilter();
+                    $(this.$root).find('select[name="payment_status"]').val('');
+                    const $from = $(this.$root).find('#filter_from_date');
+                    const $to = $(this.$root).find('#filter_to_date');
+                    $from.val('').trigger('change');
+                    $to.val('').trigger('change');
+                    if ($from.length && $to.length && typeof $.fn.datepicker === 'function') {
+                        $to.datepicker('option', 'minDate', null);
+                        $from.datepicker('option', 'maxDate', null);
+                    }
+                    const hasAppliedAdvanced = @json(
+                        request()->filled('search') ||
+                        request()->filled('supplier_id') ||
+                        request()->filled('shop_id') ||
+                        request()->filled('payment_status') ||
+                        request()->filled('from_date') ||
+                        request()->filled('to_date')
+                    );
+                    if (hasAppliedAdvanced) {
+                        const form = this.$el ? this.$el.closest('form.filter') : $(this.$root).find('form.filter')[0];
+                        if (form) form.submit();
                     }
                 },
 
@@ -627,5 +994,11 @@
         } else {
             document.addEventListener('alpine:init', registerStockInIndexAlpine);
         }
+
+        $(document).ready(function() {
+            $(document).on('click', '.filter-date-input', function() {
+                $(this).find('input').focus();
+            });
+        });
     </script>
 @stop

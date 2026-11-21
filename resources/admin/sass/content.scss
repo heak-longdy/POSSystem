@@ -571,6 +571,7 @@ li.completed {
                     background: #ffffff;
                     flex:1;
                     z-index: 5;
+                    font-size : 13px;
 
                     &.has-breadcrumb {
                         height: calc(100% - 155px);

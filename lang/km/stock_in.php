@@ -174,6 +174,7 @@ return [
         'payment_status'  => 'ស្ថានភាពទូទាត់ប្រាក់',
         'from_date'       => 'ចាប់ពីថ្ងៃ',
         'to_date'         => 'ដល់ថ្ងៃ',
+        'advanced_filter' => 'តម្រងកម្រិតខ្ពស់',
     ],
 
     'empty' => [

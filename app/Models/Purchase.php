@@ -75,8 +75,9 @@ class Purchase extends Model
                 $model->created_by = auth()->id();
             }
 
-            if (empty($model->purchase_number)) {
-                $model->purchase_number = static::generatePurchaseNumber($model->order_date ?? now());
+            // Do not auto-generate purchase_number; keep it empty
+            if (!isset($model->purchase_number)) {
+                $model->purchase_number = null;
             }
 
             if (empty($model->order_status)) {
@@ -198,9 +199,10 @@ class Purchase extends Model
     public function getPurchaseNumberLinkAttribute(): string
     {
         $url = route('admin-stock-in-view', $this->id);
-        $html = '<a href="' . $url . '" class="po-number-link"><strong>' . e($this->purchase_number) . '</strong></a>';
-        if ($this->reference_no) {
-            $html .= '<div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">Ref: ' . e($this->reference_no) . '</div>';
+        $display = $this->purchase_number ?: ($this->reference_no ?: '#' . $this->id);
+        $html = '<a href="' . $url . '" class="po-number-link"><strong>' . e($display) . '</strong></a>';
+        if ($this->reference_no && $this->purchase_number) {
+            $html .= '<div class="table-subtext" style="font-size: 13px; color: #94a3b8; margin-top: 2px;">Ref: ' . e($this->reference_no) . '</div>';
         }
         return $html;
     }

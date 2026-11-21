@@ -106,7 +106,7 @@ class PurchaseService
             $orderDate = !empty($data['order_date']) ? Carbon::parse($data['order_date'])->format('Y-m-d') : date('Y-m-d');
             $expectedDate = !empty($data['expected_delivery_date']) ? Carbon::parse($data['expected_delivery_date'])->format('Y-m-d') : null;
 
-            $purchaseNumber = !empty($data['purchase_number']) ? $data['purchase_number'] : Purchase::generatePurchaseNumber($orderDate);
+            $purchaseNumber = !empty($data['purchase_number']) ? $data['purchase_number'] : null;
 
             $purchase = new Purchase();
             $purchase->purchase_number       = $purchaseNumber;
@@ -543,11 +543,12 @@ class PurchaseService
             foreach ($receipts as $receipt) {
                 foreach ($receipt->items as $receiptItem) {
                     if ((float) $receiptItem->qty_received > 0) {
+                        $poLabel = $purchase->purchase_number ?: '#' . $purchase->id;
                         $this->stockTransaction->decreaseStock(
                             $purchase->shop_id,
                             $receiptItem->product_id,
                             $receiptItem->qty_received,
-                            "Reversed stock on deletion of PO {$purchase->purchase_number}"
+                            "Reversed stock on deletion of PO {$poLabel}"
                         );
                     }
                 }
@@ -585,11 +586,12 @@ class PurchaseService
             foreach ($receipts as $receipt) {
                 foreach ($receipt->items as $receiptItem) {
                     if ((float) $receiptItem->qty_received > 0) {
+                        $poLabel = $purchase->purchase_number ?: '#' . $purchase->id;
                         $this->stockTransaction->increaseStock(
                             $purchase->shop_id,
                             $receiptItem->product_id,
                             $receiptItem->qty_received,
-                            "Restored stock on restore of PO {$purchase->purchase_number}"
+                            "Restored stock on restore of PO {$poLabel}"
                         );
                     }
                 }

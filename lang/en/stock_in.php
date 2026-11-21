@@ -168,12 +168,13 @@ return [
     ],
 
     'filter' => [
-        'search'         => 'Search PO #, supplier, or product...',
-        'select_shop'    => 'Select Shop',
-        'select_supplier'=> 'Select Supplier',
-        'payment_status' => 'Payment Status',
-        'from_date'      => 'From Date',
-        'to_date'        => 'To Date',
+        'search'          => 'Search PO #, supplier, or product...',
+        'select_shop'     => 'Select Shop',
+        'select_supplier' => 'Select Supplier',
+        'payment_status'  => 'Payment Status',
+        'from_date'       => 'From Date',
+        'to_date'         => 'To Date',
+        'advanced_filter' => 'Advanced Filter',
     ],
 
     'empty' => [

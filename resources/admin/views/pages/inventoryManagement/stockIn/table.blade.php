@@ -5,13 +5,10 @@
                 <div class="row table-row-5">
                     <span>{{ __('global.table.no') }}</span>
                 </div>
-                <div class="row table-row-15 textLeft">
-                    <span>{{ __('stock_in.table.po_number') }}</span>
-                </div>
-                <div class="row table-row-15 textLeft">
+                <div class="row table-row-20 textLeft">
                     <span>{{ __('stock_in.table.supplier') }}</span>
                 </div>
-                <div class="row table-row-12 textLeft">
+                <div class="row table-row-17 textLeft">
                     <span>{{ __('stock_in.table.shop') }}</span>
                 </div>
                 <div class="row table-row-10">
@@ -26,10 +23,10 @@
                 <div class="row table-row-10 textRight">
                     <span>{{ __('stock_in.table.remaining_amount') }}</span>
                 </div>
-                <div class="row table-row-12">
+                <div class="row table-row-10">
                     <span>{{ __('stock_in.table.order_status') }}</span>
                 </div>
-                <div class="row table-row-10">
+                <div class="row table-row-8">
                     <span>{{ __('stock_in.table.payment_status') }}</span>
                 </div>
                 <div class="row table-row-10">
@@ -42,18 +39,10 @@
                         <div class="row table-row-5">
                             <span>{!! $data->currentPage() * $data->perPage() - $data->perPage() + ($index + 1) !!}</span>
                         </div>
-                        <div class="row table-row-15 textLeft">
-                            <a href="{!! route('admin-' . $routeName . '-view', $item->id) !!}" class="po-number-link">
-                                <strong>{{ $item->purchase_number }}</strong>
-                            </a>
-                            @if ($item->reference_no)
-                                <div class="table-subtext">Ref: {{ $item->reference_no }}</div>
-                            @endif
-                        </div>
-                        <div class="row table-row-15 textLeft">
+                        <div class="row table-row-20 textLeft">
                             <span>{{ $item->supplier_title }}</span>
                         </div>
-                        <div class="row table-row-12 textLeft">
+                        <div class="row table-row-17 textLeft">
                             <span>{{ $item->shop_title }}</span>
                         </div>
                         <div class="row table-row-10">
@@ -68,7 +57,7 @@
                         <div class="row table-row-10 textRight font-semibold {{ $item->remaining_amount > 0 ? 'text-rose-600' : 'text-slate-500' }}">
                             <span>{{ $item->formatted_remaining_amount }}</span>
                         </div>
-                        <div class="row table-row-12">
+                        <div class="row table-row-10">
                             @php
                                 $statusClass = match($item->order_status) {
                                     'draft' => 'badge-draft',
@@ -83,7 +72,7 @@
                                 {{ $item->order_status_title }}
                             </span>
                         </div>
-                        <div class="row table-row-10">
+                        <div class="row table-row-8">
                             @php
                                 $payClass = match($item->payment_status) {
                                     'unpaid' => 'badge-unpaid',
@@ -109,16 +98,16 @@
                                         <i class='bx bx-printer'></i>
                                     </a>
                                     <button type="button" class="btn-action-icon text-danger" title="{{ __('global.action.delete') }}"
-                                        @click="verifyDelete({{ $item->id }}, '{{ $item->purchase_number }}')">
+                                        @click="verifyDelete({{ $item->id }}, '{{ $item->purchase_number ?: ($item->reference_no ?: '#' . $item->id) }}')">
                                         <i class='bx bx-trash'></i>
                                     </button>
                                 @else
                                     <button type="button" class="btn-action-icon text-success" title="{{ __('global.action.restore') }}"
-                                        @click="verifyRestore({{ $item->id }}, '{{ $item->purchase_number }}')">
+                                        @click="verifyRestore({{ $item->id }}, '{{ $item->purchase_number ?: ($item->reference_no ?: '#' . $item->id) }}')">
                                         <i class='bx bx-refresh'></i>
                                     </button>
                                     <button type="button" class="btn-action-icon text-danger" title="{{ __('global.action.destroy') }}"
-                                        @click="verifyDestroy({{ $item->id }}, '{{ $item->purchase_number }}')">
+                                        @click="verifyDestroy({{ $item->id }}, '{{ $item->purchase_number ?: ($item->reference_no ?: '#' . $item->id) }}')">
                                         <i class='bx bx-x-circle'></i>
                                     </button>
                                 @endif

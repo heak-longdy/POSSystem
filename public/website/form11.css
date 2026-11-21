@@ -106,7 +106,7 @@
 .form-admin .form-wrapper .form-body .form-row label {
   text-align: right;
   float: left;
-  font-size: 14px;
+  font-size: 13px;
   color: #5a5e66;
   padding: 0 12px 0 0;
   box-sizing: border-box;
@@ -380,7 +380,7 @@
 }
 .form-admin .form-wrapper .form-body .gallery .row .item.add span {
   color: #5a5e66;
-  font-size: 15px;
+  font-size: 13px;
 }
 .form-admin .form-wrapper .form-body .gallery .row .item.add mat-icon {
   font-size: 40px;
@@ -865,7 +865,7 @@
 }
 .form-admin .form-wrapper .form-body .step .step-wrapper .step-header .step-button span {
   margin: 5px 0;
-  font-size: 14px;
+  font-size: 13px;
   text-align: center;
 }
 .form-admin .form-wrapper .form-body .step .step-wrapper .step-body {

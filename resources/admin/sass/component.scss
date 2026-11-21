@@ -81,6 +81,8 @@ button:not(.text-gray-400):not(.fancybox-button) {
         display                    : flex;
         align-items                : center;
 
+        font-size                  : 13px;
+
         button {
             padding   : 0;
             margin    : 0 !important;
@@ -89,7 +91,7 @@ button:not(.text-gray-400):not(.fancybox-button) {
             border    : none !important;
 
             span {
-                font-size: 14px;
+                font-size: 13px;
             }
         }
 
@@ -112,6 +114,7 @@ button:not(.text-gray-400):not(.fancybox-button) {
 
         span {
             white-space: nowrap !important;
+            font-size  : 13px;
         }
     }
 }

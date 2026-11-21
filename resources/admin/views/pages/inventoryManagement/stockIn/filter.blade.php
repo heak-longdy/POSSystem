@@ -1,60 +1,170 @@
-<div class="form-row w200">
-    <input type="text" name="search" placeholder="{{ __('stock_in.filter.search') }}" value="{!! request('search') !!}">
-</div>
+@php
+    $advancedCount = (request()->filled('search') ? 1 : 0)
+        + (request()->filled('supplier_id') ? 1 : 0)
+        + (request()->filled('shop_id') ? 1 : 0)
+        + (request()->filled('payment_status') ? 1 : 0)
+        + (request()->filled('from_date') ? 1 : 0)
+        + (request()->filled('to_date') ? 1 : 0);
+    $hasAnyFilter = $advancedCount > 0;
+@endphp
 
-{{-- Supplier Select2 Filter --}}
-<div class="select2-filter-wrap w220">
-    <div class="select2Group">
-        <select name="supplier_id" id="stock_in_filter_supplier_id" class="SelectField select2">
-            <option value="">{{ __('stock_in.filter.select_supplier') }}</option>
-            @if (isset($supplier) && $supplier)
-                <option value="{{ $supplier->id }}" selected>{{ $supplier->name }}</option>
-            @endif
-        </select>
-        <div class="select2Reset" x-show="supplierId" @click.stop="resetSupplierFilter()" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
-            </svg>
+<div class="advanced-filter-container"
+    x-data="{
+        showAdvancedFilter: false,
+        toggle() {
+            this.showAdvancedFilter = !this.showAdvancedFilter;
+            if (this.showAdvancedFilter) {
+                this.$nextTick(() => {
+                    this.positionPopover();
+                    this.initSelectShop();
+                    this.initSelectSupplier();
+                    this.initDatepickers();
+                });
+            }
+        },
+        positionPopover() {
+            if (!this.showAdvancedFilter) return;
+            const button = this.$refs.filterButton.getBoundingClientRect();
+            const popover = this.$refs.filterPopover;
+            const left = Math.max(8, Math.min(button.right - popover.offsetWidth, document.documentElement.clientWidth - popover.offsetWidth - 8));
+            popover.style.top = (button.bottom + 8) + 'px';
+            popover.style.left = left + 'px';
+        },
+        close() {
+            this.showAdvancedFilter = false;
+        }
+    }"
+    @resize.window="positionPopover()"
+    @scroll.window.capture="positionPopover()"
+    @keydown.escape.window="close()"
+    @click.outside="if (!$event.target.closest('.select2-container') && !$event.target.closest('#ui-datepicker-div')) { close(); }">
+
+    <button type="button" x-ref="filterButton" class="btn-advanced-filter {{ $advancedCount > 0 ? 'active' : '' }}"
+        :class="{ 'open': showAdvancedFilter }"
+        @click.stop="toggle()"
+        title="{{ __('stock_in.filter.advanced_filter') }}">
+        <i class='bx bx-filter-alt'></i>
+        <span>{{ __('stock_in.filter.advanced_filter') }}</span>
+        @if($advancedCount > 0)
+            <span class="advanced-filter-badge">{{ $advancedCount }}</span>
+        @endif
+        <i class='bx bx-chevron-down' :class="{ 'bx-rotate-180': showAdvancedFilter }" style="font-size: 15px; transition: transform 0.2s ease;"></i>
+    </button>
+
+    <div class="advanced-filter-popover" x-ref="filterPopover" x-show="showAdvancedFilter" x-cloak
+        x-transition:enter="transition ease-out duration-150"
+        x-transition:enter-start="opacity-0 transform scale-95 -translate-y-1"
+        x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-100"
+        x-transition:leave-start="opacity-100 transform scale-100 translate-y-0"
+        x-transition:leave-end="opacity-0 transform scale-95 -translate-y-1">
+        <div class="filter-popover-header">
+            <div class="filter-popover-title">
+                <i class='bx bx-filter-alt'></i>
+                <span>{{ __('stock_in.filter.advanced_filter') }}</span>
+                @if($advancedCount > 0)
+                    <span class="filter-popover-count">{{ $advancedCount }} {{ __('global.tab.active') ?? 'Active' }}</span>
+                @endif
+            </div>
+            <button type="button" class="filter-popover-close" @click="close()" title="{{ __('global.button.close') ?? 'Close' }}">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+
+        <div class="filter-popover-body">
+            {{-- Search Input --}}
+            <div class="filter-field-group" x-id="['stock-in-filter-search']">
+                <label :for="$id('stock-in-filter-search')">{{ __('stock_in.filter.search') }}</label>
+                <input type="text" name="search" :id="$id('stock-in-filter-search')" class="filter-search-input"
+                    placeholder="{{ __('stock_in.filter.search') }}" value="{{ request('search') }}">
+            </div>
+
+            {{-- Supplier Select2 --}}
+            <div class="filter-field-group" x-id="['stock-in-filter-supplier']">
+                <label :for="$id('stock-in-filter-supplier')">{{ __('stock_in.table.supplier') }}</label>
+                <div class="select2Group">
+                    <select name="supplier_id" id="stock_in_filter_supplier_id" class="SelectField select2">
+                        <option value="">{{ __('stock_in.filter.select_supplier') }}</option>
+                        @if (isset($supplier) && $supplier)
+                            <option value="{{ $supplier->id }}" selected>{{ $supplier->name }}</option>
+                        @endif
+                    </select>
+                    <div class="select2Reset" x-show="supplierId" @click.stop="resetSupplierFilter()" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Shop Select2 --}}
+            <div class="filter-field-group" x-id="['stock-in-filter-shop']">
+                <label :for="$id('stock-in-filter-shop')">{{ __('stock_in.table.shop') }}</label>
+                <div class="select2Group">
+                    <select name="shop_id" id="stock_in_filter_shop_id" class="SelectField select2">
+                        <option value="">{{ __('stock_in.filter.select_shop') }}</option>
+                        @if (isset($shop) && $shop)
+                            <option value="{{ $shop->id }}" selected>{{ $shop->name }}</option>
+                        @endif
+                    </select>
+                    <div class="select2Reset" x-show="shopId" @click.stop="resetShopFilter()" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Payment Status Filter --}}
+            <div class="filter-field-group" x-id="['stock-in-filter-payment-status']">
+                <label :for="$id('stock-in-filter-payment-status')">{{ __('stock_in.filter.payment_status') }}</label>
+                <select name="payment_status" :id="$id('stock-in-filter-payment-status')" class="filter-search-input">
+                    <option value="">{{ __('stock_in.filter.payment_status') }}</option>
+                    <option value="unpaid" {{ request('payment_status') === 'unpaid' ? 'selected' : '' }}>{{ __('stock_in.payment_status.unpaid') }}</option>
+                    <option value="partial" {{ request('payment_status') === 'partial' ? 'selected' : '' }}>{{ __('stock_in.payment_status.partial') }}</option>
+                    <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>{{ __('stock_in.payment_status.paid') }}</option>
+                </select>
+            </div>
+
+            {{-- Date Range (From Date & To Date) --}}
+            <div class="filter-dates-grid">
+                <div class="filter-field-group">
+                    <label for="filter_from_date">{{ __('stock_in.filter.from_date') }}</label>
+                    <div class="filter-date-input" @click="$('#filter_from_date').focus()">
+                        <input type="text" name="from_date" id="filter_from_date" class="filter-input"
+                            value="{!! request('from_date') !!}" autocomplete="off" placeholder="YYYY-MM-DD">
+                        <i class='bx bx-calendar' aria-hidden="true"></i>
+                    </div>
+                </div>
+                <div class="filter-field-group">
+                    <label for="filter_to_date">{{ __('stock_in.filter.to_date') }}</label>
+                    <div class="filter-date-input" @click="$('#filter_to_date').focus()">
+                        <input type="text" name="to_date" id="filter_to_date" class="filter-input"
+                            value="{!! request('to_date') !!}" autocomplete="off" placeholder="YYYY-MM-DD">
+                        <i class='bx bx-calendar' aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-popover-footer">
+            <button type="button" class="btn-popover-reset" @click="resetAdvancedFilters()">
+                <i class='bx bx-reset'></i>
+                <span>{{ __('global.button.reset') }}</span>
+            </button>
+            <button type="submit" class="btn-popover-apply">
+                <i class='bx bx-search'></i>
+                <span>{{ __('global.button.search') ?? 'Search' }}</span>
+            </button>
         </div>
     </div>
 </div>
 
-{{-- Shop Select2 Filter --}}
-<div class="select2-filter-wrap w220">
-    <div class="select2Group">
-        <select name="shop_id" id="stock_in_filter_shop_id" class="SelectField select2">
-            <option value="">{{ __('stock_in.filter.select_shop') }}</option>
-            @if (isset($shop) && $shop)
-                <option value="{{ $shop->id }}" selected>{{ $shop->name }}</option>
-            @endif
-        </select>
-        <div class="select2Reset" x-show="shopId" @click.stop="resetShopFilter()" style="display: none;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path d="m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"></path>
-            </svg>
-        </div>
-    </div>
-</div>
-
-{{-- Payment Status Filter --}}
-<div class="form-row w160">
-    <select name="payment_status" class="filter-select" onchange="$(this).closest('form').submit()">
-        <option value="">{{ __('stock_in.filter.payment_status') }}</option>
-        <option value="unpaid" {{ request('payment_status') === 'unpaid' ? 'selected' : '' }}>{{ __('stock_in.payment_status.unpaid') }}</option>
-        <option value="partial" {{ request('payment_status') === 'partial' ? 'selected' : '' }}>{{ __('stock_in.payment_status.partial') }}</option>
-        <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>{{ __('stock_in.payment_status.paid') }}</option>
-    </select>
-</div>
-
-{{-- Date Range (From & To) --}}
-<div class="filter-date-input w140" @click="$('#filter_from_date').focus()">
-    <input type="text" name="from_date" id="filter_from_date" class="filter-input datepicker-input"
-        value="{!! request('from_date') !!}" autocomplete="off" placeholder="{{ __('stock_in.filter.from_date') }}">
-    <i class='bx bx-calendar' aria-hidden="true"></i>
-</div>
-
-<div class="filter-date-input w140" @click="$('#filter_to_date').focus()">
-    <input type="text" name="to_date" id="filter_to_date" class="filter-input datepicker-input"
-        value="{!! request('to_date') !!}" autocomplete="off" placeholder="{{ __('stock_in.filter.to_date') }}">
-    <i class='bx bx-calendar' aria-hidden="true"></i>
-</div>
+@if($hasAnyFilter)
+    <a href="{!! route('admin-' . ($routeName ?? 'stock-in') . '-list', $status ?? 'all') !!}" class="btn-clear-filter" title="{{ __('global.button.reset') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    </a>
+@endif
