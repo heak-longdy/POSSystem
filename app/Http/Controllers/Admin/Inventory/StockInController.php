@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Admin\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Inventory\StockInRequest;
 use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\PurchaseItem;
+use App\Models\PurchasePayment;
 use App\Models\Shop;
 use App\Models\ShopProduct;
 use App\Models\StockIn;
 use App\Models\StockOnHand;
 use App\Models\Supplier;
+use App\Services\PurchaseService;
 use App\Services\StockTransactionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,41 +25,57 @@ class StockInController extends Controller
 {
     protected $layout = 'admin::pages.inventoryManagement.stockIn.';
     private $routeName = 'stock-in';
-    private $stockTransaction;
+    protected PurchaseService $purchaseService;
+    protected StockTransactionService $stockTransaction;
 
-    public function __construct(StockTransactionService $stockTransaction)
+    public function __construct(PurchaseService $purchaseService, StockTransactionService $stockTransaction)
     {
+        $this->purchaseService = $purchaseService;
         $this->stockTransaction = $stockTransaction;
     }
 
-    public function index(Request $req)
+    public function index(Request $req, $status = null)
     {
-        if (!$req->status) {
-            return redirect()->route('admin-' . $this->routeName . '-list', 1);
+        $currentStatus = $status ?? ($req->status ?? 'all');
+        if ($currentStatus === '1') {
+            $currentStatus = 'all';
         }
 
-        $data['status'] = $req->status;
+        $data['status'] = $currentStatus;
         $data['routeName'] = $this->routeName;
         $data['shop'] = $req->shop_id ? Shop::find($req->shop_id) : null;
+        $data['supplier'] = $req->supplier_id ? Supplier::find($req->supplier_id) : null;
+
         $exportRoute = 'admin-' . $this->routeName . '-export';
         $data['exportUrl'] = \Illuminate\Support\Facades\Route::has($exportRoute)
             ? route($exportRoute, $req->query())
             : url('admin/' . $this->routeName . '/export' . ($req->query() ? '?' . http_build_query($req->query()) : ''));
-        $data['data'] = $this->queryData('list', $req);
+
+        // Tab counts
+        $data['counts'] = [
+            'all'              => Purchase::count(),
+            'ordered'          => Purchase::where('order_status', 'ordered')->count(),
+            'partial_received' => Purchase::where('order_status', 'partial_received')->count(),
+            'received'         => Purchase::where('order_status', 'received')->count(),
+            'draft'            => Purchase::where('order_status', 'draft')->count(),
+            'trash'            => Purchase::onlyTrashed()->count(),
+        ];
+
+        $data['data'] = $this->purchaseService->queryPurchases($req, $currentStatus)->paginate(25)->appends($req->query());
 
         return view($this->layout . 'index', $data);
     }
 
     public function report(Request $req)
     {
-        $data = $this->queryData('report', $req);
+        $data = $this->purchaseService->queryPurchases($req, $req->status ?? 'all')->get();
         return response()->json($data);
     }
 
     public function export(Request $req)
     {
-        $items = $this->queryData('report', $req);
-        $fileName = 'stock_in_export_' . date('Y-m-d_H-i-s') . '.csv';
+        $items = $this->purchaseService->queryPurchases($req, $req->status ?? 'all')->get();
+        $fileName = 'purchase_stock_in_export_' . date('Y-m-d_H-i-s') . '.csv';
 
         $headers = [
             "Content-type"        => "text/csv; charset=UTF-8",
@@ -66,17 +86,18 @@ class StockInController extends Controller
         ];
 
         $columns = [
-            __('stock_in.table.no'),
-            __('stock_in.table.product'),
-            __('stock_in.table.shop'),
-            __('stock_in.table.supplier'),
-            __('stock_in.table.category'),
-            __('stock_in.table.uom'),
-            __('stock_in.table.qty'),
-            __('stock_in.table.date'),
-            __('stock_in.table.requested_by'),
-            __('stock_in.table.status'),
-            __('stock_in.table.remark'),
+            __('stock_in.table.no') ?? 'Nº',
+            __('stock_in.table.po_number') ?? 'PO Number',
+            __('stock_in.table.supplier') ?? 'Supplier',
+            __('stock_in.table.shop') ?? 'Shop',
+            __('stock_in.table.date') ?? 'Order Date',
+            __('stock_in.table.total_amount') ?? 'Total Amount',
+            __('stock_in.table.paid_amount') ?? 'Paid Amount',
+            __('stock_in.table.remaining_amount') ?? 'Remaining Due',
+            __('stock_in.table.order_status') ?? 'Receiving Status',
+            __('stock_in.table.payment_status') ?? 'Payment Status',
+            __('stock_in.table.requested_by') ?? 'Created By',
+            __('stock_in.table.remark') ?? 'Remark',
         ];
 
         $callback = function () use ($items, $columns) {
@@ -87,15 +108,16 @@ class StockInController extends Controller
             foreach ($items as $index => $item) {
                 fputcsv($file, [
                     $index + 1,
-                    $item->product_title ?? '---',
-                    $item->shop_title ?? '---',
+                    $item->purchase_number,
                     $item->supplier_title ?? '---',
-                    $item->category_title ?? '---',
-                    $item->uom_title ?? '---',
-                    $item->qty ?? 0,
+                    $item->shop_title ?? '---',
                     $item->created_date ?? '',
-                    $item->request_by_title ?? '---',
-                    $item->stock_status_title ?? '---',
+                    $item->total_amount ?? 0,
+                    $item->paid_amount ?? 0,
+                    $item->remaining_amount ?? 0,
+                    $item->order_status_title ?? '---',
+                    $item->payment_status_title ?? '---',
+                    $item->created_by_title ?? '---',
                     $item->remark ?? '',
                 ]);
             }
@@ -106,293 +128,304 @@ class StockInController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    public function queryData($type = 'list', Request $req = null)
-    {
-        $req = $req ?: request();
-        $status = $req->status ?: 1;
-
-        $query = $status === 'trash'
-            ? StockIn::onlyTrashed()
-            : StockIn::where('status', $status);
-
-        $getData = $query->with([
-            'product.category',
-            'product.uom',
-            'shop',
-            'supplier',
-            'user',
-            'barber',
-        ])
-            ->when($req->search, function ($query) use ($req) {
-                $query->where(function ($q) use ($req) {
-                    $q->whereHas('product', function ($product) use ($req) {
-                        $product->where('name', 'like', '%' . $req->search . '%');
-                    })->orWhereHas('shop', function ($shop) use ($req) {
-                        $shop->where('name', 'like', '%' . $req->search . '%');
-                    })->orWhereHas('supplier', function ($supplier) use ($req) {
-                        $supplier->where('name', 'like', '%' . $req->search . '%');
-                    });
-                });
-            })
-            ->when($req->shop_id, function ($query) use ($req) {
-                $query->where('shop_id', $req->shop_id);
-            })
-            ->when($req->date, function ($query) use ($req) {
-                $query->whereDate('created_at', $req->date);
-            })
-            ->orderBy('id', 'desc');
-
-        return $type === 'report'
-            ? $getData->get()
-            : $getData->paginate(50)->appends($req->query());
-    }
-
-    public function onCreate()
+    public function onCreate(Request $req)
     {
         return view($this->layout . 'create', $this->formData());
     }
 
-    public function onEdit(Request $req)
+    public function onEdit(Request $req, $id = null)
     {
-        $stockIn = StockIn::find($req->id);
-        if (!$stockIn) {
-            return redirect()->route('admin-' . $this->routeName . '-list', 1);
+        $id = $id ?: $req->id;
+        $purchase = Purchase::with(['items.product.category', 'items.product.uom', 'supplier', 'shop'])->find($id);
+
+        if (!$purchase) {
+            return redirect()->route('admin-' . $this->routeName . '-list', 'all');
         }
 
-        return view($this->layout . 'create', $this->formData($stockIn));
+        return view($this->layout . 'create', $this->formData($purchase));
     }
 
-    public function onView(Request $req)
+    public function onView(Request $req, $id = null)
     {
-        $stockIn = StockIn::withTrashed()->find($req->id);
-        if (!$stockIn) {
-            return redirect()->route('admin-' . $this->routeName . '-list', 1);
+        $id = $id ?: $req->id;
+        $purchase = Purchase::withTrashed()->with([
+            'items.product.category',
+            'items.product.uom',
+            'supplier',
+            'shop',
+            'createdBy',
+            'receipts.items.product',
+            'receipts.receivedBy',
+            'payments.createdBy',
+        ])->find($id);
+
+        if (!$purchase) {
+            return redirect()->route('admin-' . $this->routeName . '-list', 'all');
         }
 
-        return view($this->layout . 'create', $this->formData($stockIn, true));
+        $data = [
+            'id'        => $purchase->id,
+            'purchase'  => $purchase,
+            'routeName' => $this->routeName,
+        ];
+
+        return view($this->layout . 'detail', $data);
     }
 
     public function onSave(StockInRequest $req, $id = '')
     {
-        DB::beginTransaction();
         try {
             if ($id) {
-                $stockIn = StockIn::findOrFail($id);
-                if ((int) $stockIn->status === 1) {
-                    $this->stockTransaction->reverseStockIn($stockIn);
-                }
-
-                $stockIn->update($this->payload($req, $stockIn->status));
-                $stockIn->refresh();
-
-                if ((int) $stockIn->status === 1) {
-                    $this->stockTransaction->applyStockIn($stockIn);
-                    $this->stockTransaction->syncShopProduct($stockIn->shop_id, $stockIn->product_id);
-                }
-
-                $message = __('stock_in.message.update_success');
+                $purchase = Purchase::findOrFail($id);
+                $this->purchaseService->updatePurchase($purchase, $req->all());
+                $message = __('stock_in.message.update_success') ?? 'Purchase order updated successfully';
             } else {
-                if ($req->has('items') && is_array($req->input('items'))) {
-                    $rawItems = $req->input('items');
-                    $validItems = array_values(array_filter($rawItems, function ($item) {
-                        return !empty($item['product_id']) && isset($item['qty']) && (int) $item['qty'] > 0;
-                    }));
-
-                    if (empty($validItems)) {
-                        throw ValidationException::withMessages([
-                            'items' => __('stock_in.validation.items_required'),
-                        ]);
-                    }
-
-                    foreach ($validItems as $item) {
-                        $itemRemark = !empty($item['remark']) ? $item['remark'] : $req->input('remark');
-
-                        $stockIn = StockIn::create([
-                            'product_id'      => $item['product_id'],
-                            'shop_id'         => $req->input('shop_id'),
-                            'supplier_id'     => $req->input('supplier_id'),
-                            'supplier_type'   => 'supplier',
-                            'qty'             => $item['qty'],
-                            'remark'          => $itemRemark,
-                            'status'          => 1,
-                            'request_by'      => Auth::id(),
-                            'request_by_type' => 'admin',
-                        ]);
-
-                        $this->stockTransaction->applyStockIn($stockIn);
-                        $this->stockTransaction->syncShopProduct($stockIn->shop_id, $stockIn->product_id);
-                    }
-
-                    $message = __('stock_in.message.create_success');
-                } else {
-                    $stockIn = StockIn::create($this->payload($req));
-                    $this->stockTransaction->applyStockIn($stockIn);
-                    $this->stockTransaction->syncShopProduct($stockIn->shop_id, $stockIn->product_id);
-                    $message = __('stock_in.message.create_success');
-                }
+                $purchase = $this->purchaseService->createPurchase($req->all(), $req);
+                $message = __('stock_in.message.create_success') ?? 'Purchase stock in created successfully';
             }
 
-            DB::commit();
             Session::flash('success', $message);
 
             if ($req->input('save_opt') === 'save_new') {
                 return redirect()->route('admin-' . $this->routeName . '-create');
             }
 
-            return redirect()->route('admin-' . $this->routeName . '-list', 1);
+            return redirect()->route('admin-' . $this->routeName . '-view', $purchase->id);
         } catch (ValidationException $e) {
-            DB::rollBack();
             throw $e;
         } catch (\Exception $e) {
-            DB::rollBack();
-            Session::flash('warning', $id ? __('stock_in.message.update_failed') : __('stock_in.message.create_failed'));
-
+            Session::flash('warning', $e->getMessage() ?: ($id ? __('stock_in.message.update_failed') : __('stock_in.message.create_failed')));
             return redirect()->back()->withInput();
         }
     }
 
-    public function updateStatus($id, $status)
+    public function receiveGoods(Request $req, $id)
     {
-        DB::beginTransaction();
+        $req->validate([
+            'received_date' => 'nullable|date',
+            'reference_no'  => 'nullable|string|max:100',
+            'remark'        => 'nullable|string|max:1000',
+            'items'         => 'required|array|min:1',
+            'items.*.purchase_item_id' => 'required|integer',
+            'items.*.qty_to_receive'   => 'required|numeric|min:0',
+        ]);
+
         try {
-            $stockIn = StockIn::findOrFail($id);
-            if ((int) $stockIn->status !== (int) $status) {
-                if ((int) $status === 2 && (int) $stockIn->status === 1) {
-                    $this->stockTransaction->reverseStockIn($stockIn);
-                }
+            $purchase = Purchase::findOrFail($id);
+            $receipt = $this->purchaseService->receiveGoods(
+                $purchase,
+                $req->input('items', []),
+                $req->only(['received_date', 'reference_no', 'remark'])
+            );
 
-                if ((int) $status === 1 && (int) $stockIn->status === 2) {
-                    $this->stockTransaction->applyStockIn($stockIn);
-                }
+            $message = __('stock_in.message.receive_success') ?? "Goods receipt {$receipt->receipt_number} recorded successfully";
 
-                $stockIn->update(['status' => $status]);
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => $message,
+                    'receipt' => $receipt,
+                ]);
             }
 
-            DB::commit();
-            Session::flash('success', (int) $status === 2 ? __('stock_in.message.disable_success') : __('stock_in.message.enable_success'));
-
-            return response()->json(['message' => 'success', 'status' => 200]);
+            Session::flash('success', $message);
+            return redirect()->route('admin-' . $this->routeName . '-view', $id);
         } catch (ValidationException $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
+            if ($req->wantsJson()) {
+                return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
+            }
+            throw $e;
         } catch (\Exception $e) {
-            DB::rollBack();
-            Session::flash('warning', __('stock_in.message.status_failed'));
+            if ($req->wantsJson()) {
+                return response()->json(['message' => $e->getMessage(), 'status' => 500], 500);
+            }
+            Session::flash('warning', $e->getMessage());
+            return redirect()->back();
+        }
+    }
 
+    public function recordPayment(Request $req, $id)
+    {
+        $req->validate([
+            'amount'          => 'required|numeric|min:0.01',
+            'payment_date'    => 'nullable|date',
+            'payment_method'  => 'required|string',
+            'reference_no'    => 'nullable|string|max:100',
+            'note'            => 'nullable|string|max:1000',
+            'payment_receipt' => 'nullable|file|mimes:jpeg,png,jpg,pdf,webp|max:10240',
+        ]);
+
+        try {
+            $purchase = Purchase::findOrFail($id);
+            $payment = $this->purchaseService->recordPayment(
+                $purchase,
+                $req->all(),
+                $req->file('payment_receipt')
+            );
+
+            $message = __('stock_in.message.payment_success') ?? "Payment of \${$payment->amount} recorded successfully";
+
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => $message,
+                    'payment' => $payment,
+                ]);
+            }
+
+            Session::flash('success', $message);
+            return redirect()->route('admin-' . $this->routeName . '-view', $id);
+        } catch (ValidationException $e) {
+            if ($req->wantsJson()) {
+                return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
+            }
+            throw $e;
+        } catch (\Exception $e) {
+            if ($req->wantsJson()) {
+                return response()->json(['message' => $e->getMessage(), 'status' => 500], 500);
+            }
+            Session::flash('warning', $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
+    public function deletePayment(Request $req, $payment_id)
+    {
+        try {
+            $payment = PurchasePayment::findOrFail($payment_id);
+            $purchaseId = $payment->purchase_id;
+            $this->purchaseService->deletePayment($payment);
+
+            $message = __('stock_in.message.payment_delete_success') ?? 'Payment voided successfully';
+
+            if ($req->wantsJson()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => $message,
+                ]);
+            }
+
+            Session::flash('success', $message);
+            return redirect()->route('admin-' . $this->routeName . '-view', $purchaseId);
+        } catch (\Exception $e) {
+            if ($req->wantsJson()) {
+                return response()->json(['message' => $e->getMessage(), 'status' => 500], 500);
+            }
+            Session::flash('warning', $e->getMessage());
+            return redirect()->back();
+        }
+    }
+
+    public function printInvoice(Request $req, $id)
+    {
+        $purchase = Purchase::with([
+            'items.product.category',
+            'items.product.uom',
+            'supplier',
+            'shop',
+            'createdBy',
+            'payments',
+        ])->findOrFail($id);
+
+        return view($this->layout . 'print', [
+            'purchase'  => $purchase,
+            'routeName' => $this->routeName,
+        ]);
+    }
+
+    public function updateStatus($id, $status)
+    {
+        try {
+            $purchase = Purchase::findOrFail($id);
+            $purchase->update(['status' => $status]);
+
+            Session::flash('success', (int) $status === 2 ? __('stock_in.message.disable_success') : __('stock_in.message.enable_success'));
+            return response()->json(['message' => 'success', 'status' => 200]);
+        } catch (\Exception $e) {
+            Session::flash('warning', __('stock_in.message.status_failed'));
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }
     }
 
     public function delete($id = '')
     {
-        DB::beginTransaction();
         try {
-            $stockIn = StockIn::findOrFail($id);
-            if ((int) $stockIn->status === 1) {
-                $this->stockTransaction->reverseStockIn($stockIn);
-            }
+            $purchase = Purchase::findOrFail($id);
+            $this->purchaseService->deletePurchase($purchase);
 
-            $stockIn->delete();
-
-            DB::commit();
-            Session::flash('success', __('stock_in.message.delete_success'));
-
+            Session::flash('success', __('stock_in.message.delete_success') ?? 'Purchase deleted successfully');
             return response()->json(['message' => 'success', 'status' => 200]);
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            DB::rollBack();
-            Session::flash('warning', __('stock_in.message.delete_failed'));
-
+            Session::flash('warning', $e->getMessage() ?: __('stock_in.message.delete_failed'));
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }
     }
 
     public function restore($id = '')
     {
-        DB::beginTransaction();
         try {
-            $stockIn = StockIn::withTrashed()->findOrFail($id);
-            $stockIn->restore();
+            $purchase = Purchase::withTrashed()->findOrFail($id);
+            $this->purchaseService->restorePurchase($purchase);
 
-            if ((int) $stockIn->status === 1) {
-                $this->stockTransaction->applyStockIn($stockIn);
-            }
-
-            DB::commit();
-            Session::flash('success', __('stock_in.message.restore_success'));
-
+            Session::flash('success', __('stock_in.message.restore_success') ?? 'Purchase restored successfully');
             return response()->json(['message' => 'success', 'status' => 200]);
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            DB::rollBack();
             Session::flash('warning', __('stock_in.message.restore_failed'));
-
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }
     }
 
     public function destroy($id = '')
     {
-        DB::beginTransaction();
         try {
-            $stockIn = StockIn::withTrashed()->findOrFail($id);
-            if (!$stockIn->trashed() && (int) $stockIn->status === 1) {
-                $this->stockTransaction->reverseStockIn($stockIn);
-            }
+            $purchase = Purchase::withTrashed()->findOrFail($id);
+            $this->purchaseService->forceDeletePurchase($purchase);
 
-            $this->stockTransaction->deleteHistory($stockIn->id, 'stock_in');
-            $stockIn->forceDelete();
-
-            DB::commit();
-            Session::flash('success', __('stock_in.message.destroy_success'));
-
+            Session::flash('success', __('stock_in.message.destroy_success') ?? 'Purchase permanently deleted');
             return response()->json(['message' => 'success', 'status' => 200]);
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'unsuccess', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            DB::rollBack();
             Session::flash('warning', __('stock_in.message.destroy_failed'));
-
             return response()->json(['message' => 'unsuccess', 'status' => 404]);
         }
     }
 
-    private function payload(StockInRequest $req, $status = 1)
+    private function formData(Purchase $purchase = null, $readonly = false)
     {
-        return [
-            'product_id' => $req->product_id,
-            'shop_id' => $req->shop_id,
-            'supplier_id' => $req->supplier_id,
-            'supplier_type' => 'supplier',
-            'qty' => $req->qty,
-            'remark' => $req->remark,
-            'status' => $status,
-            'request_by' => Auth::id(),
-            'request_by_type' => 'admin',
-        ];
-    }
+        $shopId = old('shop_id', $purchase?->shop_id);
+        $supplierId = old('supplier_id', $purchase?->supplier_id);
 
-    private function formData(StockIn $stockIn = null, $readonly = false)
-    {
-        $shopId = old('shop_id', $stockIn?->shop_id);
-        $productId = old('product_id', $stockIn?->product_id);
-        $supplierId = old('supplier_id', $stockIn?->supplier_id);
+        $initialItems = [];
+        if ($purchase && $purchase->items) {
+            foreach ($purchase->items as $item) {
+                $initialItems[] = [
+                    'id'               => $item->id,
+                    'product_id'       => (string) $item->product_id,
+                    'product_name'     => $item->product_name,
+                    'product_category' => $item->category_title,
+                    'product_uom'      => $item->uom_title,
+                    'product_image'    => $item->product_image,
+                    'current_stock'    => $this->currentStock($purchase->shop_id, $item->product_id),
+                    'unit_cost'        => (float) $item->unit_cost,
+                    'qty'              => (float) $item->qty,
+                    'qty_received'     => (float) $item->qty_received,
+                    'subtotal'         => (float) $item->subtotal,
+                    'remark'           => $item->remark ?? '',
+                    'dropdownOpen'     => false,
+                    'searchQuery'      => '',
+                    'uid'              => uniqid('row_'),
+                ];
+            }
+        }
 
         return [
-            'id'                => $stockIn?->id ?? '',
-            'data'              => $stockIn,
+            'id'                => $purchase?->id ?? '',
+            'purchase'          => $purchase,
             'routeName'         => $this->routeName,
             'readonly'          => $readonly,
             'selectedShop'      => $shopId ? Shop::find($shopId) : null,
-            'selectedProduct'   => $productId ? Product::find($productId) : null,
             'selectedSupplier'  => $supplierId ? Supplier::find($supplierId) : null,
-            'currentStock'      => $this->currentStock($shopId, $productId),
             'preloadedProducts' => $shopId ? $this->getShopProductsData($shopId) : [],
+            'initialItems'      => $initialItems,
         ];
     }
 
@@ -410,32 +443,32 @@ class StockInController extends Controller
             return [];
         }
 
-        $shopProducts = ShopProduct::where('shop_id', $shopId)
-            ->where('status', 1)
-            ->whereHas('product', function ($query) {
-                $query->where('status', 1);
-            })
-            ->with(['product.category', 'product.uom'])
-            ->get()
-            ->unique('product_id');
+        // Return all active products, with shop product details & stock on hand at this shop
+        $allProducts = Product::where('status', 1)
+            ->with(['category', 'uom'])
+            ->get();
 
         $stockOnHands = StockOnHand::where('shop_id', $shopId)
             ->pluck('current_stock', 'product_id');
 
+        $assignedProductIds = ShopProduct::where('shop_id', $shopId)
+            ->where('status', 1)
+            ->pluck('product_id')
+            ->flip();
+
         $list = [];
 
-        foreach ($shopProducts as $sp) {
-            if ($sp->product && (int) $sp->product->status === 1) {
-                $list[] = [
-                    'id'            => (string) $sp->product->id,
-                    'name'          => $sp->product->name,
-                    'category'      => $sp->product->category?->name ?? '---',
-                    'uom'           => $sp->product->uom?->name ?? '---',
-                    'image'         => $sp->product->image_url ?? asset('images/logo/default.png'),
-                    'current_stock' => (int) ($stockOnHands[$sp->product->id] ?? 0),
-                    'is_assigned'   => true,
-                ];
-            }
+        foreach ($allProducts as $p) {
+            $list[] = [
+                'id'            => (string) $p->id,
+                'name'          => $p->name,
+                'category'      => $p->category?->name ?? '---',
+                'uom'           => $p->uom?->name ?? '---',
+                'image'         => $p->image_url ?? asset('images/logo/default.png'),
+                'cost'          => (float) ($p->cost ?? 0.00),
+                'current_stock' => (int) ($stockOnHands[$p->id] ?? 0),
+                'is_assigned'   => isset($assignedProductIds[$p->id]),
+            ];
         }
 
         usort($list, function ($a, $b) {

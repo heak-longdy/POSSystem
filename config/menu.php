@@ -83,10 +83,10 @@ return [
                 'path' => 'admin/stock-in/list/1',
                 'permission' => ['stock-in-view'],
                 'name' => [
-                    'en' => 'Stock In',
-                    'km' => 'ការបញ្ចូលស្តុក',
+                    'en' => 'Purchase Stock In',
+                    'km' => 'ការបញ្ជាទិញ & បញ្ចូលស្តុក',
                 ],
-                'icon' => 'bx-universal-access',
+                'icon' => 'bx-cart-download',
                 'dropDown' => 'disable',
             ],
             [

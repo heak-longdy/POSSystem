@@ -162,6 +162,10 @@ Route::middleware(['AdminGuard', \App\Http\Middleware\CheckAdminPermission::clas
             Route::get('edit/{id?}', [StockInController::class, 'onEdit'])->name('edit');
             Route::get('view/{id?}', [StockInController::class, 'onView'])->name('view');
             Route::post('save/{id?}', [StockInController::class, 'onSave'])->name('save');
+            Route::post('receive/{id}', [StockInController::class, 'receiveGoods'])->name('receive');
+            Route::post('payment/{id}', [StockInController::class, 'recordPayment'])->name('payment');
+            Route::post('payment/delete/{payment_id}', [StockInController::class, 'deletePayment'])->name('payment-delete');
+            Route::get('print/{id}', [StockInController::class, 'printInvoice'])->name('print');
             Route::get('products/{shop_id}', [StockInController::class, 'getShopProducts'])->name('products');
             Route::match(['get', 'post'], 'status/{id}/{status}', [StockInController::class, 'updateStatus'])->name('status');
             Route::post('delete/{id?}', [StockInController::class, 'delete'])->name('delete');

@@ -54,6 +54,10 @@ class Product extends Model
     {
         return $this->hasOne(StockIn::class, 'product_id', 'id');
     }
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class, 'product_id', 'id');
+    }
     public function getCategoryTitleAttribute()
     {
         return $this->category ? $this->category->name : null;

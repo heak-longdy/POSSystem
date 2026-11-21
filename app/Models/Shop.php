@@ -59,6 +59,11 @@ class Shop extends Authenticatable
     {
         return $this->belongsTo(Brand::class, 'brand_id', 'id');
     }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class, 'shop_id');
+    }
     public function getImageUrlAttribute()
     {
         if ($this->image != null) {

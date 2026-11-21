@@ -33,6 +33,7 @@ class AdminPermissions
             'update-payment-status' => 'update', 'send-payment-reminder' => 'update',
             'send-reminder' => 'update',
             'paid' => 'update',
+            'print' => 'view',
             'delete' => 'delete', 'delete-payment' => 'delete',
             'restore' => in_array($module, ['staff', 'staff-expense', 'other-income']) ? 'restore' : 'update',
             'destroy' => in_array($module, ['staff', 'staff-expense', 'other-income']) ? 'force-delete' : 'delete',
@@ -102,6 +103,15 @@ class AdminPermissions
         }
         if ($name === 'admin-stock-in-products') {
             return ['stock-in-view', 'stock-in-create', 'stock-in-update'];
+        }
+        if ($name === 'admin-stock-in-receive' || $name === 'admin-stock-in-payment') {
+            return ['stock-in-update', 'stock-in-create'];
+        }
+        if ($name === 'admin-stock-in-payment-delete') {
+            return ['stock-in-delete', 'stock-in-update'];
+        }
+        if ($name === 'admin-stock-in-print') {
+            return ['stock-in-view'];
         }
         if (in_array($name, ['admin-stock-on-hand-report', 'admin-stock-movement-report', 'admin-product-report', 'admin-staff-expense-report', 'admin-other-income-report'])) {
             return [str_replace(['admin-', '-report'], ['', '-excel'], $name)];

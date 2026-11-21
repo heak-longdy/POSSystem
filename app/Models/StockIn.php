@@ -15,6 +15,8 @@ class StockIn extends Model
         'product_id',
         'shop_id',
         'supplier_id',
+        'purchase_id',
+        'purchase_receipt_id',
         'supplier_type',
         'qty',
         'remark',
@@ -43,6 +45,14 @@ class StockIn extends Model
     public function supplier()
     {
         return $this->hasOne(Supplier::class, 'id', 'supplier_id');
+    }
+    public function purchase()
+    {
+        return $this->belongsTo(Purchase::class, 'purchase_id');
+    }
+    public function receipt()
+    {
+        return $this->belongsTo(PurchaseReceipt::class, 'purchase_receipt_id');
     }
     public function getCreatedDateAttribute()
     {
