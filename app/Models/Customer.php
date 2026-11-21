@@ -11,9 +11,30 @@ class Customer extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'customers';
-    protected $fillable = ['code', 'name', 'ordering', 'phone', 'address', 'profile', 'image_1', 'image_2', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
+    protected $fillable = ['code', 'name', 'ordering', 'phone', 'address', 'latitude', 'longitude', 'profile', 'image_1', 'image_2', 'password', 'status', 'total_point', 'user', 'payment_restriction'];
 
-    protected $appends = ['image_url', 'image_1_url', 'image_2_url'];
+    protected $casts = [
+        'latitude' => 'float',
+        'longitude' => 'float',
+    ];
+
+    protected $appends = ['image_url', 'image_1_url', 'image_2_url', 'google_maps_url'];
+    public function getGoogleMapsUrlAttribute(): ?string
+    {
+        $lat = $this->attributes['latitude'] ?? null;
+        $lng = $this->attributes['longitude'] ?? null;
+        if ($lat !== null && $lng !== null && $lat !== '' && $lng !== '') {
+            return "https://www.google.com/maps?q={$lat},{$lng}";
+        }
+        return null;
+    }
+
+    public function hasLocation(): bool
+    {
+        $lat = $this->attributes['latitude'] ?? null;
+        $lng = $this->attributes['longitude'] ?? null;
+        return $lat !== null && $lng !== null && $lat !== '' && $lng !== '';
+    }
     public function getImageUrlAttribute()
     {
         if ($this->profile != null) {

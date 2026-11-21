@@ -189,6 +189,9 @@ class CustomerController extends Controller
             __('global.table.name'),
             __('customer.form.phone.label'),
             __('customer.form.address.label'),
+            __('customer.form.location.latitude'),
+            __('customer.form.location.longitude'),
+            __('customer.form.location.map_link'),
             __('global.table.created_at'),
         );
 
@@ -204,6 +207,9 @@ class CustomerController extends Controller
                     $customer->name ?? '',
                     $customer->phone ?? '',
                     $customer->address ?? '',
+                    $customer->latitude ?? '',
+                    $customer->longitude ?? '',
+                    $customer->google_maps_url ?? '',
                     $customer->created_at ? $customer->created_at->format('Y-m-d H:i:s') : '',
                 ));
             }

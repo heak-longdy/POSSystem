@@ -1,11 +1,11 @@
-/******/ (() => { // webpackBootstrap
+/******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./resources/admin/ts/package/product-image-bg.js":
 /*!********************************************************!*\
   !*** ./resources/admin/ts/package/product-image-bg.js ***!
   \********************************************************/
-/***/ (() => {
+/***/ (function() {
 
 /**
  * Product Image Background Color Detection
@@ -287,7 +287,7 @@
 /*!*************************************************!*\
   !*** ./resources/admin/ts/package/sliderBar.js ***!
   \*************************************************/
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __unused_webpack_exports, __webpack_require__) {
 
 var menuShowHide = localStorage.getItem("menu");
 
@@ -558,7 +558,7 @@ menu_listDom === null || menu_listDom === void 0 ? void 0 : menu_listDom.scrollT
 /*!*************************************************!*\
   !*** ./resources/admin/ts/select2-lifecycle.js ***!
   \*************************************************/
-/***/ (() => {
+/***/ (function() {
 
 // Page components own Select2 options and bindings. Only manage shared teardown
 // here; automatically enhancing every select would discard AJAX configuration.
@@ -600,13 +600,13 @@ new MutationObserver(function (records) {
 /*!**************************************************!*\
   !*** ./resources/admin/ts/workspace/s-events.js ***!
   \**************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "initSEvents": () => (/* binding */ initSEvents),
-/* harmony export */   "initSMask": () => (/* binding */ initSMask)
+/* harmony export */   "initSEvents": function() { return /* binding */ initSEvents; },
+/* harmony export */   "initSMask": function() { return /* binding */ initSMask; }
 /* harmony export */ });
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -783,7 +783,7 @@ function initSMask() {
 /*!********************************************************!*\
   !*** ./resources/admin/ts/workspace/sidebar-active.js ***!
   \********************************************************/
-/***/ ((module) => {
+/***/ (function(module) {
 
 // Match the same comma-separated, wildcard paths used by PHP routeActive().
 function matchesSidebarPath(path, patterns) {
@@ -892,37 +892,37 @@ module.exports = {
 /******/ 	
 /************************************************************************/
 /******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
+/******/ 	!function() {
 /******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 		__webpack_require__.d = function(exports, definition) {
 /******/ 			for(var key in definition) {
 /******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
 /******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
 /******/ 				}
 /******/ 			}
 /******/ 		};
-/******/ 	})();
+/******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
+/******/ 	!function() {
+/******/ 		__webpack_require__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
+/******/ 	}();
 /******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
+/******/ 	!function() {
 /******/ 		// define __esModule on exports
-/******/ 		__webpack_require__.r = (exports) => {
+/******/ 		__webpack_require__.r = function(exports) {
 /******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
 /******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
 /******/ 			}
 /******/ 			Object.defineProperty(exports, '__esModule', { value: true });
 /******/ 		};
-/******/ 	})();
+/******/ 	}();
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
-(() => {
+!function() {
 /*!************************************!*\
   !*** ./resources/admin/ts/body.js ***!
   \************************************/
@@ -1007,7 +1007,6 @@ el === null || el === void 0 ? void 0 : el.addEventListener("click", function ()
 __webpack_require__(/*! ./package/sliderBar */ "./resources/admin/ts/package/sliderBar.js");
 
 __webpack_require__(/*! ./package/product-image-bg */ "./resources/admin/ts/package/product-image-bg.js");
-})();
-
+}();
 /******/ })()
 ;

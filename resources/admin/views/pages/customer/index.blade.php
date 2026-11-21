@@ -175,6 +175,8 @@
                             { header: @json(__('global.table.name')), key: 'name', width: 28 },
                             { header: @json(__('customer.form.phone.label')), key: 'phone', width: 20 },
                             { header: @json(__('customer.form.address.label')), key: 'address', width: 40 },
+                            { header: @json(__('customer.form.location.latitude')), key: 'latitude', width: 16 },
+                            { header: @json(__('customer.form.location.longitude')), key: 'longitude', width: 16 },
                             { header: @json(__('global.table.created_at')), key: 'created_at', width: 20 },
                         ];
 
@@ -186,6 +188,8 @@
                                 name: item?.name || '',
                                 phone: item?.phone || '',
                                 address: item?.address || '',
+                                latitude: item?.latitude ?? '',
+                                longitude: item?.longitude ?? '',
                                 created_at: item?.created_at ? moment(item.created_at).format('YYYY-MM-DD HH:mm:ss') : '',
                             });
                         });

@@ -732,6 +732,14 @@
                             </span>
                         @endif
 
+                        @if ($customer->hasLocation())
+                            <a href="{{ $customer->google_maps_url }}" target="_blank" rel="noopener noreferrer" class="hero-meta-chip hero-meta-chip-link" style="text-decoration: none; color: inherit;" title="{{ __('customer.detail.view_on_map') }}">
+                                <i class='bx bx-current-location' style="color: #2563eb;"></i>
+                                <span>{{ __('customer.detail.view_on_map') }}</span>
+                                <i class='bx bx-link-external' style="font-size: 11px; opacity: 0.7;"></i>
+                            </a>
+                        @endif
+
                         @if ($customer->createdBy)
                             <span class="hero-meta-chip">
                                 <i class='bx bx-user'></i>
@@ -821,6 +829,30 @@
                                 <div class="field-item-content">
                                     <div class="field-item-label">{{ __('customer.form.address.label') }}</div>
                                     <div class="field-item-value">{{ $customer->address ?: '---' }}</div>
+                                </div>
+                            </div>
+
+                            {{-- Map Location --}}
+                            <div class="field-item-row">
+                                <div class="field-item-icon">
+                                    <i class='bx bx-map-pin'></i>
+                                </div>
+                                <div class="field-item-content">
+                                    <div class="field-item-label">{{ __('customer.detail.location') }}</div>
+                                    <div class="field-item-value">
+                                        @if ($customer->hasLocation())
+                                            <div style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;flex-direction: column;">
+                                                <span style="font-family: monospace; font-size: 13px; color: #1e293b;">{{ number_format($customer->latitude, 7) }}, {{ number_format($customer->longitude, 7) }}</span>
+                                                <a href="{{ $customer->google_maps_url }}" target="_blank" rel="noopener noreferrer" class="btn-action-view-map" style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; font-size: 12px; font-weight: 500; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; text-decoration: none; transition: all 0.15s ease;">
+                                                    <i class='bx bx-map'></i>
+                                                    <span>{{ __('customer.detail.view_on_map') }}</span>
+                                                    <i class='bx bx-link-external' style="font-size: 11px;"></i>
+                                                </a>
+                                            </div>
+                                        @else
+                                            <span style="color: #94a3b8;">{{ __('customer.detail.no_location') }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
 
